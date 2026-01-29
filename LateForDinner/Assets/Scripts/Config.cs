@@ -1,4 +1,5 @@
 using MemoryPack;
+using Token.LANGUAGE;
 
 [MemoryPackable]
 public partial class Config
@@ -26,14 +27,14 @@ public partial struct GameplayConfig
 [MemoryPackable]
 public partial struct AudioConfig
 {
-    public float vMain { get; set; }
+    public float vAll { get; set; }
     public float vBGM { get; set; }
     public float vSFX { get; set; }
 
     [MemoryPackIgnore]
     public static AudioConfig Default => new()
     {
-        vMain = 1.0f,
+        vAll = 1.0f,
         vBGM = 1.0f,
         vSFX = 1.0f
     };
