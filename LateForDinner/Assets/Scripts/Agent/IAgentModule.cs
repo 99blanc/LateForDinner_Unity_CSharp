@@ -1,4 +1,7 @@
-public interface IAgentModule
+using Token.PRIORITY;
+
+public interface IAgentModule<TView, TData, TKey> where TView : class, IViewProvider where TData : IData<TKey>
 {
-    void Setup(IAgentView view, AgentData data);
+    ModulePrority priority { get; }
+    void Setup(TData data, TView view);
 }

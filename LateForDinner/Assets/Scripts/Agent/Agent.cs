@@ -1,24 +1,31 @@
 using UnityEngine;
+using ZLinq;
 
-public abstract class Agent<T> : MonoBehaviour where T : Component
+public abstract class Agent<TComponent, TView, TData, TKey> : MonoBehaviour where TComponent : Component where TView : class, IViewProvider where TData : IData<TKey>
 {
-    public IAgentModule[] modules { get; protected set; }
+    public TData aData { get; private set; }
+    public IAgentModule<TView, TData, TKey>[] modules { get; protected set; }
     public StatModel registry { get; protected set; } = new();
-    public IMovementView MoveView => registry;
+    public TView view => registry as TView;
 
-    public virtual void Init(AgentData data)
+    public virtual void Init(TData data)
     {
+        Components();
         ApplyRegistry(data);
-        SetupModules(data);
+        SetupModule(data);
     }
 
-    protected abstract void ApplyRegistry(AgentData data);
+    protected abstract void Components();
 
-    protected virtual void SetupModules(AgentData data)
+    protected abstract void ApplyRegistry(TData data);
+
+    private void SetupModule(TData data)
     {
-        modules = gameObject.GetComponentsAssert<IAgentModule>();
+        aData = data;
+        var founds = gameObject.GetComponentsAssert<IAgentModule<TView, TData, TKey>>();
+        modules = founds.AsValueEnumerable().OrderBy(m => (int)m.priority).ToArray();
 
         foreach (var module in modules)
-            module.Setup(registry, data);
+            module.Setup(data, view);
     }
 }

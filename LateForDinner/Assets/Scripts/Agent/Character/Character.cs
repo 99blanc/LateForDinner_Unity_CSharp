@@ -1,15 +1,15 @@
 using UnityEngine;
+using Token.DATA;
 
-public abstract class Character<T> : Agent<T> where T : Component
+public abstract class Character<TComponent, TView, TData, TKey> : Agent<TComponent, TView, TData, TKey> where TComponent : Component where TView : class, IViewProvider where TData : IData<TKey>
 {
     public ICharacterView characterView => registry;
-    public IHealthView healthView => registry;
 
-    public override void Init(AgentData data) => base.Init(data);
+    public override void Init(TData data) => base.Init(data);
 
-    protected override void ApplyRegistry(AgentData data) { }
+    protected override void Components() { }
 
-    protected override void SetupModules(AgentData data) => base.SetupModules(data);
+    protected override void ApplyRegistry(TData data) { }
 
     public virtual void RestoreHealth(short amount)
     {
@@ -21,6 +21,10 @@ public abstract class Character<T> : Agent<T> where T : Component
     public virtual void TakeDamage(short damage)
     {
         var cur = registry.Get<short>(StatType.CURRENT_HEALTH);
-        cur.Value = (short)Mathf.Max(cur.Value - damage, 0);
+        var temp = registry.Get<short>(StatType.CURRENT_TEMP_HEALTH);
+        short absorb = (short)Mathf.Min(damage, temp.Value);
+        temp.Value = (short)Mathf.Max(temp.Value - absorb, 0);
+        short remain = (short)(damage - absorb);
+        cur.Value = (short)Mathf.Max(cur.Value - remain, 0);
     }
 }

@@ -55,13 +55,13 @@ public class PlayerJumpState : PlayerState
 
     public override void Enter()
     {
-        int maxJump = ((IMovementView)ctx.cView).jumpCount.CurrentValue;
+        int maxJump = ctx.cView.jumpCount.CurrentValue;
         int nextJump = ctx.isNearGround ? 1 : ctx.currentJumpCount + 1;
 
         if (nextJump <= maxJump)
         {
             ctx.currentJumpCount = (short)nextJump;
-            ctx.rBody.linearVelocity = new Vector2(ctx.rBody.linearVelocity.x, ((IMovementView)ctx.cView).jumpForce.CurrentValue);
+            ctx.rBody.linearVelocity = new Vector2(ctx.rBody.linearVelocity.x, ctx.cView.jumpForce.CurrentValue);
             ctx.isNearGround = false;
         }
     }
