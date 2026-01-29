@@ -11,7 +11,7 @@ public static class UnityExtensions
     public static T FindChild<T>(this GameObject gameObject, string name = null, bool recursive = false) where T : Object
     {
         if (!gameObject)
-            throw new InvalidOperationException();
+            throw new();
 
         if (recursive)
         {
@@ -28,7 +28,7 @@ public static class UnityExtensions
                         return component as T;
                 }
 
-                throw new InvalidOperationException();
+                throw new();
             }
         }
         else
@@ -45,7 +45,7 @@ public static class UnityExtensions
             }
         }
 
-        throw new InvalidOperationException();
+        throw new();
     }
 
     public static GameObject FindChild(this GameObject gameObject, string name = null, bool recursive = false) => FindChild<Transform>(gameObject, name, recursive).gameObject;
