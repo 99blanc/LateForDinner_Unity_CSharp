@@ -8,6 +8,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
+using Token.EVENT;
 
 public abstract class UserInterface : MonoBehaviour
 {
@@ -33,12 +34,12 @@ public abstract class UserInterface : MonoBehaviour
         if (views.TryGetValue(typeof(T), out Object[] newView))
         {
             if (index < 0 || index >= newView.Length)
-                throw new IndexOutOfRangeException();
+                throw new();
 
             return newView[index] as T;
         }
 
-        throw new InvalidOperationException();
+        throw new();
     }
 
     protected void BindObject(Type type) => Bind<GameObject>(type);
@@ -57,15 +58,9 @@ public abstract class UserInterface : MonoBehaviour
         {
             ViewEvent.ENTER => view.OnPointerEnterAsObservable(),
             ViewEvent.EXIT => view.OnPointerExitAsObservable(),
-            ViewEvent.LEFT_CLICK => view.OnPointerClickAsObservable()
-                .Where(data => data.button == PointerEventData.InputButton.Left),
-            ViewEvent.RIGHT_CLICK => view.OnPointerDownAsObservable()
-                .Where(data => data.button == PointerEventData.InputButton.Right),
-            ViewEvent.LEFT_DOUBLE_CLICK => view.OnPointerClickAsObservable()
-                .Where(data => data.button == PointerEventData.InputButton.Left)
-                .Chunk(TimeSpan.FromSeconds(0.3), 2)
-                .Where(list => list.Length == 2)
-                .Select(list => list[1]),
+            ViewEvent.LEFT_CLICK => view.OnPointerClickAsObservable().Where(data => data.button == PointerEventData.InputButton.Left),
+            ViewEvent.RIGHT_CLICK => view.OnPointerDownAsObservable().Where(data => data.button == PointerEventData.InputButton.Right),
+            ViewEvent.LEFT_DOUBLE_CLICK => view.OnPointerClickAsObservable().Where(data => data.button == PointerEventData.InputButton.Left).Chunk(TimeSpan.FromSeconds(0.3), 2).Where(list => list.Length == 2).Select(list => list[1]),
             _ => throw new()
         };
 
