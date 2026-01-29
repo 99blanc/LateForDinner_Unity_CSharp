@@ -22,6 +22,9 @@ public class Define
 
     public class Input
     {
+        public const float INPUT_THRESHOLD = 0.01f;
+        public const float INPUT_BUFFER_TIME = 0.9f;
+        public const float INPUT_DOUBLE_TAP_TIME = 0.3f;
         public const string MAP_USER = "User";
         public const string MAP_UI = "UI";
         public const string ACTION_MOVE = "Move";

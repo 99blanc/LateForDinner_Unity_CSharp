@@ -44,4 +44,12 @@ public partial struct AudioConfig
 public partial struct ControlConfig
 {
     public string keybind { get; set; }
+    public bool useModifierDash { get; set; }
+
+    [MemoryPackIgnore]
+    public static ControlConfig Default => new()
+    {
+        keybind = string.Empty,
+        useModifierDash = false
+    };
 }

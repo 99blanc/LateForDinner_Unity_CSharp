@@ -9,7 +9,7 @@ public class ConfigManager
 {
     private readonly string SAVE_PATH = Path.Combine(Application.persistentDataPath, ZString.Concat(Define.USER, Define.CONFIG));
     private readonly string TEMP_PATH = Path.Combine(Application.persistentDataPath, ZString.Concat(Define.USER, Define.TEMP));
-    public Config config { get; private set; }
+    public Config value { get; private set; }
     public InputActionAsset actAsset { get; private set; }
     public InputActionMap actMap { get; private set; }
 
@@ -26,23 +26,23 @@ public class ConfigManager
             if (File.Exists(TEMP_PATH)) 
                 File.Move(TEMP_PATH, SAVE_PATH);
             else 
-                return config = new Config();
+                return value = new Config();
         }
 
         try
         {
             byte[] data = await File.ReadAllBytesAsync(SAVE_PATH);
-            config = MemoryPackSerializer.Deserialize<Config>(data);
+            value = MemoryPackSerializer.Deserialize<Config>(data);
         }
         catch (System.Exception)
         {
             if (File.Exists(SAVE_PATH))
                 File.Delete(SAVE_PATH);
 
-            config = new Config();
+            value = new Config();
         }
 
-        return config;
+        return value;
     }
 
     public async UniTask Set(Config newConfig)
@@ -50,11 +50,11 @@ public class ConfigManager
         if (newConfig == null) 
             return;
 
-        config = newConfig;
+        value = newConfig;
 
         try
         {
-            byte[] data = MemoryPackSerializer.Serialize(config);
+            byte[] data = MemoryPackSerializer.Serialize(value);
             await File.WriteAllBytesAsync(TEMP_PATH, data);
 
             if (File.Exists(SAVE_PATH))
@@ -78,41 +78,18 @@ public class ConfigManager
             return;
 
         actAsset = Object.Instantiate(original);
-        bool hasSavedData = !string.IsNullOrEmpty(config.control.keybind);
-        string bindJson = hasSavedData ? config.control.keybind : actAsset.SaveBindingOverridesAsJson();
+        bool hasSavedData = !string.IsNullOrEmpty(value.control.keybind);
+        string bindJson = hasSavedData ? value.control.keybind : actAsset.SaveBindingOverridesAsJson();
         actAsset.LoadBindingOverridesFromJson(bindJson);
 
         if (!hasSavedData)
         {
-            config.control = new ControlConfig { keybind = bindJson };
-            await Set(config);
+            value.control = new ControlConfig { keybind = bindJson };
+            await Set(value);
         }
 
-        Sync(actAsset);
         actAsset.Enable();
         actMap = actAsset.FindActionMap(Define.Input.MAP_USER);
-    }
-
-    private void Sync(InputActionAsset asset)
-    {
-        var map = asset.FindActionMap(Define.Input.MAP_USER);
-        var moveAction = map?.FindAction(Define.Input.ACTION_MOVE);
-        var dashAction = map?.FindAction(Define.Input.ACTION_DASH);
-
-        if (moveAction == null || dashAction == null) 
-            return;
-
-        foreach (var moveBinding in moveAction.bindings)
-        {
-            if (moveBinding.isComposite) 
-                continue;
-
-            dashAction.ApplyBindingOverride(new InputBinding
-            {
-                name = moveBinding.name,
-                overridePath = moveBinding.effectivePath
-            });
-        }
     }
 
     public void OnDestroy(InputActionAsset asset = null)
