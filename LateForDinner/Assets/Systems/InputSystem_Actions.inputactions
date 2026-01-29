@@ -283,50 +283,6 @@
                 },
                 {
                     "name": "",
-                    "id": "3b01a392-7ae3-4490-9824-0b4a655ada4c",
-                    "path": "<Keyboard>/upArrow",
-                    "interactions": "MultiTap",
-                    "processors": "",
-                    "groups": ";Keyboard&Mouse",
-                    "action": "Dash",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "d56a9387-2a5c-468c-b33a-01150f380a71",
-                    "path": "<Keyboard>/downArrow",
-                    "interactions": "MultiTap",
-                    "processors": "",
-                    "groups": ";Keyboard&Mouse",
-                    "action": "Dash",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "c9c72e8c-d346-4525-9651-909de8449ae1",
-                    "path": "<Keyboard>/leftArrow",
-                    "interactions": "MultiTap",
-                    "processors": "",
-                    "groups": ";Keyboard&Mouse",
-                    "action": "Dash",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "87c595cb-aadc-4ef4-be89-42960195c624",
-                    "path": "<Keyboard>/rightArrow",
-                    "interactions": "MultiTap",
-                    "processors": "",
-                    "groups": ";Keyboard&Mouse",
-                    "action": "Dash",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
                     "id": "29e9bf95-0c68-482e-b988-aca6dcb2619b",
                     "path": "<Keyboard>/leftShift",
                     "interactions": "Tap",

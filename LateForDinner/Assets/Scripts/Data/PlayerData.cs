@@ -8,6 +8,7 @@ public class PlayerData : IData<PlayerID>
     [Name("최대 체력")] public short maxHealth { get; set; }
     [Name("최대 임시 체력")] public short maxTempHealth { get; set; }
     [Name("이동 속도")] public float moveSpeed { get; set; }
+    [Name("역방향 가속")] public float velPower { get; set; }
     [Name("가속")] public float acceleration { get; set; }
     [Name("감속")] public float deceleration { get; set; }
     [Name("공격력")] public short damage { get; set; }
