@@ -1,10 +1,8 @@
 using Cysharp.Threading.Tasks;
-using UnityEngine;
+using Token.ID;
 
 public class GameManager
 {
-    public Character<Component> character;
-
     public async UniTask Init()
     {
         var gameObject = await Managers.Resource.Instantiate(Define.Asset.PREFAB_PLAYER);
@@ -12,6 +10,5 @@ public class GameManager
 
         if (Managers.Data.players.TryGetValue(PlayerID.DEFAULT, out var data))
             player.Init(data);
-
     }
 }

@@ -7,6 +7,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using ZLinq;
+using Token.ID;
 
 public class DataManager
 {
@@ -18,8 +19,6 @@ public class DataManager
         AllowComments = true,
         Comment = '#',
     };
-
-
 
     public async UniTask Init()
     {
