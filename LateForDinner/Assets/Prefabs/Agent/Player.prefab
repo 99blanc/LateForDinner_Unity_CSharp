@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1960745493334722}
   - component: {fileID: 954680861345364111}
-  - component: {fileID: 6436126220173525312}
+  - component: {fileID: 5623272976200926487}
   - component: {fileID: 856552280064150257}
   - component: {fileID: 6498932194244417114}
   m_Layer: 0
@@ -94,7 +94,7 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
---- !u!70 &6436126220173525312
+--- !u!70 &5623272976200926487
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -104,7 +104,7 @@ CapsuleCollider2D:
   m_Enabled: 1
   serializedVersion: 3
   m_Density: 1
-  m_Material: {fileID: 6200000, guid: 5248d03495e4f6e44ba81db7307e17c9, type: 2}
+  m_Material: {fileID: 6200000, guid: 25af8c2e8ff26a543a1c9e6fdac609e7, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
