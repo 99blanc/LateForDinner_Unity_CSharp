@@ -17,7 +17,7 @@ public class DashBehavior<T> : IAgentBehavior<T> where T : class, IDashData
         Vector2 dashDir = new Vector2(Mathf.Sign(agent.lookAt.x) * (1 - isDown), -1.0f * isDown);
         agent.tBody.gravityScale = 0;
         agent.tBody.linearVelocity = Vector2.zero;
-        float dashPower = agent.tView.dashDistance.CurrentValue * Define.Physics.MULTIPLIER;
+        float dashPower = agent.tView.dashDistance.CurrentValue;
         agent.tBody.linearVelocity = dashDir * dashPower;
     }
 }
