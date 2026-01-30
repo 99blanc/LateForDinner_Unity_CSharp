@@ -107,6 +107,7 @@ public class PlayerControl : AgentControl<IPlayerView, PlayerData, PlayerID>, IU
     }
 
     public void Move() => ExecuteBehavior<MoveBehavior<IMoveData>>(moveInput);
+    public void Move(Vector2 input) => ExecuteBehavior<MoveBehavior<IMoveData>>(machine.curState == dashState ? Vector2.zero : input);
     public void Jump() => ExecuteBehavior<JumpBehavior<IJumpData>>();
     public void Fall() => ExecuteBehavior<FallBehavior<IJumpData>>();
     public void Dash() => ExecuteBehavior<DashBehavior<IDashData>>();

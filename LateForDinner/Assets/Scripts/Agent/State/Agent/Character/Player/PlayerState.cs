@@ -67,17 +67,28 @@ public class PlayerFallState : PlayerState
 
 public class PlayerDashState : PlayerState
 {
+    private float duration;
+    private float start;
+
     public PlayerDashState(PlayerControl ctx, StateMachine sm) : base(ctx, sm) { }
 
-    public override void Enter() => target.Dash();
+    public override void Enter()
+    {
+        target.Dash();
+        start = Time.time;
+        float dashPower = target.tView.dashDistance.CurrentValue;
+        float moveSpeed = target.tView.moveSpeed.CurrentValue;
+        duration = (dashPower / (moveSpeed + 0.1f)) * Define.Physics.TAP_INTERVAL;
+    }
 
     public override void FixedUpdate()
     {
-        target.Move();
+        target.Move(Vector2.zero);
         float speedSqr = target.tBody.linearVelocity.sqrMagnitude;
-        float limitSqr = Mathf.Pow(target.tView.moveSpeed.CurrentValue * 0.5f, 2);
+        float limitSqr = Mathf.Pow(target.tView.moveSpeed.CurrentValue * Define.Physics.TAP_INTERVAL, 2);
+        bool isTimeOut = (Time.time - start) > duration;
 
-        if (speedSqr < limitSqr || target.isNearGround)
+        if (speedSqr < limitSqr || isTimeOut || target.isNearGround)
             machine.ChangeState(target.isNearGround ? target.idleState : target.fallState);
     }
 
