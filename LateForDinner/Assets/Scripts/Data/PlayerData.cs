@@ -2,15 +2,16 @@ using CsvHelper.Configuration.Attributes;
 using Token.ID;
 using Token.DATA;
 
-public class PlayerData : IData<PlayerID>
+public class PlayerData : IData<PlayerID>, IMoveData, IJumpData, IPhysicsData, IDashData
 {
     [Name("ID")] public PlayerID id { get; set; }
     [Name("최대 체력")] public short maxHealth { get; set; }
     [Name("최대 임시 체력")] public short maxTempHealth { get; set; }
     [Name("이동 속도")] public float moveSpeed { get; set; }
-    [Name("역방향 가속")] public float velPower { get; set; }
     [Name("가속")] public float acceleration { get; set; }
     [Name("감속")] public float deceleration { get; set; }
+    [Name("역방향 가속")] public float turnVel { get; set; }
+    [Name("사다리 감속")] public float decelLadder { get; set; }
     [Name("공격력")] public short damage { get; set; }
     [Name("공격 속도")] public float atkSpeed { get; set; }
     [Name("대시 횟수")] public short dashCount { get; set; }

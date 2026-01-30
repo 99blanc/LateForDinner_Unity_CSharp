@@ -3,8 +3,6 @@ using Token.DATA;
 
 public abstract class Character<TComponent, TView, TData, TKey> : Agent<TComponent, TView, TData, TKey> where TComponent : Component where TView : class, IViewProvider where TData : IData<TKey>
 {
-    public ICharacterView characterView => registry;
-
     public override void Init(TData data) => base.Init(data);
 
     protected override void Components() { }
