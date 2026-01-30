@@ -34,6 +34,7 @@ public interface IDashData : IData
     short dashCount { get; }
     float dashCooltime { get; }
     float dashDistance { get; }
+    float dashSpeed { get; }
 }
 
 public interface ILadderData : IData

@@ -11,7 +11,7 @@ public class FallBehavior<T> : IAgentBehavior<T> where T : class, IJumpData
         config = data;
     }
 
-    public void Execute(Vector2 input = default)
+    public void Execute(BehaviorContext context)
     {
         var hit = Physics2D.BoxCast(agent.tCollider.bounds.center, agent.tCollider.bounds.size, 0, Vector2.down, config.gcDistance, LayerMask.GetMask(Define.Layer.GROUND));
         var nearHit = Physics2D.Raycast(agent.tBody.position, Vector2.down, config.gcNearDistance, LayerMask.GetMask(Define.Layer.GROUND));

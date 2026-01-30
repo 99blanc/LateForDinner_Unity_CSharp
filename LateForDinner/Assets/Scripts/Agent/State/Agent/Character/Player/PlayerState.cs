@@ -67,32 +67,40 @@ public class PlayerFallState : PlayerState
 
 public class PlayerDashState : PlayerState
 {
+    private float elapsed;
     private float duration;
-    private float start;
+    private float direction;
 
     public PlayerDashState(PlayerControl ctx, StateMachine sm) : base(ctx, sm) { }
 
     public override void Enter()
     {
-        target.Dash();
-        start = Time.time;
-        float dashPower = target.tView.dashDistance.CurrentValue;
-        float moveSpeed = target.tView.moveSpeed.CurrentValue;
-        duration = (dashPower / (moveSpeed + 0.1f)) * Define.Physics.TAP_INTERVAL;
+        float speed = target.tView.moveSpeed.CurrentValue * target.config.dashSpeed;
+        float distance = target.tView.dashDistance.CurrentValue;
+        elapsed = 0;
+        duration = distance / speed;
+        direction = Mathf.Sign(target.lookAt.x);
+        var behavior = target.GetBehavior<DashBehavior<IDashData>>();
+        behavior.Prepare();
     }
 
     public override void FixedUpdate()
     {
-        target.Move(Vector2.zero);
-        float speedSqr = target.tBody.linearVelocity.sqrMagnitude;
-        float limitSqr = Mathf.Pow(target.tView.moveSpeed.CurrentValue * Define.Physics.TAP_INTERVAL, 2);
-        bool isTimeOut = (Time.time - start) > duration;
+        elapsed += Time.fixedDeltaTime;
+        float percent = Mathf.Clamp01(elapsed / duration);
+        target.Dash(percent);
 
-        if (speedSqr < limitSqr || isTimeOut || target.isNearGround)
+        if (target.moveInput.x != 0 && Mathf.Sign(target.moveInput.x) != direction)
+        {
+            machine.ChangeState(target.isNearGround ? target.moveState : target.fallState);
+            return;
+        }
+
+        if (percent >= Define.Physics.PERCENTAGE)
             machine.ChangeState(target.isNearGround ? target.idleState : target.fallState);
     }
 
-    public override void Exit() => target.tBody.gravityScale = 1.0f;
+    public override void Exit() => target.tBody.gravityScale = Define.Physics.PERCENTAGE;
 }
 
 public class PlayerLadderState : PlayerState
@@ -112,7 +120,7 @@ public class PlayerLadderState : PlayerState
         target.Fall();
         target.Ladder();
 
-        if (target.isNearGround && target.moveInput.y < -0.1f)
+        if (target.isNearGround && target.moveInput.y < -Define.Physics.DEADZONE)
             machine.ChangeState(target.idleState);
     }
 }

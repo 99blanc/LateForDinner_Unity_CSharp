@@ -84,7 +84,7 @@ public class ConfigManager
 
         if (!hasSavedData)
         {
-            value.control = new() { keybind = bindJson };
+            value.control = new(){ keybind = bindJson, useModifierDash = value.control.useModifierDash };
             await Set(value);
         }
 

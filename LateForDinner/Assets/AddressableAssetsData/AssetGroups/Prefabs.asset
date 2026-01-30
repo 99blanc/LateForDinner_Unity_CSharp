@@ -16,7 +16,7 @@ MonoBehaviour:
   m_GUID: e1c4e07bf53c73943b25e0677ae30889
   m_SerializeEntries:
   - m_GUID: f97c5b8abb6928848ba5d0f5ce82b155
-    m_Address: Assets/Prefabs/Character/Player.prefab
+    m_Address: Assets/Prefabs/Agent/Player.prefab
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

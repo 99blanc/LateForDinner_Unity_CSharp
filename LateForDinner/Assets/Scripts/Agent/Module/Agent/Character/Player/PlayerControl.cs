@@ -65,13 +65,10 @@ public class PlayerControl : AgentControl<IPlayerView, PlayerData, PlayerID>, IU
         lookAt = isPureUp ? Vector2.zero : new Vector2(currentMoveInput.x, isUp ? 0 : currentMoveInput.y).normalized;
         lastMoveDirection = currentMoveInput;
         moveInput = currentMoveInput;
-    }
-
-    private void OnMoveCanceled(InputAction.CallbackContext context)
-    {
-        moveInput = Vector2.zero;
         lastMoveInputTime = Time.time;
     }
+
+    private void OnMoveCanceled(InputAction.CallbackContext context) => moveInput = Vector2.zero;
 
     private void OnJump(InputAction.CallbackContext context)
     {
@@ -103,16 +100,15 @@ public class PlayerControl : AgentControl<IPlayerView, PlayerData, PlayerID>, IU
         machine.ChangeState(dashState);
         lastMoveDirection = Vector2.zero;
         DashCharge();
-        Dash();
     }
 
-    public void Move() => ExecuteBehavior<MoveBehavior<IMoveData>>(moveInput);
-    public void Move(Vector2 input) => ExecuteBehavior<MoveBehavior<IMoveData>>(machine.curState == dashState ? Vector2.zero : input);
+    public void Move() => ExecuteBehavior<MoveBehavior<IMoveData>>(new() { input = moveInput });
+    public void Move(Vector2 input) => ExecuteBehavior<MoveBehavior<IMoveData>>(new() { input = machine.curState == dashState ? Vector2.zero : input });
     public void Jump() => ExecuteBehavior<JumpBehavior<IJumpData>>();
     public void Fall() => ExecuteBehavior<FallBehavior<IJumpData>>();
-    public void Dash() => ExecuteBehavior<DashBehavior<IDashData>>();
+    public void Dash(float percent) => ExecuteBehavior<DashBehavior<IDashData>>(new() { bias = percent });
     public void Gravity() => ExecuteBehavior<GravityBehavior<IPhysicsData>>();
-    public void Ladder() => ExecuteBehavior<LadderBehavior<ILadderData>>(moveInput);
+    public void Ladder() => ExecuteBehavior<LadderBehavior<ILadderData>>(new() { input = moveInput });
 
     private void DashCharge()
     {

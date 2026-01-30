@@ -11,5 +11,5 @@ public class JumpBehavior<T> : IAgentBehavior<T> where T : class, IJumpData
         config = data;
     }
 
-    public void Execute(Vector2 input = default) => agent.tBody.linearVelocity = new Vector2(agent.tBody.linearVelocity.x, agent.tView.jumpForce.CurrentValue);
+    public void Execute(BehaviorContext context) => agent.tBody.linearVelocity = new Vector2(agent.tBody.linearVelocity.x, agent.tView.jumpForce.CurrentValue);
 }

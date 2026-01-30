@@ -43,5 +43,6 @@ public class Define
         public const float BUFFER_TIME = 0.9f;
         public const float TAP_INTERVAL = 0.3f;
         public const float THRESHOLD = 100f;
+        public const float PERCENTAGE = 1.0f;
     }
 }

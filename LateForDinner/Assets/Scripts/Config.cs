@@ -4,22 +4,20 @@ using Token.LANGUAGE;
 [MemoryPackable]
 public partial class Config
 {
-    public GameplayConfig gameplay { get; set; } = new();
-    public AudioConfig audio { get; set; } = new();
-    public ControlConfig control { get; set; } = new();
+    public GameplayConfig gameplay { get; set; } = GameplayConfig.Default;
+    public AudioConfig audio { get; set; } = AudioConfig.Default;
+    public ControlConfig control { get; set; } = ControlConfig.Default;
     public Language language { get; set; } = Language.KOREAN;
 }
 
 [MemoryPackable]
 public partial struct GameplayConfig
 {
-    public bool isDashComboOnly { get; set; }
     public float screenShakeIntensity { get; set; }
 
     [MemoryPackIgnore]
     public static GameplayConfig Default => new()
     {
-        isDashComboOnly = false,
         screenShakeIntensity = 1.0f
     };
 }

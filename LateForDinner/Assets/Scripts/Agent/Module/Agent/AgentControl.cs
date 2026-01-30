@@ -6,7 +6,7 @@ using Token.PRIORITY;
 public abstract class AgentControl<TView, TData, TKey> : MonoBehaviour, IAgentControl, IAgentModule<TView, TData, TKey> where TView : class, IViewProvider where TData : class, IData<TKey>
 {
     private readonly Dictionary<Type, IAgentBehavior> behaviors = new();
-    protected TData config;
+    public TData config { get; private set; }
     public StateMachine machine { get; private set; }
     public Rigidbody2D tBody { get; private set; }
     public CapsuleCollider2D tCollider { get; private set; }
@@ -28,10 +28,10 @@ public abstract class AgentControl<TView, TData, TKey> : MonoBehaviour, IAgentCo
         Behaviors();
     }
 
-    public void ExecuteBehavior<T>(Vector2 input = default) where T : IAgentBehavior
+    public void ExecuteBehavior<T>(BehaviorContext context = default) where T : IAgentBehavior
     {
         if (behaviors.TryGetValue(typeof(T), out var behavior))
-            behavior.Execute(input);
+            behavior.Execute(context);
     }
 
     public T GetBehavior<T>() where T : IAgentBehavior => behaviors.TryGetValue(typeof(T), out var behavior) ? (T)behavior : default;

@@ -11,7 +11,7 @@ public class GravityBehavior<T> : IAgentBehavior<T> where T : class, IPhysicsDat
         config = data;
     }
 
-    public void Execute(Vector2 input = default)
+    public void Execute(BehaviorContext context)
     {
         float isFalling = Mathf.Sign(Mathf.Min(0, agent.tBody.linearVelocity.y + Define.Physics.DEADZONE)) * -1f;
         float baseMultiplier = 1.0f + (isFalling * (config.gvMul - 1.0f - agent.tView.gvReduction.CurrentValue));
