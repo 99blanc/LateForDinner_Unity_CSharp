@@ -1,6 +1,6 @@
 using Cysharp.Text;
-using System;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -65,6 +65,16 @@ public static class UnityExtensions
         Debug.Assert(component is not null);
         return component;
     }
+
+    public static T GetOrAddComponentAssert<T>(this Transform transform) where T : Component
+    {
+        if (!transform.TryGetComponent<T>(out T component))
+            component = transform.AddComponent<T>();
+
+        Debug.Assert(component is not null);
+        return component;
+    }
+
 
     public static T GetComponentAssert<T>(this GameObject gameObject)
     {

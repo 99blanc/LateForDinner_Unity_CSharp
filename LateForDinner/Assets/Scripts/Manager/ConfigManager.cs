@@ -26,7 +26,7 @@ public class ConfigManager
             if (File.Exists(TEMP_PATH)) 
                 File.Move(TEMP_PATH, SAVE_PATH);
             else 
-                return value = new Config();
+                return value = new();
         }
 
         try
@@ -39,7 +39,7 @@ public class ConfigManager
             if (File.Exists(SAVE_PATH))
                 File.Delete(SAVE_PATH);
 
-            value = new Config();
+            value = new();
         }
 
         return value;
@@ -84,7 +84,7 @@ public class ConfigManager
 
         if (!hasSavedData)
         {
-            value.control = new ControlConfig { keybind = bindJson };
+            value.control = new() { keybind = bindJson };
             await Set(value);
         }
 

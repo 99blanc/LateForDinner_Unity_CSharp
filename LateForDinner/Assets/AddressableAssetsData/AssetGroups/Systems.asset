@@ -20,11 +20,6 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 5248d03495e4f6e44ba81db7307e17c9
-    m_Address: Assets/Settings/Slippery.physicsMaterial2D
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d98df11e18cdf2b409d6dd6bc8caa60b
     m_Address: Assets/InputSystem.inputsettings.asset
     m_ReadOnly: 0

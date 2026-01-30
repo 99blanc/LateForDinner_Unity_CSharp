@@ -17,14 +17,11 @@ public class Define
     {
         public const string FILE_INPUT_SYSTEM = "InputSystem_Actions.inputactions";
         public const string FILE_PLAYER = "Player.csv";
-        public const string PREFAB_PLAYER = "Character/Player.prefab";
+        public const string PREFAB_PLAYER = "Agent/Player.prefab";
     }
 
     public class Input
     {
-        public const float INPUT_THRESHOLD = 0.01f;
-        public const float INPUT_BUFFER_TIME = 0.9f;
-        public const float INPUT_DOUBLE_TAP_TIME = 0.3f;
         public const string MAP_USER = "User";
         public const string MAP_UI = "UI";
         public const string ACTION_MOVE = "Move";
@@ -36,5 +33,16 @@ public class Define
     public class Layer
     {
         public const string GROUND = "Ground";
+        public const string LADDER = "Ladder";
+    }
+
+    public class Physics
+    {
+        public const float GRAVITY_LIMIT = 0.9f;
+        public const float DEADZONE = 0.01f;
+        public const float BUFFER_TIME = 0.9f;
+        public const float TAP_INTERVAL = 0.3f;
+        public const float THRESHOLD = 100f;
+        public const float MULTIPLIER = 1.5f;
     }
 }

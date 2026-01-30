@@ -11,14 +11,15 @@ using Token.ID;
 
 public class DataManager
 {
-    public Dictionary<PlayerID, PlayerData> players { get; private set; }
-
-    private readonly CsvConfiguration csvConfig = new(CultureInfo.InvariantCulture) 
+    private readonly CsvConfiguration csvConfig = new(CultureInfo.InvariantCulture)
     {
+        ShouldSkipRecord = args => args.Row.Parser.Record.All(string.IsNullOrWhiteSpace),
         HasHeaderRecord = true,
         AllowComments = true,
         Comment = '#',
     };
+
+    public Dictionary<PlayerID, PlayerData> players { get; private set; }
 
     public async UniTask Init()
     {
