@@ -13,9 +13,12 @@ public class GravityBehavior<T> : IAgentBehavior<T> where T : class, IPhysicsDat
 
     public void Execute(BehaviorContext context)
     {
-        float isFalling = Mathf.Sign(Mathf.Min(0, agent.tBody.linearVelocity.y + Define.Physics.DEADZONE)) * -1f;
-        float baseMultiplier = 1.0f + (isFalling * (config.gvMul - 1.0f - agent.tView.gvReduction.CurrentValue));
-        float finalMultiplier = Mathf.Max(baseMultiplier, 1.0f - Define.Physics.GRAVITY_LIMIT);
+        if (agent.isGrounded) 
+            return;
+
+        float isFalling = Mathf.Sign(Mathf.Min(0, agent.tBody.linearVelocity.y + Define.Physics.DEADZONE)) * -Define.Physics.FULL;
+        float baseMultiplier = Define.Physics.FULL + (isFalling * (config.gvMul - Define.Physics.FULL - agent.tView.gvReduction.CurrentValue));
+        float finalMultiplier = Mathf.Max(baseMultiplier, Define.Physics.FULL - Define.Physics.LIMIT);
         agent.tBody.AddForce(Vector2.down * -Physics2D.gravity.y * finalMultiplier, ForceMode2D.Force);
     }
 }

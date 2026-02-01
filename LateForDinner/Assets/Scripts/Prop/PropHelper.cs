@@ -13,13 +13,14 @@ public class PropHelper
         if (props.Remove(target)) 
             Refresh(props, agent);
     }
+
     private static void Refresh(HashSet<Prop> props, IPropHolder agent)
     {
         Prop best = GetProp(props);
-        agent.pProp = best != null ? best.cCollider : null;
+        agent.pProp = best is not null ? best : null;
     }
 
-    public static Prop GetProp(HashSet<Prop> props)
+    private static Prop GetProp(HashSet<Prop> props)
     {
         if (props.Count == 0) 
             return null;

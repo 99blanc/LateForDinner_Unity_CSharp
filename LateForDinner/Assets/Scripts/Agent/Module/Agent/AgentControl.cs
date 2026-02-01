@@ -12,7 +12,7 @@ public abstract class AgentControl<TView, TData, TKey> : MonoBehaviour, IAgentCo
     public StateMachine machine { get; private set; }
     public Rigidbody2D tBody { get; private set; }
     public CapsuleCollider2D tCollider { get; private set; }
-    public BoxCollider2D pProp { get; set; }
+    public Prop pProp { get; set; }
     public IActionView tView { get; private set; }
     public Vector2 moveInput { get; set; }
     public Vector2 lookAt { get; set; } = new();

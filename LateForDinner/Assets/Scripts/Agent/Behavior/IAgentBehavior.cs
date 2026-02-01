@@ -18,3 +18,8 @@ public interface IAgentBehavior<in T> : IAgentBehavior where T : class, IData
 {
     void Setup(IAgentControl control, T data);
 }
+
+public interface ILadderAgent
+{
+    void EnslaveToLadder();
+}

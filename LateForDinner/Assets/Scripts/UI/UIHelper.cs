@@ -15,7 +15,7 @@ public class UIHelper
             ViewEvent.EXIT => view.OnPointerExitAsObservable(),
             ViewEvent.LEFT_CLICK => view.OnPointerClickAsObservable().Where(data => data.button == PointerEventData.InputButton.Left),
             ViewEvent.RIGHT_CLICK => view.OnPointerDownAsObservable().Where(data => data.button == PointerEventData.InputButton.Right),
-            ViewEvent.LEFT_DOUBLE_CLICK => view.OnPointerClickAsObservable().Where(data => data.button == PointerEventData.InputButton.Left).Chunk(TimeSpan.FromSeconds(Define.Physics.TAP_INTERVAL), 2).Where(list => list.Length == 2).Select(list => list[1]),
+            ViewEvent.LEFT_DOUBLE_CLICK => view.OnPointerClickAsObservable().Where(data => data.button == PointerEventData.InputButton.Left).Chunk(TimeSpan.FromSeconds(Define.Physics.INTERVAL), 2).Where(list => list.Length == 2).Select(list => list[1]),
             _ => throw new()
         };
         observable.Subscribe(action).AddTo(component);

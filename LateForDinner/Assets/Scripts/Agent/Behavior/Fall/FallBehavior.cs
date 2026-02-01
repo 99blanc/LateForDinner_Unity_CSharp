@@ -13,16 +13,14 @@ public class FallBehavior<T> : IAgentBehavior<T> where T : class, IJumpData
 
     public void Execute(BehaviorContext context)
     {
-        Vector2 bottom = new(agent.tCollider.bounds.center.x, agent.tCollider.bounds.min.y);
-        RaycastHit2D hit = Physics2D.BoxCast(bottom, agent.tCollider.bounds.size, 0, Vector2.down, config.gcDistance, LayerMask.GetMask(Define.Layer.GROUND));
+        bool isClimbing = agent is ILadderAgent && agent.pProp is ILadderProp;
+        Vector2 bottom = new(agent.tCollider.bounds.center.x, agent.tCollider.bounds.min.y + Define.Physics.OFFSET);
+        Vector2 castSize = new(agent.tCollider.bounds.size.x * 0.9f, Define.Physics.OFFSET);
+        RaycastHit2D hit = Physics2D.BoxCast(bottom, castSize, 0, Vector2.down, config.gcDistance, LayerMask.GetMask(Define.Layer.GROUND));
         bool isVelocityStatic = Mathf.Abs(agent.tBody.linearVelocity.y) <= config.threshold;
-        bool isGrounded = hit.collider is not null && isVelocityStatic;
-        bool isFalling = !isGrounded && agent.tBody.linearVelocity.y < -config.threshold;
-        agent.isGrounded = isGrounded;
-        agent.isFalling = isFalling;
-        agent.currentJumpCount = (short)(agent.currentJumpCount * (isGrounded ? 0 : 1));
-
-        if (isGrounded)
-            agent.currentJumpCount = 0;
+        bool detectedGrounded = hit.collider is not null && isVelocityStatic;
+        agent.isGrounded = detectedGrounded && !isClimbing;
+        agent.isFalling = !agent.isGrounded && agent.tBody.linearVelocity.y < -config.threshold;
+        agent.currentJumpCount = (short)(agent.currentJumpCount * (agent.isGrounded ? 0 : 1));
     }
 }

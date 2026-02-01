@@ -42,7 +42,7 @@ public class PlayerJumpState : PlayerState
     {
         ApplyPhysics();
 
-        if (target.tBody.linearVelocity.y < -Define.Physics.TAP_INTERVAL)
+        if (target.tBody.linearVelocity.y < -Define.Physics.INTERVAL)
             machine.ChangeState(target.fallState);
     }
 }
@@ -83,31 +83,29 @@ public class PlayerDashState : PlayerState
         float percent = Mathf.Clamp01(elapsed / duration);
         target.Dash(percent);
 
-        if (target.IsOppositeInput(direction) || percent >= Define.Physics.PERCENTAGE)
+        if (target.IsOppositeInput(direction) || percent >= Define.Physics.FULL)
             machine.ChangeState(target.isGrounded ? target.idleState : target.fallState);
     }
 
-    public override void Exit() => target.tBody.gravityScale = Define.Physics.PERCENTAGE;
+    public override void Exit() => target.tBody.gravityScale = Define.Physics.FULL;
 }
 
 public class PlayerLadderState : PlayerState
 {
     public PlayerLadderState(PlayerControl ctx, StateMachine sm) : base(ctx, sm) { }
 
-    public override void Enter()
-    {
-        target.tBody.gravityScale = 0;
-        target.currentJumpCount = 0;
-        target.tBody.linearVelocity = Vector2.zero;
-    }
+    public override void Enter() => target.GetBehavior<LadderBehavior<ILadderData>>().Prepare();
 
     public override void FixedUpdate()
     {
         target.Ladder();
 
-        if (!target.pProp || (target.moveInput.y < -Define.Physics.DEADZONE && target.isGrounded))
+        bool hasNoProp = !target.pProp;
+        bool isBottomExit = target.isGrounded && target.moveInput.y < -Define.Physics.DEADZONE;
+
+        if (hasNoProp || isBottomExit)
             machine.ChangeState(target.isGrounded ? target.idleState : target.fallState);
     }
 
-    public override void Exit() => target.tBody.gravityScale = Define.Physics.PERCENTAGE;
+    public override void Exit() => target.tBody.gravityScale = Define.Physics.FULL;
 }

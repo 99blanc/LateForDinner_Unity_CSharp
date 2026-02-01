@@ -3,7 +3,7 @@ using Token.ID;
 using Token.PRIORITY;
 using UnityEngine;
 
-public class PlayerControl : AgentControl<IPlayerView, PlayerData, PlayerID>
+public class PlayerControl : AgentControl<IPlayerView, PlayerData, PlayerID>, ILadderAgent
 {
     public override ModulePrority priority => ModulePrority.PLAYER_CONTROL;
     public PlayerIdleState idleState { get; private set; }
@@ -12,6 +12,7 @@ public class PlayerControl : AgentControl<IPlayerView, PlayerData, PlayerID>
     public PlayerFallState fallState { get; private set; }
     public PlayerDashState dashState { get; private set; }
     public PlayerLadderState ladderState { get; private set; }
+
     private InputSystem input;
 
     protected override void Behaviors()
@@ -47,24 +48,25 @@ public class PlayerControl : AgentControl<IPlayerView, PlayerData, PlayerID>
         moveInput = ctx.moveInput;
         lookAt = UpdateLookAt(ctx.moveInput);
 
-        PlayerState nextState = ctx switch
+        PlayerState targetState = ctx switch
         {
             { canDash: true } => dashState,
             { isLadderAction: true } => ladderState,
             { isMovingX: true } => moveState,
-            _ => null
+            _ => isGrounded ? idleState : null
         };
 
-        if (nextState is null)
+        if (targetState is null)
             return;
 
-        switch (nextState)
+        switch (targetState)
         {
             case PlayerDashState: input.UseDash(); break;
             case PlayerMoveState: currentJumpCount = isGrounded ? (short)0 : currentJumpCount; break;
+            case PlayerLadderState: currentJumpCount = 0; break;
         }
 
-        machine.ChangeState(nextState);
+        machine.ChangeState(targetState);
     }
 
     public void OnJumpRequested()
@@ -98,4 +100,6 @@ public class PlayerControl : AgentControl<IPlayerView, PlayerData, PlayerID>
     public void Gravity() => ExecuteBehavior<GravityBehavior<IPhysicsData>>();
 
     public void Ladder() => ExecuteBehavior<LadderBehavior<ILadderData>>(new() { input = moveInput });
+
+    public void EnslaveToLadder() => machine.ChangeState(ladderState);
 }

@@ -1,12 +1,10 @@
-using NUnit.Framework.Internal;
 using Token.PRIORITY;
 using UnityEngine;
 
-public class Platform : Prop
+public class Platform : Prop, IPlatformProp
 {
     public override PropPriority priority => PropPriority.PLATFORM;
-
-    private BoxCollider2D physics;
+    public BoxCollider2D physics { get; private set; }
 
     protected override void Awake()
     {
@@ -20,23 +18,24 @@ public class Platform : Prop
 
     public override void OnTick(IAgentControl agent)
     {
-        Prop prop = agent.GetProp();
-
-        if (prop != null && physics.enabled && (int)prop.priority < (int)this.priority)
-        {
-            physics.enabled = false;
-            return;
-        }
-
-        float footY = agent.tCollider.bounds.min.y + Define.Physics.PLATFORM_OFFSET;
         float topY = cCollider.bounds.max.y;
-        bool isAbove = footY >= topY;
-        bool isNotJumpingUp = agent.tBody.linearVelocity.y <= 0;
-        bool wantsToDrop = agent.moveInput.y < -Define.Physics.DEADZONE;
-        bool shouldEnable = isAbove && isNotJumpingUp && !wantsToDrop;
+        float footY = agent.tCollider.bounds.min.y + Define.Physics.OFFSET;
+        bool isClimbing = agent is PlayerControl player && player.machine.curState == player.ladderState;
+        bool isDownInput = agent.moveInput.y < -Define.Physics.DEADZONE;
+        bool hasLadder = agent.pProp is ILadderProp;
+        bool isDownThrough = isDownInput && hasLadder;
+        float verticalVelocity = agent.tBody.linearVelocity.y;
+        float velocityBuffer = verticalVelocity < 0 ? Mathf.Abs(verticalVelocity) * Time.fixedDeltaTime : 0;
+        bool isAbove = (footY + velocityBuffer) >= topY;
+        bool finalEnabled = isAbove && !isDownThrough && !isClimbing;
 
-        if (physics.enabled != shouldEnable)
-            physics.enabled = shouldEnable;
+        if (physics.enabled != finalEnabled)
+            physics.enabled = finalEnabled;
+
+        bool canClimb = isDownThrough && agent is ILadderAgent;
+
+        if (canClimb)
+            ((ILadderAgent)agent).EnslaveToLadder();
     }
 
     public override void OnDetach(IAgentControl agent)

@@ -18,7 +18,7 @@ public partial struct GameplayConfig
     [MemoryPackIgnore]
     public static GameplayConfig Default => new()
     {
-        screenShakeIntensity = 1.0f
+        screenShakeIntensity = Define.Physics.FULL
     };
 }
 
@@ -32,9 +32,9 @@ public partial struct AudioConfig
     [MemoryPackIgnore]
     public static AudioConfig Default => new()
     {
-        vAll = 1.0f,
-        vBGM = 1.0f,
-        vSFX = 1.0f
+        vAll = Define.Physics.FULL,
+        vBGM = Define.Physics.FULL,
+        vSFX = Define.Physics.FULL
     };
 }
 

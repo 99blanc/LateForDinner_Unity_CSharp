@@ -40,4 +40,5 @@ public interface ILadderData : IData
 {
     float moveSpeed { get; }
     float decelLadder { get; }
+    float gcDistance { get; }
 }

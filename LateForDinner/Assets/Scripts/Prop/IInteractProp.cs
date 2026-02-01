@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
-using Token.PRIORITY;
 using UnityEngine;
+using Token.PRIORITY;
 
 public interface IPropHolder
 {
-    BoxCollider2D pProp { get; set; }
+    Prop pProp { get; set; }
     void HandleProp(Action<HashSet<Prop>> action);
 }
 
@@ -15,4 +15,15 @@ public interface IInteractProp
     void OnTick(IAgentControl agent);
     void OnInteract(IAgentControl agent);
     void OnDetach(IAgentControl agent);
+}
+
+public interface ILadderProp : IInteractProp
+{
+    float centerX { get; }
+    Bounds bounds { get; }
+}
+
+public interface IPlatformProp : IInteractProp
+{
+    BoxCollider2D physics { get; }
 }

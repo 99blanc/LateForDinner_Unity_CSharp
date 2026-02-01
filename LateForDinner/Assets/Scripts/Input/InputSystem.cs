@@ -46,7 +46,7 @@ public class InputSystem
         bool dashRequested = false;
 
         if (!Managers.Config.value.control.useModifierDash)
-            dashRequested = (Time.time - lastMoveInputTime <= Define.Physics.TAP_INTERVAL) && Vector2.Dot(input.normalized, lastMoveDirection.normalized) > 0.8f;
+            dashRequested = (Time.time - lastMoveInputTime <= Define.Physics.INTERVAL) && Vector2.Dot(input.normalized, lastMoveDirection.normalized) > 0.8f;
         
         InputContext ctx = CreateContext(input, dashRequested);
         player.HandleInput(ctx);
@@ -81,15 +81,16 @@ public class InputSystem
 
     private bool EvaluateLadder(Vector2 input)
     {
-        if (player.pProp == null || Mathf.Abs(input.y) <= Define.Physics.DEADZONE || !player.pProp.TryGetComponent<Ladder>(out var ladder))
+        if (player.pProp is not ILadderProp ladder)
             return false;
 
-        float headY = player.tCollider.bounds.max.y;
+        float moveY = input.y;
+        float ladderTop = ladder.bounds.max.y;
+        float ladderBottom = ladder.bounds.min.y;
         float footY = player.tCollider.bounds.min.y;
-        float ladderTop = ladder.cCollider.bounds.max.y;
-        float ladderBottom = ladder.cCollider.bounds.min.y;
-        bool canClimbUp = input.y > 0 && headY > ladderBottom && footY < ladderTop;
-        bool canClimbDown = input.y < 0 && footY < ladderTop && headY > ladderBottom;
+        float headY = player.tCollider.bounds.max.y;
+        bool canClimbUp = moveY > Define.Physics.DEADZONE && footY < ladderTop - Define.Physics.OFFSET;
+        bool canClimbDown = moveY < -Define.Physics.DEADZONE && headY > ladderBottom + Define.Physics.OFFSET;
         return canClimbUp || canClimbDown;
     }
 
@@ -98,7 +99,29 @@ public class InputSystem
         bool statReady = !isCoolingDown && player.tView.dashCount.CurrentValue > 0;
         bool stateReady = player.machine.curState != player.dashState;
         bool angleReady = input.y <= Define.Physics.DEADZONE;
+        bool isDownDash = input.y < -Define.Physics.DEADZONE;
+        bool isOnPlatform = player.pProp is IPlatformProp;
+        bool canPassThrough = dashRequested && isDownDash && isOnPlatform;
+
+        if (canPassThrough)
+        {
+            RestoreDash();
+            player.pProp.OnDetach(player);
+        }
+
         return dashRequested && statReady && stateReady && angleReady;
+    }
+
+    private void RestoreDash()
+    {
+        bool hasStat = player.tView is StatModel;
+
+        if (!hasStat) 
+            return;
+
+        StatModel registry = (StatModel)player.tView;
+        short nextCount = (short)(player.tView.dashCount.CurrentValue + 1);
+        registry.Set(StatType.DASH_COUNT, nextCount);
     }
 
     private void RefillDash()

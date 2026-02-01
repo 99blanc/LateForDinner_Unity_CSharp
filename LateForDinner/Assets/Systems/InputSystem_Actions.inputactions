@@ -119,7 +119,7 @@
                 {
                     "name": "WASD",
                     "id": "94c91204-cf23-45c3-b33c-8f34ee2aa298",
-                    "path": "Dpad",
+                    "path": "Dpad(mode=1)",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
