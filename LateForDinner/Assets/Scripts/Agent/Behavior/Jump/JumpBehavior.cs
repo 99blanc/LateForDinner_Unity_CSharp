@@ -1,5 +1,3 @@
-using UnityEngine;
-
 public class JumpBehavior<T> : IAgentBehavior<T> where T : class, IJumpData
 {
     private IAgentControl agent;
@@ -11,5 +9,5 @@ public class JumpBehavior<T> : IAgentBehavior<T> where T : class, IJumpData
         config = data;
     }
 
-    public void Execute(BehaviorContext context) => agent.tBody.linearVelocity = new Vector2(agent.tBody.linearVelocity.x, agent.tView.jumpForce.CurrentValue);
+    public void Execute(BehaviorContext context) => agent.tBody.linearVelocity = new(agent.tBody.linearVelocity.x, agent.tView.jumpForce.CurrentValue);
 }

@@ -18,7 +18,6 @@ public interface IJumpData : IData
     float jumpForce { get; }
     short jumpCount { get; }
     float gcDistance { get; }
-    float gcNearDistance { get; }
     float threshold { get; }
 }
 
@@ -39,5 +38,6 @@ public interface IDashData : IData
 
 public interface ILadderData : IData
 {
+    float moveSpeed { get; }
     float decelLadder { get; }
 }

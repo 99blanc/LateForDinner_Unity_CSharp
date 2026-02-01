@@ -1,28 +1,64 @@
+using R3;
+using System.Collections.Generic;
+using Token.PRIORITY;
 using UnityEngine;
 
 public abstract class Prop : MonoBehaviour, IInteractProp
 {
-    private Collider2D cCollider;
+    private readonly CompositeDisposable disposables = new();
+    private readonly ReactiveProperty<IAgentControl> occupant = new(null);
+    private readonly HashSet<IAgentControl> agents = new();
+    public BoxCollider2D cCollider { get; private set; }
+    public virtual PropPriority priority => default;
 
-    protected virtual void Awake() => cCollider = gameObject.GetComponentAssert<Collider2D>();
-
-    public abstract void OnInteract(IAgentControl agent);
-
-    protected virtual void OnTriggerEnter2D(Collider2D collider)
+    protected virtual void Awake()
     {
-        if (collider.TryGetComponent(out IAgentControl agent))
-            agent.actCollider = cCollider;
+        cCollider = gameObject.GetComponentAssert<BoxCollider2D>();
+        occupant.Select(agent => agent is not null ? Observable.EveryUpdate(UnityFrameProvider.FixedUpdate) : Observable.Never<Unit>()).Switch().Subscribe(_ => OnTick(occupant.Value)).AddTo(disposables);
     }
 
-    protected virtual void OnTriggerStay2D(Collider2D collider)
+    public virtual void OnTick(IAgentControl agent) { }
+
+    public virtual void OnInteract(IAgentControl agent) => occupant.Value = agent;
+
+    public virtual void OnDetach(IAgentControl agent) => occupant.Value = null;
+
+    private void OnTriggerEnter2D(Collider2D collider) => HandleEnter(collider.gameObject);
+
+    private void OnTriggerStay2D(Collider2D collider) => HandleStay();
+
+    private void OnTriggerExit2D(Collider2D collider) => HandleExit(collider.gameObject);
+
+    private void HandleEnter(GameObject gameObject)
     {
-        if (collider.TryGetComponent(out IAgentControl agent))
+        if (gameObject.TryGetComponent<IAgentControl>(out var agent) && agents.Add(agent) && occupant.Value == null)
+        {
+            agent.InProp(this);
             OnInteract(agent);
+        }
     }
 
-    protected virtual void OnTriggerExit2D(Collider2D collider)
+    private void HandleStay()
     {
-        if (collider.TryGetComponent(out IAgentControl agent) && agent.actCollider == cCollider)
-            agent.actCollider = null;
+        if (occupant.Value == null && agents.Count > 0)
+        {
+            foreach (var agent in agents)
+            {
+                agent.InProp(this);
+                OnInteract(agent);
+                break;
+            }
+        }
     }
+
+    private void HandleExit(GameObject gameObject)
+    {
+        if (gameObject.TryGetComponent<IAgentControl>(out var agent) && agents.Remove(agent) && occupant.Value == agent)
+        {
+            agent.OutProp(this);
+            OnDetach(agent);
+        }
+    }
+
+    protected virtual void OnDestroy() => disposables.Dispose();
 }

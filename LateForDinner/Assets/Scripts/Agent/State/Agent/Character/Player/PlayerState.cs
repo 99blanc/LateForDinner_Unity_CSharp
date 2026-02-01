@@ -6,12 +6,13 @@ public class PlayerIdleState : PlayerState
 
     public override void FixedUpdate()
     {
-        target.Move();
-        target.Gravity();
-        target.Fall();
+        ApplyPhysics();
 
-        if (target.moveInput.x != 0)
+        if (target.moveInput.x != 0) 
             machine.ChangeState(target.moveState);
+
+        if (!target.isGrounded && target.tBody.linearVelocity.y < -Define.Physics.DEADZONE) 
+            machine.ChangeState(target.fallState);
     }
 }
 
@@ -21,14 +22,12 @@ public class PlayerMoveState : PlayerState
 
     public override void FixedUpdate()
     {
-        target.Move();
-        target.Gravity();
-        target.Fall();
+        ApplyPhysics();
 
-        if (target.moveInput.x == 0 && Mathf.Abs(target.tBody.linearVelocity.x) < 0.1f)
+        if (target.moveInput.x == 0 && Mathf.Abs(target.tBody.linearVelocity.x) < Define.Physics.DEADZONE)
             machine.ChangeState(target.idleState);
 
-        if (!target.isNearGround && target.tBody.linearVelocity.y < -0.1f)
+        if (!target.isGrounded && target.tBody.linearVelocity.y < -Define.Physics.DEADZONE)
             machine.ChangeState(target.fallState);
     }
 }
@@ -41,11 +40,9 @@ public class PlayerJumpState : PlayerState
 
     public override void FixedUpdate()
     {
-        target.Move();
-        target.Gravity();
-        target.Fall();
+        ApplyPhysics();
 
-        if (target.tBody.linearVelocity.y <= 0)
+        if (target.tBody.linearVelocity.y < -Define.Physics.TAP_INTERVAL)
             machine.ChangeState(target.fallState);
     }
 }
@@ -56,11 +53,9 @@ public class PlayerFallState : PlayerState
 
     public override void FixedUpdate()
     {
-        target.Move();
-        target.Gravity();
-        target.Fall();
+        ApplyPhysics();
 
-        if (target.isNearGround)
+        if (target.isGrounded)
             machine.ChangeState(target.idleState);
     }
 }
@@ -76,12 +71,10 @@ public class PlayerDashState : PlayerState
     public override void Enter()
     {
         float speed = target.tView.moveSpeed.CurrentValue * target.config.dashSpeed;
-        float distance = target.tView.dashDistance.CurrentValue;
+        duration = target.tView.dashDistance.CurrentValue / speed;
         elapsed = 0;
-        duration = distance / speed;
         direction = Mathf.Sign(target.lookAt.x);
-        var behavior = target.GetBehavior<DashBehavior<IDashData>>();
-        behavior.Prepare();
+        target.GetBehavior<DashBehavior<IDashData>>().Prepare();
     }
 
     public override void FixedUpdate()
@@ -90,14 +83,8 @@ public class PlayerDashState : PlayerState
         float percent = Mathf.Clamp01(elapsed / duration);
         target.Dash(percent);
 
-        if (target.moveInput.x != 0 && Mathf.Sign(target.moveInput.x) != direction)
-        {
-            machine.ChangeState(target.isNearGround ? target.moveState : target.fallState);
-            return;
-        }
-
-        if (percent >= Define.Physics.PERCENTAGE)
-            machine.ChangeState(target.isNearGround ? target.idleState : target.fallState);
+        if (target.IsOppositeInput(direction) || percent >= Define.Physics.PERCENTAGE)
+            machine.ChangeState(target.isGrounded ? target.idleState : target.fallState);
     }
 
     public override void Exit() => target.tBody.gravityScale = Define.Physics.PERCENTAGE;
@@ -107,20 +94,20 @@ public class PlayerLadderState : PlayerState
 {
     public PlayerLadderState(PlayerControl ctx, StateMachine sm) : base(ctx, sm) { }
 
-    public override void Enter() => target.Ladder();
+    public override void Enter()
+    {
+        target.tBody.gravityScale = 0;
+        target.currentJumpCount = 0;
+        target.tBody.linearVelocity = Vector2.zero;
+    }
 
     public override void FixedUpdate()
     {
-        if (target.actCollider == null)
-        {
-            machine.ChangeState(target.fallState);
-            return;
-        }
-
-        target.Fall();
         target.Ladder();
 
-        if (target.isNearGround && target.moveInput.y < -Define.Physics.DEADZONE)
-            machine.ChangeState(target.idleState);
+        if (!target.pProp || (target.moveInput.y < -Define.Physics.DEADZONE && target.isGrounded))
+            machine.ChangeState(target.isGrounded ? target.idleState : target.fallState);
     }
+
+    public override void Exit() => target.tBody.gravityScale = Define.Physics.PERCENTAGE;
 }

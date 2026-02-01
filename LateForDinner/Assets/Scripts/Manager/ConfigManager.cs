@@ -47,7 +47,7 @@ public class ConfigManager
 
     public async UniTask Set(Config newConfig)
     {
-        if (newConfig == null) 
+        if (newConfig is null) 
             return;
 
         value = newConfig;
@@ -72,9 +72,9 @@ public class ConfigManager
 
     private async UniTask SetupKeybind()
     {
-        var original = await Managers.Resource.LoadInputSystem(Define.Asset.FILE_INPUT_SYSTEM);
+        InputActionAsset original = await Managers.Resource.LoadInputSystem(Define.Asset.FILE_INPUT_SYSTEM);
         
-        if (original == null) 
+        if (original is null) 
             return;
 
         actAsset = Object.Instantiate(original);

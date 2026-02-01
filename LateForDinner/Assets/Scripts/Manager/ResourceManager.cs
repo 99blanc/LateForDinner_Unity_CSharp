@@ -15,7 +15,7 @@ public class ResourceManager
 
     private async UniTask<T> Load<T>(string path) where T : Object
     {
-        if (handles.TryGetValue(path, out AsyncOperationHandle handle))
+        if (handles.TryGetValue(path, out var handle))
         {
             if (handle.IsDone)
                 return handle.Convert<T>().Result;
@@ -37,21 +37,21 @@ public class ResourceManager
 
     public async UniTask<GameObject> Instantiate(string path, Transform parent = null)
     {
-        var prefab = await LoadPrefab(path);
+        GameObject prefab = await LoadPrefab(path);
         Debug.Assert(prefab);
         return Instantiate(prefab, parent);
     }
 
     public GameObject Instantiate(GameObject prefab, Transform parent = null)
     {
-        var gameObject = Object.Instantiate(prefab, parent);
+        GameObject gameObject = Object.Instantiate(prefab, parent);
         gameObject.name = prefab.name;
         return gameObject;
     }
 
     public void Unload(string path)
     {
-        if (handles.TryGetValue(path, out AsyncOperationHandle handle))
+        if (handles.TryGetValue(path, out var handle))
         {
             Addressables.Release(handle);
             handles.Remove(path);

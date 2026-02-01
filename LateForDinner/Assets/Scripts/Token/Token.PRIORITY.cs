@@ -6,4 +6,12 @@ namespace Token.PRIORITY
         AGENT_CONTROL,
         PLAYER_CONTROL
     }
+
+    public enum PropPriority
+    {
+        NULL,
+        LADDER,
+        PLATFORM,
+        NONE
+    }
 }

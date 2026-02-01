@@ -8,9 +8,9 @@ public class StateMachine
         curState.Enter();
     }
 
-    public void ChangeState(State newState)
+    public void ChangeState(State newState, bool force = false)
     {
-        if (curState == newState)
+        if (!force && curState == newState)
             return;
 
         curState.Exit();

@@ -16,4 +16,11 @@ public abstract class AgentState<T> : State where T : class, IAgentControl
 public abstract class PlayerState : AgentState<PlayerControl>
 {
     public PlayerState(PlayerControl ctx, StateMachine sm) : base(ctx, sm) { }
+
+    protected void ApplyPhysics() 
+    { 
+        target.Move(); 
+        target.Gravity(); 
+        target.Fall();
+    }
 }

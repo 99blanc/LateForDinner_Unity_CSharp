@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 5243795431895671223}
   - component: {fileID: 931090024986128594}
   - component: {fileID: 3761827445812872585}
-  m_Layer: 7
+  m_Layer: 3
   m_Name: Ground
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -27,7 +27,7 @@ Transform:
   m_GameObject: {fileID: 2821071431658151913}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -4.8, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 17.5, y: 0.4, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

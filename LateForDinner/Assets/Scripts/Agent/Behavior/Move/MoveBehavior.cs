@@ -26,6 +26,6 @@ public class MoveBehavior<T> : IAgentBehavior<T> where T : class, IMoveData
         if (agent.tBody.gravityScale == 0 && Mathf.Abs(context.input.y) <= Define.Physics.DEADZONE)
             newY = Mathf.MoveTowards(newY, 0, config.deceleration * moveSpeed * Time.fixedDeltaTime);
 
-        agent.tBody.linearVelocity = new Vector2(newX, newY);
+        agent.tBody.linearVelocity = new(newX, newY);
     }
 }

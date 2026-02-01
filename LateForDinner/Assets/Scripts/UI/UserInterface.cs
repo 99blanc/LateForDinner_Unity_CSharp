@@ -1,14 +1,10 @@
 using Cysharp.Text;
-using R3;
-using R3.Triggers;
 using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
-using Token.EVENT;
 
 public abstract class UserInterface : MonoBehaviour
 {
@@ -18,8 +14,8 @@ public abstract class UserInterface : MonoBehaviour
 
     protected void Bind<T>(Type type) where T : Object
     {
-        var values = Enum.GetValues(type);
-        var newView = new Object[values.Length];
+        Array values = Enum.GetValues(type);
+        Object[] newView = new Object[values.Length];
         views.Add(typeof(T), newView);
 
         for (int index = 0; index < values.Length; ++index)
@@ -31,7 +27,7 @@ public abstract class UserInterface : MonoBehaviour
 
     protected T Get<T>(int index) where T : Object
     {
-        if (views.TryGetValue(typeof(T), out Object[] newView))
+        if (views.TryGetValue(typeof(T), out var newView))
         {
             if (index < 0 || index >= newView.Length)
                 throw new();
@@ -51,23 +47,4 @@ public abstract class UserInterface : MonoBehaviour
     protected Image GetImage(int index) => Get<Image>(index);
     protected TMP_Text GetText(int index) => Get<TMP_Text>(index);
     protected Button GetButton(int index) => Get<Button>(index);
-
-    public static void BindViewEvent(UIBehaviour view, Action<PointerEventData> action, ViewEvent type, Component component)
-    {
-        Observable<PointerEventData> observable = type switch
-        {
-            ViewEvent.ENTER => view.OnPointerEnterAsObservable(),
-            ViewEvent.EXIT => view.OnPointerExitAsObservable(),
-            ViewEvent.LEFT_CLICK => view.OnPointerClickAsObservable().Where(data => data.button == PointerEventData.InputButton.Left),
-            ViewEvent.RIGHT_CLICK => view.OnPointerDownAsObservable().Where(data => data.button == PointerEventData.InputButton.Right),
-            ViewEvent.LEFT_DOUBLE_CLICK => view.OnPointerClickAsObservable().Where(data => data.button == PointerEventData.InputButton.Left).Chunk(TimeSpan.FromSeconds(Define.Physics.TAP_INTERVAL), 2).Where(list => list.Length == 2).Select(list => list[1]),
-            _ => throw new()
-        };
-        observable.Subscribe(action).AddTo(component);
-    }
-
-    public static void BindModelEvent<T>(ReactiveProperty<T> model, Action<T> action, Component component)
-    {
-        model.Subscribe(action).AddTo(component);
-    }
 }

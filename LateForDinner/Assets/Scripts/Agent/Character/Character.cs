@@ -12,7 +12,7 @@ public abstract class Character<TComponent, TView, TData, TKey> : Agent<TCompone
     public virtual void RestoreHealth(short amount)
     {
         var cur = registry.Get<short>(StatType.CURRENT_HEALTH);
-        var max = registry.Get<short>(StatType.MAX_HEALTH).Value;
+        short max = registry.Get<short>(StatType.MAX_HEALTH).Value;
         cur.Value = (short)Mathf.Min(cur.Value + amount, max);
     }
 

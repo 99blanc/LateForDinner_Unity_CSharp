@@ -22,7 +22,7 @@ public static class UnityExtensions
 
                 for (int index = 0; index < Caches.Count; ++index)
                 {
-                    var component = Caches[index];
+                    Component component = Caches[index];
 
                     if (string.IsNullOrEmpty(name) || ZString.Equals(name, Caches[index].name))
                         return component as T;
@@ -35,12 +35,12 @@ public static class UnityExtensions
         {
             for (int index = 0; index < gameObject.transform.childCount; ++index)
             {
-                var child = gameObject.transform.GetChild(index);
+                Transform child = gameObject.transform.GetChild(index);
 
                 if (!string.IsNullOrEmpty(name) && !ZString.Equals(name, child.name))
                     continue;
 
-                if (child.TryGetComponent<T>(out T component))
+                if (child.TryGetComponent<T>(out var component))
                     return component;
             }
         }
@@ -52,14 +52,14 @@ public static class UnityExtensions
 
     public static Transform FindAssert(this Transform transform, string name)
     {
-        var newTransform = transform.Find(name);
+        Transform newTransform = transform.Find(name);
         Debug.Assert(newTransform);
         return newTransform;
     }
 
     public static T GetOrAddComponentAssert<T>(this GameObject gameObject) where T : Component
     {
-        if (!gameObject.TryGetComponent<T>(out T component))
+        if (!gameObject.TryGetComponent<T>(out var component))
             component = gameObject.AddComponent<T>();
 
         Debug.Assert(component is not null);
@@ -68,7 +68,7 @@ public static class UnityExtensions
 
     public static T GetOrAddComponentAssert<T>(this Transform transform) where T : Component
     {
-        if (!transform.TryGetComponent<T>(out T component))
+        if (!transform.TryGetComponent<T>(out var component))
             component = transform.AddComponent<T>();
 
         Debug.Assert(component is not null);

@@ -6,7 +6,7 @@ public struct BehaviorContext
     public float bias;
     public float value;
 
-    public static BehaviorContext Default => new BehaviorContext { input = Vector2.zero, bias = 0f };
+    public static BehaviorContext Default => new() { input = new(), bias = 0, value = 0 };
 }
 
 public interface IAgentBehavior

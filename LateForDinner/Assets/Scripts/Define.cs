@@ -32,6 +32,7 @@ public class Define
 
     public class Layer
     {
+        public const string AGENT = "Agent";
         public const string GROUND = "Ground";
         public const string LADDER = "Ladder";
     }
@@ -39,10 +40,12 @@ public class Define
     public class Physics
     {
         public const float GRAVITY_LIMIT = 0.9f;
-        public const float DEADZONE = 0.01f;
-        public const float BUFFER_TIME = 0.9f;
-        public const float TAP_INTERVAL = 0.3f;
-        public const float THRESHOLD = 100f;
+        public const float TAP_INTERVAL = 0.2f;
         public const float PERCENTAGE = 1.0f;
+        public const float THRESHOLD = 100f;
+        public const float DEADZONE = 0.01f;
+        public const float SNAP_TIME = 0.05f;
+        public const float BUFFER_TIME = 0.9f;
+        public const float PLATFORM_OFFSET = 0.1f;
     }
 }

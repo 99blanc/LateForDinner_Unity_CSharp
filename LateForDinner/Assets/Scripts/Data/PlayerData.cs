@@ -2,7 +2,7 @@ using CsvHelper.Configuration.Attributes;
 using Token.ID;
 using Token.DATA;
 
-public class PlayerData : IData<PlayerID>, IMoveData, IJumpData, IPhysicsData, IDashData
+public class PlayerData : IData<PlayerID>, IMoveData, IJumpData, IPhysicsData, IDashData, ILadderData
 {
     [Name("ID")] public PlayerID id { get; set; }
     [Name("최대 체력")] public short maxHealth { get; set; }
@@ -23,7 +23,6 @@ public class PlayerData : IData<PlayerID>, IMoveData, IJumpData, IPhysicsData, I
     [Name("중력 보정")] public float gvMul { get; set; }
     [Name("중력 경감")] public float gvReduction { get; set; }
     [Name("지면 인식 거리")] public float gcDistance { get; set; }
-    [Name("부드러운 점프 거리")] public float gcNearDistance { get; set; }
     [Name("무적 시간")] public float invulDuration { get; set; }
     [Name("오차 허용 범위")] public float threshold { get; set; }
     [Name("무기 카테고리")] public WeaponCategory weaponCategory { get; set; }
