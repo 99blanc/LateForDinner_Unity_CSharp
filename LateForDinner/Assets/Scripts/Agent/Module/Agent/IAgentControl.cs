@@ -9,8 +9,5 @@ public interface IAgentControl
     IActionView tView { get; }
     Vector2 moveInput { get; }
     Vector2 lookAt { get; }
-    bool isGrounded { get; set; }
-    bool isFalling { get; set; }
-    short currentJumpCount { get; set; }
     T GetBehavior<T>() where T : IAgentBehavior;
 }

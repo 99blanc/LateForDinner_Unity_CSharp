@@ -19,14 +19,46 @@ public interface IAgentBehavior<in T> : IAgentBehavior where T : class, IData
     void Setup(IAgentControl control, T data);
 }
 
-public interface IClimb
+public interface IMove
 {
-    bool isClimbing { get; }
-    void ExecuteLadder();
+    PlayerMoveState moveState { get; }
+    bool isMoving { get; set; }
+    void ExecuteClimb();
 }
 
-public interface IPush
+public interface IJump
 {
-    bool isPushing { get; }
-    void ExecutePush();
+    PlayerJumpState jumpState { get; }
+    bool isJumping { get; set; }
+    short currentJumpCount { get; set; }
+    void ExecuteJump();
+}
+
+public interface IFall
+{
+    PlayerFallState fallState { get; }
+    bool isFalling { get; set; }
+    bool isGrounded { get; set; }
+    void ExecuteFall();
+}
+
+public interface IDash
+{
+    PlayerDashState dashState { get; }
+    bool isDashing { get; set; }
+    void ExecuteDash(float percent);
+}
+
+public interface IClimb
+{
+    PlayerClimbState climbState { get; }
+    bool isClimbing { get; set; }
+    void ExecuteClimb();
+}
+
+public interface ISneak
+{
+    PlayerSneakState sneakState { get; }
+    bool isSneaking { get; set; }
+    void ExecuteSneak(float threshold);
 }

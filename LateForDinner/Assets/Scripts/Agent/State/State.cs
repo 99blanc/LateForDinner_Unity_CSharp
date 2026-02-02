@@ -13,14 +13,37 @@ public abstract class AgentState<T> : State where T : class, IAgentControl
     public AgentState(T ctx, StateMachine sm) { target = ctx; machine = sm; }
 }
 
-public abstract class PlayerState : AgentState<PlayerControl>
+public class IdleState<T> : AgentState<T> where T : class, IAgentControl
 {
-    public PlayerState(PlayerControl ctx, StateMachine sm) : base(ctx, sm) { }
+    public IdleState(T ctx, StateMachine sm) : base(ctx, sm) { }
+}
 
-    protected void ApplyPhysics() 
-    { 
-        target.ExecuteMove(); 
-        target.ExecuteGravity(); 
-        target.ExecuteFall();
-    }
+public class MoveState<T> : AgentState<T> where T : class, IAgentControl
+{
+    public MoveState(T ctx, StateMachine sm) : base(ctx, sm) { }
+}
+
+public class JumpState<T> : AgentState<T> where T : class, IAgentControl
+{
+    public JumpState(T ctx, StateMachine sm) : base(ctx, sm) { }
+}
+
+public class FallState<T> : AgentState<T> where T : class, IAgentControl
+{
+    public FallState(T ctx, StateMachine sm) : base(ctx, sm) { }
+}
+
+public class DashState<T> : AgentState<T> where T : class, IAgentControl
+{
+    public DashState(T ctx, StateMachine sm) : base(ctx, sm) { }
+}
+
+public class ClimbState<T> : AgentState<T> where T : class, IAgentControl
+{
+    public ClimbState(T ctx, StateMachine sm) : base(ctx, sm) { }
+}
+
+public class SneakState<T> : AgentState<T> where T : class, IAgentControl
+{
+    public SneakState(T ctx, StateMachine sm) : base(ctx, sm) { }
 }

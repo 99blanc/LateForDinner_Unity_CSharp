@@ -14,9 +14,6 @@ public abstract class AgentControl<TView, TData, TKey> : MonoBehaviour, IAgentCo
     public IActionView tView { get; private set; }
     public Vector2 moveInput { get; set; }
     public Vector2 lookAt { get; set; } = new();
-    public bool isGrounded { get; set; }
-    public bool isFalling { get; set; }
-    public short currentJumpCount { get; set; }
     public virtual ModulePrority priority => ModulePrority.AGENT_CONTROL;
 
     public virtual void Setup(TData data, TView view)

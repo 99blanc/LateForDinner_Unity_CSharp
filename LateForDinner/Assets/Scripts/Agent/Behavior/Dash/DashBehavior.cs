@@ -10,6 +10,8 @@ public class DashBehavior<T> : IAgentBehavior<T> where T : class, IDashData
 
     public void Prepare()
     {
+        agent.tBody.gravityScale = 0;
+        agent.tBody.linearVelocity = Vector2.zero;
         int isDown = agent.lookAt.y < 0 ? 1 : 0;
         Vector2 dashDir = new(Mathf.Sign(agent.lookAt.x) * (1 - isDown), -Define.Physics.FULL * isDown);
         startPos = agent.tBody.position;
@@ -23,11 +25,11 @@ public class DashBehavior<T> : IAgentBehavior<T> where T : class, IDashData
         Vector2 direction = (nextPos - currentPos).normalized;
         float distance = Vector2.Distance(currentPos, nextPos);
 
-        if (distance < Define.Physics.DEADZONE) 
+        if (distance < Define.Physics.OFFSET) 
             return;
 
-        Vector2 castSize = agent.tCollider.bounds.size * Define.Physics.HALF;
-        RaycastHit2D hit = Physics2D.BoxCast(currentPos, castSize, 0, direction, distance + Define.Physics.DEADZONE, Define.Layer.GROUND_MASKS);
+        Vector2 castSize = agent.tCollider.bounds.size * Define.Physics.LIMIT;
+        RaycastHit2D hit = Physics2D.BoxCast(currentPos, castSize, 0, direction, distance + Define.Physics.OFFSET, Define.Layer.GROUND_MASKS);
         bool canPass = hit.collider is null || hit.collider.isTrigger;
 
         if (canPass)
@@ -36,7 +38,7 @@ public class DashBehavior<T> : IAgentBehavior<T> where T : class, IDashData
             return;
         }
 
-        Vector2 snapPos = currentPos + (direction * (hit.distance - Define.Physics.DEADZONE));
+        Vector2 snapPos = currentPos + (direction * (hit.distance - Define.Physics.OFFSET));
         startPos = snapPos;
         targetPos = snapPos;
         agent.tBody.MovePosition(snapPos);

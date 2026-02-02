@@ -13,9 +13,12 @@ public class MoveBehavior<T> : IAgentBehavior<T> where T : class, IMoveData
 
     public void Execute(BehaviorContext context)
     {
+        if (agent is IMove move)
+            move.isMoving = context.input.x != 0;
+
         float moveSpeed = agent.tView.moveSpeed.CurrentValue;
         float targetSpeed = context.input.x * moveSpeed;
-        float isInputting = (Mathf.Abs(context.input.x) > Define.Physics.DEADZONE) ? 1f : 0;
+        float isInputting = (Mathf.Abs(context.input.x) > 0) ? 1f : 0;
         float accelRate = Mathf.Lerp(config.deceleration, config.acceleration, isInputting);
         float isTurning = Mathf.Clamp01(Mathf.Sign(targetSpeed) * Mathf.Sign(agent.tBody.linearVelocity.x) * -1 + 1);
         accelRate *= Mathf.Lerp(1f, config.turnVel, isTurning * isInputting);
@@ -23,7 +26,7 @@ public class MoveBehavior<T> : IAgentBehavior<T> where T : class, IMoveData
         float newX = Mathf.MoveTowards(agent.tBody.linearVelocity.x, targetSpeed, accelAmount);
         float newY = agent.tBody.linearVelocity.y;
 
-        if (agent.tBody.gravityScale == 0 && Mathf.Abs(context.input.y) <= Define.Physics.DEADZONE)
+        if (agent.tBody.gravityScale == 0 && Mathf.Abs(context.input.y) < 0)
             newY = Mathf.MoveTowards(newY, 0, config.deceleration * moveSpeed * Time.fixedDeltaTime);
 
         agent.tBody.linearVelocity = new(newX, newY);

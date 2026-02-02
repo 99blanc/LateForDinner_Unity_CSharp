@@ -2,7 +2,7 @@ using CsvHelper.Configuration.Attributes;
 using Token.ID;
 using Token.DATA;
 
-public class PlayerData : IData<PlayerID>, IMoveData, IJumpData, IPhysicsData, IDashData, ILadderData
+public class PlayerData : IData<PlayerID>, IMoveData, IJumpData, IFallData, IDashData, IClimbData, ISneakData
 {
     [Name("ID")] public PlayerID id { get; set; }
     [Name("최대 체력")] public short maxHealth { get; set; }

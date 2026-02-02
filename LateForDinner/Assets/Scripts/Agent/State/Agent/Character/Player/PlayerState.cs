@@ -1,38 +1,40 @@
 using UnityEngine;
 
-public class PlayerIdleState : PlayerState
+public class PlayerIdleState : IdleState<PlayerControl>
 {
     public PlayerIdleState(PlayerControl ctx, StateMachine sm) : base(ctx, sm) { }
 
     public override void FixedUpdate()
     {
-        ApplyPhysics();
+        target.ExecuteMove();
+        target.ExecuteFall();
 
-        if (target.moveInput.x != 0) 
+        if (target.isMoving) 
             machine.ChangeState(target.moveState);
 
-        if (!target.isGrounded && target.tBody.linearVelocity.y < -Define.Physics.DEADZONE) 
+        if (!target.isGrounded && target.isFalling) 
             machine.ChangeState(target.fallState);
     }
 }
 
-public class PlayerMoveState : PlayerState
+public class PlayerMoveState : MoveState<PlayerControl>
 {
     public PlayerMoveState(PlayerControl ctx, StateMachine sm) : base(ctx, sm) { }
 
     public override void FixedUpdate()
     {
-        ApplyPhysics();
+        target.ExecuteMove();
+        target.ExecuteFall();
 
-        if (target.moveInput.x == 0 && Mathf.Abs(target.tBody.linearVelocity.x) < Define.Physics.DEADZONE)
+        if (!target.isMoving)
             machine.ChangeState(target.idleState);
 
-        if (!target.isGrounded && target.tBody.linearVelocity.y < -Define.Physics.DEADZONE)
+        if (!target.isGrounded && target.isFalling)
             machine.ChangeState(target.fallState);
     }
 }
 
-public class PlayerJumpState : PlayerState
+public class PlayerJumpState : JumpState<PlayerControl>
 {
     public PlayerJumpState(PlayerControl ctx, StateMachine sm) : base(ctx, sm) { }
 
@@ -40,27 +42,29 @@ public class PlayerJumpState : PlayerState
 
     public override void FixedUpdate()
     {
-        ApplyPhysics();
+        target.ExecuteMove();
+        target.ExecuteFall();
 
-        if (target.tBody.linearVelocity.y < -Define.Physics.INTERVAL)
+        if (target.isFalling)
             machine.ChangeState(target.fallState);
     }
 }
 
-public class PlayerFallState : PlayerState
+public class PlayerFallState : FallState<PlayerControl>
 {
     public PlayerFallState(PlayerControl ctx, StateMachine sm) : base(ctx, sm) { }
 
     public override void FixedUpdate()
     {
-        ApplyPhysics();
+        target.ExecuteMove();
+        target.ExecuteFall();
 
         if (target.isGrounded)
             machine.ChangeState(target.idleState);
     }
 }
 
-public class PlayerDashState : PlayerState
+public class PlayerDashState : DashState<PlayerControl>
 {
     private float elapsed;
     private float duration;
@@ -70,8 +74,6 @@ public class PlayerDashState : PlayerState
 
     public override void Enter()
     {
-        target.tBody.gravityScale = 0;
-        target.tBody.linearVelocity = Vector2.zero;
         float speed = target.tView.moveSpeed.CurrentValue * target.config.dashSpeed;
         duration = target.tView.dashDistance.CurrentValue / speed;
         elapsed = 0;
@@ -93,36 +95,24 @@ public class PlayerDashState : PlayerState
     public override void Exit() => target.tBody.gravityScale = Define.Physics.FULL;
 }
 
-public class PlayerLadderState : PlayerState
+public class PlayerClimbState : ClimbState<PlayerControl>
 {
-    public PlayerLadderState(PlayerControl ctx, StateMachine sm) : base(ctx, sm) { }
+    public PlayerClimbState(PlayerControl ctx, StateMachine sm) : base(ctx, sm) { }
 
-    public override void Enter()
-    {
-        target.tBody.gravityScale = 0;
-        target.tBody.linearVelocity = Vector2.zero;
-    }
+    public override void Enter() => target.GetBehavior<ClimbBehavior<IClimbData>>().Prepare();
 
     public override void FixedUpdate()
     {
-        target.ExecuteLadder();
+        target.ExecuteClimb();
 
-        if (!target.hProp || target.isGrounded)
+        if (target.hProp is not IClimbProp || target.isGrounded)
             machine.ChangeState(target.isGrounded ? target.idleState : target.fallState);
     }
 
     public override void Exit() => target.tBody.gravityScale = Define.Physics.FULL;
 }
 
-public class PlayerPushState : PlayerState
+public class PlayerSneakState : SneakState<PlayerControl>
 {
-    public PlayerPushState(PlayerControl ctx, StateMachine sm) : base(ctx, sm) { }
-
-    public override void FixedUpdate()
-    {
-        target.ExecutePush();
-        target.ExecuteGravity();
-    }
-
-    public override void Exit() => target.tBody.gravityScale = Define.Physics.FULL;
+    public PlayerSneakState(PlayerControl ctx, StateMachine sm) : base(ctx, sm) { }
 }

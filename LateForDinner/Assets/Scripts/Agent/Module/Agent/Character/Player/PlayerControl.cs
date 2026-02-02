@@ -3,7 +3,7 @@ using Token.ID;
 using Token.PRIORITY;
 using UnityEngine;
 
-public class PlayerControl : AgentControl<IPlayerView, PlayerData, PlayerID>, IClimb, IPush
+public class PlayerControl : AgentControl<IPlayerView, PlayerData, PlayerID>, IMove, IJump, IFall, IDash, IClimb, ISneak
 {
     public override ModulePrority priority => ModulePrority.PLAYER_CONTROL;
     public PlayerIdleState idleState { get; private set; }
@@ -11,10 +11,16 @@ public class PlayerControl : AgentControl<IPlayerView, PlayerData, PlayerID>, IC
     public PlayerJumpState jumpState { get; private set; }
     public PlayerFallState fallState { get; private set; }
     public PlayerDashState dashState { get; private set; }
-    public PlayerLadderState ladderState { get; private set; }
-    public PlayerPushState pushState { get; private set; }
-    public bool isClimbing => machine.curState == ladderState;
-    public bool isPushing => machine.curState == pushState;
+    public PlayerClimbState climbState { get; private set; }
+    public PlayerSneakState sneakState { get; private set; }
+    public bool isMoving { get; set; }
+    public bool isJumping { get; set; }
+    public bool isFalling { get; set; }
+    public bool isGrounded { get; set; }
+    public bool isDashing { get; set; }
+    public bool isClimbing { get; set; }
+    public bool isSneaking { get; set; }
+    public short currentJumpCount { get; set; }
 
     private InputSystem input;
 
@@ -22,10 +28,10 @@ public class PlayerControl : AgentControl<IPlayerView, PlayerData, PlayerID>, IC
     {
         SetBehavior(new MoveBehavior<IMoveData>());
         SetBehavior(new JumpBehavior<IJumpData>());
-        SetBehavior(new FallBehavior<IJumpData>());
+        SetBehavior(new FallBehavior<IFallData>());
         SetBehavior(new DashBehavior<IDashData>());
-        SetBehavior(new GravityBehavior<IPhysicsData>());
-        SetBehavior(new LadderBehavior<ILadderData>());
+        SetBehavior(new ClimbBehavior<IClimbData>());
+        SetBehavior(new SneakBehavior<ISneakData>());
     }
 
     public override void Setup(PlayerData data, IPlayerView view)
@@ -46,8 +52,8 @@ public class PlayerControl : AgentControl<IPlayerView, PlayerData, PlayerID>, IC
         jumpState = new(this, machine);
         fallState = new(this, machine);
         dashState = new(this, machine);
-        ladderState = new(this, machine);
-        pushState = new(this, machine);
+        climbState = new(this, machine);
+        sneakState = new(this, machine);
         machine.Init(idleState);
         input = new(this);
         input.Init();
@@ -61,25 +67,25 @@ public class PlayerControl : AgentControl<IPlayerView, PlayerData, PlayerID>, IC
     {
         moveInput = ctx.moveInput;
         lookAt = UpdateLookAt(ctx.moveInput);
-        PlayerState target = ctx switch
+        State target = ctx switch
         {
             { canDash: true } when !(isGrounded && ctx.moveInput.y < 0) => dashState,
             { doJump: true } when currentJumpCount < tView.jumpCount.CurrentValue => jumpState,
-            { onLadder: true } => ladderState,
-            _ when isPushing => pushState,
+            { onLadder: true } => climbState,
+            _ when isSneaking => sneakState,
             { hasX: true } => moveState,
             _ => isGrounded ? idleState : null
         };
         _ = target != null && ApplyStateEffect(target, ctx);
     }
 
-    private bool ApplyStateEffect(PlayerState target, InputContext ctx)
+    private bool ApplyStateEffect(State target, InputContext ctx)
     {
         switch (target)
         {
             case PlayerDashState when !ctx.onLadder: input.UseDash(); break;
             case PlayerJumpState: currentJumpCount++; break;
-            case PlayerMoveState or PlayerIdleState or PlayerLadderState: currentJumpCount = 0; break;
+            case PlayerMoveState or PlayerIdleState or PlayerClimbState: currentJumpCount = 0; break;
         }
 
         machine.ChangeState(target, target == jumpState);
@@ -90,13 +96,11 @@ public class PlayerControl : AgentControl<IPlayerView, PlayerData, PlayerID>, IC
 
     public void ExecuteJump() => ExecuteBehavior<JumpBehavior<IJumpData>>();
 
-    public void ExecuteFall() => ExecuteBehavior<FallBehavior<IJumpData>>();
+    public void ExecuteFall() => ExecuteBehavior<FallBehavior<IFallData>>();
 
     public void ExecuteDash(float percent) => ExecuteBehavior<DashBehavior<IDashData>>(new() { bias = percent });
 
-    public void ExecuteGravity() => ExecuteBehavior<GravityBehavior<IPhysicsData>>();
+    public void ExecuteClimb() => ExecuteBehavior<ClimbBehavior<IClimbData>>(new() { input = moveInput * config.decelObj });
 
-    public void ExecuteLadder() => ExecuteBehavior<LadderBehavior<ILadderData>>(new() { input = moveInput });
-
-    public void ExecutePush() => ExecuteBehavior<MoveBehavior<IMoveData>>(new() { input = moveInput * config.decelObj });
+    public void ExecuteSneak(float threshold) => ExecuteBehavior<SneakBehavior<ISneakData>>(new() { value = threshold });
 }

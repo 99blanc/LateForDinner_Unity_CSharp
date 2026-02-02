@@ -17,15 +17,14 @@ public interface IJumpData : IData
 {
     float jumpForce { get; }
     short jumpCount { get; }
-    float gcDistance { get; }
-    float threshold { get; }
 }
 
-public interface IPhysicsData : IData
+public interface IFallData : IData
 {
+    float decelObj { get; }
     float gvMul { get; }
     float gvReduction { get; }
-    float decelObj { get; }
+    float gcDistance { get; }
 }
 
 public interface IDashData : IData
@@ -36,9 +35,14 @@ public interface IDashData : IData
     float dashSpeed { get; }
 }
 
-public interface ILadderData : IData
+public interface IClimbData : IData
 {
     float moveSpeed { get; }
     float decelObj { get; }
     float gcDistance { get; }
+}
+
+public interface ISneakData : IData 
+{
+    float threshold { get; }
 }

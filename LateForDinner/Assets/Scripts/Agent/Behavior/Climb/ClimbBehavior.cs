@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class LadderBehavior<T> : IAgentBehavior<T> where T : class, ILadderData
+public class ClimbBehavior<T> : IAgentBehavior<T> where T : class, IClimbData
 {
     private IAgentControl agent;
     private T config;
@@ -12,9 +12,15 @@ public class LadderBehavior<T> : IAgentBehavior<T> where T : class, ILadderData
         config = data;
     }
 
+    public void Prepare()
+    {
+        agent.tBody.gravityScale = 0;
+        agent.tBody.linearVelocity = Vector2.zero;
+    }
+
     public void Execute(BehaviorContext context)
     {
-        if (agent.hProp is not IClimbProp ladder || agent is not IClimb { isClimbing: true })
+        if (agent.hProp is not IClimbProp ladder || agent is not IClimb climb) 
             return;
 
         float nextX = Mathf.SmoothDamp(agent.tBody.position.x, ladder.centerX, ref xVelocity, Define.Physics.SNAP);

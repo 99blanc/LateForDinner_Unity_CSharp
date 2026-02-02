@@ -55,11 +55,11 @@ public class InputSystem
         lastMoveInputTime = Time.time;
     }
 
-    private void OnMoveCanceled(InputAction.CallbackContext context) => player.HandleInput(CreateContext(Vector2.zero, false));
+    private void OnMoveCanceled(InputAction.CallbackContext context) => player.HandleInput(CreateContext(Vector2.zero, player.isDashing = false));
 
-    private void OnJump(InputAction.CallbackContext context) => player.HandleInput(CreateContext(player.moveInput, false, true));
+    private void OnJump(InputAction.CallbackContext context) => player.HandleInput(CreateContext(player.moveInput, player.isDashing = false, player.isJumping = true));
 
-    private void OnDash(InputAction.CallbackContext context) => player.HandleInput(CreateContext(player.moveInput, true, false));
+    private void OnDash(InputAction.CallbackContext context) => player.HandleInput(CreateContext(player.moveInput, player.isDashing = true, player.isJumping = false));
 
     private InputContext CreateContext(Vector2 input, bool dashRequested, bool jumpRequested = false)
     {
