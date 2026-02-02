@@ -79,10 +79,18 @@ public class InputSystem
         if (player.pProp is not ILadderProp ladder)
             return false;
 
+        float ladderTop = ladder.bounds.max.y;
+        float ladderBottom = ladder.bounds.min.y;
         float footY = player.tCollider.bounds.min.y;
         float headY = player.tCollider.bounds.max.y;
-        bool canUp = input.y > 0 && footY < ladder.bounds.max.y - Define.Physics.OFFSET;
-        bool canDown = input.y < 0 && headY > ladder.bounds.min.y + Define.Physics.OFFSET;
+        float centerY = player.tCollider.bounds.center.y;
+        float midLowerY = (footY + centerY) * Define.Physics.HALF;
+
+        if (input.y > 0 && midLowerY > ladderTop - Define.Physics.OFFSET)
+            return false;
+
+        bool canUp = input.y > 0 && headY > ladderBottom;
+        bool canDown = input.y < 0 && footY < ladderTop;
         return canUp || canDown;
     }
 
@@ -90,8 +98,9 @@ public class InputSystem
     {
         bool statReady = !isCoolingDown && player.tView.dashCount.CurrentValue > 0;
         bool stateReady = player.machine.curState != player.dashState;
+        bool isUp = input.y > 0;
         bool isDown = input.y < 0;
-        bool isForbidden = player.isGrounded && isDown;
+        bool isForbidden = (player.isGrounded && isDown) || isUp;
         return dashRequested && statReady && stateReady && !isForbidden;
     }
 

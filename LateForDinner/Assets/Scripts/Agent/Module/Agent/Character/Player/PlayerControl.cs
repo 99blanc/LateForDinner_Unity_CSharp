@@ -47,23 +47,27 @@ public class PlayerControl : AgentControl<IPlayerView, PlayerData, PlayerID>, IL
         moveInput = ctx.moveInput;
         lookAt = UpdateLookAt(ctx.moveInput);
         bool isForbidden = isGrounded && ctx.moveInput.y < 0;
+        bool isCurrentLadder = machine.curState == ladderState;
 
         PlayerState target = ctx switch
         {
             { canDash: true } when !isForbidden => dashState,
             { doJump: true } when currentJumpCount < tView.jumpCount.CurrentValue => jumpState,
             { onLadder: true } => ladderState,
-            { hasX: true } => moveState,
+            { hasX: true } when !isCurrentLadder => moveState,
             _ => isGrounded ? idleState : null
         };
+
+        if (isGrounded && (target == moveState || target == idleState || machine.curState == moveState || machine.curState == idleState))
+            currentJumpCount = 0;
 
         if (target is null)
             return;
 
         switch (target)
         {
-            case PlayerDashState: input.UseDash(); break;
-            case PlayerJumpState: currentJumpCount++; break;
+            case PlayerDashState: if (ctx.onLadder) break; input.UseDash(); break;
+            case PlayerJumpState: ++currentJumpCount; break;
             case PlayerMoveState when isGrounded: currentJumpCount = 0; break;
             case PlayerLadderState: currentJumpCount = 0; break;
         }

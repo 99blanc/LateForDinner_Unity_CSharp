@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class DashBehavior<T> : IAgentBehavior<T> where T : class, IDashData
@@ -29,6 +30,10 @@ public class DashBehavior<T> : IAgentBehavior<T> where T : class, IDashData
         Vector2 currentPos = agent.tBody.position;
         Vector2 direction = (nextPos - currentPos).normalized;
         float distance = Vector2.Distance(currentPos, nextPos);
+
+        if (distance < Define.Physics.DEADZONE) 
+            return;
+
         Vector2 castSize = agent.tCollider.bounds.size * Define.Physics.HALF;
         RaycastHit2D hit = Physics2D.BoxCast(currentPos, castSize, 0, direction, distance + Define.Physics.DEADZONE, LayerMask.GetMask(Define.Layer.GROUND));
         bool canPass = hit.collider is null || hit.collider.isTrigger;

@@ -25,10 +25,6 @@ public abstract class Platform : Prop, IPlatformProp
         float vVel = agent.tBody.linearVelocity.y;
         float buffer = vVel < 0 ? Mathf.Abs(vVel) * Time.fixedDeltaTime : 0;
         bool isAbove = (footY + buffer) >= topY;
-
-        if (isDown && agent.pProp is ILadderProp && agent is ILadderAgent ladderAgent)
-            ladderAgent.UseLadder();
-
         return isAbove && !isClimbing && (!dropable || !isDown);
     }
 
