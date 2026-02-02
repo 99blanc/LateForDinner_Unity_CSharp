@@ -11,6 +11,8 @@ public static class Extensions
 
     public static void OutProp(this IPropHolder agent, Prop prop) => agent.HandleProp(props => PropHelper.OutProp(props, prop, agent));
 
+    public static bool IsOppositeInput(this IAgentControl agent, float inputX, float currentDir) => InputHelper.IsOppositeInput(agent, inputX, currentDir);
+
     public static void BindInputEvent(this InputAction action, Action<InputAction.CallbackContext> performed, Component component) => InputHelper.BindInputEvent(action, performed, component);
 
     public static void BindInputEvent(this InputAction action, Action<InputAction.CallbackContext> performed, Action<InputAction.CallbackContext> canceled, Component component) => InputHelper.BindInputEvent(action, performed, canceled, component);

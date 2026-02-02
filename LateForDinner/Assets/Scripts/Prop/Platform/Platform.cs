@@ -1,7 +1,7 @@
-using Token.PRIORITY;
 using UnityEngine;
+using Token.PRIORITY;
 
-public class Platform : Prop, IPlatformProp
+public abstract class Platform : Prop, IPlatformProp
 {
     public override PropPriority priority => PropPriority.PLATFORM;
     public BoxCollider2D physics { get; private set; }
@@ -16,30 +16,35 @@ public class Platform : Prop, IPlatformProp
         physics.enabled = false;
     }
 
-    public override void OnTick(IAgentControl agent)
+    protected bool Evaluate(IAgentControl agent, bool dropable)
     {
         float topY = cCollider.bounds.max.y;
         float footY = agent.tCollider.bounds.min.y + Define.Physics.OFFSET;
         bool isClimbing = agent is PlayerControl p && p.machine.curState == p.ladderState;
-        bool isDownInput = agent.moveInput.y < -Define.Physics.DEADZONE;
-        bool hasLadder = agent.pProp is ILadderProp;
+        bool isDown = agent.moveInput.y < -Define.Physics.DEADZONE;
         float vVel = agent.tBody.linearVelocity.y;
-        float velocityBuffer = vVel < 0 ? Mathf.Abs(vVel) * Time.fixedDeltaTime : 0;
-        bool isAbove = (footY + velocityBuffer) >= topY;
-        bool finalEnabled = isAbove && !isDownInput && !isClimbing;
+        float buffer = vVel < 0 ? Mathf.Abs(vVel) * Time.fixedDeltaTime : 0;
+        bool isAbove = (footY + buffer) >= topY;
 
-        if (physics.enabled != finalEnabled)
-            physics.enabled = finalEnabled;
+        if (isDown && agent.pProp is ILadderProp && agent is ILadderAgent ladderAgent)
+            ladderAgent.UseLadder();
 
-        if (isDownInput && hasLadder && agent is ILadderAgent ladderAgent)
-            ladderAgent.EnslaveToLadder();
+        return isAbove && !isClimbing && (!dropable || !isDown);
+    }
+
+    protected void Toggle(bool state)
+    {
+        if (physics.enabled != state)
+            physics.enabled = state;
     }
 
     public override void OnDetach(IAgentControl agent)
     {
         base.OnDetach(agent);
 
-        if (physics is not null) 
+        if (physics != null) 
             physics.enabled = false;
     }
+
+    public abstract override void OnTick(IAgentControl agent);
 }

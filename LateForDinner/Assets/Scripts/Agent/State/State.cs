@@ -19,8 +19,8 @@ public abstract class PlayerState : AgentState<PlayerControl>
 
     protected void ApplyPhysics() 
     { 
-        target.Move(); 
-        target.Gravity(); 
-        target.Fall();
+        target.ExecuteMove(); 
+        target.ExecuteGravity(); 
+        target.ExecuteFall();
     }
 }

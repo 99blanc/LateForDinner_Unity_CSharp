@@ -21,5 +21,5 @@ public interface IAgentBehavior<in T> : IAgentBehavior where T : class, IData
 
 public interface ILadderAgent
 {
-    void EnslaveToLadder();
+    void UseLadder();
 }

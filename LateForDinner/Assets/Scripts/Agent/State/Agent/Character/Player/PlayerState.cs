@@ -36,7 +36,7 @@ public class PlayerJumpState : PlayerState
 {
     public PlayerJumpState(PlayerControl ctx, StateMachine sm) : base(ctx, sm) { }
 
-    public override void Enter() => target.Jump();
+    public override void Enter() => target.ExecuteJump();
 
     public override void FixedUpdate()
     {
@@ -81,9 +81,10 @@ public class PlayerDashState : PlayerState
     {
         elapsed += Time.fixedDeltaTime;
         float percent = Mathf.Clamp01(elapsed / duration);
-        target.Dash(percent);
+        target.ExecuteDash(percent);
+        IAgentControl agent = target;
 
-        if (target.IsOppositeInput(direction) || percent >= Define.Physics.FULL)
+        if (agent.IsOppositeInput(target.moveInput.x, direction) || percent >= Define.Physics.FULL)
             machine.ChangeState(target.isGrounded ? target.idleState : target.fallState);
     }
 
@@ -98,7 +99,7 @@ public class PlayerLadderState : PlayerState
 
     public override void FixedUpdate()
     {
-        target.Ladder();
+        target.ExecuteLadder();
 
         bool hasNoProp = !target.pProp;
         bool isBottomExit = target.isGrounded && target.moveInput.y < -Define.Physics.DEADZONE;

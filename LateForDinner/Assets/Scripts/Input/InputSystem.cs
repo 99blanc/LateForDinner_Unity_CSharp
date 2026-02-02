@@ -7,10 +7,11 @@ using Token.DATA;
 public struct InputContext
 {
     public Vector2 moveInput;
-    public bool isDoubleTap;
-    public bool isLadderAction;
-    public bool isMovingX;
+    public bool isTap;
+    public bool onLadder;
+    public bool hasX;
     public bool canDash;
+    public bool doJump;
 }
 
 public class InputSystem
@@ -56,26 +57,20 @@ public class InputSystem
 
     private void OnMoveCanceled(InputAction.CallbackContext context) => player.HandleInput(CreateContext(Vector2.zero, false));
 
-    private void OnJump(InputAction.CallbackContext context) => player.OnJumpRequested();
+    private void OnJump(InputAction.CallbackContext context) => player.HandleInput(CreateContext(player.moveInput, false, true));
 
-    private void OnDash(InputAction.CallbackContext context) => player.OnDashRequested(CreateContext(player.moveInput, true));
+    private void OnDash(InputAction.CallbackContext context) => player.HandleInput(CreateContext(player.moveInput, true, false));
 
-    public void UseDash()
-    {
-        lastMoveDirection = Vector2.zero;
-        lastMoveInputTime = 0;
-        RefillDash();
-    }
-
-    private InputContext CreateContext(Vector2 input, bool dashRequested)
+    private InputContext CreateContext(Vector2 input, bool dashRequested, bool jumpRequested = false)
     {
         return new()
         {
             moveInput = input,
-            isDoubleTap = dashRequested,
-            isLadderAction = EvaluateLadder(input),
-            isMovingX = Mathf.Abs(input.x) > Define.Physics.DEADZONE,
-            canDash = EvaluateDash(input, dashRequested)
+            isTap = dashRequested,
+            onLadder = EvaluateLadder(input),
+            hasX = input.x != 0,
+            canDash = EvaluateDash(input, dashRequested),
+            doJump = jumpRequested
         };
     }
 
@@ -84,47 +79,23 @@ public class InputSystem
         if (player.pProp is not ILadderProp ladder)
             return false;
 
-        float moveY = input.y;
-        float ladderTop = ladder.bounds.max.y;
-        float ladderBottom = ladder.bounds.min.y;
         float footY = player.tCollider.bounds.min.y;
         float headY = player.tCollider.bounds.max.y;
-        bool canClimbUp = moveY > Define.Physics.DEADZONE && footY < ladderTop - Define.Physics.OFFSET;
-        bool canClimbDown = moveY < -Define.Physics.DEADZONE && headY > ladderBottom + Define.Physics.OFFSET;
-        return canClimbUp || canClimbDown;
+        bool canUp = input.y > 0 && footY < ladder.bounds.max.y - Define.Physics.OFFSET;
+        bool canDown = input.y < 0 && headY > ladder.bounds.min.y + Define.Physics.OFFSET;
+        return canUp || canDown;
     }
 
     private bool EvaluateDash(Vector2 input, bool dashRequested)
     {
         bool statReady = !isCoolingDown && player.tView.dashCount.CurrentValue > 0;
         bool stateReady = player.machine.curState != player.dashState;
-        bool angleReady = input.y <= Define.Physics.DEADZONE;
-        bool isDownDash = input.y < -Define.Physics.DEADZONE;
-        bool isOnPlatform = player.pProp is IPlatformProp;
-        bool canPassThrough = dashRequested && isDownDash && isOnPlatform;
-
-        if (canPassThrough)
-        {
-            RestoreDash();
-            player.pProp.OnDetach(player);
-        }
-
-        return dashRequested && statReady && stateReady && angleReady;
+        bool isDown = input.y < 0;
+        bool isForbidden = player.isGrounded && isDown;
+        return dashRequested && statReady && stateReady && !isForbidden;
     }
 
-    private void RestoreDash()
-    {
-        bool hasStat = player.tView is StatModel;
-
-        if (!hasStat) 
-            return;
-
-        StatModel registry = (StatModel)player.tView;
-        short nextCount = (short)(player.tView.dashCount.CurrentValue + 1);
-        registry.Set(StatType.DASH_COUNT, nextCount);
-    }
-
-    private void RefillDash()
+    public void UseDash()
     {
         if (player.tView is not StatModel registry)
             return;

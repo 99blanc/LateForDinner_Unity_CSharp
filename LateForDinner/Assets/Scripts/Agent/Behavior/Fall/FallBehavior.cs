@@ -17,10 +17,8 @@ public class FallBehavior<T> : IAgentBehavior<T> where T : class, IJumpData
         Vector2 bottom = new(agent.tCollider.bounds.center.x, agent.tCollider.bounds.min.y + Define.Physics.OFFSET);
         Vector2 castSize = new(agent.tCollider.bounds.size.x * 0.9f, Define.Physics.OFFSET);
         RaycastHit2D hit = Physics2D.BoxCast(bottom, castSize, 0, Vector2.down, config.gcDistance, LayerMask.GetMask(Define.Layer.GROUND));
-        bool isVelocityStatic = Mathf.Abs(agent.tBody.linearVelocity.y) <= config.threshold;
-        bool detectedGrounded = hit.collider is not null && isVelocityStatic;
+        bool detectedGrounded = hit.collider is not null && Mathf.Abs(agent.tBody.linearVelocity.y) < Define.Physics.OFFSET;
         agent.isGrounded = detectedGrounded && !isClimbing;
         agent.isFalling = !agent.isGrounded && agent.tBody.linearVelocity.y < -config.threshold;
-        agent.currentJumpCount = (short)(agent.currentJumpCount * (agent.isGrounded ? 0 : 1));
     }
 }

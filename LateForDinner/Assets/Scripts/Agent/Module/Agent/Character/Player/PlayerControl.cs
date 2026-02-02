@@ -1,7 +1,6 @@
 using R3;
 using Token.ID;
 using Token.PRIORITY;
-using UnityEngine;
 
 public class PlayerControl : AgentControl<IPlayerView, PlayerData, PlayerID>, ILadderAgent
 {
@@ -47,59 +46,42 @@ public class PlayerControl : AgentControl<IPlayerView, PlayerData, PlayerID>, IL
     {
         moveInput = ctx.moveInput;
         lookAt = UpdateLookAt(ctx.moveInput);
+        bool isForbidden = isGrounded && ctx.moveInput.y < 0;
 
-        PlayerState targetState = ctx switch
+        PlayerState target = ctx switch
         {
-            { canDash: true } => dashState,
-            { isLadderAction: true } => ladderState,
-            { isMovingX: true } => moveState,
+            { canDash: true } when !isForbidden => dashState,
+            { doJump: true } when currentJumpCount < tView.jumpCount.CurrentValue => jumpState,
+            { onLadder: true } => ladderState,
+            { hasX: true } => moveState,
             _ => isGrounded ? idleState : null
         };
 
-        if (targetState is null)
+        if (target is null)
             return;
 
-        switch (targetState)
+        switch (target)
         {
             case PlayerDashState: input.UseDash(); break;
-            case PlayerMoveState: currentJumpCount = isGrounded ? (short)0 : currentJumpCount; break;
+            case PlayerJumpState: currentJumpCount++; break;
+            case PlayerMoveState when isGrounded: currentJumpCount = 0; break;
             case PlayerLadderState: currentJumpCount = 0; break;
         }
 
-        machine.ChangeState(targetState);
+        machine.ChangeState(target, target == jumpState);
     }
 
-    public void OnJumpRequested()
-    {
-        if (currentJumpCount >= tView.jumpCount.CurrentValue)
-            return;
+    public void ExecuteMove() => ExecuteBehavior<MoveBehavior<IMoveData>>(new() { input = moveInput });
 
-        ++currentJumpCount;
-        machine.ChangeState(jumpState, true);
-    }
+    public void ExecuteJump() => ExecuteBehavior<JumpBehavior<IJumpData>>();
 
-    public void OnDashRequested(InputContext ctx)
-    {
-        if (!ctx.canDash) 
-            return;
+    public void ExecuteFall() => ExecuteBehavior<FallBehavior<IJumpData>>();
 
-        input.UseDash();
-        machine.ChangeState(dashState, false);
-    }
+    public void ExecuteDash(float percent) => ExecuteBehavior<DashBehavior<IDashData>>(new() { bias = percent });
 
-    public bool IsOppositeInput(float currentDir) => moveInput.x != 0 && Mathf.Sign(moveInput.x) != currentDir;
+    public void ExecuteGravity() => ExecuteBehavior<GravityBehavior<IPhysicsData>>();
 
-    public void Move() => ExecuteBehavior<MoveBehavior<IMoveData>>(new() { input = moveInput });
+    public void ExecuteLadder() => ExecuteBehavior<LadderBehavior<ILadderData>>(new() { input = moveInput });
 
-    public void Jump() => ExecuteBehavior<JumpBehavior<IJumpData>>();
-
-    public void Fall() => ExecuteBehavior<FallBehavior<IJumpData>>();
-
-    public void Dash(float percent) => ExecuteBehavior<DashBehavior<IDashData>>(new() { bias = percent });
-
-    public void Gravity() => ExecuteBehavior<GravityBehavior<IPhysicsData>>();
-
-    public void Ladder() => ExecuteBehavior<LadderBehavior<ILadderData>>(new() { input = moveInput });
-
-    public void EnslaveToLadder() => machine.ChangeState(ladderState);
+    public void UseLadder() => machine.ChangeState(ladderState);
 }
