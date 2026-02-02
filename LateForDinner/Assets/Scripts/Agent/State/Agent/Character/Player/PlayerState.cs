@@ -70,6 +70,8 @@ public class PlayerDashState : PlayerState
 
     public override void Enter()
     {
+        target.tBody.gravityScale = 0;
+        target.tBody.linearVelocity = Vector2.zero;
         float speed = target.tView.moveSpeed.CurrentValue * target.config.dashSpeed;
         duration = target.tView.dashDistance.CurrentValue / speed;
         elapsed = 0;
@@ -95,17 +97,33 @@ public class PlayerLadderState : PlayerState
 {
     public PlayerLadderState(PlayerControl ctx, StateMachine sm) : base(ctx, sm) { }
 
-    public override void Enter() => target.GetBehavior<LadderBehavior<ILadderData>>().Prepare();
+    public override void Enter()
+    {
+        target.tBody.gravityScale = 0;
+        target.tBody.linearVelocity = Vector2.zero;
+    }
 
     public override void FixedUpdate()
     {
         target.ExecuteLadder();
-
         bool hasNoProp = !target.pProp;
         bool isBottomExit = target.isGrounded && target.moveInput.y < -Define.Physics.DEADZONE;
 
         if (hasNoProp || isBottomExit)
             machine.ChangeState(target.isGrounded ? target.idleState : target.fallState);
+    }
+
+    public override void Exit() => target.tBody.gravityScale = Define.Physics.FULL;
+}
+
+public class PlayerPushState : PlayerState
+{
+    public PlayerPushState(PlayerControl ctx, StateMachine sm) : base(ctx, sm) { }
+
+    public override void FixedUpdate()
+    {
+        target.ExecutePush();
+        target.ExecuteGravity();
     }
 
     public override void Exit() => target.tBody.gravityScale = Define.Physics.FULL;

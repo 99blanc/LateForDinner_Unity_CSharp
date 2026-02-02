@@ -25,7 +25,7 @@ public interface IPhysicsData : IData
 {
     float gvMul { get; }
     float gvReduction { get; }
-    float decelLadder { get; }
+    float decelObj { get; }
 }
 
 public interface IDashData : IData
@@ -39,6 +39,6 @@ public interface IDashData : IData
 public interface ILadderData : IData
 {
     float moveSpeed { get; }
-    float decelLadder { get; }
+    float decelObj { get; }
     float gcDistance { get; }
 }

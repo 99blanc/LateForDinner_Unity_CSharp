@@ -19,7 +19,14 @@ public interface IAgentBehavior<in T> : IAgentBehavior where T : class, IData
     void Setup(IAgentControl control, T data);
 }
 
-public interface ILadderAgent
+public interface IClimb
 {
-    void UseLadder();
+    bool isClimbing { get; }
+    void ExecuteLadder();
+}
+
+public interface IPush
+{
+    bool isPushing { get; }
+    void ExecutePush();
 }

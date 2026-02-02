@@ -12,24 +12,13 @@ public class LadderBehavior<T> : IAgentBehavior<T> where T : class, ILadderData
         config = data;
     }
 
-    public void Prepare()
-    {
-        agent.tBody.gravityScale = 0;
-        agent.tBody.linearVelocity = Vector2.zero;
-    }
-
     public void Execute(BehaviorContext context)
     {
-        if (agent.pProp is not ILadderProp ladder)
+        if (agent.pProp is not IClimbProp ladder || agent is not IClimb { isClimbing: true })
             return;
 
-        agent.tBody.gravityScale = 0;
-        agent.tBody.linearVelocity = Vector2.zero;
-        BoxCollider2D box = agent.pProp.cCollider;
-        float ladderX = ladder.centerX;
-        float nextX = Mathf.SmoothDamp(agent.tBody.position.x, ladderX, ref xVelocity, Define.Physics.SNAP);
-        float moveY = context.input.y * config.moveSpeed * config.decelLadder * Time.fixedDeltaTime;
+        float nextX = Mathf.SmoothDamp(agent.tBody.position.x, ladder.centerX, ref xVelocity, Define.Physics.SNAP);
+        float moveY = context.input.y * config.moveSpeed * config.decelObj * Time.fixedDeltaTime;
         agent.tBody.MovePosition(new(nextX, agent.tBody.position.y + moveY));
-        agent.tBody.linearVelocity = Vector2.zero;
     }
 }

@@ -1,9 +1,9 @@
 using Token.PRIORITY;
 using UnityEngine;
 
-public class Ladder : Prop, ILadderProp
+public class Ladder : TriggerProp, IClimbProp
 {
+    public float centerX => sensor.bounds.center.x;
+    public Bounds bounds => sensor.bounds;
     public override PropPriority priority => PropPriority.LADDER;
-    public float centerX => cCollider.bounds.center.x;
-    public Bounds bounds => cCollider.bounds;
 }

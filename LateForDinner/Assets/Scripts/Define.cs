@@ -1,3 +1,5 @@
+using UnityEngine;
+
 public class Define
 {
     public const string ROOT = "@Root";
@@ -33,8 +35,11 @@ public class Define
     public class Layer
     {
         public const string AGENT = "Agent";
+        public const string PLAYER = "Player";
         public const string GROUND = "Ground";
         public const string LADDER = "Ladder";
+        public const string BOX = "Box";
+        public static readonly int GROUND_MASKS = LayerMask.GetMask(GROUND, BOX);
     }
 
     public class Physics

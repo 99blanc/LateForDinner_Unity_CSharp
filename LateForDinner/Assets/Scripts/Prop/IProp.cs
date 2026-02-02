@@ -9,7 +9,7 @@ public interface IPropHolder
     void HandleProp(Action<HashSet<Prop>> action);
 }
 
-public interface IInteractProp
+public interface IProp
 {
     PropPriority priority { get; }
     void OnTick(IAgentControl agent);
@@ -17,13 +17,12 @@ public interface IInteractProp
     void OnDetach(IAgentControl agent);
 }
 
-public interface ILadderProp : IInteractProp
+public interface IClimbProp : IProp
 {
     float centerX { get; }
     Bounds bounds { get; }
 }
 
-public interface IPlatformProp : IInteractProp
-{
-    BoxCollider2D physics { get; }
-}
+public interface IPlatformProp : IProp { }
+
+public interface IPushProp : IProp { }

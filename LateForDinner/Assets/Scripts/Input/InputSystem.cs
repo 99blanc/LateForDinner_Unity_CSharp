@@ -76,7 +76,7 @@ public class InputSystem
 
     private bool EvaluateLadder(Vector2 input)
     {
-        if (player.pProp is not ILadderProp ladder)
+        if (player.pProp is not IClimbProp ladder)
             return false;
 
         float ladderTop = ladder.bounds.max.y;

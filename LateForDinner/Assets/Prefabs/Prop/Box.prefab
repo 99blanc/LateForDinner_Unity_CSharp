@@ -12,7 +12,8 @@ GameObject:
   - component: {fileID: 4424387525384236517}
   - component: {fileID: 7171984886441664564}
   - component: {fileID: 7751873498654779954}
-  m_Layer: 3
+  - component: {fileID: -340490011579314315}
+  m_Layer: 7
   m_Name: Box
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -165,4 +166,16 @@ Rigidbody2D:
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
-  m_Constraints: 4
+  m_Constraints: 0
+--- !u!114 &-340490011579314315
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2112072134421270787}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7ada5c2aa0606a84faae69f8f66301fa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Box

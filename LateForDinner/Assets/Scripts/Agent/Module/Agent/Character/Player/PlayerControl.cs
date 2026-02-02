@@ -1,8 +1,10 @@
+using NUnit.Framework;
 using R3;
 using Token.ID;
 using Token.PRIORITY;
+using UnityEngine;
 
-public class PlayerControl : AgentControl<IPlayerView, PlayerData, PlayerID>, ILadderAgent
+public class PlayerControl : AgentControl<IPlayerView, PlayerData, PlayerID>, IClimb, IPush
 {
     public override ModulePrority priority => ModulePrority.PLAYER_CONTROL;
     public PlayerIdleState idleState { get; private set; }
@@ -11,6 +13,9 @@ public class PlayerControl : AgentControl<IPlayerView, PlayerData, PlayerID>, IL
     public PlayerFallState fallState { get; private set; }
     public PlayerDashState dashState { get; private set; }
     public PlayerLadderState ladderState { get; private set; }
+    public PlayerPushState pushState { get; private set; }
+    public bool isClimbing => machine.curState == ladderState;
+    public bool isPushing => machine.curState == pushState;
 
     private InputSystem input;
 
@@ -27,12 +32,23 @@ public class PlayerControl : AgentControl<IPlayerView, PlayerData, PlayerID>, IL
     public override void Setup(PlayerData data, IPlayerView view)
     {
         base.Setup(data, view);
+        PhysicsMaterial2D mat = new PhysicsMaterial2D(Define.Layer.PLAYER)
+        {
+            friction = 0,
+            bounciness = 0
+        };
+        tCollider.sharedMaterial = mat;
+        tBody.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+        tBody.sleepMode = RigidbodySleepMode2D.NeverSleep;
+        tBody.interpolation = RigidbodyInterpolation2D.Extrapolate;
+        tBody.constraints = RigidbodyConstraints2D.FreezeRotation;
         idleState = new(this, machine);
         moveState = new(this, machine);
         jumpState = new(this, machine);
         fallState = new(this, machine);
         dashState = new(this, machine);
         ladderState = new(this, machine);
+        pushState = new(this, machine);
         machine.Init(idleState);
         input = new(this);
         input.Init();
@@ -47,14 +63,14 @@ public class PlayerControl : AgentControl<IPlayerView, PlayerData, PlayerID>, IL
         moveInput = ctx.moveInput;
         lookAt = UpdateLookAt(ctx.moveInput);
         bool isForbidden = isGrounded && ctx.moveInput.y < 0;
-        bool isCurrentLadder = machine.curState == ladderState;
 
         PlayerState target = ctx switch
         {
             { canDash: true } when !isForbidden => dashState,
             { doJump: true } when currentJumpCount < tView.jumpCount.CurrentValue => jumpState,
             { onLadder: true } => ladderState,
-            { hasX: true } when !isCurrentLadder => moveState,
+            _ when isPushing => pushState,
+            { hasX: true } when !isClimbing => moveState,
             _ => isGrounded ? idleState : null
         };
 
@@ -87,5 +103,5 @@ public class PlayerControl : AgentControl<IPlayerView, PlayerData, PlayerID>, IL
 
     public void ExecuteLadder() => ExecuteBehavior<LadderBehavior<ILadderData>>(new() { input = moveInput });
 
-    public void UseLadder() => machine.ChangeState(ladderState);
+    public void ExecutePush() => ExecuteBehavior<MoveBehavior<IMoveData>>(new() { input = moveInput * config.decelObj });
 }

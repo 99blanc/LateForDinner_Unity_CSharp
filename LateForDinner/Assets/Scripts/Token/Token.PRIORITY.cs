@@ -11,7 +11,9 @@ namespace Token.PRIORITY
     {
         NULL,
         LADDER,
-        PLATFORM,
+        BOX,
+        ONEWAY_PLATFORM,
+        TWOWAY_PLATFORM,
         NONE
     }
 }
