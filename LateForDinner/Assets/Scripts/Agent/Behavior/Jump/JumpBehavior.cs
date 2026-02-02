@@ -1,13 +1,8 @@
 public class JumpBehavior<T> : IAgentBehavior<T> where T : class, IJumpData
 {
     private IAgentControl agent;
-    private T config;
 
-    public void Setup(IAgentControl control, T data)
-    {
-        agent = control;
-        config = data;
-    }
+    public void Setup(IAgentControl control, T data) => agent = control;
 
     public void Execute(BehaviorContext context) => agent.tBody.linearVelocity = new(agent.tBody.linearVelocity.x, agent.tView.jumpForce.CurrentValue);
 }

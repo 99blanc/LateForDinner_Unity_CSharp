@@ -1,13 +1,6 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 using Token.PRIORITY;
-
-public interface IPropHolder
-{
-    Prop pProp { get; set; }
-    void HandleProp(Action<HashSet<Prop>> action);
-}
 
 public interface IProp
 {

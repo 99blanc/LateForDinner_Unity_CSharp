@@ -106,7 +106,7 @@ public class PlayerLadderState : PlayerState
     public override void FixedUpdate()
     {
         target.ExecuteLadder();
-        bool hasNoProp = !target.pProp;
+        bool hasNoProp = !target.hProp;
         bool isBottomExit = target.isGrounded && target.moveInput.y < -Define.Physics.DEADZONE;
 
         if (hasNoProp || isBottomExit)

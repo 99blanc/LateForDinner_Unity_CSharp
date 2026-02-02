@@ -14,7 +14,7 @@ public class Box : CollisionProp, IPushProp
         rBody.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
         rBody.constraints = RigidbodyConstraints2D.FreezeRotation;
         rBody.useAutoMass = true;
-        PhysicsMaterial2D mat = new PhysicsMaterial2D(Define.Layer.BOX) 
+        PhysicsMaterial2D mat = new(Define.Layer.BOX) 
         { 
             friction = 0.4f, 
             bounciness = 0

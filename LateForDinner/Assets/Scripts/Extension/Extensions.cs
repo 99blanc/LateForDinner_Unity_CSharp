@@ -7,9 +7,9 @@ using Token.EVENT;
 
 public static class Extensions
 {
-    public static void InProp(this IPropHolder agent, Prop prop) => agent.HandleProp(props => PropHelper.InProp(props, prop, agent));
+    public static void InProp(this Prop current, Prop target) => PropHelper.InProp(current, target);
 
-    public static void OutProp(this IPropHolder agent, Prop prop) => agent.HandleProp(props => PropHelper.OutProp(props, prop, agent));
+    public static void OutProp(this Prop current, Prop target) => PropHelper.OutProp(current, target);
 
     public static bool IsOppositeInput(this IAgentControl agent, float inputX, float currentDir) => InputHelper.IsOppositeInput(agent, inputX, currentDir);
 

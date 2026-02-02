@@ -13,7 +13,7 @@ public class FallBehavior<T> : IAgentBehavior<T> where T : class, IJumpData
 
     public void Execute(BehaviorContext context)
     {
-        bool isClimbing = agent is IClimb && agent.pProp is IClimbProp;
+        bool isClimbing = agent is IClimb && agent.hProp is IClimbProp;
         Vector2 bottom = new(agent.tCollider.bounds.center.x, agent.tCollider.bounds.min.y + Define.Physics.OFFSET);
         Vector2 castSize = new(agent.tCollider.bounds.size.x * 0.9f, Define.Physics.OFFSET);
         RaycastHit2D hit = Physics2D.BoxCast(bottom, castSize, 0, Vector2.down, config.gcDistance, Define.Layer.GROUND_MASKS);

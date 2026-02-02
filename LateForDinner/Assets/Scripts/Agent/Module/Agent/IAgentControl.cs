@@ -1,10 +1,11 @@
 using UnityEngine;
 
-public interface IAgentControl : IPropHolder
+public interface IAgentControl
 {
     StateMachine machine { get; }
     Rigidbody2D tBody { get; }
     CapsuleCollider2D tCollider { get; }
+    Prop hProp { get; }
     IActionView tView { get; }
     Vector2 moveInput { get; }
     Vector2 lookAt { get; }

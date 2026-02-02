@@ -1,18 +1,12 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 public class DashBehavior<T> : IAgentBehavior<T> where T : class, IDashData
 {
     private IAgentControl agent;
-    private T config;
     private Vector2 startPos;
     private Vector2 targetPos;
 
-    public void Setup(IAgentControl control, T data)
-    {
-        agent = control;
-        config = data;
-    }
+    public void Setup(IAgentControl control, T data) =>  agent = control;
 
     public void Prepare()
     {

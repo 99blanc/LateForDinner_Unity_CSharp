@@ -14,7 +14,7 @@ public class LadderBehavior<T> : IAgentBehavior<T> where T : class, ILadderData
 
     public void Execute(BehaviorContext context)
     {
-        if (agent.pProp is not IClimbProp ladder || agent is not IClimb { isClimbing: true })
+        if (agent.hProp is not IClimbProp ladder || agent is not IClimb { isClimbing: true })
             return;
 
         float nextX = Mathf.SmoothDamp(agent.tBody.position.x, ladder.centerX, ref xVelocity, Define.Physics.SNAP);

@@ -6,13 +6,11 @@ using UnityEngine;
 public abstract class AgentControl<TView, TData, TKey> : MonoBehaviour, IAgentControl, IAgentModule<TView, TData, TKey> where TView : class, IViewProvider where TData : class, IData<TKey>
 {
     private readonly Dictionary<Type, IAgentBehavior> behaviors = new();
-    private readonly HashSet<Prop> props = new();
-    public void HandleProp(Action<HashSet<Prop>> action) => action?.Invoke(props);
     public TData config { get; private set; }
     public StateMachine machine { get; private set; }
     public Rigidbody2D tBody { get; private set; }
     public CapsuleCollider2D tCollider { get; private set; }
-    public Prop pProp { get; set; }
+    public Prop hProp { get; set; }
     public IActionView tView { get; private set; }
     public Vector2 moveInput { get; set; }
     public Vector2 lookAt { get; set; } = new();

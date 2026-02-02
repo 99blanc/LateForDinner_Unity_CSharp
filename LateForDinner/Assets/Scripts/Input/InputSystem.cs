@@ -47,7 +47,7 @@ public class InputSystem
         bool dashRequested = false;
 
         if (!Managers.Config.value.control.useModifierDash)
-            dashRequested = (Time.time - lastMoveInputTime <= Define.Physics.INTERVAL) && Vector2.Dot(input.normalized, lastMoveDirection.normalized) > 0.8f;
+            dashRequested = (Time.time - lastMoveInputTime <= Define.Physics.INTERVAL) && Vector2.Dot(input.normalized, lastMoveDirection.normalized) > Define.Physics.LIMIT;
         
         InputContext ctx = CreateContext(input, dashRequested);
         player.HandleInput(ctx);
@@ -76,7 +76,7 @@ public class InputSystem
 
     private bool EvaluateLadder(Vector2 input)
     {
-        if (player.pProp is not IClimbProp ladder)
+        if (player.hProp is not IClimbProp ladder)
             return false;
 
         float ladderTop = ladder.bounds.max.y;

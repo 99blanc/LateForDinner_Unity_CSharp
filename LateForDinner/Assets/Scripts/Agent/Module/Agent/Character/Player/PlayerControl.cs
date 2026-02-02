@@ -1,4 +1,3 @@
-using NUnit.Framework;
 using R3;
 using Token.ID;
 using Token.PRIORITY;
@@ -32,7 +31,7 @@ public class PlayerControl : AgentControl<IPlayerView, PlayerData, PlayerID>, IC
     public override void Setup(PlayerData data, IPlayerView view)
     {
         base.Setup(data, view);
-        PhysicsMaterial2D mat = new PhysicsMaterial2D(Define.Layer.PLAYER)
+        PhysicsMaterial2D mat = new(Define.Layer.PLAYER)
         {
             friction = 0,
             bounciness = 0
@@ -62,33 +61,29 @@ public class PlayerControl : AgentControl<IPlayerView, PlayerData, PlayerID>, IC
     {
         moveInput = ctx.moveInput;
         lookAt = UpdateLookAt(ctx.moveInput);
-        bool isForbidden = isGrounded && ctx.moveInput.y < 0;
-
         PlayerState target = ctx switch
         {
-            { canDash: true } when !isForbidden => dashState,
+            { canDash: true } when !(isGrounded && ctx.moveInput.y < 0) => dashState,
             { doJump: true } when currentJumpCount < tView.jumpCount.CurrentValue => jumpState,
             { onLadder: true } => ladderState,
             _ when isPushing => pushState,
             { hasX: true } when !isClimbing => moveState,
             _ => isGrounded ? idleState : null
         };
+        _ = target != null && ApplyStateEffect(target, ctx);
+    }
 
-        if (isGrounded && (target == moveState || target == idleState || machine.curState == moveState || machine.curState == idleState))
-            currentJumpCount = 0;
-
-        if (target is null)
-            return;
-
+    private bool ApplyStateEffect(PlayerState target, InputContext ctx)
+    {
         switch (target)
         {
-            case PlayerDashState: if (ctx.onLadder) break; input.UseDash(); break;
-            case PlayerJumpState: ++currentJumpCount; break;
-            case PlayerMoveState when isGrounded: currentJumpCount = 0; break;
-            case PlayerLadderState: currentJumpCount = 0; break;
+            case PlayerDashState when !ctx.onLadder: input.UseDash(); break;
+            case PlayerJumpState: currentJumpCount++; break;
+            case PlayerMoveState or PlayerIdleState or PlayerLadderState: currentJumpCount = 0; break;
         }
 
         machine.ChangeState(target, target == jumpState);
+        return true;
     }
 
     public void ExecuteMove() => ExecuteBehavior<MoveBehavior<IMoveData>>(new() { input = moveInput });

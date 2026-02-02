@@ -91,16 +91,4 @@ public class ConfigManager
         actAsset.Enable();
         actMap = actAsset.FindActionMap(Define.Input.MAP_USER);
     }
-
-    public void OnDestroy(InputActionAsset asset = null)
-    {
-        if (!asset)
-            asset = actAsset;
-
-        if (asset)
-        {
-            asset.Disable();
-            Object.Destroy(asset);
-        }
-    }
 }
