@@ -67,7 +67,7 @@ public class PlayerControl : AgentControl<IPlayerView, PlayerData, PlayerID>, IC
             { doJump: true } when currentJumpCount < tView.jumpCount.CurrentValue => jumpState,
             { onLadder: true } => ladderState,
             _ when isPushing => pushState,
-            { hasX: true } when !isClimbing => moveState,
+            { hasX: true } => moveState,
             _ => isGrounded ? idleState : null
         };
         _ = target != null && ApplyStateEffect(target, ctx);

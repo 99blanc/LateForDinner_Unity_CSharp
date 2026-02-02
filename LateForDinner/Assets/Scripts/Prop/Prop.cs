@@ -11,7 +11,7 @@ public abstract class Prop : MonoBehaviour, IProp
     protected virtual void Awake()
     {
         sensor = gameObject.GetOrAddComponentAssert<BoxCollider2D>();
-        occupant.Select(agent => agent is not null ? Observable.EveryUpdate(UnityFrameProvider.FixedUpdate) : Observable.Never<Unit>()).Switch().Subscribe(o => OnTick(occupant.Value)).AddTo(this);
+        occupant.Select(agent => agent is not null ? Observable.EveryUpdate(UnityFrameProvider.FixedUpdate) : Observable.Never<Unit>()).Switch().Subscribe(_ => OnTick(occupant.Value)).AddTo(this);
     }
 
     public virtual void OnTick(IAgentControl agent) { }
@@ -24,7 +24,7 @@ public abstract class Prop : MonoBehaviour, IProp
     {
         if (gameObject.TryGetComponent<IAgentControl>(out var agent) && occupant.Value == null)
         {
-            agent.hProp.InProp(this);
+            agent.InProp(this);
             OnInteract(agent);
         }
     }
@@ -33,7 +33,7 @@ public abstract class Prop : MonoBehaviour, IProp
     {
         if (gameObject.TryGetComponent<IAgentControl>(out var agent) && occupant.Value == agent)
         {
-            agent.hProp.OutProp(this);
+            agent.OutProp(this);
             OnDetach(agent);
         }
     }
