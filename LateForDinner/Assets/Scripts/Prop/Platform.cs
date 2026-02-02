@@ -20,22 +20,19 @@ public class Platform : Prop, IPlatformProp
     {
         float topY = cCollider.bounds.max.y;
         float footY = agent.tCollider.bounds.min.y + Define.Physics.OFFSET;
-        bool isClimbing = agent is PlayerControl player && player.machine.curState == player.ladderState;
+        bool isClimbing = agent is PlayerControl p && p.machine.curState == p.ladderState;
         bool isDownInput = agent.moveInput.y < -Define.Physics.DEADZONE;
         bool hasLadder = agent.pProp is ILadderProp;
-        bool isDownThrough = isDownInput && hasLadder;
-        float verticalVelocity = agent.tBody.linearVelocity.y;
-        float velocityBuffer = verticalVelocity < 0 ? Mathf.Abs(verticalVelocity) * Time.fixedDeltaTime : 0;
+        float vVel = agent.tBody.linearVelocity.y;
+        float velocityBuffer = vVel < 0 ? Mathf.Abs(vVel) * Time.fixedDeltaTime : 0;
         bool isAbove = (footY + velocityBuffer) >= topY;
-        bool finalEnabled = isAbove && !isDownThrough && !isClimbing;
+        bool finalEnabled = isAbove && !isDownInput && !isClimbing;
 
         if (physics.enabled != finalEnabled)
             physics.enabled = finalEnabled;
 
-        bool canClimb = isDownThrough && agent is ILadderAgent;
-
-        if (canClimb)
-            ((ILadderAgent)agent).EnslaveToLadder();
+        if (isDownInput && hasLadder && agent is ILadderAgent ladderAgent)
+            ladderAgent.EnslaveToLadder();
     }
 
     public override void OnDetach(IAgentControl agent)
