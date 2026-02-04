@@ -36,7 +36,11 @@ public class ClimbBehavior<T> : IAgentBehavior<T> where T : class, IClimbData
         agent.tBody.MovePosition(new(nextX, agent.tBody.position.y + moveY));
     }
 
-    public void Terminate(BehaviorContext context) => agent.tBody.gravityScale = Define.Physics.FULL;
+    public void Terminate(BehaviorContext context)
+    {
+        agent.tBody.linearVelocity = Vector2.zero;
+        agent.tBody.gravityScale = Define.Physics.FULL;
+    }
 
     public bool CanClimb(Vector2 input)
     {

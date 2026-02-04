@@ -11,14 +11,7 @@ public class FallBehavior<T> : IAgentBehavior<T> where T : class, IFallData
         config = data;
     }
 
-    public void Prepare(BehaviorContext context)
-    {
-        if (agent is ITumble tumble && Mathf.Approximately(context.scala, 1f))
-        {
-            agent.tBody.linearVelocity = new(agent.tBody.linearVelocity.x, -Define.Physics.BUFFER);
-            tumble.isTumbling = true;
-        }
-    }
+    public void Prepare(BehaviorContext context) { }
 
     public void Execute(BehaviorContext context)
     {
@@ -28,17 +21,10 @@ public class FallBehavior<T> : IAgentBehavior<T> where T : class, IFallData
         if (agent is IFall fall)
             fall.isFalling = !agent.isGrounded && agent.tBody.linearVelocity.y < Define.Physics.INTERVAL;
 
-        if (agent is ITumble { isTumbling: true } tumble && (agent.isGrounded || agent.tBody.linearVelocity.y > -Define.Physics.OFFSET))
-            tumble.isTumbling = false;
-
         Gravity();
     }
 
-    public void Terminate(BehaviorContext context) 
-    {
-        if (agent is ITumble tumble)
-            tumble.isTumbling = false;
-    }
+    public void Terminate(BehaviorContext context) { }
 
     private bool Gravity()
     {

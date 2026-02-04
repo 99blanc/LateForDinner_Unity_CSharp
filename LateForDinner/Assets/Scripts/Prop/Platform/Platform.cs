@@ -2,6 +2,7 @@ using UnityEngine;
 
 public abstract class Platform : TriggerProp, IPlatformProp
 {
+    public abstract bool dropable { get; }
     protected BoxCollider2D physics { get; private set; }
 
     protected override void Awake()
@@ -10,36 +11,23 @@ public abstract class Platform : TriggerProp, IPlatformProp
         physics = gameObject.AddComponent<BoxCollider2D>();
         physics.size = sensor.size;
         physics.offset = sensor.offset;
+        sensor.size = physics.size * (1f + Define.Physics.OFFSET);
     }
 
-    public abstract override void OnTick(IAgentControl agent);
-
-    public override void OnDetach(IAgentControl agent)
-    {
-        base.OnDetach(agent);
-        Physics2D.IgnoreCollision(agent.tCollider, physics, false);
-    }
-
-    protected bool Evaluate(IAgentControl agent, bool dropable)
+    protected bool Evaluate(IAgentControl agent)
     {
         float platformTop = sensor.bounds.max.y;
         float footY = agent.tCollider.bounds.min.y;
         bool isAbove = footY >= platformTop - Define.Physics.OFFSET;
-        bool isClimbing = agent is IClimb climb && climb.isClimbing;
-        bool isFalling = agent is IFall fall && fall.isFalling;
         bool isDownInput = agent.moveInput.y < 0;
-        bool isTumbling = agent is ITumble tumbler && (tumbler.isTumbling || (tumbler.isSneaking && tumbler.isJumping));
 
-        if (isClimbing || (agent.active is IClimbProp && isDownInput))
+        if (dropable && agent is ITumble { isTumbling: true })
             return false;
 
-        if (dropable && isTumbling)
-        {
-            SetIgnore(agent, true);
+        if (agent is IClimb { isClimbing: true } || (agent.active is IClimbProp && isDownInput))
             return false;
-        }
 
-        if (dropable && isFalling && isDownInput)
+        if (dropable && isDownInput && agent is IFall { isFalling: true })
             return false;
 
         return isAbove;

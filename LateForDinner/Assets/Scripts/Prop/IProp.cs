@@ -15,6 +15,9 @@ public interface IClimbProp : IProp
     Bounds bounds { get; }
 }
 
-public interface IPlatformProp : IProp { }
+public interface IPlatformProp : IProp 
+{
+    bool dropable { get; }
+}
 
 public interface IPushProp : IProp { }

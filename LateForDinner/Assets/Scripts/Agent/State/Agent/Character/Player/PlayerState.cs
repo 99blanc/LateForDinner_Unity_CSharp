@@ -70,6 +70,11 @@ public class PlayerFallState : FallState<PlayerControl>
     {
         target.ExecuteMove();
         target.ExecuteFall(false);
+        bool groundCheck = target.isGrounded;
+        bool velocityCheck = target.tBody.linearVelocity.y > -Define.Physics.OFFSET;
+
+        if (target.isTumbling && target.isFalling && (target.isGrounded || target.tBody.linearVelocity.y > -Define.Physics.OFFSET))
+            target.isTumbling = false;
     }
 
     public override void Exit() 
@@ -158,8 +163,9 @@ public class PlayerSneakState : SneakState<PlayerControl>
     {
         base.Enter();
         target.isSneaking = true;
-        target.ExecuteSneak();
     }
+
+    public override void FixedUpdate() => target.ExecuteSneak();
 
     public override void Exit()
     {

@@ -18,6 +18,10 @@ public class SneakBehavior<T> : IAgentBehavior<T> where T : class, ISneakData
     public void Prepare(BehaviorContext context)
     {
         agent.tBody.linearVelocity = Vector2.zero;
+
+        if (!agent.isGrounded) 
+            return;
+
         var collider = agent.tCollider;
         collider.direction = CapsuleDirection2D.Horizontal;
         float sneakHeight = originSize.y * config.threshold;
@@ -28,11 +32,14 @@ public class SneakBehavior<T> : IAgentBehavior<T> where T : class, ISneakData
         collider.offset = new(originOffset.x, newOffsetY);
     }
 
-    public void Execute(BehaviorContext context = default) { }
+    public void Execute(BehaviorContext context = default)
+    {
+        if (agent is IClimb { isClimbing: false } && agent.isGrounded)
+            agent.tBody.linearVelocity = Vector2.zero;
+    }
 
     public void Terminate(BehaviorContext context)
     {
-        agent.tBody.linearVelocity = Vector2.zero;
         var collider = agent.tCollider;
         collider.direction = CapsuleDirection2D.Vertical;
         collider.size = originSize;
