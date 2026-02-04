@@ -11,11 +11,10 @@ public class MoveBehavior<T> : IAgentBehavior<T> where T : class, IMoveData
         config = data;
     }
 
+    public void Prepare(BehaviorContext context) { }
+
     public void Execute(BehaviorContext context)
     {
-        if (agent is IMove move)
-            move.isMoving = context.input.x != 0;
-
         float moveSpeed = agent.tView.moveSpeed.CurrentValue;
         float targetSpeed = context.input.x * moveSpeed;
         float isInputting = (Mathf.Abs(context.input.x) > 0) ? 1f : 0;
@@ -31,4 +30,6 @@ public class MoveBehavior<T> : IAgentBehavior<T> where T : class, IMoveData
 
         agent.tBody.linearVelocity = new(newX, newY);
     }
+
+    public void Terminate(BehaviorContext context) { }
 }

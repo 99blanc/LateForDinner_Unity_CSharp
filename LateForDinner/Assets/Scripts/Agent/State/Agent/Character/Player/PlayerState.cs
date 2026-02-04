@@ -1,118 +1,169 @@
+using Mono.Cecil.Cil;
 using UnityEngine;
 
 public class PlayerIdleState : IdleState<PlayerControl>
 {
     public PlayerIdleState(PlayerControl ctx, StateMachine sm) : base(ctx, sm) { }
 
+    public override void Enter() => target.isIdling = true;
+
     public override void FixedUpdate()
     {
         target.ExecuteMove();
-        target.ExecuteFall();
-
-        if (target.isMoving) 
-            machine.ChangeState(target.moveState);
-
-        if (!target.isGrounded && target.isFalling) 
-            machine.ChangeState(target.fallState);
+        target.ExecuteFall(false);
     }
+
+    public override void Exit() => target.isIdling = false;
 }
 
 public class PlayerMoveState : MoveState<PlayerControl>
 {
     public PlayerMoveState(PlayerControl ctx, StateMachine sm) : base(ctx, sm) { }
 
+    public override void Enter() => target.isMoving = true;
+
     public override void FixedUpdate()
     {
         target.ExecuteMove();
-        target.ExecuteFall();
-
-        if (!target.isMoving)
-            machine.ChangeState(target.idleState);
-
-        if (!target.isGrounded && target.isFalling)
-            machine.ChangeState(target.fallState);
+        target.ExecuteFall(false);
     }
+
+    public override void Exit() => target.isMoving = false;
 }
 
 public class PlayerJumpState : JumpState<PlayerControl>
 {
     public PlayerJumpState(PlayerControl ctx, StateMachine sm) : base(ctx, sm) { }
 
-    public override void Enter() => target.ExecuteJump();
+    public override void Enter()
+    {
+        target.ExecuteJump();
+        target.isJumping = true;
+    }
 
     public override void FixedUpdate()
     {
         target.ExecuteMove();
-        target.ExecuteFall();
-
-        if (target.isFalling)
-            machine.ChangeState(target.fallState);
+        target.ExecuteFall(false);
     }
+
+    public override void Exit() => target.isJumping = false;
 }
 
 public class PlayerFallState : FallState<PlayerControl>
 {
     public PlayerFallState(PlayerControl ctx, StateMachine sm) : base(ctx, sm) { }
 
+    protected override BehaviorContext GetContext() => new()
+    {
+        input = target.moveInput,
+        scala = target.isTumbling ? 1f : 0
+    };
+
+    public override void Enter()
+    {
+        base.Enter();
+        target.isFalling = true;
+    }
+
     public override void FixedUpdate()
     {
         target.ExecuteMove();
-        target.ExecuteFall();
+        target.ExecuteFall(false);
+    }
 
-        if (target.isGrounded)
-            machine.ChangeState(target.idleState);
+    public override void Exit() 
+    {
+        base.Exit();
+        target.isFalling = false;
     }
 }
 
 public class PlayerDashState : DashState<PlayerControl>
 {
     private float elapsed;
-    private float duration;
-    private float direction;
 
     public PlayerDashState(PlayerControl ctx, StateMachine sm) : base(ctx, sm) { }
 
+    public override bool Transition(Vector2 input)
+    {
+        bool isOpposite = target.IsOppositeInput(input.x, behavior.direction);
+        bool canClimb = target.GetBehavior<ClimbBehavior<IClimbData>>().CanClimb(input);
+        return isOpposite || canClimb;
+    }
+
     public override void Enter()
     {
-        float speed = target.tView.moveSpeed.CurrentValue * target.config.dashSpeed;
-        duration = target.tView.dashDistance.CurrentValue / speed;
+        base.Enter();
+        target.isDashing = true;
         elapsed = 0;
-        direction = Mathf.Sign(target.lookAt.x);
-        target.GetBehavior<DashBehavior<IDashData>>().Prepare();
     }
 
     public override void FixedUpdate()
     {
         elapsed += Time.fixedDeltaTime;
-        float percent = Mathf.Clamp01(elapsed / duration);
+        float percent = Mathf.Clamp01(elapsed / behavior.duration);
         target.ExecuteDash(percent);
-        IAgentControl agent = target;
 
-        if (agent.IsOppositeInput(target.moveInput.x, direction) || percent >= Define.Physics.FULL)
-            machine.ChangeState(target.isGrounded ? target.idleState : target.fallState);
+        if (behavior.IsFinished(percent) || target.IsOppositeInput(target.moveInput.x, behavior.direction))
+            machine.Change(target.isGrounded ? target.idleState : target.fallState, target.moveInput, true);
     }
 
-    public override void Exit() => target.tBody.gravityScale = Define.Physics.FULL;
+    public override void Exit()
+    {
+        base.Exit();
+        target.isDashing = false;
+    }
 }
 
 public class PlayerClimbState : ClimbState<PlayerControl>
 {
     public PlayerClimbState(PlayerControl ctx, StateMachine sm) : base(ctx, sm) { }
 
-    public override void Enter() => target.GetBehavior<ClimbBehavior<IClimbData>>().Prepare();
+    public override bool Transition(Vector2 input) => !behavior.CanClimb(input);
+
+    public override void Enter()
+    {
+        base.Enter();
+
+        if (target is IJump jump)
+            jump.currentJumpCount.Value = 0;
+
+        if (target is IDash dash && dash.currentDashCount.Value > 0)
+            --dash.currentDashCount.Value;
+
+        target.isClimbing = true;
+    }
 
     public override void FixedUpdate()
     {
         target.ExecuteClimb();
 
-        if (target.hProp is not IClimbProp || target.isGrounded)
-            machine.ChangeState(target.isGrounded ? target.idleState : target.fallState);
+        if (!behavior.CanClimb(target.moveInput))
+            machine.Change(target.isGrounded ? (target.moveInput.x != 0 ? target.moveState : target.idleState) : target.fallState, target.moveInput, true);
     }
 
-    public override void Exit() => target.tBody.gravityScale = Define.Physics.FULL;
+    public override void Exit()
+    {
+        base.Exit();
+        target.isClimbing = false;
+    }
 }
 
 public class PlayerSneakState : SneakState<PlayerControl>
 {
     public PlayerSneakState(PlayerControl ctx, StateMachine sm) : base(ctx, sm) { }
+
+    public override void Enter()
+    {
+        base.Enter();
+        target.isSneaking = true;
+        target.ExecuteSneak();
+    }
+
+    public override void Exit()
+    {
+        base.Exit();
+        target.isSneaking = false;
+    }
 }

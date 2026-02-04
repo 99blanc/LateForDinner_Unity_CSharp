@@ -1,21 +1,26 @@
 using R3;
 using System;
+using Token.EVENT;
+using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using Component = UnityEngine.Component;
-using Token.EVENT;
 
 public static class Extensions
 {
-    public static Prop InProp(this IAgentControl agent, Prop target) => agent.hProp = PropHelper.InProp(agent.hProp, target);
+    public static bool IsGrounded(this IAgentControl agent) => PhysicsHelper.IsGrounded(agent.tCollider, agent.tBody);
 
-    public static Prop OutProp(this IAgentControl agent, Prop target) => agent.hProp = PropHelper.OutProp(agent.hProp, target);
+    public static Vector2 ToLookAt(this Vector2 current, Vector2 target = default)  => PhysicsHelper.ToLookAt(current, target);
+
+    public static bool CheckTap(this Vector2 input, Vector2 lastDirection, float lastTime, float interval) => InputHelper.CheckTap(input, lastDirection, lastTime, interval);
 
     public static bool IsOppositeInput(this IAgentControl agent, float inputX, float currentDir) => InputHelper.IsOppositeInput(agent, inputX, currentDir);
 
-    public static void BindInputEvent(this InputAction action, Action<InputAction.CallbackContext> performed, Component component) => InputHelper.BindInputEvent(action, performed, component);
+    public static Prop Occupy(this IAgentControl agent, Prop target) => PropHelper.Occupy(agent, target);
 
-    public static void BindInputEvent(this InputAction action, Action<InputAction.CallbackContext> performed, Action<InputAction.CallbackContext> canceled, Component component) => InputHelper.BindInputEvent(action, performed, canceled, component);
+    public static Prop Release(this IAgentControl agent, Prop target) => PropHelper.Release(agent, target);
+
+    public static void BindActionMap(this InputActionMap map, Component owner, Func<InputContext> ctx, Action<InputContext> action) => InputHelper.BindActionMap(map, owner, ctx, action);
 
     public static void BindViewEvent(this UIBehaviour view, Action<PointerEventData> action, ViewEvent type, Component component) => UIHelper.BindViewEvent(view, action, type, component);
 

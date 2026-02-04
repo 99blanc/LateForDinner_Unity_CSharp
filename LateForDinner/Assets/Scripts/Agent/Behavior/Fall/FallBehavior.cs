@@ -11,24 +11,33 @@ public class FallBehavior<T> : IAgentBehavior<T> where T : class, IFallData
         config = data;
     }
 
+    public void Prepare(BehaviorContext context)
+    {
+        if (agent is ITumble tumble && Mathf.Approximately(context.scala, 1f))
+        {
+            agent.tBody.linearVelocity = new(agent.tBody.linearVelocity.x, -Define.Physics.BUFFER);
+            tumble.isTumbling = true;
+        }
+    }
+
     public void Execute(BehaviorContext context)
     {
-        bool isClimbing = agent is IClimb && agent.hProp is IClimbProp;
-        Vector2 bottom = new(agent.tCollider.bounds.center.x, agent.tCollider.bounds.min.y + Define.Physics.OFFSET);
-        Vector2 castSize = new(agent.tCollider.bounds.size.x * Define.Physics.LIMIT, Define.Physics.OFFSET);
-        RaycastHit2D hit = Physics2D.BoxCast(bottom, castSize, 0, Vector2.down, config.gcDistance, Define.Layer.GROUND_MASKS);
-        bool detected = hit.collider != null && !hit.collider.isTrigger && agent.tBody.linearVelocity.y < Define.Physics.OFFSET;
+        if (agent.isGrounded && agent.tBody.linearVelocity.y < Define.Physics.OFFSET && agent is IJump jump)
+            jump.currentJumpCount.Value = 0;
 
         if (agent is IFall fall)
-        {
-            fall.isGrounded = detected && !isClimbing;
-            fall.isFalling = !fall.isGrounded && agent.tBody.linearVelocity.y < Define.Physics.INTERVAL;
-        }
+            fall.isFalling = !agent.isGrounded && agent.tBody.linearVelocity.y < Define.Physics.INTERVAL;
 
-        if (agent is IJump jAgent && agent is IFall fAgent)
-            jAgent.currentJumpCount = fAgent.isGrounded ? (short)0 : jAgent.currentJumpCount;
+        if (agent is ITumble { isTumbling: true } tumble && (agent.isGrounded || agent.tBody.linearVelocity.y > -Define.Physics.OFFSET))
+            tumble.isTumbling = false;
 
-        _ = (agent is IFall { isGrounded: false }) && Gravity();
+        Gravity();
+    }
+
+    public void Terminate(BehaviorContext context) 
+    {
+        if (agent is ITumble tumble)
+            tumble.isTumbling = false;
     }
 
     private bool Gravity()

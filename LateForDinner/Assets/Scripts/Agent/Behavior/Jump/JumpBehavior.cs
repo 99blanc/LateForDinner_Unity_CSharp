@@ -4,5 +4,25 @@ public class JumpBehavior<T> : IAgentBehavior<T> where T : class, IJumpData
 
     public void Setup(IAgentControl control, T data) => agent = control;
 
-    public void Execute(BehaviorContext context) => agent.tBody.linearVelocity = new(agent.tBody.linearVelocity.x, agent.tView.jumpForce.CurrentValue);
+    public void Prepare(BehaviorContext context) { }
+
+    public void Execute(BehaviorContext context)
+    {
+        if (agent is not IJump jump)
+            return;
+
+        ++jump.currentJumpCount.Value;
+        agent.tBody.linearVelocity = new(agent.tBody.linearVelocity.x, agent.tView.jumpForce.CurrentValue);
+    }
+
+    public void Terminate(BehaviorContext context) { }
+
+    public bool CanJump(bool jumpRequested)
+    {
+        if (agent is not IJump jump) 
+            return false;
+
+        bool hasCount = jump.currentJumpCount.Value < agent.tView.jumpCount.CurrentValue;
+        return jumpRequested && hasCount;
+    }
 }

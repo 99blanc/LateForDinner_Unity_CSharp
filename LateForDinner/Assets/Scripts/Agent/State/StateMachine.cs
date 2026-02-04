@@ -1,3 +1,5 @@
+using UnityEngine;
+
 public class StateMachine
 {
     public State curState { get; private set; }
@@ -8,13 +10,12 @@ public class StateMachine
         curState.Enter();
     }
 
-    public void ChangeState(State newState, bool force = false)
+    public void Change(State next, Vector2 input, bool force = false)
     {
-        if (!force && curState == newState)
-            return;
-
-        curState.Exit();
-        curState = newState;
-        curState.Enter();
+        if (force || (curState != next && curState.Transition(input)))
+        {
+            curState?.Exit();
+            (curState = next).Enter();
+        }
     }
 }

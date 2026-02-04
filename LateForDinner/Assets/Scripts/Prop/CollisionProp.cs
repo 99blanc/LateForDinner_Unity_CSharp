@@ -1,14 +1,17 @@
 using UnityEngine;
+using Token.PRIORITY;
 
-public class CollisionProp : Prop
+public abstract class CollisionProp : Prop
 {
+    public override abstract PropPriority priority { get; }
+
     protected override void Awake()
     {
         base.Awake();
         sensor.isTrigger = false;
     }
 
-    private void OnCollisionEnter2D(Collision2D collision) => HandleEnter(collision.gameObject);
+    protected void OnCollisionEnter2D(Collision2D collision) => HandleEnter(collision.gameObject);
 
-    private void OnCollisionExit2D(Collision2D collision) => HandleExit(collision.gameObject);
+    protected void OnCollisionExit2D(Collision2D collision) => HandleExit(collision.gameObject);
 }

@@ -16,7 +16,7 @@ public class PlayerData : IData<PlayerID>, IMoveData, IJumpData, IFallData, IDas
     [Name("공격 속도")] public float atkSpeed { get; set; }
     [Name("대시 횟수")] public short dashCount { get; set; }
     [Name("대시 쿨타임")] public float dashCooltime { get; set; }
-    [Name("대시 거리")] public float dashDistance { get; set; }
+    [Name("최대 대시 거리")] public float dashDistance { get; set; }
     [Name("대시 속도")] public float dashSpeed { get; set; }
     [Name("점프 횟수")] public short jumpCount { get; set; }
     [Name("점프력")] public float jumpForce { get; set; }

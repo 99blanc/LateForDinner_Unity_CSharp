@@ -3,7 +3,7 @@ using Token.ID;
 using Token.PRIORITY;
 using UnityEngine;
 
-public class PlayerControl : AgentControl<IPlayerView, PlayerData, PlayerID>, IMove, IJump, IFall, IDash, IClimb, ISneak
+public class PlayerControl : AgentControl<IPlayerView, PlayerData, PlayerID>, IMove, IJump, IFall, IDash, IClimb, ISneak, ITumble
 {
     public override ModulePrority priority => ModulePrority.PLAYER_CONTROL;
     public PlayerIdleState idleState { get; private set; }
@@ -16,12 +16,12 @@ public class PlayerControl : AgentControl<IPlayerView, PlayerData, PlayerID>, IM
     public bool isMoving { get; set; }
     public bool isJumping { get; set; }
     public bool isFalling { get; set; }
-    public bool isGrounded { get; set; }
     public bool isDashing { get; set; }
     public bool isClimbing { get; set; }
     public bool isSneaking { get; set; }
-    public short currentJumpCount { get; set; }
-
+    public bool isTumbling { get; set; }
+    public ReactiveProperty<short> currentJumpCount { get; set; } = new();
+    public ReactiveProperty<short> currentDashCount { get; set; } = new();
     private InputSystem input;
 
     protected override void Behaviors()
@@ -66,41 +66,30 @@ public class PlayerControl : AgentControl<IPlayerView, PlayerData, PlayerID>, IM
     public void HandleInput(InputContext ctx)
     {
         moveInput = ctx.moveInput;
-        lookAt = UpdateLookAt(ctx.moveInput);
+        lookAt = ctx.moveInput.ToLookAt();
         State target = ctx switch
         {
-            { canDash: true } when !(isGrounded && ctx.moveInput.y < 0) => dashState,
-            { doJump: true } when currentJumpCount < tView.jumpCount.CurrentValue => jumpState,
-            { onLadder: true } => climbState,
-            _ when isSneaking => sneakState,
-            { hasX: true } => moveState,
-            _ => isGrounded ? idleState : null
+            { doTumble: true } when (isTumbling = true) is var _ => fallState,
+            { canDash: true } => dashState,
+            { doJump: true } => jumpState,
+            { doClimb: true } => climbState,
+            { doSneak: true } => sneakState,
+            { doMove: true } => moveState,
+            _ => (isTumbling = false) is var _ && isGrounded ? idleState : fallState
         };
-        _ = target != null && ApplyStateEffect(target, ctx);
-    }
-
-    private bool ApplyStateEffect(State target, InputContext ctx)
-    {
-        switch (target)
-        {
-            case PlayerDashState when !ctx.onLadder: input.UseDash(); break;
-            case PlayerJumpState: currentJumpCount++; break;
-            case PlayerMoveState or PlayerIdleState or PlayerClimbState: currentJumpCount = 0; break;
-        }
-
-        machine.ChangeState(target, target == jumpState);
-        return true;
+        bool force = (ctx.doTumble || target == dashState || target == jumpState);
+        machine.Change(target, moveInput, force);
     }
 
     public void ExecuteMove() => ExecuteBehavior<MoveBehavior<IMoveData>>(new() { input = moveInput });
 
     public void ExecuteJump() => ExecuteBehavior<JumpBehavior<IJumpData>>();
 
-    public void ExecuteFall() => ExecuteBehavior<FallBehavior<IFallData>>();
+    public void ExecuteFall(bool tumble) => ExecuteBehavior<FallBehavior<IFallData>>(new() { scala = tumble ? 1f : 0 });
 
-    public void ExecuteDash(float percent) => ExecuteBehavior<DashBehavior<IDashData>>(new() { bias = percent });
+    public void ExecuteDash(float percent) => ExecuteBehavior<DashBehavior<IDashData>>(new() { scala = percent });
 
-    public void ExecuteClimb() => ExecuteBehavior<ClimbBehavior<IClimbData>>(new() { input = moveInput * config.decelObj });
+    public void ExecuteClimb() => ExecuteBehavior<ClimbBehavior<IClimbData>>(new() { input = moveInput });
 
-    public void ExecuteSneak(float threshold) => ExecuteBehavior<SneakBehavior<ISneakData>>(new() { value = threshold });
+    public void ExecuteSneak() => ExecuteBehavior<SneakBehavior<ISneakData>>();
 }

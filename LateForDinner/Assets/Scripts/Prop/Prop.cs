@@ -1,39 +1,45 @@
+using ObservableCollections;
 using R3;
-using Token.PRIORITY;
 using UnityEngine;
+using Token.PRIORITY;
 
 public abstract class Prop : MonoBehaviour, IProp
 {
-    private readonly ReactiveProperty<IAgentControl> occupant = new(null);
+    protected readonly ObservableHashSet<IAgentControl> occupants = new();
     public BoxCollider2D sensor { get; set; }
-    public virtual PropPriority priority => default;
+    public abstract PropPriority priority { get; }
 
     protected virtual void Awake()
     {
         sensor = gameObject.GetOrAddComponentAssert<BoxCollider2D>();
-        occupant.Select(agent => agent is not null ? Observable.EveryUpdate(UnityFrameProvider.FixedUpdate) : Observable.Never<Unit>()).Switch().Subscribe(_ => OnTick(occupant.Value)).AddTo(this);
+        Observable.EveryUpdate(UnityFrameProvider.FixedUpdate).Where(_ => occupants.Count > 0).Subscribe(_ =>
+        {
+            foreach (var agent in occupants)
+                OnTick(agent);
+        })
+        .AddTo(this);
     }
 
     public virtual void OnTick(IAgentControl agent) { }
 
-    public virtual void OnInteract(IAgentControl agent) => occupant.Value = agent;
+    public virtual void OnInteract(IAgentControl agent) => occupants.Add(agent);
 
-    public virtual void OnDetach(IAgentControl agent) => occupant.Value = null;
+    public virtual void OnDetach(IAgentControl agent) => occupants.Remove(agent);
 
     protected void HandleEnter(GameObject gameObject)
     {
-        if (gameObject.TryGetComponent<IAgentControl>(out var agent) && occupant.Value == null)
+        if (gameObject.TryGetComponent<IAgentControl>(out var agent))
         {
-            agent.InProp(this);
+            agent.Occupy(this);
             OnInteract(agent);
         }
     }
 
     protected void HandleExit(GameObject gameObject)
     {
-        if (gameObject.TryGetComponent<IAgentControl>(out var agent) && occupant.Value == agent)
+        if (gameObject.TryGetComponent<IAgentControl>(out var agent))
         {
-            agent.OutProp(this);
+            agent.Release(this);
             OnDetach(agent);
         }
     }

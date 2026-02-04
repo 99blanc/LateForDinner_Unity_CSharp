@@ -1,17 +1,19 @@
+using R3;
 using UnityEngine;
 
 public struct BehaviorContext
 {
     public Vector2 input;
-    public float bias;
-    public float value;
+    public float scala;
 
-    public static BehaviorContext Default => new() { input = new(), bias = 0, value = 0 };
+    public static BehaviorContext Default => new() { input = new(), scala = 0 };
 }
 
 public interface IAgentBehavior
 {
+    void Prepare(BehaviorContext context = default);
     void Execute(BehaviorContext context = default);
+    void Terminate(BehaviorContext context = default);
 }
 
 public interface IAgentBehavior<in T> : IAgentBehavior where T : class, IData
@@ -26,11 +28,11 @@ public interface IMove
     void ExecuteClimb();
 }
 
-public interface IJump
+public interface IJump : IFall
 {
     PlayerJumpState jumpState { get; }
     bool isJumping { get; set; }
-    short currentJumpCount { get; set; }
+    ReactiveProperty<short> currentJumpCount { get; set; }
     void ExecuteJump();
 }
 
@@ -38,20 +40,21 @@ public interface IFall
 {
     PlayerFallState fallState { get; }
     bool isFalling { get; set; }
-    bool isGrounded { get; set; }
-    void ExecuteFall();
+    void ExecuteFall(bool tumble);
 }
 
 public interface IDash
 {
     PlayerDashState dashState { get; }
     bool isDashing { get; set; }
+    ReactiveProperty<short> currentDashCount { get; set; }
     void ExecuteDash(float percent);
 }
 
 public interface IClimb
 {
     PlayerClimbState climbState { get; }
+    Vector2 moveInput { get; set; }
     bool isClimbing { get; set; }
     void ExecuteClimb();
 }
@@ -60,5 +63,10 @@ public interface ISneak
 {
     PlayerSneakState sneakState { get; }
     bool isSneaking { get; set; }
-    void ExecuteSneak(float threshold);
+    void ExecuteSneak();
+}
+
+public interface ITumble : IJump, ISneak
+{
+    bool isTumbling { get; set; }
 }

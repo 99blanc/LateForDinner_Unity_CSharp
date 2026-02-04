@@ -10,8 +10,6 @@ public abstract class Platform : TriggerProp, IPlatformProp
         physics = gameObject.AddComponent<BoxCollider2D>();
         physics.size = sensor.size;
         physics.offset = sensor.offset;
-        physics.isTrigger = false;
-        physics.enabled = false;
     }
 
     public abstract override void OnTick(IAgentControl agent);
@@ -19,25 +17,33 @@ public abstract class Platform : TriggerProp, IPlatformProp
     public override void OnDetach(IAgentControl agent)
     {
         base.OnDetach(agent);
-
-        if (physics != null)
-            physics.enabled = false;
+        Physics2D.IgnoreCollision(agent.tCollider, physics, false);
     }
 
     protected bool Evaluate(IAgentControl agent, bool dropable)
     {
-        float topY = sensor.bounds.max.y;
-        float footY = agent.tCollider.bounds.min.y + Define.Physics.OFFSET;
-        bool isDown = agent.moveInput.y < -Define.Physics.DEADZONE;
-        float vVel = agent.tBody.linearVelocity.y;
-        bool isAbove = footY >= topY - (vVel < 0 ? Mathf.Abs(vVel) * Time.fixedDeltaTime : 0);
-        bool isClimbing = agent.hProp is IClimbProp && agent is IClimb { isClimbing: true };
-        return !isClimbing && isAbove && (!dropable || !isDown);
+        float platformTop = sensor.bounds.max.y;
+        float footY = agent.tCollider.bounds.min.y;
+        bool isAbove = footY >= platformTop - Define.Physics.OFFSET;
+        bool isClimbing = agent is IClimb climb && climb.isClimbing;
+        bool isFalling = agent is IFall fall && fall.isFalling;
+        bool isDownInput = agent.moveInput.y < 0;
+        bool isTumbling = agent is ITumble tumbler && (tumbler.isTumbling || (tumbler.isSneaking && tumbler.isJumping));
+
+        if (isClimbing || (agent.active is IClimbProp && isDownInput))
+            return false;
+
+        if (dropable && isTumbling)
+        {
+            SetIgnore(agent, true);
+            return false;
+        }
+
+        if (dropable && isFalling && isDownInput)
+            return false;
+
+        return isAbove;
     }
 
-    protected void Toggle(bool state)
-    {
-        if (physics.enabled != state)
-            physics.enabled = state;
-    }
+    protected void SetIgnore(IAgentControl agent, bool ignore) => Physics2D.IgnoreCollision(agent.tCollider, physics, ignore);
 }

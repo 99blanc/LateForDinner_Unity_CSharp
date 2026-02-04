@@ -10,10 +10,12 @@ namespace Token.PRIORITY
     public enum PropPriority
     {
         NULL,
-        LADDER,
-        BOX,
+        _GROUP_ENVIRONMENT = 100,
         ONEWAY_PLATFORM,
         TWOWAY_PLATFORM,
-        NONE
+        _GROUP_OBJECTIVE = 200,
+        LADDER,
+        BOX,
+        _GROUP_INTERACTION = 300
     }
 }
