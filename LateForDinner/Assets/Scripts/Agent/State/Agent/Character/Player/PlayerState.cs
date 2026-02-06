@@ -26,10 +26,7 @@ public class PlayerMoveState : MoveState<PlayerControl>
         if (!target.isGrounded) 
             return false;
 
-        if (input.x != 0) 
-            return false;
-
-        return true;
+        return input.x == 0;
     }
 
     public override void Enter() => target.isMoving = true;
