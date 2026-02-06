@@ -11,14 +11,15 @@ public abstract class Platform : TriggerProp, IPlatformProp
         physics = gameObject.AddComponent<BoxCollider2D>();
         physics.size = sensor.size;
         physics.offset = sensor.offset;
-        sensor.size = physics.size * (1f + Define.Physics.OFFSET);
+        float margin = Define.Physics.OFFSET * Define.Physics.DOUBLE;
+        sensor.size = new(physics.size.x, physics.size.y + margin);
     }
 
     protected bool Evaluate(IAgentControl agent)
     {
-        float platformTop = sensor.bounds.max.y;
+        float platformTop = physics.bounds.max.y;
         float footY = agent.tCollider.bounds.min.y;
-        bool isAbove = footY >= platformTop - Define.Physics.OFFSET;
+        bool isAbove = footY > platformTop - Define.Physics.OFFSET;
         bool isDownInput = agent.moveInput.y < 0;
 
         if (dropable && agent is ITumble { isTumbling: true })

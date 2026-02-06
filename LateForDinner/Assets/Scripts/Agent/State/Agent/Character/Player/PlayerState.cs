@@ -1,4 +1,3 @@
-using Mono.Cecil.Cil;
 using UnityEngine;
 
 public class PlayerIdleState : IdleState<PlayerControl>
@@ -28,7 +27,11 @@ public class PlayerMoveState : MoveState<PlayerControl>
         target.ExecuteFall(false);
     }
 
-    public override void Exit() => target.isMoving = false;
+    public override void Exit()
+    {
+        base.Exit();
+        target.isMoving = false;
+    }
 }
 
 public class PlayerJumpState : JumpState<PlayerControl>

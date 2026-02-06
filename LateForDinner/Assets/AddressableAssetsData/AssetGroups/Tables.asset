@@ -15,11 +15,6 @@ MonoBehaviour:
   m_GroupName: Tables
   m_GUID: a66276f4dd8235843b35a9f5852add55
   m_SerializeEntries:
-  - m_GUID: 45759e94ea921754c9231e847f417a13
-    m_Address: Assets/Tables/Player.csv
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 5398621ecf9162f4eabea7e964132141
     m_Address: Assets/Tables/Player.csv
     m_ReadOnly: 0

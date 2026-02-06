@@ -15,11 +15,6 @@ MonoBehaviour:
   m_GroupName: Systems
   m_GUID: 8f6b3f5cb9b31d24dbacb9d75be42b3e
   m_SerializeEntries:
-  - m_GUID: 25af8c2e8ff26a543a1c9e6fdac609e7
-    m_Address: Assets/Systems/New Physics Material 2D.physicsMaterial2D
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 2bcd2660ca9b64942af0de543d8d7100
     m_Address: Assets/Systems/InputSystem_Actions.inputactions
     m_ReadOnly: 0

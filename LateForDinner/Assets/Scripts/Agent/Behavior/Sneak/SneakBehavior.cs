@@ -17,11 +17,9 @@ public class SneakBehavior<T> : IAgentBehavior<T> where T : class, ISneakData
 
     public void Prepare(BehaviorContext context)
     {
-        agent.tBody.linearVelocity = Vector2.zero;
-
         if (!agent.isGrounded) 
             return;
-
+        agent.tBody.linearVelocity = Vector2.zero;
         var collider = agent.tCollider;
         collider.direction = CapsuleDirection2D.Horizontal;
         float sneakHeight = originSize.y * config.threshold;
