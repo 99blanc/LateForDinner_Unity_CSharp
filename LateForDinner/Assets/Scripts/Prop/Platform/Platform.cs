@@ -19,16 +19,12 @@ public abstract class Platform : TriggerProp, IPlatformProp
     {
         float platformTop = physics.bounds.max.y;
         float footY = agent.tCollider.bounds.min.y;
-        bool isAbove = footY > platformTop - Define.Physics.OFFSET;
-        bool isDownInput = agent.moveInput.y < 0;
+        bool isAbove = footY > platformTop;
+
+        if (agent is IClimb { isClimbing: true })
+            return false;
 
         if (dropable && agent is ITumble { isTumbling: true })
-            return false;
-
-        if (agent is IClimb { isClimbing: true } || (agent.active is IClimbProp && isDownInput))
-            return false;
-
-        if (dropable && isDownInput && agent is IFall { isFalling: true })
             return false;
 
         return isAbove;

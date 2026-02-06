@@ -37,7 +37,7 @@ public class InputSystem
             isTap = dashRequested,
             doMove = input.x != 0,
             doJump = !tumbleRequested && jumpRequested && EvaluateJump(jumpRequested),
-            canDash = dashRequested && EvaluateDash(input, dashRequested),
+            canDash = dashRequested && EvaluateDash(dashRequested, input),
             doClimb = EvaluateClimb(input),
             doSneak = input.y < 0,
             doTumble = tumbleRequested
@@ -46,7 +46,7 @@ public class InputSystem
 
     private bool EvaluateJump(bool jumpRequested) => player.GetBehavior<JumpBehavior<IJumpData>>().CanJump(jumpRequested);
 
-    private bool EvaluateDash(Vector2 input, bool dashRequested) => player.GetBehavior<DashBehavior<IDashData>>().CanDash(dashRequested, input);
+    private bool EvaluateDash(bool dashRequested, Vector2 input) => player.GetBehavior<DashBehavior<IDashData>>().CanDash(dashRequested, input);
 
     private bool EvaluateClimb(Vector2 input) => player.GetBehavior<ClimbBehavior<IClimbData>>().CanClimb(input);
 }

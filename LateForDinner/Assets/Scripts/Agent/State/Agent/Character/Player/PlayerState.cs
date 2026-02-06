@@ -27,11 +27,7 @@ public class PlayerMoveState : MoveState<PlayerControl>
         target.ExecuteFall(false);
     }
 
-    public override void Exit()
-    {
-        base.Exit();
-        target.isMoving = false;
-    }
+    public override void Exit() => target.isMoving = false;
 }
 
 public class PlayerJumpState : JumpState<PlayerControl>
@@ -168,7 +164,11 @@ public class PlayerSneakState : SneakState<PlayerControl>
         target.isSneaking = true;
     }
 
-    public override void FixedUpdate() => target.ExecuteSneak();
+    public override void FixedUpdate()
+    {
+        if (!target.isGrounded)
+            machine.Change(target.isGrounded ? (target.moveInput.x != 0 ? target.moveState : target.idleState) : target.fallState, target.moveInput, true);
+    }
 
     public override void Exit()
     {

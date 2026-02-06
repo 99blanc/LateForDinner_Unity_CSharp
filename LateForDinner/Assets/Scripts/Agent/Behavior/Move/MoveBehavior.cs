@@ -31,5 +31,5 @@ public class MoveBehavior<T> : IAgentBehavior<T> where T : class, IMoveData
         agent.tBody.linearVelocity = new(newX, newY);
     }
 
-    public void Terminate(BehaviorContext context) => agent.tBody.linearVelocity = Vector2.zero;
+    public void Terminate(BehaviorContext context) { }
 }

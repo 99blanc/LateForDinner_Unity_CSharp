@@ -24,7 +24,6 @@ public interface IFallData : IData
     float decelObj { get; }
     float gvMul { get; }
     float gvReduction { get; }
-    float gcDistance { get; }
 }
 
 public interface IDashData : IData
@@ -39,7 +38,6 @@ public interface IClimbData : IData
 {
     float moveSpeed { get; }
     float decelObj { get; }
-    float gcDistance { get; }
 }
 
 public interface ISneakData : IData 
