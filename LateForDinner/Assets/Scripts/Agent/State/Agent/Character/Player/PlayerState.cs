@@ -12,6 +12,9 @@ public class PlayerIdleState : IdleState<PlayerControl>
     {
         target.ExecuteMove();
         target.ExecuteFall();
+
+        if (target.moveInput.x != 0 && target.isGrounded)
+            machine.Change(target.moveState, target.moveInput);
     }
 
     public override void Exit() => target.isIdling = false;
@@ -35,6 +38,9 @@ public class PlayerMoveState : MoveState<PlayerControl>
     {
         target.ExecuteMove();
         target.ExecuteFall();
+
+        if (target.moveInput.x == 0 && target.isGrounded)
+            machine.Change(target.idleState, target.moveInput);
     }
 
     public override void Exit() => target.isMoving = false;

@@ -25,7 +25,7 @@ public abstract class AgentAnimator<TView, TData, TKey> : MonoBehaviour, IAgentA
         tCollider = gameObject.GetOrAddComponentAssert<CapsuleCollider2D>();
         animator = gameObject.GetOrAddComponentAssert<Animator>();
         animator.runtimeAnimatorController = await Managers.Resource.LoadAnimator(cPath);
-        animator.updateMode = AnimatorUpdateMode.Fixed;
+        animator.updateMode = AnimatorUpdateMode.Normal;
         control = gameObject.GetComponentAssert<IAgentControl>();
         aView = view as IAgentView;
         sMachine.OnStateChanged.Where(state => state is not null).Subscribe(state => PlayStateAnimation(state.GetType())).AddTo(this);
@@ -72,7 +72,15 @@ public abstract class AgentAnimator<TView, TData, TKey> : MonoBehaviour, IAgentA
         transform.localScale = scale;
     }
 
-    public void Play(int hash, float transition = Define.Physics.BUFFER) => animator.CrossFade(hash, transition, 0);
+    public void Play(int hash, float transition = 0)
+    {
+        var stateInfo = animator.GetCurrentAnimatorStateInfo(0);
+
+        if (stateInfo.shortNameHash == hash) 
+            return;
+
+        animator.CrossFade(hash, transition, 0);
+    }
 
     public void SetParam(int hash, float value) => animator.SetFloat(hash, value);
 

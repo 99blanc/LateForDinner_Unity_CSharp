@@ -78,14 +78,10 @@ public class PlayerControl : AgentControl<IPlayerView, PlayerData, PlayerID>, IM
             _ => idleState
         };
 
-        if (target == idleState && Mathf.Abs(tBody.linearVelocity.x) > Define.Physics.TICK && isGrounded)
-            target = moveState;
-
-
         if (!isGrounded && (target == moveState || target == idleState))
             target = (tBody.linearVelocity.y > 0) ? jumpState : fallState;
 
-        if (sMachine.curState == target && !ctx.doJump && !ctx.canDash) 
+        if (sMachine.curState == target && !ctx.doJump && !ctx.canDash)
             return;
 
         bool force = ctx.doTumble || target == dashState || target == jumpState;

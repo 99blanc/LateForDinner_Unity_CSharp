@@ -39,6 +39,9 @@ public class PlayerAnimator : AgentAnimator<IPlayerView, PlayerData, PlayerID>
 
     protected override void Parameters()
     {
+        if (sMachine.curState is not null)
+            PlayStateAnimation(sMachine.curState.GetType());
+
         lookAt = tBody.linearVelocity.ToLookAt(lookAt);
         Flip(lookAt.x);
         SetParam(Anime_IsIdling, control.isIdling);
@@ -46,7 +49,11 @@ public class PlayerAnimator : AgentAnimator<IPlayerView, PlayerData, PlayerID>
         SetParam(Anime_IsGrounded, isGrounded);
         bool isMoving = moveRef.isMoving;
         SetParam(Anime_IsMoving, isMoving);
-        float animeSpeed = (control.isGrounded && moveRef.isMoving && !dashRef.isDashing) ? Mathf.Max(Define.Physics.TICK, tBody.linearVelocity.magnitude / aView.moveSpeed.CurrentValue) : 0;
+        float animeSpeed = (control.isGrounded && moveRef.isMoving && !dashRef.isDashing) ? tBody.linearVelocity.magnitude / aView.moveSpeed.CurrentValue : 0;
+
+        if (control.isIdling || animeSpeed < Define.Physics.DEADZONE) 
+            animeSpeed = 0;
+
         SetParam(Anime_MoveSpeed, animeSpeed);
         SetParam(Anime_MoveSpeed, animeSpeed);
         SetParam(Anime_IsJumping, jumpRef.isJumping);
