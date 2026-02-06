@@ -4,16 +4,17 @@ using UnityEngine;
 public class Managers : MonoBehaviour
 {
     private static Managers Instance;
-
-    public static ResourceManager Resource { get; private set; }
-    public static DataManager Data { get; private set; }
-    public static ConfigManager Config { get; private set; }
-    public static GameManager Game { get; private set; }
-    public static UIManager UI { get; private set; }
+    public static ResourceManager Resource { get; private set; } = new();
+    public static ConfigManager Config { get; private set; } = new();
+    public static DataManager Data { get; private set; } = new();
+    public static LocalizationManager Localization { get; private set; } = new();
+    public static LoadManager Load { get; private set; } = new();
+    public static UIManager UI { get; private set; } = new();
+    public static GameManager Game { get; private set; } = new();
 
     private void Awake() => Init();
 
-    private void Init()
+    private async void Init()
     {
         if (Instance)
         {
@@ -23,19 +24,22 @@ public class Managers : MonoBehaviour
 
         Instance = this;
         DontDestroyOnLoad(this);
-        TaskInit().Forget();
+        await TaskInit();
     }
 
-    private async UniTaskVoid TaskInit()
+    private async UniTask TaskInit()
     {
-        Resource = new();
-        Data = new();
-        Config = new();
-        Game = new();
-        UI = new();
         Resource.Init();
-        await UniTask.WhenAll(Data.Init(), Config.Init());
+        Load.SetProgress(0.1f);
+        await Config.Init();
+        Load.SetProgress(0.3f);
+        await UniTask.WhenAll(Data.Init(), Localization.Init());
+        Load.SetStatus(Localization.UI.GetText("UI.LOAD.GAME"));
         await Game.Init();
+        Load.SetProgress(0.8f);
+        Load.SetStatus(Localization.UI.GetText("UI.LOAD.UI"));
         UI.Init();
+        Load.SetProgress(1.0f);
+        Load.SetStatus(Localization.UI.GetText("UI.LOAD.COMPLETE"));
     }
 }

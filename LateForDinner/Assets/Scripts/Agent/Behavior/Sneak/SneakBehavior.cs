@@ -15,7 +15,7 @@ public class SneakBehavior<T> : IAgentBehavior<T> where T : class, ISneakData
         originOffset = agent.tCollider.offset;
     }
 
-    public void Prepare(BehaviorContext context)
+    public void Prepare()
     {
         if (!agent.isGrounded)
             return;
@@ -33,7 +33,7 @@ public class SneakBehavior<T> : IAgentBehavior<T> where T : class, ISneakData
 
     public void Execute(BehaviorContext context = default) { }
 
-    public void Terminate(BehaviorContext context)
+    public void Terminate()
     {
         var collider = agent.tCollider;
         collider.direction = CapsuleDirection2D.Vertical;

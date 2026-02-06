@@ -1,8 +1,15 @@
+using R3;
 using UnityEngine;
 
 public class StateMachine
 {
-    public State curState { get; private set; }
+    private readonly ReactiveProperty<State> state = new();
+    public ReadOnlyReactiveProperty<State> OnStateChanged => state;
+    public State curState
+    {
+        get => state.Value;
+        private set => state.Value = value;
+    }
 
     public void Init(State initState)
     {
@@ -10,12 +17,15 @@ public class StateMachine
         curState.Enter();
     }
 
-    public void Change(State next, Vector2 input, bool force = false)
+    public void Change(State next, Vector2 input = default, bool force = false)
     {
-        if (force || (curState != next && curState.Transition(input)))
-        {
-            curState?.Exit();
-            (curState = next).Enter();
-        }
+        if (!force && curState == next) 
+            return;
+
+        if (!force && !curState.Transition(input))
+            return;
+
+        curState?.Exit();
+        (curState = next).Enter();
     }
 }

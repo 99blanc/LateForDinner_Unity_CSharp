@@ -3,8 +3,10 @@ namespace Token.PRIORITY
     public enum ModulePrority
     {
         NULL,
-        AGENT_CONTROL,
-        PLAYER_CONTROL
+        _GROUP_CONTROL = 100,
+        PLAYER_CONTROL,
+        _GROUP_ANIMATOR = 200,
+        PLAYER_ANIMATOR
     }
 
     public enum PropPriority

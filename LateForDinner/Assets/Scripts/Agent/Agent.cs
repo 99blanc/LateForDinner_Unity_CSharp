@@ -6,6 +6,7 @@ public abstract class Agent<TComponent, TView, TData, TKey> : MonoBehaviour wher
     public TData aData { get; private set; }
     public IAgentModule<TView, TData, TKey>[] modules { get; protected set; }
     public StatModel registry { get; protected set; } = new();
+    public StateMachine machine { get; private set; } = new();
     public TView view => registry as TView;
 
     public virtual void Init(TData data)
@@ -26,6 +27,6 @@ public abstract class Agent<TComponent, TView, TData, TKey> : MonoBehaviour wher
         modules = founds.AsValueEnumerable().OrderBy(m => (int)m.priority).ToArray();
 
         foreach (var module in modules)
-            module.Setup(data, view);
+            module.Setup(data, view, machine);
     }
 }

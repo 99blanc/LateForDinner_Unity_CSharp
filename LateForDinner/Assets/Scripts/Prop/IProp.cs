@@ -3,7 +3,7 @@ using Token.PRIORITY;
 
 public interface IProp
 {
-    PropPriority priority { get; }
+    abstract PropPriority priority { get; }
     void OnTick(IAgentControl agent);
     void OnInteract(IAgentControl agent);
     void OnDetach(IAgentControl agent);

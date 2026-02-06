@@ -14,7 +14,11 @@ public class Player : Character<Component, IPlayerView, PlayerData, PlayerID>
 
     public override void Init(PlayerData data) => base.Init(data);
 
-    protected override void Components() => gameObject.GetOrAddComponentAssert<PlayerControl>();
+    protected override void Components()
+    {
+        gameObject.GetOrAddComponentAssert<PlayerControl>();
+        gameObject.GetOrAddComponentAssert<PlayerAnimator>();
+    }
 
     protected override void ApplyRegistry(PlayerData data)
     {

@@ -2,10 +2,10 @@ using Cysharp.Text;
 using Cysharp.Threading.Tasks;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.AddressableAssets;
-using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.InputSystem;
+using UnityEngine.ResourceManagement.AsyncOperations;
+using UnityEngine.U2D;
 
 public class ResourceManager
 {
@@ -29,11 +29,22 @@ public class ResourceManager
         return await asyncHandle.ToUniTask();
     }
 
-    public async UniTask<Image> LoadSprite(string path) => await Load<Image>(ZString.Concat(Define.Path.SPRITE, path));
+    public async UniTask<SpriteAtlas> LoadAtlas(string path) => await Load<SpriteAtlas>(ZString.Concat(Define.Path.ATLAS, path));
+    public async UniTask<Sprite> LoadSprite(string path) => await Load<Sprite>(ZString.Concat(Define.Path.SPRITE, path));
     public async UniTask<GameObject> LoadPrefab(string path) => await Load<GameObject>(ZString.Concat(Define.Path.PREFAB, path));
-    public async UniTask<InputActionAsset> LoadInputSystem(string path) => await Load<InputActionAsset>(ZString.Concat(Define.Path.SYSTEM, path));
-    public async UniTask<TextAsset> LoadTextAsset(string path)  => await Load<TextAsset>(ZString.Concat(Define.Path.TABLE, path));
+    public async UniTask<InputActionAsset> LoadSystem(string path) => await Load<InputActionAsset>(ZString.Concat(Define.Path.SYSTEM, path));
+    public async UniTask<TextAsset> LoadTextAsset(string path) => await Load<TextAsset>(ZString.Concat(Define.Path.TABLE, path));
+    public async UniTask<RuntimeAnimatorController> LoadAnimator(string path) => await Load<RuntimeAnimatorController>(ZString.Concat(Define.Path.ANIMATOR, path));
 
+    public async UniTask<Sprite> GetSpriteInAtlas(string atlas, string sprite)
+    {
+        SpriteAtlas take = await LoadAtlas(atlas);
+
+        if (take is null) 
+            return null;
+
+        return take.GetSprite(sprite);
+    }
 
     public async UniTask<GameObject> Instantiate(string path, Transform parent = null)
     {

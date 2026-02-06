@@ -11,9 +11,9 @@ public class MoveBehavior<T> : IAgentBehavior<T> where T : class, IMoveData
         config = data;
     }
 
-    public void Prepare(BehaviorContext context) { }
+    public void Prepare() { }
 
-    public void Execute(BehaviorContext context)
+    public void Execute(BehaviorContext context = default)
     {
         float moveSpeed = agent.tView.moveSpeed.CurrentValue;
         float targetSpeed = context.input.x * moveSpeed;
@@ -31,5 +31,5 @@ public class MoveBehavior<T> : IAgentBehavior<T> where T : class, IMoveData
         agent.tBody.linearVelocity = new(newX, newY);
     }
 
-    public void Terminate(BehaviorContext context) { }
+    public void Terminate() { }
 }

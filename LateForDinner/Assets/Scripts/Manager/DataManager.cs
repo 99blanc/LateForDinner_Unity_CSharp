@@ -24,9 +24,18 @@ public class DataManager
 
     public async UniTask Init()
     {
-        TextAsset cTable = await Managers.Resource.LoadTextAsset(Define.Asset.FILE_PLAYER);
-        await UniTask.Yield(PlayerLoopTiming.Update);
-        players = ParseToDictionary<PlayerID, PlayerData>(cTable.text, data => data.id);
+        TextAsset chTable = await Managers.Resource.LoadTextAsset(Define.Asset.TABLE_PLAYER);
+        players = ParseToDictionary<PlayerID, PlayerData>(chTable.text, data => data.id);
+    }
+
+    public async UniTask Localization(LocalizationManager localization)
+    {
+        TextAsset uiTable = await Managers.Resource.LoadTextAsset(Define.Asset.TABLE_LOCALIZATION_UI);
+        localization.UI.Data = ParseToDictionary<string, LocalizationData>(uiTable.text, data => data.ID);
+        TextAsset statTable = await Managers.Resource.LoadTextAsset(Define.Asset.TABLE_LOCALIZATION_STAT);
+        localization.Stat.Data = ParseToDictionary<string, LocalizationData>(statTable.text, data => data.ID);
+        TextAsset dialogTable = await Managers.Resource.LoadTextAsset(Define.Asset.TABLE_LOCALIZATION_DIALOGUE);
+        localization.Dialogue.Data = ParseToDictionary<string, LocalizationData>(dialogTable.text, data => data.ID);
     }
 
     private List<T> ParseToList<T>(string text)

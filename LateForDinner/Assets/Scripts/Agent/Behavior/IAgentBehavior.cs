@@ -11,9 +11,9 @@ public struct BehaviorContext
 
 public interface IAgentBehavior
 {
-    void Prepare(BehaviorContext context = default);
+    void Prepare();
     void Execute(BehaviorContext context = default);
-    void Terminate(BehaviorContext context = default);
+    void Terminate();
 }
 
 public interface IAgentBehavior<in T> : IAgentBehavior where T : class, IData
@@ -23,14 +23,12 @@ public interface IAgentBehavior<in T> : IAgentBehavior where T : class, IData
 
 public interface IMove
 {
-    PlayerMoveState moveState { get; }
     bool isMoving { get; set; }
     void ExecuteClimb();
 }
 
 public interface IJump : IFall
 {
-    PlayerJumpState jumpState { get; }
     bool isJumping { get; set; }
     ReactiveProperty<short> currentJumpCount { get; set; }
     void ExecuteJump();
@@ -38,14 +36,12 @@ public interface IJump : IFall
 
 public interface IFall
 {
-    PlayerFallState fallState { get; }
     bool isFalling { get; set; }
-    void ExecuteFall(bool tumble);
+    void ExecuteFall();
 }
 
 public interface IDash
 {
-    PlayerDashState dashState { get; }
     bool isDashing { get; set; }
     ReactiveProperty<short> currentDashCount { get; set; }
     void ExecuteDash(float percent);
@@ -53,7 +49,6 @@ public interface IDash
 
 public interface IClimb
 {
-    PlayerClimbState climbState { get; }
     Vector2 moveInput { get; set; }
     bool isClimbing { get; set; }
     void ExecuteClimb();
@@ -61,7 +56,6 @@ public interface IClimb
 
 public interface ISneak
 {
-    PlayerSneakState sneakState { get; }
     bool isSneaking { get; set; }
     void ExecuteSneak();
 }

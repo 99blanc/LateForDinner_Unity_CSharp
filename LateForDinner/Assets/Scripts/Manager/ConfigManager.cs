@@ -7,8 +7,8 @@ using System.IO;
 
 public class ConfigManager
 {
-    private readonly string SAVE_PATH = Path.Combine(Application.persistentDataPath, ZString.Concat(Define.USER, Define.CONFIG));
-    private readonly string TEMP_PATH = Path.Combine(Application.persistentDataPath, ZString.Concat(Define.USER, Define.TEMP));
+    private string SAVE_PATH => Path.Combine(Application.persistentDataPath, ZString.Concat(Define.USER, Define.CONFIG));
+    private string TEMP_PATH => Path.Combine(Application.persistentDataPath, ZString.Concat(Define.USER, Define.TEMP));
     public Config value { get; private set; }
     public InputActionAsset actAsset { get; private set; }
     public InputActionMap actMap { get; private set; }
@@ -34,7 +34,7 @@ public class ConfigManager
             byte[] data = await File.ReadAllBytesAsync(SAVE_PATH);
             value = MemoryPackSerializer.Deserialize<Config>(data);
         }
-        catch (System.Exception)
+        catch
         {
             if (File.Exists(SAVE_PATH))
                 File.Delete(SAVE_PATH);
@@ -63,7 +63,7 @@ public class ConfigManager
                 File.Move(TEMP_PATH, SAVE_PATH);
 
         }
-        catch (System.Exception)
+        catch
         {
             if (File.Exists(TEMP_PATH))
                 File.Delete(TEMP_PATH);
@@ -72,7 +72,7 @@ public class ConfigManager
 
     private async UniTask SetupKeybind()
     {
-        InputActionAsset original = await Managers.Resource.LoadInputSystem(Define.Asset.FILE_INPUT_SYSTEM);
+        InputActionAsset original = await Managers.Resource.LoadSystem(Define.Asset.INPUT_SYSTEM);
         
         if (original is null) 
             return;

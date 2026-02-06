@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using R3;
 using System;
 using System.Collections.Generic;
@@ -7,27 +8,27 @@ using UnityEngine;
 public abstract class AgentControl<TView, TData, TKey> : MonoBehaviour, IAgentControl, IAgentModule<TView, TData, TKey>, IPropHolder where TView : class, IViewProvider where TData : class, IData<TKey>
 {
     private readonly Dictionary<Type, IAgentBehavior> behaviors = new();
+    public abstract ModulePrority priority { get; }
     public ReactiveProperty<PropContext> props { get; private set; } = new(new());
     public TData config { get; private set; }
-    public StateMachine machine { get; private set; }
+    public StateMachine sMachine { get; private set; }
     public Rigidbody2D tBody { get; private set; }
     public CapsuleCollider2D tCollider { get; private set; }
     public Prop active => props.Value.active;
     public IActionView tView { get; private set; }
     public Vector2 moveInput { get; set; }
-    public Vector2 lookAt { get; set; } = new();
-    public virtual ModulePrority priority => ModulePrority.AGENT_CONTROL;
-    public virtual bool isGrounded => this.IsGrounded();
     public bool isIdling { get; set; }
+    public virtual bool isGrounded => this.IsGrounded();
 
-    public virtual void Setup(TData data, TView view)
+    public virtual async UniTask Setup(TData data, TView view, StateMachine machine)
     {
         config = data;
-        machine = new();
+        sMachine = machine;
         tBody = gameObject.GetOrAddComponentAssert<Rigidbody2D>();
         tCollider = gameObject.GetOrAddComponentAssert<CapsuleCollider2D>();
         tView = view as IActionView;
         Behaviors();
+        await UniTask.CompletedTask;
     }
 
     public void ExecuteBehavior<T>(BehaviorContext context = default) where T : IAgentBehavior

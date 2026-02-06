@@ -2,10 +2,10 @@ using UnityEngine;
 
 public abstract class State
 {
+    public virtual int hash => 0;
     public virtual void Enter() { }
     public virtual void FixedUpdate() { }
     public virtual void Exit() { }
-
     public virtual bool Transition(Vector2 input) => true;
 }
 
@@ -27,18 +27,8 @@ public abstract class AgentState<TContext, TBehavior> : AgentState<TContext> whe
 
     public AgentState(TContext ctx, StateMachine sm) : base(ctx, sm) => behavior = ctx.GetBehavior<TBehavior>();
 
-    public override void Enter()
-    {
-        var context = GetContext();
-        behavior.Prepare(context);
-    }
-    public override void Exit()
-    {
-        var context = GetContext();
-        behavior.Terminate(context);
-    }
-
-    protected virtual BehaviorContext GetContext() => BehaviorContext.Default;
+    public override void Enter() => behavior.Prepare();
+    public override void Exit() => behavior.Terminate();
 }
 
 public class IdleState<T> : AgentState<T> where T : class, IAgentControl

@@ -11,9 +11,9 @@ public class FallBehavior<T> : IAgentBehavior<T> where T : class, IFallData
         config = data;
     }
 
-    public void Prepare(BehaviorContext context) { }
+    public void Prepare() { }
 
-    public void Execute(BehaviorContext context)
+    public void Execute(BehaviorContext context = default)
     {
         if (agent.isGrounded && agent.tBody.linearVelocity.y < Define.Physics.OFFSET && agent is IJump jump)
             jump.currentJumpCount.Value = 0;
@@ -24,7 +24,7 @@ public class FallBehavior<T> : IAgentBehavior<T> where T : class, IFallData
         Gravity();
     }
 
-    public void Terminate(BehaviorContext context) { }
+    public void Terminate() { }
 
     private bool Gravity()
     {

@@ -6,10 +6,14 @@ public class UIManager
 {
     private readonly Vector3 DEFAULT_SCALE = Vector3.one;
     private Stack<UIPopup> popups = new();
-    private GameObject container = new(Define.ROOT);
+    private GameObject container;
     private int curCanvasOrder = -20;
 
-    public void Init() => popups.Clear();
+    public void Init()
+    {
+        popups.Clear();
+        container = new(Define.ROOT);
+    }
 
     public void SetCanvas(GameObject gameObject, bool sort = true)
     {

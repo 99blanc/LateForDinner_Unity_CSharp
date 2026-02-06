@@ -4,12 +4,14 @@ public class PlayerIdleState : IdleState<PlayerControl>
 {
     public PlayerIdleState(PlayerControl ctx, StateMachine sm) : base(ctx, sm) { }
 
+    public override bool Transition(Vector2 input) => target.isGrounded;
+
     public override void Enter() => target.isIdling = true;
 
     public override void FixedUpdate()
     {
         target.ExecuteMove();
-        target.ExecuteFall(false);
+        target.ExecuteFall();
     }
 
     public override void Exit() => target.isIdling = false;
@@ -19,12 +21,23 @@ public class PlayerMoveState : MoveState<PlayerControl>
 {
     public PlayerMoveState(PlayerControl ctx, StateMachine sm) : base(ctx, sm) { }
 
+    public override bool Transition(Vector2 input)
+    {
+        if (!target.isGrounded) 
+            return false;
+
+        if (input.x != 0) 
+            return false;
+
+        return true;
+    }
+
     public override void Enter() => target.isMoving = true;
 
     public override void FixedUpdate()
     {
         target.ExecuteMove();
-        target.ExecuteFall(false);
+        target.ExecuteFall();
     }
 
     public override void Exit() => target.isMoving = false;
@@ -33,6 +46,13 @@ public class PlayerMoveState : MoveState<PlayerControl>
 public class PlayerJumpState : JumpState<PlayerControl>
 {
     public PlayerJumpState(PlayerControl ctx, StateMachine sm) : base(ctx, sm) { }
+
+    public override bool Transition(Vector2 input)
+    {
+        bool canDash = target.GetBehavior<DashBehavior<IDashData>>().CanDash(target.currentDashCount.Value < target.tView.dashCount.CurrentValue, input);
+        bool canClimb = target.GetBehavior<ClimbBehavior<IClimbData>>().CanClimb(input);
+        return target.isGrounded || canDash || canClimb;
+    }
 
     public override void Enter()
     {
@@ -43,7 +63,16 @@ public class PlayerJumpState : JumpState<PlayerControl>
     public override void FixedUpdate()
     {
         target.ExecuteMove();
-        target.ExecuteFall(false);
+        target.ExecuteFall();
+
+        if (target.isFalling)
+        {
+            machine.Change(target.fallState, target.moveInput);
+            return;
+        }
+
+        if (target.isGrounded)
+            machine.Change(target.moveInput.x != 0 ? target.moveState : target.idleState);
     }
 
     public override void Exit() => target.isJumping = false;
@@ -52,12 +81,6 @@ public class PlayerJumpState : JumpState<PlayerControl>
 public class PlayerFallState : FallState<PlayerControl>
 {
     public PlayerFallState(PlayerControl ctx, StateMachine sm) : base(ctx, sm) { }
-
-    protected override BehaviorContext GetContext() => new()
-    {
-        input = target.moveInput,
-        scala = target.isTumbling ? 1f : 0
-    };
 
     public override void Enter()
     {
@@ -68,9 +91,15 @@ public class PlayerFallState : FallState<PlayerControl>
     public override void FixedUpdate()
     {
         target.ExecuteMove();
-        target.ExecuteFall(false);
+        target.ExecuteFall();
         bool groundCheck = target.isGrounded;
         bool velocityCheck = target.tBody.linearVelocity.y > -Define.Physics.OFFSET;
+
+        if (target.isGrounded)
+        {
+            machine.Change(target.moveInput.x != 0 ? target.moveState : target.idleState, target.moveInput, true);
+            return;
+        }
 
         if (target.isTumbling && target.isFalling && (target.isGrounded || target.tBody.linearVelocity.y > -Define.Physics.OFFSET))
             target.isTumbling = false;
@@ -110,7 +139,7 @@ public class PlayerDashState : DashState<PlayerControl>
         target.ExecuteDash(percent);
 
         if (behavior.IsFinished(percent) || target.IsOppositeInput(target.moveInput.x, behavior.direction))
-            machine.Change(target.isGrounded ? target.idleState : target.fallState, target.moveInput, true);
+            machine.Change(target.isGrounded ? (target.moveInput.x != 0 ? target.moveState : target.idleState) : target.fallState, target.moveInput, true);
     }
 
     public override void Exit()

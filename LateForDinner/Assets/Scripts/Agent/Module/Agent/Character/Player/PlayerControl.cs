@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using R3;
 using Token.ID;
 using Token.PRIORITY;
@@ -34,9 +35,9 @@ public class PlayerControl : AgentControl<IPlayerView, PlayerData, PlayerID>, IM
         SetBehavior(new SneakBehavior<ISneakData>());
     }
 
-    public override void Setup(PlayerData data, IPlayerView view)
+    public override async UniTask Setup(PlayerData data, IPlayerView view, StateMachine machine)
     {
-        base.Setup(data, view);
+        await base.Setup(data, view, machine);
         PhysicsMaterial2D mat = new(Define.Layer.PLAYER)
         {
             friction = 0,
@@ -47,45 +48,51 @@ public class PlayerControl : AgentControl<IPlayerView, PlayerData, PlayerID>, IM
         tBody.sleepMode = RigidbodySleepMode2D.NeverSleep;
         tBody.interpolation = RigidbodyInterpolation2D.Extrapolate;
         tBody.constraints = RigidbodyConstraints2D.FreezeRotation;
-        idleState = new(this, machine);
-        moveState = new(this, machine);
-        jumpState = new(this, machine);
-        fallState = new(this, machine);
-        dashState = new(this, machine);
-        climbState = new(this, machine);
-        sneakState = new(this, machine);
-        machine.Init(idleState);
+        idleState = new(this, sMachine);
+        moveState = new(this, sMachine);
+        jumpState = new(this, sMachine);
+        fallState = new(this, sMachine);
+        dashState = new(this, sMachine);
+        climbState = new(this, sMachine);
+        sneakState = new(this, sMachine);
+        sMachine.Init(idleState);
         input = new(this);
         input.Init();
         Observable.EveryUpdate(UnityFrameProvider.FixedUpdate).Subscribe(_ =>
         {
-            machine.curState.FixedUpdate();
+            sMachine.curState.FixedUpdate();
         }).AddTo(this);
     }
 
     public void HandleInput(InputContext ctx)
     {
         moveInput = ctx.moveInput;
-        lookAt = ctx.moveInput.ToLookAt();
         State target = ctx switch
         {
-            { doTumble: true } when (isTumbling = true) is var _ => fallState,
+            { doTumble: true } => fallState,
             { canDash: true } => dashState,
             { doJump: true } => jumpState,
             { doClimb: true } => climbState,
             { doSneak: true } => sneakState,
             { doMove: true } => moveState,
-            _ => (isTumbling = false) is var _ && isGrounded ? idleState : fallState
+            _ => idleState
         };
-        bool force = (ctx.doTumble || target == dashState || target == jumpState);
-        machine.Change(target, moveInput, force);
+
+        if (!isGrounded && (target == moveState || target == idleState))
+            target = (tBody.linearVelocity.y > 0) ? jumpState : fallState;
+
+        if (sMachine.curState == target && !ctx.doJump && !ctx.canDash) 
+            return;
+
+        bool force = ctx.doTumble || target == dashState || target == jumpState;
+        sMachine.Change(target, moveInput, force);
     }
 
     public void ExecuteMove() => ExecuteBehavior<MoveBehavior<IMoveData>>(new() { input = moveInput });
 
     public void ExecuteJump() => ExecuteBehavior<JumpBehavior<IJumpData>>();
 
-    public void ExecuteFall(bool tumble) => ExecuteBehavior<FallBehavior<IFallData>>(new() { scala = tumble ? 1f : 0 });
+    public void ExecuteFall() => ExecuteBehavior<FallBehavior<IFallData>>(new() { scala = isTumbling ? 1f : 0 });
 
     public void ExecuteDash(float percent) => ExecuteBehavior<DashBehavior<IDashData>>(new() { scala = percent });
 

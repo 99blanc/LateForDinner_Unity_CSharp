@@ -12,13 +12,13 @@ public class ClimbBehavior<T> : IAgentBehavior<T> where T : class, IClimbData
         config = data;
     }
 
-    public void Prepare(BehaviorContext context)
+    public void Prepare()
     {
         agent.tBody.gravityScale = 0;
         agent.tBody.linearVelocity = Vector2.zero;
     }
 
-    public void Execute(BehaviorContext context)
+    public void Execute(BehaviorContext context = default)
     {
         if (agent.active is not IClimbProp cProp)
             return;
@@ -37,7 +37,7 @@ public class ClimbBehavior<T> : IAgentBehavior<T> where T : class, IClimbData
         agent.tBody.MovePosition(new(nextX, targetY));
     }
 
-    public void Terminate(BehaviorContext context)
+    public void Terminate()
     {
         agent.tBody.linearVelocity = Vector2.zero;
         agent.tBody.gravityScale = Define.Physics.FULL;

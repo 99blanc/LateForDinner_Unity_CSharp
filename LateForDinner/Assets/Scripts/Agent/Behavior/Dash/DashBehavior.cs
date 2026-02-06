@@ -18,22 +18,22 @@ public class DashBehavior<T> : IAgentBehavior<T> where T : class, IDashData
         config = data;
     }
 
-    public void Prepare(BehaviorContext context)
+    public void Prepare()
     {
         agent.tBody.gravityScale = 0;
         agent.tBody.linearVelocity = Vector2.zero;
         float dashDist = agent.tView.dashDistance.CurrentValue;
         float dashSpeed = agent.tView.moveSpeed.CurrentValue * config.dashSpeed;
         duration = dashDist / dashSpeed;
-        direction = Mathf.Sign(agent.lookAt.x);
-        int isDown = agent.lookAt.y < 0 ? 1 : 0;
+        direction = Mathf.Sign(agent.moveInput.x);
+        int isDown = agent.moveInput.y < 0 ? 1 : 0;
         Vector2 dashDir = new(direction * (1f - isDown), -1f * isDown);
         startPos = agent.tBody.position;
         targetPos = startPos + (dashDir * dashDist);
         Use();
     }
 
-    public void Execute(BehaviorContext context)
+    public void Execute(BehaviorContext context = default)
     {
         Vector2 nextPos = Vector2.Lerp(startPos, targetPos, context.scala);
         Vector2 currentPos = agent.tBody.position;
@@ -53,7 +53,7 @@ public class DashBehavior<T> : IAgentBehavior<T> where T : class, IDashData
         }
     }
 
-    public void Terminate(BehaviorContext context)
+    public void Terminate()
     {
         agent.tBody.gravityScale = Define.Physics.FULL;
         agent.tBody.linearVelocity = Vector2.zero;
