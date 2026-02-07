@@ -8,9 +8,11 @@ public class PlayerAnimator : AgentAnimator<IPlayerView, PlayerData, PlayerID>
     private static readonly int Anime_MoveSpeed = Animator.StringToHash("MoveSpeed");
     private static readonly int Anime_JumpCount = Animator.StringToHash("JumpCount");
     private static readonly int Anime_DashY = Animator.StringToHash("DashY");
+    private static readonly int Anime_ClimbSpeed = Animator.StringToHash("ClimbSpeed");
     private IMove moveRef;
     private IJump jumpRef;
     private IDash dashRef;
+    private IClimb climbRef;
     public override ModulePrority priority => ModulePrority.PLAYER_ANIMATOR;
     public override string cPath => Define.Asset.ANIMATOR_PLAYER;
 
@@ -20,6 +22,7 @@ public class PlayerAnimator : AgentAnimator<IPlayerView, PlayerData, PlayerID>
         moveRef = control as IMove;
         jumpRef = control as IJump;
         dashRef = control as IDash;
+        climbRef = control as IClimb;
     }
 
     protected override void States()
@@ -38,7 +41,7 @@ public class PlayerAnimator : AgentAnimator<IPlayerView, PlayerData, PlayerID>
         if (sMachine.curState is not null)
             PlayStateAnimation(sMachine.curState.GetType());
 
-        lookAt = tBody.linearVelocity.ToLookAt(lookAt);
+        lookAt = control.moveInput.ToLookAt(lookAt);
         Flip(lookAt.x);
 
         if (moveRef.isMoving)
@@ -54,5 +57,16 @@ public class PlayerAnimator : AgentAnimator<IPlayerView, PlayerData, PlayerID>
 
         if (dashRef.isDashing)
             SetParam(Anime_DashY, control.moveInput.y);
+
+        float vSpeed = climbRef.isClimbing ? Mathf.Abs(control.moveInput.y * aView.moveSpeed.CurrentValue) : Mathf.Abs(tBody.linearVelocity.y);
+
+        if (climbRef.isClimbing && vSpeed > Define.Physics.SNAP)
+        {
+            float speedRatio = vSpeed / aView.moveSpeed.CurrentValue;
+            float finalSpeed = Mathf.Clamp(speedRatio, Define.Physics.HALF, Define.Physics.DOUBLE);
+            SetParam(Anime_ClimbSpeed, finalSpeed);
+        }
+        else
+            SetParam(Anime_ClimbSpeed, 0f);
     }
 }

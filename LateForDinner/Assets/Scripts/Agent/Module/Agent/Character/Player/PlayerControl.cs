@@ -14,6 +14,7 @@ public class PlayerControl : AgentControl<IPlayerView, PlayerData, PlayerID>, IM
     public PlayerDashState dashState { get; private set; }
     public PlayerClimbState climbState { get; private set; }
     public PlayerSneakState sneakState { get; private set; }
+    public override bool isGrounded => !isTumbling && this.IsGrounded();
     public bool isMoving { get; set; }
     public bool isJumping { get; set; }
     public bool isFalling { get; set; }
@@ -69,7 +70,7 @@ public class PlayerControl : AgentControl<IPlayerView, PlayerData, PlayerID>, IM
         moveInput = ctx.moveInput;
         State target = ctx switch
         {
-            { doTumble: true } => fallState,
+            { doTumble: true } when (isTumbling = true) is var _ => fallState,
             { canDash: true } => dashState,
             { doJump: true } => jumpState,
             { doClimb: true } => climbState,
@@ -84,7 +85,7 @@ public class PlayerControl : AgentControl<IPlayerView, PlayerData, PlayerID>, IM
         if (sMachine.curState == target && !ctx.doJump && !ctx.canDash)
             return;
 
-        bool force = ctx.doTumble || target == dashState || target == jumpState;
+        bool force = ctx.doTumble || isTumbling || target == dashState || target == jumpState || target == climbState;
         sMachine.Change(target, moveInput, force);
     }
 

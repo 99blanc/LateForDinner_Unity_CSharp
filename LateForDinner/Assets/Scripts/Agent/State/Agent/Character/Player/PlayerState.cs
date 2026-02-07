@@ -4,7 +4,7 @@ public class PlayerIdleState : IdleState<PlayerControl>
 {
     public PlayerIdleState(PlayerControl ctx, StateMachine sm) : base(ctx, sm) { }
 
-    public override bool Transition(Vector2 input) => target.isGrounded;
+    public override bool Transition(Vector2 input) => target.isGrounded && !target.isDashing;
 
     public override void Enter() => target.isIdling = true;
 
@@ -95,16 +95,14 @@ public class PlayerFallState : FallState<PlayerControl>
     {
         target.ExecuteMove();
         target.ExecuteFall();
-        bool groundCheck = target.isGrounded;
-        bool velocityCheck = target.tBody.linearVelocity.y > -Define.Physics.OFFSET;
 
-        if (target.isGrounded)
+        if (!target.isTumbling && target.isGrounded)
         {
             machine.Change(target.moveInput.x != 0 ? target.moveState : target.idleState, target.moveInput, true);
             return;
         }
 
-        if (target.isTumbling && target.isFalling && (target.isGrounded || target.tBody.linearVelocity.y > -Define.Physics.OFFSET))
+        if (target.isTumbling && target.tBody.linearVelocity.y < -Define.Physics.TICK)
             target.isTumbling = false;
     }
 
@@ -140,8 +138,9 @@ public class PlayerDashState : DashState<PlayerControl>
         elapsed += Time.fixedDeltaTime;
         float percent = Mathf.Clamp01(elapsed / behavior.duration);
         target.ExecuteDash(percent);
+        bool canCancel = elapsed > Define.Physics.SNAP && InputHelper.IsOppositeInput(target, target.moveInput.x, behavior.direction);
 
-        if (behavior.IsFinished(percent) || target.IsOppositeInput(target.moveInput.x, behavior.direction))
+        if (behavior.IsFinished(percent) || canCancel)
             machine.Change(target.isGrounded ? (target.moveInput.x != 0 ? target.moveState : target.idleState) : target.fallState, target.moveInput, true);
     }
 
