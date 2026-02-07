@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: f63d6269ed1c8674e843d6ecde3de60b
+guid: 95a20f45c14920c4b92742e86e40b406
 TextureImporter:
   internalIDToNameTable:
   - first:
@@ -116,10 +116,10 @@ TextureImporter:
       name: dummy run_0003_0
       rect:
         serializedVersion: 2
-        x: 292
-        y: 264
-        width: 305
-        height: 443
+        x: 289
+        y: 265
+        width: 310
+        height: 441
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -138,7 +138,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 4c5cb97e2b7925644b4b25abf549199e
+    spriteID: 585088120a29d6a45bbb78339309eb38
     internalID: 0
     vertices: []
     indices: 
