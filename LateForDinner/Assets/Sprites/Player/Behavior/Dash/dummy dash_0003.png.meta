@@ -75,9 +75,9 @@ TextureImporter:
   platformSettings:
   - serializedVersion: 4
     buildTarget: DefaultTexturePlatform
-    maxTextureSize: 4096
+    maxTextureSize: 2048
     resizeAlgorithm: 0
-    textureFormat: 4
+    textureFormat: -1
     textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
@@ -121,10 +121,10 @@ TextureImporter:
         serializedVersion: 2
         x: 187
         y: 401
-        width: 355
-        height: 231
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        width: 464
+        height: 307
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -137,33 +137,11 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
-    - serializedVersion: 2
-      name: dummy dash_0003_1
-      rect:
-        serializedVersion: 2
-        x: 512
-        y: 604
-        width: 140
-        height: 104
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 6a2689cf9e30a5160800000000000000
-      internalID: 7014923673083077286
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
     outline: []
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 5e97eb03825dee720800000000000000
+    spriteID: 259a5be51512862418d4c7bd347ebbeb
     internalID: 0
     vertices: []
     indices: 

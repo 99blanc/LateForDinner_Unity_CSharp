@@ -29,7 +29,7 @@ public abstract class AgentAnimator<TView, TData, TKey> : MonoBehaviour, IAgentA
         control = gameObject.GetComponentAssert<IAgentControl>();
         aView = view as IAgentView;
         sMachine.OnStateChanged.Where(state => state is not null).Subscribe(state => PlayStateAnimation(state.GetType())).AddTo(this);
-        Observable.EveryUpdate(UnityFrameProvider.FixedUpdate).Subscribe(_ => Parameters()).AddTo(this);
+        Observable.EveryUpdate().Subscribe(_ => Parameters()).AddTo(this);
         States();
     }
 

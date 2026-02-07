@@ -6,12 +6,8 @@ using Token.PRIORITY;
 public class PlayerAnimator : AgentAnimator<IPlayerView, PlayerData, PlayerID>
 {
     private static readonly int Anime_MoveSpeed = Animator.StringToHash("MoveSpeed");
-    private static readonly int Anime_IsGrounded = Animator.StringToHash("IsGrounded");
+    private static readonly int Anime_JumpCount = Animator.StringToHash("JumpCount");
     private static readonly int Anime_DashY = Animator.StringToHash("DashY");
-    private static readonly int Anime_IsIdling = Animator.StringToHash("IsIdling");
-    private static readonly int Anime_IsMoving = Animator.StringToHash("IsMoving");
-    private static readonly int Anime_IsJumping = Animator.StringToHash("IsJumping");
-    private static readonly int Anime_IsDashing = Animator.StringToHash("IsDashing");
     private IMove moveRef;
     private IJump jumpRef;
     private IDash dashRef;
@@ -44,22 +40,19 @@ public class PlayerAnimator : AgentAnimator<IPlayerView, PlayerData, PlayerID>
 
         lookAt = tBody.linearVelocity.ToLookAt(lookAt);
         Flip(lookAt.x);
-        SetParam(Anime_IsIdling, control.isIdling);
-        bool isGrounded = control.isGrounded;
-        SetParam(Anime_IsGrounded, isGrounded);
-        bool isMoving = moveRef.isMoving;
-        SetParam(Anime_IsMoving, isMoving);
-        float animeSpeed = (control.isGrounded && moveRef.isMoving && !dashRef.isDashing) ? tBody.linearVelocity.magnitude / aView.moveSpeed.CurrentValue : 0;
 
-        if (control.isIdling || animeSpeed < Define.Physics.DEADZONE) 
-            animeSpeed = 0;
+        if (moveRef.isMoving)
+        {
+            float speedRatio = tBody.linearVelocity.magnitude / aView.moveSpeed.CurrentValue;
+            SetParam(Anime_MoveSpeed, Mathf.Clamp(speedRatio, Define.Physics.HALF, Define.Physics.DOUBLE));
+        }
+        else
+            SetParam(Anime_MoveSpeed, Define.Physics.FULL);
 
-        SetParam(Anime_MoveSpeed, animeSpeed);
-        SetParam(Anime_MoveSpeed, animeSpeed);
-        SetParam(Anime_IsJumping, jumpRef.isJumping);
-        SetParam(Anime_IsDashing, dashRef.isDashing);
+        if (jumpRef.isJumping)
+            SetParam(Anime_JumpCount, (float)jumpRef.currentJumpCount.Value);
 
         if (dashRef.isDashing)
-            SetParam(Anime_DashY, tBody.linearVelocity.normalized.y);
+            SetParam(Anime_DashY, control.moveInput.y);
     }
 }
