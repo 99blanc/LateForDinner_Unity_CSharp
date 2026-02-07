@@ -96,14 +96,12 @@ public class PlayerFallState : FallState<PlayerControl>
         target.ExecuteMove();
         target.ExecuteFall();
 
-        if (!target.isTumbling && target.isGrounded)
+        if (target.isGrounded || target.isTumbling)
         {
-            machine.Change(target.moveInput.x != 0 ? target.moveState : target.idleState, target.moveInput, true);
-            return;
-        }
-
-        if (target.isTumbling && target.tBody.linearVelocity.y < -Define.Physics.TICK)
             target.isTumbling = false;
+            State nextState = target.moveInput.x != 0 ? target.moveState : target.idleState;
+            machine.Change(nextState, target.moveInput, true);
+        }
     }
 
     public override void Exit() 
