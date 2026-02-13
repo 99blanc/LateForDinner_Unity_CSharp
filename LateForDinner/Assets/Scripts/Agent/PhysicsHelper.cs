@@ -7,12 +7,8 @@ public class PhysicsHelper
         Vector2 origin = new(collider.bounds.center.x, collider.bounds.min.y + Define.Physics.SNAP);
         Vector2 size = new(collider.size.x * Define.Physics.FOOT, Define.Physics.DEADZONE);
         RaycastHit2D hit = Physics2D.BoxCast(origin, size, 0, Vector2.down, Define.Physics.OFFSET, Define.Layer.GROUND_MASKS);
-        float horizontalDistance = Mathf.Abs(hit.point.x - collider.bounds.center.x);
 
         if (Vector2.Angle(hit.normal, Vector2.up) > Define.Physics.SLOPE)
-            return false;
-
-        if (horizontalDistance > collider.size.x * Define.Physics.HALF)
             return false;
 
         return hit && body.linearVelocity.y <= Define.Physics.OFFSET;

@@ -2,18 +2,20 @@ using Cysharp.Threading.Tasks;
 using R3;
 using System;
 using System.Collections.Generic;
-using Token.PRIORITY;
 using UnityEngine;
+using Token.PRIORITY;
 
-public abstract class AgentControl<TView, TData, TKey> : MonoBehaviour, IAgentControl, IAgentModule<TView, TData, TKey>, IPropHolder where TView : class, IViewProvider where TData : class, IData<TKey>
+public abstract class AgentControl<TView, TData, TKey, TIntent> : MonoBehaviour, IAgentControl, IAgentModule<TView, TData, TKey>, IPropHolder where TView : class, IViewProvider where TData : class, IData<TKey> where TIntent : struct
 {
     private readonly Dictionary<Type, IAgentBehavior> behaviors = new();
+    public TIntent intent;
     public abstract ModulePrority priority { get; }
     public ReactiveProperty<PropContext> props { get; private set; } = new(new());
     public TData config { get; private set; }
     public StateMachine sMachine { get; private set; }
     public Rigidbody2D tBody { get; private set; }
     public CapsuleCollider2D tCollider { get; private set; }
+    public Transform itemSocket { get; private set; }
     public Prop active => props.Value.active;
     public IActionView tView { get; private set; }
     public Vector2 moveInput { get; set; }
@@ -25,7 +27,9 @@ public abstract class AgentControl<TView, TData, TKey> : MonoBehaviour, IAgentCo
         config = data;
         sMachine = machine;
         tBody = gameObject.GetOrAddComponentAssert<Rigidbody2D>();
+        tBody.constraints = RigidbodyConstraints2D.FreezeRotation;
         tCollider = gameObject.GetOrAddComponentAssert<CapsuleCollider2D>();
+        itemSocket = gameObject.FindChild(Define.ITEM, true).transform;
         tView = view as IActionView;
         Behaviors();
         await UniTask.CompletedTask;

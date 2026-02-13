@@ -18,6 +18,9 @@ namespace Token.PRIORITY
         _GROUP_OBJECTIVE = 200,
         LADDER,
         BOX,
-        _GROUP_INTERACTION = 300
+        _GROUP_INTERACTION = 300,
+        TRAY,
+        NPC,
+        PORTAL
     }
 }

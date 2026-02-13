@@ -41,7 +41,7 @@ public class DashBehavior<T> : IAgentBehavior<T> where T : class, IDashData
         Vector2 castSize = agent.tCollider.bounds.size * Define.Physics.LIMIT;
         RaycastHit2D hit = Physics2D.BoxCast(currentPos, castSize, 0, moveDir, Vector2.Distance(currentPos, nextPos), Define.Layer.GROUND_MASKS);
 
-        if (hit.collider == null || hit.collider.isTrigger || hit.distance < Define.Physics.DEADZONE)
+        if (hit.collider is null || hit.collider.isTrigger || hit.distance < Define.Physics.DEADZONE)
             agent.tBody.MovePosition(nextPos);
         else
         {

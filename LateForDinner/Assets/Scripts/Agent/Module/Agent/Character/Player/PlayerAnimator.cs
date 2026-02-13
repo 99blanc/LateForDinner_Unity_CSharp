@@ -1,6 +1,7 @@
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using Token.ID;
+using Token.LAYER;
 using Token.PRIORITY;
 
 public class PlayerAnimator : AgentAnimator<IPlayerView, PlayerData, PlayerID>
@@ -19,6 +20,7 @@ public class PlayerAnimator : AgentAnimator<IPlayerView, PlayerData, PlayerID>
     public override async UniTask Setup(PlayerData data, IPlayerView view, StateMachine machine)
     {
         await base.Setup(data, view, machine);
+        animator.SetLayerWeight((int)AnimatorLayer.BODY, 1);
         moveRef = control as IMove;
         jumpRef = control as IJump;
         dashRef = control as IDash;

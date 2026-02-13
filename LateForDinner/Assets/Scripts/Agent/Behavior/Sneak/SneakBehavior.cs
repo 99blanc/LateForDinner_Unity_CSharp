@@ -15,7 +15,9 @@ public class SneakBehavior<T> : IAgentBehavior<T> where T : class, ISneakData
         originOffset = agent.tCollider.offset;
     }
 
-    public void Prepare()
+    public void Prepare() { }
+
+    public void Execute(BehaviorContext context = default)
     {
         if (!agent.isGrounded)
             return;
@@ -30,8 +32,6 @@ public class SneakBehavior<T> : IAgentBehavior<T> where T : class, ISneakData
         collider.size = new(sneakWidth, sneakHeight);
         collider.offset = new(originOffset.x, newOffsetY);
     }
-
-    public void Execute(BehaviorContext context = default) { }
 
     public void Terminate()
     {

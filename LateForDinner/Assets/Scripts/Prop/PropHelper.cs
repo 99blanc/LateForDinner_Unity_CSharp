@@ -4,7 +4,7 @@ public class PropHelper
 {
     public static Prop Occupy(IPropHolder holder, Prop target)
     {
-        if (target == null) 
+        if (target is null) 
             return holder.props.Value.active;
 
         var current = holder.props.Value;
@@ -22,7 +22,7 @@ public class PropHelper
 
     public static Prop Release(IPropHolder holder, Prop target)
     {
-        if (target == null) 
+        if (target is null) 
             return holder.props.Value.active;
 
         var current = holder.props.Value;

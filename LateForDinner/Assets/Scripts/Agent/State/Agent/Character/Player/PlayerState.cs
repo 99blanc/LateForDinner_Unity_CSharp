@@ -1,66 +1,63 @@
+using R3;
 using UnityEngine;
 
-public class PlayerIdleState : IdleState<PlayerControl>
+public abstract class PlayerState<TBehavior> : AgentState<PlayerControl, TBehavior> where TBehavior : class, IAgentBehavior
 {
-    public PlayerIdleState(PlayerControl ctx, StateMachine sm) : base(ctx, sm) { }
-
-    public override bool Transition(Vector2 input) => target.isGrounded && !target.isDashing;
-
-    public override void Enter() => target.isIdling = true;
-
-    public override void FixedUpdate()
-    {
-        target.ExecuteMove();
-        target.ExecuteFall();
-
-        if (target.moveInput.x != 0 && target.isGrounded)
-            machine.Change(target.moveState, target.moveInput);
-    }
-
-    public override void Exit() => target.isIdling = false;
+    protected PlayerState(PlayerControl ctx, StateMachine sm) : base(ctx, sm) { }
 }
 
-public class PlayerMoveState : MoveState<PlayerControl>
+public class PlayerIdleState : PlayerState<IAgentBehavior>
 {
-    public PlayerMoveState(PlayerControl ctx, StateMachine sm) : base(ctx, sm) { }
-
-    public override bool Transition(Vector2 input)
+    public PlayerIdleState(PlayerControl ctx, StateMachine sm) : base(ctx, sm)
     {
-        if (!target.isGrounded) 
-            return false;
-
-        return input.x == 0;
-    }
-
-    public override void Enter() => target.isMoving = true;
-
-    public override void FixedUpdate()
-    {
-        target.ExecuteMove();
-        target.ExecuteFall();
-
-        if (target.moveInput.x == 0 && target.isGrounded)
-            machine.Change(target.idleState, target.moveInput);
-    }
-
-    public override void Exit() => target.isMoving = false;
-}
-
-public class PlayerJumpState : JumpState<PlayerControl>
-{
-    public PlayerJumpState(PlayerControl ctx, StateMachine sm) : base(ctx, sm) { }
-
-    public override bool Transition(Vector2 input)
-    {
-        bool canDash = target.GetBehavior<DashBehavior<IDashData>>().CanDash(target.currentDashCount.Value < target.tView.dashCount.CurrentValue, input);
-        bool canClimb = target.GetBehavior<ClimbBehavior<IClimbData>>().CanClimb(input);
-        return target.isGrounded || canDash || canClimb;
+        Bind<InputContext, PlayerFallState>(c => c.doTumble);
+        Bind<InputContext, PlayerDashState>(c => c.canDash);
+        Bind<InputContext, PlayerJumpState>(c => c.doJump);
+        Bind<InputContext, PlayerClimbState>(c => c.doClimb);
+        Bind<InputContext, PlayerSneakState>(c => c.doSneak);
+        Bind<InputContext, PlayerMoveState>(c => c.doMove);
+        Bind<InputContext>(c => c.doInteract, () => target.isPickuping ? machine.Get<PlayerThrowState>() : machine.Get<PlayerPickupState>());
     }
 
     public override void Enter()
     {
-        target.ExecuteJump();
-        target.isJumping = true;
+        base.Enter();
+        target.isIdling = true;
+    }
+
+    public override void FixedUpdate()
+    {  
+        target.ExecuteMove();
+        target.ExecuteFall();
+
+        if (!target.isGrounded) 
+            machine.Change<PlayerFallState>();
+    }
+
+    public override void Exit()
+    {
+        base.Exit();
+        target.isIdling = false;
+    }
+}
+
+public class PlayerMoveState : PlayerState<MoveBehavior<IMoveData>>
+{
+    public PlayerMoveState(PlayerControl ctx, StateMachine sm) : base(ctx, sm) 
+    {
+        Bind<InputContext, PlayerFallState>(c => c.doTumble);
+        Bind<InputContext, PlayerDashState>(c => c.canDash);
+        Bind<InputContext, PlayerJumpState>(c => c.doJump);
+        Bind<InputContext, PlayerClimbState>(c => c.doClimb);
+        Bind<InputContext, PlayerSneakState>(c => c.doSneak);
+        Bind<InputContext>(c => !c.doMove, () => machine.Get<PlayerIdleState>());
+        Bind<InputContext>(c => c.doInteract, () => target.isPickuping ? machine.Get<PlayerThrowState>() : machine.Get<PlayerPickupState>());
+    }
+
+    public override void Enter()
+    {
+        base.Enter();
+        target.isMoving = true;
     }
 
     public override void FixedUpdate()
@@ -68,22 +65,57 @@ public class PlayerJumpState : JumpState<PlayerControl>
         target.ExecuteMove();
         target.ExecuteFall();
 
-        if (target.isFalling)
-        {
-            machine.Change(target.fallState, target.moveInput);
-            return;
-        }
-
-        if (target.isGrounded)
-            machine.Change(target.moveInput.x != 0 ? target.moveState : target.idleState);
+        if (!target.isGrounded) 
+            machine.Change<PlayerFallState>();
     }
 
-    public override void Exit() => target.isJumping = false;
+    public override void Exit() 
+    {
+        base.Exit();
+        target.isMoving = false;
+    } 
 }
 
-public class PlayerFallState : FallState<PlayerControl>
+public class PlayerJumpState : PlayerState<JumpBehavior<IJumpData>>
 {
-    public PlayerFallState(PlayerControl ctx, StateMachine sm) : base(ctx, sm) { }
+    public PlayerJumpState(PlayerControl ctx, StateMachine sm) : base(ctx, sm) 
+    {
+        Bind<InputContext, PlayerClimbState>(c => c.doClimb);
+        Bind<InputContext, PlayerDashState>(c => c.canDash);
+        subject.OfType<object, InputContext>().Where(c => c.doJump).Subscribe(_ => target.ExecuteJump()).AddTo(ref bag);
+    }
+
+    public override void Enter()
+    {
+        base.Enter();
+        target.isJumping = true;
+        target.ExecuteJump();
+    }
+
+    public override void FixedUpdate()
+    {
+        target.ExecuteMove();
+        target.ExecuteFall();
+
+        if (target.tBody.linearVelocity.y < -Define.Physics.TICK)
+            machine.Change<PlayerFallState>();
+    }
+
+    public override void Exit() 
+    {
+        base.Exit();
+        target.isJumping = false;
+    } 
+}
+
+public class PlayerFallState : PlayerState<FallBehavior<IFallData>>
+{
+    public PlayerFallState(PlayerControl ctx, StateMachine sm) : base(ctx, sm) 
+    {
+        Bind<InputContext>(c => !target.isTumbling && c.canDash, () => machine.Get<PlayerDashState>());
+        Bind<InputContext>(c => !target.isTumbling && c.doJump, () => machine.Get<PlayerJumpState>());
+        Bind<InputContext>(c => !target.isTumbling && c.doClimb, () => machine.Get<PlayerClimbState>());
+    }
 
     public override void Enter()
     {
@@ -96,32 +128,26 @@ public class PlayerFallState : FallState<PlayerControl>
         target.ExecuteMove();
         target.ExecuteFall();
 
-        if (target.isGrounded || target.isTumbling)
-        {
-            target.isTumbling = false;
-            State nextState = target.moveInput.x != 0 ? target.moveState : target.idleState;
-            machine.Change(nextState, target.moveInput, true);
-        }
+        if (target.isGrounded) 
+            machine.Change(target.moveInput.x != 0 ? machine.Get<PlayerMoveState>() : machine.Get<PlayerIdleState>());
     }
 
-    public override void Exit() 
+    public override void Exit()
     {
         base.Exit();
         target.isFalling = false;
+        target.isTumbling = false; 
     }
 }
 
-public class PlayerDashState : DashState<PlayerControl>
+public class PlayerDashState : PlayerState<DashBehavior<IDashData>>
 {
     private float elapsed;
 
-    public PlayerDashState(PlayerControl ctx, StateMachine sm) : base(ctx, sm) { }
-
-    public override bool Transition(Vector2 input)
+    public PlayerDashState(PlayerControl ctx, StateMachine sm) : base(ctx, sm) 
     {
-        bool isOpposite = target.IsOppositeInput(input.x, behavior.direction);
-        bool canClimb = target.GetBehavior<ClimbBehavior<IClimbData>>().CanClimb(input);
-        return isOpposite || canClimb;
+        Bind<InputContext, PlayerClimbState>(c => c.doClimb);
+        Bind<InputContext, PlayerJumpState>(c => c.doJump);
     }
 
     public override void Enter()
@@ -136,10 +162,11 @@ public class PlayerDashState : DashState<PlayerControl>
         elapsed += Time.fixedDeltaTime;
         float percent = Mathf.Clamp01(elapsed / behavior.duration);
         target.ExecuteDash(percent);
-        bool canCancel = elapsed > Define.Physics.SNAP && InputHelper.IsOppositeInput(target, target.moveInput.x, behavior.direction);
+        bool isOpposite = elapsed > Define.Physics.SNAP && target.IsOppositeInput(target.moveInput.x, behavior.direction);
 
-        if (behavior.IsFinished(percent) || canCancel)
-            machine.Change(target.isGrounded ? (target.moveInput.x != 0 ? target.moveState : target.idleState) : target.fallState, target.moveInput, true);
+        if (percent >= Define.Physics.FULL || isOpposite)
+            machine.Change(target.isGrounded ? (target.moveInput.x != 0 ? machine.Get<PlayerMoveState>() : machine.Get<PlayerIdleState>()) : machine.Get<PlayerFallState>());
+
     }
 
     public override void Exit()
@@ -149,23 +176,22 @@ public class PlayerDashState : DashState<PlayerControl>
     }
 }
 
-public class PlayerClimbState : ClimbState<PlayerControl>
+public class PlayerClimbState : PlayerState<ClimbBehavior<IClimbData>>
 {
-    public PlayerClimbState(PlayerControl ctx, StateMachine sm) : base(ctx, sm) { }
-
-    public override bool Transition(Vector2 input) => !behavior.CanClimb(input);
+    public PlayerClimbState(PlayerControl ctx, StateMachine sm) : base(ctx, sm)
+    {
+        Bind<InputContext, PlayerJumpState>(c => c.doJump);
+        Bind<InputContext, PlayerDashState>(c => c.canDash);
+    }
 
     public override void Enter()
     {
         base.Enter();
-
-        if (target is IJump jump)
-            jump.currentJumpCount.Value = 0;
-
-        if (target is IDash dash && dash.currentDashCount.Value > 0)
-            --dash.currentDashCount.Value;
-
         target.isClimbing = true;
+        target.currentJumpCount.Value = 0;
+
+        if (target.currentDashCount.Value > 0) 
+            --target.currentDashCount.Value;
     }
 
     public override void FixedUpdate()
@@ -173,7 +199,7 @@ public class PlayerClimbState : ClimbState<PlayerControl>
         target.ExecuteClimb();
 
         if (!behavior.CanClimb(target.moveInput))
-            machine.Change(target.isGrounded ? (target.moveInput.x != 0 ? target.moveState : target.idleState) : target.fallState, target.moveInput, true);
+            machine.Change(target.isGrounded ? (target.moveInput.y < 0 ? machine.Get<PlayerSneakState>() : target.moveInput.x != 0 ? machine.Get<PlayerMoveState>() : machine.Get<PlayerIdleState>()) : machine.Get<PlayerFallState>());
     }
 
     public override void Exit()
@@ -183,25 +209,62 @@ public class PlayerClimbState : ClimbState<PlayerControl>
     }
 }
 
-public class PlayerSneakState : SneakState<PlayerControl>
+public class PlayerSneakState : PlayerState<SneakBehavior<ISneakData>>
 {
-    public PlayerSneakState(PlayerControl ctx, StateMachine sm) : base(ctx, sm) { }
+    public PlayerSneakState(PlayerControl ctx, StateMachine sm) : base(ctx, sm) 
+    {
+        Bind<InputContext, PlayerFallState>(c => !target.isGrounded);
+        Bind<InputContext>(c => !c.doSneak, () => target.moveInput.x != 0 ? machine.Get<PlayerMoveState>() : machine.Get<PlayerIdleState>());
+    }
 
     public override void Enter()
     {
         base.Enter();
         target.isSneaking = true;
+        target.ExecuteSneak();
     }
 
     public override void FixedUpdate()
     {
-        if (!target.isGrounded)
-            machine.Change(target.isGrounded ? (target.moveInput.x != 0 ? target.moveState : target.idleState) : target.fallState, target.moveInput, true);
+        target.ExecuteFall();
     }
 
     public override void Exit()
     {
         base.Exit();
         target.isSneaking = false;
+    }
+}
+
+public class PlayerPickupState : PlayerState<PickupBehavior<IPickupData>>
+{
+    public PlayerPickupState(PlayerControl ctx, StateMachine sm) : base(ctx, sm) { }
+
+    public override void Enter()
+    {
+        base.Enter();
+        target.isPickuping = true;
+        target.ExecutePickup();
+        machine.Change(target.isGrounded ? (target.moveInput.x != 0 ? machine.Get<PlayerMoveState>() : machine.Get<PlayerIdleState>()) : machine.Get<PlayerFallState>());
+    }
+}
+
+public class PlayerThrowState : PlayerState<ThrowBehavior<IThrowData>>
+{
+    public PlayerThrowState(PlayerControl ctx, StateMachine sm) : base(ctx, sm) { }
+
+    public override void Enter()
+    {
+        base.Enter(); 
+        target.isPickuping = false; 
+        target.isThrowing = true; 
+        target.ExecuteThrow();
+        machine.Change(target.isGrounded ? (target.moveInput.x != 0 ? machine.Get<PlayerMoveState>() : machine.Get<PlayerIdleState>()) : machine.Get<PlayerFallState>());
+    }
+
+    public override void Exit()
+    {
+        base.Exit();
+        target.isThrowing = false;
     }
 }

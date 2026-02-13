@@ -6,12 +6,14 @@ using Token.PRIORITY;
 public abstract class Prop : MonoBehaviour, IProp
 {
     protected readonly ObservableHashSet<IAgentControl> occupants = new();
-    public BoxCollider2D sensor { get; set; }
     public abstract PropPriority priority { get; }
+    public Collider2D sensor { get; set; }
+    public Transform rTransform => transform;
+    public GameObject rGameObject => gameObject;
 
     protected virtual void Awake()
     {
-        sensor = gameObject.GetOrAddComponentAssert<BoxCollider2D>();
+        sensor = gameObject.GetOrAddComponentAssert<Collider2D>();
         Observable.EveryUpdate(UnityFrameProvider.FixedUpdate).Where(_ => occupants.Count > 0).Subscribe(_ =>
         {
             foreach (var agent in occupants)
@@ -42,5 +44,11 @@ public abstract class Prop : MonoBehaviour, IProp
             agent.Release(this);
             OnDetach(agent);
         }
+    }
+
+    public virtual void SetActive(bool active)
+    {
+        if (sensor is not null) 
+            sensor.enabled = active;
     }
 }

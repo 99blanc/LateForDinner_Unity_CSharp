@@ -28,7 +28,7 @@ public abstract class AgentAnimator<TView, TData, TKey> : MonoBehaviour, IAgentA
         animator.updateMode = AnimatorUpdateMode.Normal;
         control = gameObject.GetComponentAssert<IAgentControl>();
         aView = view as IAgentView;
-        sMachine.OnStateChanged.Where(state => state is not null).Subscribe(state => PlayStateAnimation(state.GetType())).AddTo(this);
+        sMachine.OnStateChange.Where(state => state is not null).Subscribe(state => PlayStateAnimation(state.GetType())).AddTo(this);
         Observable.EveryUpdate().Subscribe(_ => Parameters()).AddTo(this);
         States();
     }
@@ -37,7 +37,7 @@ public abstract class AgentAnimator<TView, TData, TKey> : MonoBehaviour, IAgentA
     {
         Type baseType = typeof(TSpecific).BaseType;
 
-        if (baseType == null) 
+        if (baseType is null) 
             return;
 
         ReadOnlySpan<char> nameSpan = baseType.Name.AsSpan();
@@ -62,13 +62,13 @@ public abstract class AgentAnimator<TView, TData, TKey> : MonoBehaviour, IAgentA
 
     protected abstract void Parameters();
 
-    protected void Flip(float xDir)
+    protected void Flip(float xDirection)
     {
-        if (Mathf.Abs(xDir) < Define.Physics.DEADZONE) 
+        if (Mathf.Abs(xDirection) < Define.Physics.DEADZONE) 
             return;
 
         Vector3 scale = transform.localScale;
-        scale.x = Mathf.Abs(scale.x) * (xDir > 0 ? 1 : -1);
+        scale.x = Mathf.Abs(scale.x) * (xDirection > 0 ? 1 : -1);
         transform.localScale = scale;
     }
 

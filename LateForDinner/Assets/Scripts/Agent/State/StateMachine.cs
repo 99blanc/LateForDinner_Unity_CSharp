@@ -1,31 +1,47 @@
 using R3;
-using UnityEngine;
+using System;
+using System.Collections.Generic;
 
 public class StateMachine
 {
+    private readonly Dictionary<Type, State> maps = new();
     private readonly ReactiveProperty<State> state = new();
-    public ReadOnlyReactiveProperty<State> OnStateChanged => state;
+    public ReadOnlyReactiveProperty<State> OnStateChange => state;
     public State curState
     {
         get => state.Value;
         private set => state.Value = value;
     }
 
-    public void Init(State initState)
+    public void Setup(params State[] states)
     {
-        curState = initState;
+        foreach (var state in states)
+            maps[state.GetType()] = state;
+    }
+
+    public T Get<T>() where T : State
+    {
+        if (!maps.TryGetValue(typeof(T), out var value))
+            throw new();
+
+        return value as T;
+    }
+
+    public void Init<T>() where T : State
+    {
+        curState = Get<T>();
         curState.Enter();
     }
 
-    public void Change(State next, Vector2 input = default, bool force = false)
+    public void Change(State next)
     {
-        if (!force && curState == next) 
+        if (curState == next)
             return;
 
-        if (!force && !curState.Transition(input))
-            return;
-
-        curState?.Exit();
-        (curState = next).Enter();
+        curState.Exit();
+        curState = next;
+        curState.Enter();
     }
+
+    public void Change<T>() where T : State => Change(Get<T>());
 }

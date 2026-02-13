@@ -1,4 +1,5 @@
-using UnityEngine;
+using R3;
+using System;
 
 public abstract class State
 {
@@ -6,62 +7,78 @@ public abstract class State
     public virtual void Enter() { }
     public virtual void FixedUpdate() { }
     public virtual void Exit() { }
-    public virtual bool Transition(Vector2 input) => true;
+    public virtual void HandleState<TInput>(TInput input) { }
 }
 
-public abstract class AgentState<TContext> : State where TContext : class, IAgentControl
+public abstract class AgentState<TControl, TBehavior> : State where TControl : class, IAgentControl where TBehavior : class, IAgentBehavior
 {
-    protected readonly TContext target;
+    protected readonly TControl target;
     protected readonly StateMachine machine;
+    protected readonly Subject<object> subject = new();
+    protected readonly TBehavior behavior;
+    protected DisposableBag bag;
 
-    public AgentState(TContext ctx, StateMachine sm)
+    public AgentState(TControl ctx, StateMachine sm)
     {
         target = ctx;
         machine = sm;
+        behavior = ctx.GetBehavior<TBehavior>();
     }
+
+    public override void Enter()
+    {
+        bag = new();
+
+        if (behavior is not null)
+            behavior.Prepare();
+    }
+
+    public override void Exit()
+    {
+        bag.Dispose();
+
+        if (behavior is not null)
+            behavior.Terminate();
+    }
+
+    public override void HandleState<TInput>(TInput input) => subject.OnNext(input);
+
+    protected void Bind<TInput, TNextState>(Func<TInput, bool> condition) where TNextState : State => subject.OfType<object, TInput>().Where(condition).Subscribe(_ => machine.Change<TNextState>()).AddTo(ref bag);
+
+    protected void Bind<TInput>(Func<TInput, bool> condition, Func<State> key) => subject.OfType<object, TInput>().Where(condition).Subscribe(_ => machine.Change(key())).AddTo(ref bag);
 }
 
-public abstract class AgentState<TContext, TBehavior> : AgentState<TContext> where TContext : class, IAgentControl where TBehavior : class, IAgentBehavior
+public class IdleState<TControl> : AgentState<TControl, IAgentBehavior> where TControl : class, IAgentControl
 {
-    protected readonly TBehavior behavior;
-
-    public AgentState(TContext ctx, StateMachine sm) : base(ctx, sm) => behavior = ctx.GetBehavior<TBehavior>();
-
-    public override void Enter() => behavior.Prepare();
-    public override void Exit() => behavior.Terminate();
+    public IdleState(TControl ctx, StateMachine sm) : base(ctx, sm) { }
 }
 
-public class IdleState<T> : AgentState<T> where T : class, IAgentControl
+public class MoveState<TControl> : AgentState<TControl, MoveBehavior<IMoveData>> where TControl : class, IAgentControl
 {
-    public IdleState(T ctx, StateMachine sm) : base(ctx, sm) { }
+    public MoveState(TControl ctx, StateMachine sm) : base(ctx, sm) { }
 }
 
-public class MoveState<T> : AgentState<T, MoveBehavior<IMoveData>> where T : class, IAgentControl
+public class JumpState<TControl> : AgentState<TControl, JumpBehavior<IJumpData>> where TControl : class, IAgentControl
 {
-    public MoveState(T ctx, StateMachine sm) : base(ctx, sm) { }
+    public JumpState(TControl ctx, StateMachine sm) : base(ctx, sm) { }
 }
 
-public class JumpState<T> : AgentState<T, JumpBehavior<IJumpData>> where T : class, IAgentControl
+public class FallState<TControl> : AgentState<TControl, FallBehavior<IFallData>> where TControl : class, IAgentControl
 {
-    public JumpState(T ctx, StateMachine sm) : base(ctx, sm) { }
+    public FallState(TControl ctx, StateMachine sm) : base(ctx, sm) { }
 }
 
-public class FallState<T> : AgentState<T, FallBehavior<IFallData>> where T : class, IAgentControl
+public class DashState<TControl> : AgentState<TControl, DashBehavior<IDashData>> where TControl : class, IAgentControl
 {
-    public FallState(T ctx, StateMachine sm) : base(ctx, sm) { }
+    public DashState(TControl ctx, StateMachine sm) : base(ctx, sm) { }
 }
 
-public class DashState<T> : AgentState<T, DashBehavior<IDashData>> where T : class, IAgentControl
+public class ClimbState<TControl> : AgentState<TControl, ClimbBehavior<IClimbData>> where TControl : class, IAgentControl
 {
-    public DashState(T ctx, StateMachine sm) : base(ctx, sm) { }
+    public ClimbState(TControl ctx, StateMachine sm) : base(ctx, sm) { }
 }
 
-public class ClimbState<T> : AgentState<T, ClimbBehavior<IClimbData>> where T : class, IAgentControl
+public class SneakState<TControl> : AgentState<TControl, SneakBehavior<ISneakData>> where TControl : class, IAgentControl
 {
-    public ClimbState(T ctx, StateMachine sm) : base(ctx, sm) { }
-}
-
-public class SneakState<T> : AgentState<T, SneakBehavior<ISneakData>> where T : class, IAgentControl
-{
-    public SneakState(T ctx, StateMachine sm) : base(ctx, sm) { }
+    public SneakState(TControl ctx, StateMachine sm) : base(ctx, sm) { }
 }

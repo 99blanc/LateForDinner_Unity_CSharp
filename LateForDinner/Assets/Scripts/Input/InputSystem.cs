@@ -31,6 +31,7 @@ public class InputSystem
         rawLastInput = input;
         bool dashRequested = Managers.Config.value.control.useModifierDash ? dashPressed : isTap;
         bool tumbleRequested = input.y < 0 && jumpRequested;
+        bool interactRequested = map.FindAction(Define.Input.ACTION_INTERACT).IsPressed();
         return new InputContext
         {
             moveInput = input,
@@ -40,7 +41,8 @@ public class InputSystem
             canDash = dashRequested && EvaluateDash(dashRequested, input),
             doClimb = EvaluateClimb(input),
             doSneak = input.y < 0,
-            doTumble = tumbleRequested
+            doTumble = tumbleRequested,
+            doInteract = interactRequested
         };
     }
 

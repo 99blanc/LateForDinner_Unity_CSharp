@@ -64,3 +64,15 @@ public interface ITumble : IJump, ISneak
 {
     bool isTumbling { get; set; }
 }
+
+public interface IPickup
+{
+    bool isPickuping { get; set; }
+    void ExecutePickup();
+}
+
+public interface IThrow
+{
+    bool isThrowing { get; set; }
+    void ExecuteThrow();
+}

@@ -1,34 +1,24 @@
 using Cysharp.Text;
-using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
 public static class UnityExtensions
 {
-    public static readonly List<Component> Caches = new(64);
-
     public static T FindChild<T>(this GameObject gameObject, string name = null, bool recursive = false) where T : Object
     {
-        if (!gameObject)
+        if (!gameObject) 
             throw new();
 
         if (recursive)
         {
-            lock (Caches)
+            var components = gameObject.GetComponentsInChildren<T>(true);
+
+            for (int index = 0; index < components.Length; ++index)
             {
-                Caches.Clear();
-                gameObject.GetComponentsInChildren<T>(true, (List<T>)(object)Caches);
+                T component = components[index];
 
-                for (int index = 0; index < Caches.Count; ++index)
-                {
-                    Component component = Caches[index];
-
-                    if (string.IsNullOrEmpty(name) || ZString.Equals(name, Caches[index].name))
-                        return component as T;
-                }
-
-                throw new();
+                if (string.IsNullOrEmpty(name) || ZString.Equals(name, component.name))
+                    return component;
             }
         }
         else
@@ -83,9 +73,18 @@ public static class UnityExtensions
         return components;
     }
 
+    public static T GetComponentInChildrenAssert<T>(this GameObject gameObject, bool active = false) where T : class
+    {
+        T component = gameObject.GetComponentInChildren<T>(active);
+        Debug.Assert(component is not null);
+        return component;
+    }
+
     public static T GetOrAddComponentAssert<T>(this GameObject gameObject) where T : Component => gameObject.transform.GetOrAddComponentAssert<T>();
 
     public static T GetComponentAssert<T>(this GameObject gameObject) => gameObject.transform.GetComponentAssert<T>();
 
     public static T[] GetComponentsAssert<T>(this GameObject gameObject) => gameObject.transform.GetComponentsAssert<T>();
+
+    public static T GetComponentInChildrenAssert<T>(this Component source, bool active = false) where T : class => source.gameObject.GetComponentInChildrenAssert<T>(active);
 }

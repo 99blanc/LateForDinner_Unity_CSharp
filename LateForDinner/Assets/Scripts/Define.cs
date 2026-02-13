@@ -4,6 +4,7 @@ public class Define
 {
     public const string ROOT = "@Root";
     public const string USER = "user";
+    public const string ITEM = "Item";
     public const string CONFIG = ".config";
     public const string TEMP = ".tmp";
 
@@ -24,8 +25,8 @@ public class Define
         public const string TABLE_LOCALIZATION_UI = "Tables - Localization_UI.csv";
         public const string TABLE_LOCALIZATION_STAT = "Tables - Localization_Stat.csv";
         public const string TABLE_LOCALIZATION_DIALOGUE = "Tables - Localization_Dialogue.csv";
-        public const string PREFAB_PLAYER = "Agent/Player.prefab";
-        public const string ANIMATOR_PLAYER = "Player/PlayerAnimator.controller";
+        public const string PREFAB_PLAYER = "Agent/Player/Player.prefab";
+        public const string ANIMATOR_PLAYER = "Player/PlayerAnimator.overrideController";
     }
 
     public class Input
@@ -36,6 +37,7 @@ public class Define
         public const string ACTION_JUMP = "Jump";
         public const string ACTION_DASH = "Dash";
         public const string ACTION_ATTACK = "Attack";
+        public const string ACTION_INTERACT = "Interact";
     }
 
     public class Layer

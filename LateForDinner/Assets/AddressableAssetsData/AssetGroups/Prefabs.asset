@@ -30,13 +30,13 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: ee1079948fc4b45498cf1b1787437127
-    m_Address: Assets/Prefabs/Prop/Ladder.prefab
+  - m_GUID: d086a8596e0b9f54294bcbcc5e8d8795
+    m_Address: Assets/Prefabs/Agent/Player/Player.prefab
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: f97c5b8abb6928848ba5d0f5ce82b155
-    m_Address: Assets/Prefabs/Agent/Player.prefab
+  - m_GUID: ee1079948fc4b45498cf1b1787437127
+    m_Address: Assets/Prefabs/Prop/Ladder.prefab
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

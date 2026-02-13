@@ -20,20 +20,15 @@ public class ClimbBehavior<T> : IAgentBehavior<T> where T : class, IClimbData
 
     public void Execute(BehaviorContext context = default)
     {
-        if (agent.active is not IClimbProp cProp)
+        if (agent.active is not IClimbProp cProp) 
             return;
 
         agent.tBody.linearVelocity = Vector2.zero;
-        float nextX = Mathf.SmoothDamp(agent.tBody.position.x, cProp.centerX, ref xVelocity, Define.Physics.SNAP);
+        float targetX = agent.isGrounded ? agent.tBody.position.x : cProp.centerX;
+        float nextX = Mathf.SmoothDamp(agent.tBody.position.x, targetX, ref xVelocity, Define.Physics.SNAP);
         float moveY = context.input.y * config.moveSpeed * config.decelObj * Time.fixedDeltaTime;
-        float targetY = agent.tBody.position.y + moveY;
-        float ladderTop = cProp.bounds.max.y;
-        float footY = agent.tCollider.bounds.min.y;
-        float pivotOffset = agent.tBody.position.y - footY;
-
-        if (context.input.y > 0 && targetY > ladderTop + pivotOffset)
-            targetY = ladderTop + pivotOffset + Define.Physics.DEADZONE;
-
+        float pivotOffset = agent.tBody.position.y - agent.tCollider.bounds.min.y;
+        float targetY = Mathf.Min(agent.tBody.position.y + moveY, cProp.bounds.max.y + pivotOffset);
         agent.tBody.MovePosition(new(nextX, targetY));
     }
 
@@ -53,18 +48,10 @@ public class ClimbBehavior<T> : IAgentBehavior<T> where T : class, IClimbData
         float footY = agent.tCollider.bounds.min.y;
         bool isUp = input.y > 0;
         bool isDown = input.y < 0;
-        bool isAtTop = footY >= ladderTop - Define.Physics.OFFSET;
-        bool tryingToGoUpAtTop = isUp && isAtTop && agent.isGrounded;
-        bool hasMoreLadderBelow = footY > ladderBottom + Define.Physics.OFFSET;
-        bool tryingToExitFromGround = agent.isGrounded && !climb.isClimbing && ((isDown && !hasMoreLadderBelow) || input.x != 0);
-        bool isAtBottom = footY < ladderBottom + Define.Physics.OFFSET;
-        bool shouldReleaseAtBottom = climb.isClimbing && agent.isGrounded && isAtBottom && (isDown || input.x != 0);
-
-        if (tryingToGoUpAtTop || shouldReleaseAtBottom || tryingToExitFromGround)
-            return false;
-
-        bool canUp = isUp && footY < ladderTop;
-        bool canDown = isDown && footY < ladderTop + Define.Physics.OFFSET;
-        return (climb.isClimbing || canUp || canDown);
+        bool isHorizontal = Mathf.Abs(input.x) > Define.Physics.TICK;
+        bool shouldExit = agent.isGrounded && (isHorizontal || (isDown && footY <= ladderBottom + Define.Physics.TICK) || (climb.isClimbing && isDown));
+        bool tryEnter = !climb.isClimbing && ((isUp && footY < ladderTop) || (isDown && footY >= ladderTop - Define.Physics.TICK));
+        bool keepClimb = climb.isClimbing && (footY <= ladderTop || isDown) && (footY >= ladderBottom || isUp);
+        return !shouldExit && (tryEnter || keepClimb);
     }
 }

@@ -14,6 +14,7 @@ public struct InputContext
     public bool doClimb;
     public bool doSneak;
     public bool doTumble;
+    public bool doInteract;
 }
 
 public class InputHelper

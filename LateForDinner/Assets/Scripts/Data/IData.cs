@@ -44,3 +44,11 @@ public interface ISneakData : IData
 {
     float threshold { get; }
 }
+
+public interface IPickupData : IData { }
+
+public interface IThrowData : IData
+{
+    float throwPower { get; }
+    float throwTorque { get; }
+}

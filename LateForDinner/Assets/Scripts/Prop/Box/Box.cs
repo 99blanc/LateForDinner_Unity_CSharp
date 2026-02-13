@@ -1,19 +1,19 @@
 using UnityEngine;
 using Token.PRIORITY;
 
-public class Box : CollisionProp, IPushProp
+public class Box : CollisionProp, IBoxProp
 {
-    protected Rigidbody2D rBody { get; private set; }
+    protected Rigidbody2D body { get; private set; }
     public override PropPriority priority => PropPriority.BOX;
 
     protected override void Awake()
     {
         base.Awake();
-        rBody = gameObject.GetOrAddComponentAssert<Rigidbody2D>();
-        rBody.bodyType = RigidbodyType2D.Dynamic;
-        rBody.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
-        rBody.constraints = RigidbodyConstraints2D.FreezeRotation;
-        rBody.useAutoMass = true;
+        body = gameObject.GetOrAddComponentAssert<Rigidbody2D>();
+        body.bodyType = RigidbodyType2D.Dynamic;
+        body.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+        body.constraints = RigidbodyConstraints2D.FreezeRotation;
+        body.useAutoMass = true;
         PhysicsMaterial2D mat = new(Define.Layer.BOX) 
         { 
             friction = 0.4f, 

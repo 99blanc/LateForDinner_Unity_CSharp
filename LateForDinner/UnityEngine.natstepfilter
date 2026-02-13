@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<StepFilter xmlns="http://schemas.microsoft.com/visualstudio/debugger/natstepfilter/2010">
+  <Function Action="NoStepInto">UnityEngine\..*</Function>
+  <Function Action="NoStepInto">UnityEditor\..*</Function>
+  <Function Action="NoStepInto">R3\..*</Function>
+  <Function Action="NoStepInto">MemoryPack\..*</Function>
+  <Function Action="NoStepInto">System\..*</Function>
+  <Function Action="NoStepInto">Microsoft\..*</Function>
+</StepFilter>
