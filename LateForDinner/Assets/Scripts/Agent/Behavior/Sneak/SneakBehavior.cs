@@ -19,9 +19,6 @@ public class SneakBehavior<T> : IAgentBehavior<T> where T : class, ISneakData
 
     public void Execute(BehaviorContext context = default)
     {
-        if (!agent.isGrounded)
-            return;
-
         agent.tBody.linearVelocity = Vector2.zero;
         var collider = agent.tCollider;
         collider.direction = CapsuleDirection2D.Horizontal;

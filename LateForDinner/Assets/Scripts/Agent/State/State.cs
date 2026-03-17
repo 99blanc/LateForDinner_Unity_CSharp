@@ -14,9 +14,7 @@ public abstract class AgentState<TControl, TBehavior> : State where TControl : c
 {
     protected readonly TControl target;
     protected readonly StateMachine machine;
-    protected readonly Subject<object> subject = new();
-    protected readonly TBehavior behavior;
-    protected DisposableBag bag;
+    public readonly TBehavior behavior;
 
     public AgentState(TControl ctx, StateMachine sm)
     {
@@ -27,25 +25,15 @@ public abstract class AgentState<TControl, TBehavior> : State where TControl : c
 
     public override void Enter()
     {
-        bag = new();
-
         if (behavior is not null)
             behavior.Prepare();
     }
 
     public override void Exit()
     {
-        bag.Dispose();
-
         if (behavior is not null)
             behavior.Terminate();
     }
-
-    public override void HandleState<TInput>(TInput input) => subject.OnNext(input);
-
-    protected void Bind<TInput, TNextState>(Func<TInput, bool> condition) where TNextState : State => subject.OfType<object, TInput>().Where(condition).Subscribe(_ => machine.Change<TNextState>()).AddTo(ref bag);
-
-    protected void Bind<TInput>(Func<TInput, bool> condition, Func<State> key) => subject.OfType<object, TInput>().Where(condition).Subscribe(_ => machine.Change(key())).AddTo(ref bag);
 }
 
 public class IdleState<TControl> : AgentState<TControl, IAgentBehavior> where TControl : class, IAgentControl

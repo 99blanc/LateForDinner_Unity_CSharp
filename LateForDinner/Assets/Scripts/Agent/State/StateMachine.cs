@@ -36,7 +36,11 @@ public class StateMachine
     public void Change(State next)
     {
         if (curState == next)
+        {
+            curState.Exit();
+            curState.Enter();
             return;
+        }
 
         curState.Exit();
         curState = next;

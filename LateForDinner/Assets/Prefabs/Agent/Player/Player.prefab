@@ -74,6 +74,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 4760902682808408877}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6d2b5d0a9ec1e0446b035f8a1c78bd37, type: 3}
+  m_Script: {fileID: 11500000, guid: e0e6a3d201289a448890902af04d7647, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Player

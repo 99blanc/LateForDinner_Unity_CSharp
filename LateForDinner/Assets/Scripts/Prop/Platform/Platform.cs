@@ -8,7 +8,7 @@ public abstract class Platform : PhysicsProp, IPlatformProp
     {
         float platformTop = physics.bounds.max.y;
         float footY = agent.tCollider.bounds.min.y;
-        bool isAbove = footY > platformTop;
+        bool isAbove = footY > platformTop - Define.Physics.SNAP;
 
         if (agent is IClimb { isClimbing: true })
             return false;

@@ -59,7 +59,6 @@ public class Define
         public const float INTERVAL = 0.25f;
         public const float DEADZONE = 0.01f;
         public const float OFFSET = 0.25f;
-        public const float FOOT = 0.8f;
         public const float SNAP = 0.05f;
         public const float BUFFER = 0.15f;
         public const float SLOPE = 45f;

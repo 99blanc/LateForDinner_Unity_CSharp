@@ -1,3 +1,4 @@
+using R3;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -7,48 +8,50 @@ public class InputSystem
     private InputActionMap map;
     private Vector2 lastDirection;
     private float lastInputTime;
-    private Vector2 rawLastInput;
+    private bool jumpQueued;
+    private bool dashQueued;
+    private bool interactQueued;
 
     public InputSystem(PlayerControl control) => player = control;
 
     public void Init()
     {
         map = Managers.Config.actMap;
-        map.BindActionMap(player, CreateContext, ctx => player.HandleInput(ctx));
-    }
-
-    private InputContext CreateContext()
-    {
-        Vector2 input = map.FindAction(Define.Input.ACTION_MOVE).ReadValue<Vector2>();
-        bool jumpRequested = map.FindAction(Define.Input.ACTION_JUMP).IsPressed();
-        bool dashPressed = map.FindAction(Define.Input.ACTION_DASH).IsPressed();
-        bool isJustPressed = input != Vector2.zero && rawLastInput == Vector2.zero;
-        bool isDirectionChanged = input != Vector2.zero && input != lastDirection;
-        bool isUpdateRequired = isJustPressed || isDirectionChanged;
-        bool isTap = isUpdateRequired && input.CheckTap(lastDirection, lastInputTime, Define.Physics.INTERVAL);
-        lastInputTime = isUpdateRequired ? Time.time : lastInputTime;
-        lastDirection = isUpdateRequired ? input : lastDirection;
-        rawLastInput = input;
-        bool dashRequested = Managers.Config.value.control.useModifierDash ? dashPressed : isTap;
-        bool tumbleRequested = input.y < 0 && jumpRequested;
-        bool interactRequested = map.FindAction(Define.Input.ACTION_INTERACT).IsPressed();
-        return new InputContext
+        Observable.EveryUpdate().Subscribe(_ =>
         {
-            moveInput = input,
-            isTap = dashRequested,
-            doMove = input.x != 0,
-            doJump = !tumbleRequested && jumpRequested && EvaluateJump(jumpRequested),
-            canDash = dashRequested && EvaluateDash(dashRequested, input),
-            doClimb = EvaluateClimb(input),
-            doSneak = input.y < 0,
-            doTumble = tumbleRequested,
-            doInteract = interactRequested
-        };
+            UpdateQueues();
+        }).AddTo(player);
     }
 
-    private bool EvaluateJump(bool jumpRequested) => player.GetBehavior<JumpBehavior<IJumpData>>().CanJump(jumpRequested);
+    private void UpdateQueues()
+    {
+        if (map.FindAction(Define.Input.ACTION_JUMP).WasPressedThisFrame())
+            jumpQueued = true;
 
-    private bool EvaluateDash(bool dashRequested, Vector2 input) => player.GetBehavior<DashBehavior<IDashData>>().CanDash(dashRequested, input);
+        if (map.FindAction(Define.Input.ACTION_DASH).WasPressedThisFrame())
+            dashQueued = true;
 
-    private bool EvaluateClimb(Vector2 input) => player.GetBehavior<ClimbBehavior<IClimbData>>().CanClimb(input);
+        if (map.FindAction(Define.Input.ACTION_INTERACT).WasPressedThisFrame())
+            interactQueued = true;
+    }
+
+    public InputContext Get()
+    {
+        Vector2 move = map.FindAction(Define.Input.ACTION_MOVE).ReadValue<Vector2>();
+        bool isTap = move.CheckTap(ref lastDirection, ref lastInputTime);
+        InputContext context = new()
+        {
+            moveInput = move,
+            doJump = jumpQueued,
+            canDash = dashQueued || isTap || (Managers.Config.value.control.useModifierDash && map.FindAction(Define.Input.ACTION_DASH).IsPressed()),
+            doMove = move.x != 0,
+            doSneak = move.y < 0,
+            doInteract = interactQueued
+        };
+
+        ResetQueues();
+        return context;
+    }
+
+    private void ResetQueues() => jumpQueued = dashQueued = interactQueued = false;
 }

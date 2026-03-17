@@ -4,10 +4,9 @@ using UnityEngine;
 using Token.ID;
 using Token.PRIORITY;
 
-public class PlayerControl : AgentControl<IPlayerView, PlayerData, PlayerID, InputContext>, IMove, IJump, IFall, IDash, IClimb, ISneak, ITumble, IPickup, IThrow
+public class PlayerControl : AgentControl<IPlayerView, PlayerData, PlayerID>, IMove, IJump, IFall, IDash, IClimb, ISneak, ITumble, IPickup, IThrow
 {
     public override ModulePrority priority => ModulePrority.PLAYER_CONTROL;
-    public override bool isGrounded => !isTumbling && this.IsGrounded();
     public bool isMoving { get; set; }
     public bool isJumping { get; set; }
     public bool isFalling { get; set; }
@@ -19,7 +18,7 @@ public class PlayerControl : AgentControl<IPlayerView, PlayerData, PlayerID, Inp
     public bool isThrowing { get; set; }
     public ReactiveProperty<short> currentJumpCount { get; set; } = new();
     public ReactiveProperty<short> currentDashCount { get; set; } = new();
-
+    protected override IHandler CreateHandler() => new PlayerHandler();
     private InputSystem input;
 
     protected override void Behaviors()
@@ -42,10 +41,7 @@ public class PlayerControl : AgentControl<IPlayerView, PlayerData, PlayerID, Inp
             friction = 0,
             bounciness = 0
         };
-        tCollider.sharedMaterial = mat;
-        tBody.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
-        tBody.sleepMode = RigidbodySleepMode2D.NeverSleep;
-        tBody.interpolation = RigidbodyInterpolation2D.Extrapolate;
+        SetupPhysics();
         sMachine.Setup
         (
             new PlayerIdleState(this, sMachine),
@@ -61,17 +57,21 @@ public class PlayerControl : AgentControl<IPlayerView, PlayerData, PlayerID, Inp
         sMachine.Init<PlayerIdleState>();
         input = new(this);
         input.Init();
-        Observable.EveryUpdate(UnityFrameProvider.FixedUpdate).Subscribe(_ =>
-        {
-            sMachine.curState.FixedUpdate();
-        }).AddTo(this);
     }
 
-    public void HandleInput(InputContext ctx)
+    private void SetupPhysics()
     {
+        tCollider.sharedMaterial = new PhysicsMaterial2D(Define.Layer.PLAYER) { friction = 0, bounciness = 0 };
+        tBody.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+        tBody.sleepMode = RigidbodySleepMode2D.NeverSleep;
+        tBody.interpolation = RigidbodyInterpolation2D.Extrapolate;
+    }
+
+    protected override InputContext FetchContext()
+    {
+        InputContext ctx = input.Get();
         moveInput = ctx.moveInput;
-        intent = ctx;
-        sMachine.curState.HandleState(ctx);
+        return ctx;
     }
 
     public void ExecuteMove() => ExecuteBehavior<MoveBehavior<IMoveData>>(new() { input = moveInput });

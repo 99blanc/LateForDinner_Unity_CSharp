@@ -5,10 +5,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using Token.PRIORITY;
 
-public abstract class AgentControl<TView, TData, TKey, TIntent> : MonoBehaviour, IAgentControl, IAgentModule<TView, TData, TKey>, IPropHolder where TView : class, IViewProvider where TData : class, IData<TKey> where TIntent : struct
+public abstract class AgentControl<TView, TData, TKey> : MonoBehaviour, IAgentControl, IAgentModule<TView, TData, TKey>, IPropHolder where TView : class, IViewProvider where TData : class, IData<TKey>
 {
     private readonly Dictionary<Type, IAgentBehavior> behaviors = new();
-    public TIntent intent;
+    protected IHandler handler { get; private set; }
     public abstract ModulePrority priority { get; }
     public ReactiveProperty<PropContext> props { get; private set; } = new(new());
     public TData config { get; private set; }
@@ -32,6 +32,11 @@ public abstract class AgentControl<TView, TData, TKey, TIntent> : MonoBehaviour,
         itemSocket = gameObject.FindChild(Define.ITEM, true).transform;
         tView = view as IActionView;
         Behaviors();
+        handler = CreateHandler();
+        Observable.EveryUpdate(UnityFrameProvider.FixedUpdate).Subscribe(_ =>
+        {
+            Tasks();
+        }).AddTo(this);
         await UniTask.CompletedTask;
     }
 
@@ -55,4 +60,19 @@ public abstract class AgentControl<TView, TData, TKey, TIntent> : MonoBehaviour,
     }
 
     protected abstract void Behaviors();
+
+    protected abstract IHandler CreateHandler();
+
+    protected virtual void Tasks()
+    {
+        InputContext context = FetchContext();
+        State nextState = handler.GetNextState(this, sMachine, context);
+
+        if (nextState != sMachine.curState)
+            sMachine.Change(nextState);
+
+        sMachine.curState.FixedUpdate();
+    }
+
+    protected abstract InputContext FetchContext();
 }

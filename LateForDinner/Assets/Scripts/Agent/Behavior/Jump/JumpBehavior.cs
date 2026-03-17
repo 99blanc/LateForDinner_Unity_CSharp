@@ -1,3 +1,5 @@
+using UnityEngine;
+
 public class JumpBehavior<T> : IAgentBehavior<T> where T : class, IJumpData
 {
     private IAgentControl agent;

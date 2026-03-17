@@ -26,10 +26,9 @@ public class ClimbBehavior<T> : IAgentBehavior<T> where T : class, IClimbData
         agent.tBody.linearVelocity = Vector2.zero;
         float targetX = agent.isGrounded ? agent.tBody.position.x : cProp.centerX;
         float nextX = Mathf.SmoothDamp(agent.tBody.position.x, targetX, ref xVelocity, Define.Physics.SNAP);
-        float moveY = context.input.y * config.moveSpeed * config.decelObj * Time.fixedDeltaTime;
-        float pivotOffset = agent.tBody.position.y - agent.tCollider.bounds.min.y;
-        float targetY = Mathf.Min(agent.tBody.position.y + moveY, cProp.bounds.max.y + pivotOffset);
-        agent.tBody.MovePosition(new(nextX, targetY));
+        float moveY = context.input.y * agent.tView.moveSpeed.CurrentValue * config.decelObj * Time.fixedDeltaTime;
+        float nextY = agent.tBody.position.y + moveY;
+        agent.tBody.MovePosition(new(nextX, nextY));
     }
 
     public void Terminate()
@@ -48,10 +47,14 @@ public class ClimbBehavior<T> : IAgentBehavior<T> where T : class, IClimbData
         float footY = agent.tCollider.bounds.min.y;
         bool isUp = input.y > 0;
         bool isDown = input.y < 0;
-        bool isHorizontal = Mathf.Abs(input.x) > Define.Physics.TICK;
-        bool shouldExit = agent.isGrounded && (isHorizontal || (isDown && footY <= ladderBottom + Define.Physics.TICK) || (climb.isClimbing && isDown));
-        bool tryEnter = !climb.isClimbing && ((isUp && footY < ladderTop) || (isDown && footY >= ladderTop - Define.Physics.TICK));
-        bool keepClimb = climb.isClimbing && (footY <= ladderTop || isDown) && (footY >= ladderBottom || isUp);
-        return !shouldExit && (tryEnter || keepClimb);
+
+        if (climb.isClimbing)
+        {
+            bool outOfBounds = footY > ladderTop + Define.Physics.HALF || footY < ladderBottom - Define.Physics.HALF;
+            return !outOfBounds;
+        }
+
+        bool withinVerticalRange = footY <= ladderTop && footY >= ladderBottom;
+        return withinVerticalRange && (isUp || isDown);
     }
 }
