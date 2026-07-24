@@ -14,12 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
   m_GroupName: Atlas
   m_GUID: 49ec3e40c257fd946bca96b34b838ae8
-  m_SerializeEntries:
-  - m_GUID: 9778955bb23a47c43b94019b11f7c6c1
-    m_Address: Assets/Atlas/PlayerAtlas.spriteatlasv2
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
+  m_SerializeEntries: []
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 2ef43808b0c64ee419e3ba25f0b00265, type: 2}
   m_SchemaSet:

@@ -15,23 +15,8 @@ MonoBehaviour:
   m_GroupName: Tables
   m_GUID: a66276f4dd8235843b35a9f5852add55
   m_SerializeEntries:
-  - m_GUID: 338e516920d39a94aa95fe7a43da7a60
-    m_Address: Assets/Tables/Tables - Player.csv
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 48c64956355e9e240b58cff3c98f92d7
-    m_Address: Assets/Tables/Tables - Localization_Stat.csv
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 50a8226242a6762439dfdc6099c7f70a
-    m_Address: Assets/Tables/Tables - Localization_UI.csv
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 9a808db227753d84bb2c0583e4e5e2b4
-    m_Address: Assets/Tables/Tables - Localization_Dialogue.csv
+  - m_GUID: e37a895c422706747a845eafd9294c20
+    m_Address: Localization_Log
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

@@ -1,5 +1,0 @@
-# 스텟 현지화 테이블,,,
-# 1. ID 열은 고유 값으로 다른 행과 동일하지 않은 값 지정,,,
-# 2. 언어 설정에 따른 값 분류,,,
-ID,English,Japanese,Korean
-ST.MOVESPEED,MoveSpeed,,이동 속도

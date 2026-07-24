@@ -1,0 +1,38 @@
+{
+  "name": "com.baltin.ufbt",
+  "version": "0.6.4",
+  "displayName": "UniTaskFBT",
+  "description": "Async Functional Behavior Tree implementation based on UniTask",
+  "unity": "2021.2",
+  "keywords": [
+    "unity",
+    "tools",
+    "library",
+    "behavior tree",
+    "ai",
+    "npc",
+    "async",
+    "task"
+  ],
+  "author": {
+    "name": "Dmitry Baltin",
+    "email": "baltin.dmitry@gmail.com",
+    "url": "https://github.com/dmitrybaltin"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "com.cysharp.unitask": "2.5.10"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dmitrybaltin/UnitaskFBT.git"
+  },
+  "bugs": {
+    "url": "https://github.com/dmitrybaltin/UnitaskFBT/issues"
+  },
+  "homepage": "https://github.com/dmitrybaltin/UnitaskFBT",
+  "publishConfig": {
+    "registry": "https://package.openupm.com"
+  },
+  "_fingerprint": "eeb9d4c5a726c8a51f319acdefa82f37ac7491a6"
+}

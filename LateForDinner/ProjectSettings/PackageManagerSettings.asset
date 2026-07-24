@@ -38,6 +38,9 @@ MonoBehaviour:
     - com.neuecc
     - com.joshclose
     - com.github-glitchenzo
+    - com.baltin
+    - games.corundum
+    - com.inspiaaa
     m_IsDefault: 0
     m_Capabilities: 0
     m_ConfigSource: 4
@@ -49,6 +52,6 @@ MonoBehaviour:
   m_RegistryInfoDraft:
     m_Modified: 0
     m_ErrorMessage: 
-    m_UserModificationsInstanceId: -894
+    m_UserModificationsInstanceId: -896
     m_OriginalInstanceId: -898
   m_LoadAssets: 0

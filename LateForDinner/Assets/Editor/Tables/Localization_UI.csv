@@ -1,0 +1,9 @@
+# Table Type: Localization,
+# Description: 게임 내 UI 메시지 현지화 데이터 관리 테이블,
+# Rule: 콤마 사용 불가. KEY는 고유 값이어야 하며 중복 불가. 언어별 텍스트에 포맷팅 파라미터({0} or {1} 등) 사용 가능,
+Key,Text
+# Index: UIPhaseScene,
+UI_Phase_Scene_Step_Config,[UIPhaseScene] 사용자 설정 불러오는 중...
+UI_Phase_Scene_Step_Pool,[UIPhaseScene] 게임 내 사용할 리소스 적재하는 중...
+UI_Phase_Scene_Step_Console,[UIPhaseScene] 콘솔 불러오는 중...
+UI_Phase_Scene_Step_Complete,[UIPhaseScene] 게임 프레임워크 준비 성공

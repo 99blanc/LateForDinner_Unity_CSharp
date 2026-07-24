@@ -1,0 +1,49 @@
+# Table Type: Localization,
+# Description: 게임 내 로그 및 시스템 메시지 현지화 데이터 관리 테이블,
+# Rule: 콤마 사용 불가. KEY는 고유 값이어야 하며 중복 불가. 언어별 텍스트에 포맷팅 파라미터({0} or {1} 등) 사용 가능,
+Key,Text
+# Index: ConfigManager,
+Log_Config_LoadFailed,[ConfigManager] 설정 파일 로드 실패
+Log_Config_SaveFailed,[ConfigManager] 설정 파일 저장 실패
+Log_Config_ResetComplete,[ConfigManager] 설정 초기화 완료
+Log_Config_KeybindLoadFailed,[ConfigManager] 키바인드 에셋 로드 실패
+Log_Config_EngineApplied,[ConfigManager] 엔진 설정 적용 완료
+# Index: DataManager,
+Log_Data_LoadFailed,[DataManager] 데이터 로드 실패: {0}
+Log_Data_DuplicateId,[DataManager] 중복 ID 발견: {0} (파일: {1})
+# Index: LanguageExtensions,
+Log_LanguageExtensions_CultureNotFound,[LanguageExtensions] 유효하지 않은 Culture 코드: {0}
+# Index: LocalizationManager,
+Log_Localization_FileDamaged,[Localization] 손상된 JSON 파일이 존재합니다: {0} ({1})
+Log_Localization_FileCreated,[Localization] JSON 파일 생성됨 ({0}): {1}개 키 저장
+Log_Localization_SyncComplete,[Localization] JSON 동기화 완료 ({0}): {1}개 키 추가
+Log_Localization_SyncFailed,[Localization] SyncAsync 실패 ({0}): {1}
+Log_Localization_Saved,[Localization] 파일 저장 완료: {0}
+Log_Localization_Refreshed,[Localization] 로컬라이제이션 캐시 갱신 완료 ({0}개 키)
+Log_Localization_InvalidFormat,[Localization] 잘못된 형식의 JSON 파일 존재: {0} ({1})
+# Index: PoolManager,
+Log_Pool_SetupComplete,[PoolManager] 폴더 구조 셋업 완료 ({0}개)
+Log_Pool_PopFailed,[PoolManager] 로드할 수 없는 프리팹: {0}
+Log_Pool_PushNull,[PoolManager] 유효하지 않은 오브젝트 반환
+Log_Pool_Cleared,[PoolManager] 풀에 관리되던 모든 오브젝트 정리
+# Index: ResourceManager,
+Log_Resource_LoadFailed,[ResourceManager] 에셋 로드 실패 (경로: {0})
+Log_Resource_LoadException,[ResourceManager] 에셋 로드 중 예외 발생 (경로: {0}): {1}
+Log_Resource_SpriteNotFound,[ResourceManager] 아틀라스({0})에서 찾을 수 없는 스프라이트({1})
+Log_Resource_UnloadedSingle,[ResourceManager] 단일 에셋 핸들 해제 완료 (경로: {0})
+# Index: UIExtensions,
+Log_UIExtensions_NotImplementedEvent,[UIExtensions] 구현되지 않은 ViewEvent 타입: {0}
+# Index: UIManager,
+Log_UI_InitComplete,[UIManager] UI 매니저 초기화 완료
+Log_UI_OpenFailed,[UIManager] 열 수 없는 UI (타입: {0})
+Log_UI_Opened,"[UIManager] UI 오픈 완료 (타입: {0}, 현재 활성 UI: {1}개)"
+Log_UI_Closed,[UIManager] UI 닫기 완료 (잔여 UI: {0}개)
+Log_UI_AlreadyOpened,[UIManager] 이미 열려 있는 UI: {0}
+Log_UI_ClosedAll,[UIManager] 모든 UI 초기화 및 종료
+Log_UI_Focused,[UIManager] UI 포커스 갱신 완료
+# Index: UnityExtensions,
+Log_UnityExtensions_FindChildFailed,[UnityExtensions] {0}의 자식 중 {1}({2}) 오브젝트 검색 실패
+Log_UnityExtensions_GetComponentFailed,[UnityExtensions] {0} 오브젝트에 {1} 컴포넌트 누락
+# Index: UserInterface,
+Log_UserInterface_BindingNotFound,[UserInterface] 바인딩 정보가 없는 타입 요청: {0}
+Log_UserInterface_OutOfRange,"[UserInterface] 잘못된 인덱스: {0}, 배열 크기: {1}"

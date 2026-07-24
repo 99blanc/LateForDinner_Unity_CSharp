@@ -14,12 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
   m_GroupName: Animators
   m_GUID: 64e6f537296d8ed47a2b90fb04bfa67f
-  m_SerializeEntries:
-  - m_GUID: 4c62fb84a1f6ee64ebe0f812d7308a12
-    m_Address: Assets/Animators/Player/PlayerAnimator.controller
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
+  m_SerializeEntries: []
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 2ef43808b0c64ee419e3ba25f0b00265, type: 2}
   m_SchemaSet:

@@ -14,32 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
   m_GroupName: Prefabs
   m_GUID: e1c4e07bf53c73943b25e0677ae30889
-  m_SerializeEntries:
-  - m_GUID: 0e03469133e8be849a761a4bbe6ddb5f
-    m_Address: Assets/Prefabs/Prop/Platform.prefab
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 3bcf6910a76bed848a534116f2d570b0
-    m_Address: Assets/Prefabs/Prop/Box.prefab
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: b4b68aba2a2fa4643a71523a40ef84ce
-    m_Address: Assets/Prefabs/Prop/OneWayPlatform.prefab
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: d086a8596e0b9f54294bcbcc5e8d8795
-    m_Address: Assets/Prefabs/Agent/Player/Player.prefab
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: ee1079948fc4b45498cf1b1787437127
-    m_Address: Assets/Prefabs/Prop/Ladder.prefab
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
+  m_SerializeEntries: []
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 2ef43808b0c64ee419e3ba25f0b00265, type: 2}
   m_SchemaSet:

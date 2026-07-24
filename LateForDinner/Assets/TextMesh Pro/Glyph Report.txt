@@ -1,0 +1,29 @@
+Font:   Style: 
+Point Size: 0   Padding: 10   SP/PD Ratio: Infinity
+
+Characters included: 1537/21376
+Missing characters: 17
+Excluded characters: 0
+
+Characters missing from font file:
+----------------------------------------
+ID: 127	Hex: 7F	Char []
+ID: 65280	Hex: FF00	Char [＀]
+ID: 65440	Hex: FFA0	Char [ﾠ]
+ID: 65471	Hex: FFBF	Char [﾿]
+ID: 65472	Hex: FFC0	Char [￀]
+ID: 65473	Hex: FFC1	Char [￁]
+ID: 65480	Hex: FFC8	Char [￈]
+ID: 65481	Hex: FFC9	Char [￉]
+ID: 65488	Hex: FFD0	Char [￐]
+ID: 65489	Hex: FFD1	Char [￑]
+ID: 65496	Hex: FFD8	Char [￘]
+ID: 65497	Hex: FFD9	Char [￙]
+ID: 65501	Hex: FFDD	Char [￝]
+ID: 65502	Hex: FFDE	Char [￞]
+ID: 65503	Hex: FFDF	Char [￟]
+ID: 65511	Hex: FFE7	Char [￧]
+ID: 65519	Hex: FFEF	Char [￯]
+
+Characters excluded from packing:
+----------------------------------------
