@@ -1,6 +1,7 @@
 using Cysharp.Text;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -8,6 +9,18 @@ using UnityEngine.UI;
 public class UserInterface : MonoBehaviour
 {
     private Dictionary<Type, UnityEngine.Object[]> _views = new Dictionary<Type, UnityEngine.Object[]>();
+    private Dictionary<string, CancellationTokenSource> _tokens = new Dictionary<string, CancellationTokenSource>();
+    private RectTransform _rectTransform;
+    public RectTransform RectTransform
+    {
+        get
+        {
+            if (_rectTransform == null)
+                _rectTransform = gameObject.GetComponentAssert<RectTransform>();
+
+            return _rectTransform;
+        }
+    }
 
     public virtual void Init() 
         => _views.Clear();
@@ -27,16 +40,10 @@ public class UserInterface : MonoBehaviour
 
     protected T Get<T>(int index) where T : UnityEngine.Object
     {
-        bool isNotFound = !_views.TryGetValue(typeof(T), out var newView);
-        Log.Error(Localization.Log_UserInterface_BindingNotFound, isNotFound, typeof(T).Name);
-
-        if (isNotFound)
+        if (!_views.TryGetValue(typeof(T), out var newView))
             return null;
 
-        bool isOutOfRange = index < 0 || index >= newView.Length;
-        Log.Error(Localization.Log_UserInterface_OutOfRange, isOutOfRange, index, newView.Length);
-
-        if (isOutOfRange)
+        if (index < 0 || index >= newView.Length)
             return null;
 
         return newView[index] as T;
@@ -54,6 +61,9 @@ public class UserInterface : MonoBehaviour
     protected void BindButton(Type type) 
         => Bind<Button>(type);
 
+    protected void BindCanvasGroup(Type type)
+        => Bind<CanvasGroup>(type);
+
     protected GameObject GetObject(int index) 
         => Get<GameObject>(index);
 
@@ -65,4 +75,37 @@ public class UserInterface : MonoBehaviour
 
     protected Button GetButton(int index) 
         => Get<Button>(index);
+
+    protected CanvasGroup GetCanvasGroup(int index)
+        => Get<CanvasGroup>(index);
+
+    protected CancellationToken GetToken(string key)
+    {
+        if (_tokens.TryGetValue(key, out var cts))
+        {
+            cts?.Cancel();
+            cts?.Dispose();
+        }
+
+        var cancel = CancellationTokenSource.CreateLinkedTokenSource(destroyCancellationToken);
+        _tokens[key] = cancel;
+        return cancel.Token;
+    }
+
+    private void CancelAll()
+    {
+        foreach (var cts in _tokens.Values)
+        {
+            cts?.Cancel();
+            cts?.Dispose();
+        }
+
+        _tokens.Clear();
+    }
+
+    protected virtual void OnDisable()
+        => CancelAll();
+
+    protected virtual void OnDestroy()
+        => CancelAll();
 }

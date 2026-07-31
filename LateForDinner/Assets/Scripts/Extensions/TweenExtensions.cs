@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public static class TweenExtensions
 {
-    public static async UniTask FadeAsync(this Image image, float start, float end, float duration, CancellationToken token = default)
+    public static async UniTask FadeAsync(this Image image, float start, float end, float duration, float power = 1.0f, CancellationToken token = default)
     {
         float elapsedTime = 0f;
         Color color = image.color;
@@ -16,7 +16,8 @@ public static class TweenExtensions
         {
             token.ThrowIfCancellationRequested();
             elapsedTime += Time.unscaledDeltaTime;
-            float normalizedTime = Mathf.Clamp01(elapsedTime / duration);
+            float rawTime = Mathf.Clamp01(elapsedTime / duration);
+            float normalizedTime = 1f - Mathf.Pow(1f - rawTime, power);
             color.a = Mathf.Lerp(start, end, normalizedTime);
             image.color = color;
 
@@ -27,7 +28,7 @@ public static class TweenExtensions
         image.color = color;
     }
 
-    public static async UniTask FadeAsync(this CanvasGroup canvas, float start, float end, float duration, CancellationToken token = default)
+    public static async UniTask FadeAsync(this CanvasGroup canvas, float start, float end, float duration, float power = 1.0f, CancellationToken token = default)
     {
         if (canvas == null) 
             return;
@@ -40,7 +41,8 @@ public static class TweenExtensions
         {
             token.ThrowIfCancellationRequested();
             elapsedTime += Time.unscaledDeltaTime;
-            float normalizedTime = Mathf.Clamp01(elapsedTime / duration);
+            float rawTime = Mathf.Clamp01(elapsedTime / duration);
+            float normalizedTime = 1f - Mathf.Pow(1f - rawTime, power);
             canvas.alpha = Mathf.Lerp(start, end, normalizedTime);
 
             await UniTask.Yield(PlayerLoopTiming.Update, token);

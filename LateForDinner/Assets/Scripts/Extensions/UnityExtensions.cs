@@ -47,7 +47,6 @@ public static class UnityExtensions
     public static T FindChildAssert<T>(this GameObject gameObject, string name = null, bool recursive = false) where T : Object
     {
         T target = FindChild<T>(gameObject, name, recursive);
-        Log.Error(Localization.Log_UnityExtensions_FindChildFailed, target == null, gameObject != null ? gameObject.name : "Null", string.IsNullOrEmpty(name) ? "Target" : name, typeof(T).Name);
 
         return target;
     }
@@ -55,7 +54,6 @@ public static class UnityExtensions
     public static GameObject FindChildAssert(this GameObject gameObject, string name = null, bool recursive = false)
     {
         Transform target = FindChild<Transform>(gameObject, name, recursive);
-        Log.Error(Localization.Log_UnityExtensions_FindChildFailed, target == null, gameObject != null ? gameObject.name : "Null", string.IsNullOrEmpty(name) ? "Target" : name, nameof(GameObject));
 
         return target != null ? target.gameObject : null;
     }
@@ -63,11 +61,10 @@ public static class UnityExtensions
     public static T GetComponentAssert<T>(this Component component) where T : Component
     {
         T newComponent = component.GetComponent<T>();
-        Log.Error(Localization.Log_UnityExtensions_GetComponentFailed, newComponent == null, component != null ? component.name : "Null", typeof(T).Name);
 
         return newComponent;
     }
 
     public static T GetComponentAssert<T>(this GameObject gameObject) where T : Component
-        => gameObject.GetComponentAssert<T>();
+        => gameObject.GetComponent<T>();
 }

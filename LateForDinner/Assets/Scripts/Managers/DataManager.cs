@@ -9,7 +9,10 @@ public class DataManager
     public Dictionary<string, LocalizationData> Localization { get; private set; } = new Dictionary<string, LocalizationData>();
 
     public async UniTask InitAsync()
-        => Localization = await LoadDictionaryAsync<string, LocalizationData>(Literal.Tables.Localization, data => data.Key);
+    {
+        // TODO ::: 데이터 테이블 추가 입력
+        Localization = await LoadDictionaryAsync<string, LocalizationData>(Literal.Tables.Localization, data => data.Key);
+    }
 
     private async UniTask<List<T>> LoadListAsync<T>(string name)
     {
@@ -18,10 +21,7 @@ public class DataManager
             TextAsset asset = await Managers.Resource.LoadTextAssetAsync(name);
 
             if (asset == null)
-            {
-                Log.Error(global::Localization.Log_Data_LoadFailed, true, name);
                 return new List<T>();
-            }
 
             byte[] encryptedBytes = asset.bytes;
             byte[] decryptedBytes = new byte[encryptedBytes.Length];
@@ -33,8 +33,6 @@ public class DataManager
         }
         catch
         {
-            Log.Error(global::Localization.Log_Data_LoadFailed, true, name);
-
             return new List<T>();
         }
     }
@@ -53,11 +51,7 @@ public class DataManager
             TKey key = keySelector(item);
 
             if (dictionary.ContainsKey(key))
-            {
-                Log.Warning(global::Localization.Log_Data_DuplicateId, true, key, name);
-
                 continue;
-            }
 
             dictionary.Add(key, item);
         }

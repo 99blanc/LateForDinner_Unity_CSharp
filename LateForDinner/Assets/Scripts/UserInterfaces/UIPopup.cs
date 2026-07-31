@@ -1,65 +1,21 @@
-using R3;
-using System;
-using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.InputSystem;
-
-public class UIPopup : UserInterface, IPointerDownHandler
+public class UIPopup : UserInterface
 {
-    private IDisposable _cancel;
-    private Canvas _canvas;
-    private RectTransform _rectTransform;
-    public Canvas Canvas
-    {
-        get 
-        { 
-            if (_canvas == null)
-                _canvas = gameObject.GetComponentAssert<Canvas>();
-
-            return _canvas; 
-        }
-    }
-    public RectTransform RectTransform
-    {
-        get
-        {
-            if (_rectTransform == null)
-                _rectTransform = gameObject.GetComponentAssert<RectTransform>();
-
-            return _rectTransform;
-        }
-    }
-
     public override void Init()
-        => base.Init();
-
-    private void OnEnable()
     {
-        var action = Managers.Config?.ActionAsset;
+        base.Init();
+        var elements = GetComponentsInChildren<UIElement>(true);
 
-        if (action != null)
-        {
-            var cancel = action.FindAction(Literal.Hotkeys.Cancel);
-
-            if (cancel != null)
-            {
-                _cancel = Observable.FromEvent<InputAction.CallbackContext>(h => cancel.performed += h, h => cancel.performed -= h).Subscribe(_ =>
-                {
-                    Close();
-                });
-            }
-        }
+        for (int index = 0; index < elements.Length; index++)
+            elements[index]?.Init();
     }
 
-    private void OnDisable()
+    public virtual void Close()
     {
-        _cancel?.Dispose();
-        _cancel = null;
+        var elements = GetComponentsInChildren<UIElement>(true);
+
+        foreach (var element in elements)
+            element?.Close();
+
+        Managers.UI.Close(this);
     }
-
-    public virtual void Close() 
-        => Managers.UI.ClosePopup(this);
-
-    public virtual void OnPointerDown(PointerEventData data)
-        => Managers.UI.Focus(this);
 }

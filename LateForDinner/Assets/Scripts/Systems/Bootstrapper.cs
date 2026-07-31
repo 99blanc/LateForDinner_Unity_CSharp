@@ -12,13 +12,25 @@ public class Bootstrapper
     {
         await Managers.Instance.CoreAsync();
 
-        var loadingUI = await Managers.UI.OpenSceneAsync<UIPhaseScene>();
+        var splashScene = await Managers.UI.OpenScreenAsync<UISplashScreen>();
+
+        await splashScene.PlayAsync();
+        await LoadAsync();
+    }
+
+    private static async UniTask LoadAsync()
+    {
+        var loadScene = await Managers.UI.OpenScreenAsync<UILoadScreen>();
+        loadScene.PlayAsync().Forget();
         using var disposable = Observable.CombineLatest(Managers.Instance.Progress, Managers.Instance.Message, (progress, msg) => (progress, msg)).Subscribe(x =>
         {
-            loadingUI.Phase(x.progress, x.msg);
+            if (loadScene != null)
+                loadScene.LoadAsync(x.progress, x.msg).Forget();
         });
 
         await Managers.Instance.LoadAsync();
         await UniTask.Delay(1000);
+
+        loadScene.Close();
     }
 }

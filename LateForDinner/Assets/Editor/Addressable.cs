@@ -3,12 +3,11 @@ using UnityEditor;
 using UnityEditor.AddressableAssets;
 using UnityEditor.AddressableAssets.Settings;
 using System.IO;
-using UnityEngine;
 
 public class Addressable
 {
     [MenuItem("Tools/Addressables/Auto Setup Binaries and Systems")]
-    public static void SetupAssets()
+    public static void SetupSystems()
     {
         AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.Settings;
 
@@ -19,6 +18,20 @@ public class Addressable
         int systemsCount = RegisterFolderToGroup(settings, "Assets/" + Literal.Paths.Systems, Literal.Groups.Systems);
         AssetDatabase.SaveAssets();
         EditorUtility.DisplayDialog("Addressables Setup", $"Binaries: {binariesCount} registered\nSystems: {systemsCount} registered\nTotal {binariesCount + systemsCount} assets processed", "OK");
+    }
+
+    [MenuItem("Tools/Addressables/Auto Setup UserInterfaces")]
+    public static void SetupUserInterfaces()
+    {
+        AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.Settings;
+
+        if (settings == null)
+            return;
+
+        int uiCount = RegisterFolderToGroup(settings, "Assets/" + Literal.Paths.UserInterfaces, Literal.Groups.UserInterfaces);
+
+        AssetDatabase.SaveAssets();
+        EditorUtility.DisplayDialog("Addressables UI Setup", $"UserInterfaces: {uiCount} assets processed", "OK");
     }
 
     private static int RegisterFolderToGroup(AddressableAssetSettings settings, string path, string name)

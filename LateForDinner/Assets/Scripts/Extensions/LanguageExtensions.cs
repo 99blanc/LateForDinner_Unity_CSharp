@@ -13,8 +13,6 @@ public static class LanguageExtensions
         }
         catch
         {
-            Log.Warning(Localization.Log_LanguageExtensions_CultureNotFound, true, language);
-
             return language;
         }
     }

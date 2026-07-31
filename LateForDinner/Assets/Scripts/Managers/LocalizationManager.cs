@@ -12,8 +12,8 @@ public class LocalizationManager
     public async UniTask InitAsync()
     {
         await SyncAsync();
-        await RefreshAsync();
-        Managers.Log.Notify();
+
+        RefreshAsync();
     }
 
     private async UniTask SyncAsync()
@@ -38,7 +38,7 @@ public class LocalizationManager
             }
             catch
             {
-                Log.Error(Localization.Log_Localization_FileDamaged, true, file);
+                // DESC ::: 예외 발생 시 무시
             }
         }
 
@@ -59,8 +59,6 @@ public class LocalizationManager
                     Locate = language,
                     Translations = GetLocalizations()
                 };
-
-                Log.System(Localization.Log_Localization_FileCreated, true, language, file.Translations.Count);
 
                 await SaveAsync(path, file);
             }
@@ -83,7 +81,6 @@ public class LocalizationManager
                 {
                     file.Locate = language;
                     file.Translations = _overrides;
-                    Log.System(Localization.Log_Localization_SyncComplete, true, language, addedCount);
 
                     await SaveAsync(path, file);
                 }
@@ -93,25 +90,27 @@ public class LocalizationManager
         }
         catch
         {
-            Log.Error(Localization.Log_Localization_SyncFailed, true, language);
+            // DESC ::: 예외 발생 시 무시
         }
     }
 
     private async UniTask SaveAsync(string path, LocalizationFormat file)
     {
-        string json = JsonConvert.SerializeObject(file, Formatting.Indented);
-
-        await File.WriteAllTextAsync(path, json);
-        Log.System(Localization.Log_Localization_Saved, true, path);
+        try
+        {
+            string json = JsonConvert.SerializeObject(file, Formatting.Indented);
+            await File.WriteAllTextAsync(path, json);
+        }
+        catch
+        {
+            // DESC ::: 예외 발생 시 무시
+        }
     }
 
-    public async UniTask RefreshAsync()
+    public void RefreshAsync()
     {
         _caches.Clear();
         _caches = GetLocalizations();
-
-        await UniTask.CompletedTask;
-        Log.System(Localization.Log_Localization_Refreshed, true, _caches.Count);
     }
 
     private Dictionary<string, string> GetLocalizations()
@@ -158,7 +157,7 @@ public class LocalizationManager
             }
             catch
             {
-                Log.Error(Localization.Log_Localization_InvalidFormat, true, file);
+                // DESC ::: 예외 발생 시 무시
             }
         }
 
@@ -167,10 +166,10 @@ public class LocalizationManager
 
     public string Get(string id)
     {
-        if (_overrides.TryGetValue(id, out var text)) 
+        if (_overrides.TryGetValue(id, out var text))
             return text;
 
-        if (_caches.TryGetValue(id, out text)) 
+        if (_caches.TryGetValue(id, out text))
             return text;
 
         return id;

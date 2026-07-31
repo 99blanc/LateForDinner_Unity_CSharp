@@ -7,10 +7,7 @@ using UnityEngine.EventSystems;
 public static class UIExtensions
 {
     private static Observable<PointerEventData> Return(ViewEvent type)
-    {
-        Log.Error(Localization.Log_UIExtensions_NotImplementedEvent, true, type);
-        return Observable.Empty<PointerEventData>();
-    }
+        => Observable.Empty<PointerEventData>();
 
     public static void BindView(this UIBehaviour view, Action<PointerEventData> action, ViewEvent type, Component component)
     {
