@@ -9,6 +9,13 @@ public class ResourceManager
 {
     private readonly Dictionary<string, AsyncOperationHandle> _handles = new Dictionary<string, AsyncOperationHandle>();
 
+    public async UniTask InitAsync()
+    {
+        _handles.Clear();
+
+        await Addressables.InitializeAsync().ToUniTask();
+    }
+
     private async UniTask<T> LoadAsync<T>(string path) where T : Object
     {
         if (_handles.TryGetValue(path, out var handle) && !handle.IsValid())

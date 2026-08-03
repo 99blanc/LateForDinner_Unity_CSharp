@@ -53,4 +53,34 @@ public static class TweenExtensions
         if (end <= 0f)
             canvas.blocksRaycasts = false;
     }
+
+    public static async UniTask TogglePanelAsync(this CanvasGroup canvas, bool isActive, float duration = 0.2f, CancellationToken token = default)
+    {
+        if (canvas == null) 
+            return;
+
+        if (isActive)
+        {
+            canvas.blocksRaycasts = true;
+
+            await canvas.FadeAsync(canvas.alpha, 1f, duration, 1f, token);
+        }
+        else
+        {
+            await canvas.FadeAsync(canvas.alpha, 0f, duration, 1f, token);
+
+            canvas.blocksRaycasts = false;
+            canvas.interactable = false;
+        }
+    }
+
+    public static void SetActivePanel(this CanvasGroup canvas, bool isActive)
+    {
+        if (canvas == null) 
+            return;
+
+        canvas.alpha = isActive ? 1f : 0f;
+        canvas.interactable = isActive;
+        canvas.blocksRaycasts = isActive;
+    }
 }

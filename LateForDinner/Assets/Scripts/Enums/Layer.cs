@@ -1,7 +1,7 @@
 public enum Layer
 {
-    Background = 0,
-    Screen = 100,
-    Popup = 200,
-    System = 300
+    Screen = 0,
+    Popup = 100,
+    System = 200,
+    Lock = 300
 }

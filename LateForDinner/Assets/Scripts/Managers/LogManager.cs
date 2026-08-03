@@ -35,18 +35,42 @@ public class LogManager
 
     public void Write(Localization key, LogType type)
     {
-        string newKey = key.ToString();
-        string raw = (Managers.Localization == null) ? newKey : Managers.Localization.Get(newKey);
-        string message = string.IsNullOrEmpty(raw) ? newKey : raw;
+        string message = GetMessage(key);
         Write(message, type);
     }
 
+    public void Write<T1>(Localization key, LogType type, T1 arg1)
+    {
+        string message = GetMessage(key);
+        string formatted = ZString.Format(message, arg1);
+        Write(formatted, type);
+    }
+
+    public void Write<T1, T2>(Localization key, LogType type, T1 arg1, T2 arg2)
+    {
+        string message = GetMessage(key);
+        string formatted = ZString.Format(message, arg1, arg2);
+        Write(formatted, type);
+    }
+
+    public void Write<T1, T2, T3>(Localization key, LogType type, T1 arg1, T2 arg2, T3 arg3)
+    {
+        string message = GetMessage(key);
+        string formatted = ZString.Format(message, arg1, arg2, arg3);
+        Write(formatted, type);
+    }
     public void Write(Localization key, LogType type, params object[] args)
+    {
+        string message = GetMessage(key);
+        string formatted = (args != null && args.Length > 0) ? ZString.Format(message, args) : message;
+        Write(formatted, type);
+    }
+
+    private string GetMessage(Localization key)
     {
         string newKey = key.ToString();
         string raw = (Managers.Localization == null) ? newKey : Managers.Localization.Get(newKey);
-        string message = string.IsNullOrEmpty(raw) ? newKey : raw;
-        string formattedMessage = (args != null && args.Length > 0) ? ZString.Format(message, args) : message;
-        Write(formattedMessage, type);
+
+        return string.IsNullOrEmpty(raw) ? newKey : raw;
     }
 }

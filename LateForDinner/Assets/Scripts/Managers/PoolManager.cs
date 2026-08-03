@@ -22,35 +22,10 @@ public class PoolManager
     }
     private readonly Dictionary<string, Queue<GameObject>> _registries = new Dictionary<string, Queue<GameObject>>();
     private readonly Dictionary<string, Transform> _folders = new Dictionary<string, Transform>();
-
     private readonly Dictionary<string, string> _maps = new Dictionary<string, string>()
     {
         { Literal.Keys.UI, Literal.Roots.UserInterfaces },
     };
-
-    [Serializable]
-    private struct Debug
-    {
-        public string key;
-        public int count;
-
-        public Debug(string key, int count)
-        {
-            this.key = key;
-            this.count = count;
-        }
-    }
-
-    [SerializeField]
-    private List<Debug> _debugs = new List<Debug>();
-
-    private void SyncDebug()
-    {
-        _debugs.Clear();
-
-        foreach (var pair in _registries)
-            _debugs.Add(new Debug(pair.Key, pair.Value.Count));
-    }
 
     public async UniTask InitAsync()
     {
@@ -96,7 +71,6 @@ public class PoolManager
             instance.SetActive(true);
         }
 
-        SyncDebug();
         GameObject target = instance;
         IDisposable rentHandle = Disposable.Create(() => Push(target, key));
 
@@ -124,7 +98,6 @@ public class PoolManager
         gameObject.SetActive(false); 
         gameObject.transform.SetParent(Get(newKey), false);
         _registries[newKey].Enqueue(gameObject);
-        SyncDebug();
     }
 
     public void Push(Component component, string key = null)
@@ -161,6 +134,18 @@ public class PoolManager
         }
 
         _registries.Clear();
-        SyncDebug();
     }
+
+    public Dictionary<string, int> GetRegistrySnapshot()
+    {
+        var snapshot = new Dictionary<string, int>();
+
+        foreach (var pair in _registries)
+            snapshot[pair.Key] = pair.Value.Count;
+
+        return snapshot;
+    }
+
+    public Dictionary<string, string> GetMapsSnapshot()
+        => new Dictionary<string, string>(_maps);
 }

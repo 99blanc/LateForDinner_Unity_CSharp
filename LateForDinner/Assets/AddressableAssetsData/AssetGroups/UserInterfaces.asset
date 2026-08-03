@@ -15,6 +15,11 @@ MonoBehaviour:
   m_GroupName: UserInterfaces
   m_GUID: 47595298b01c96f4e88de01f6be8fcce
   m_SerializeEntries:
+  - m_GUID: 457fc1c7f6a29cf4e8b85ab7eafd8948
+    m_Address: UILock
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 5d22fcbcf52874944b53b8a2ef0b77d4
     m_Address: UIRoot
     m_ReadOnly: 0
@@ -22,6 +27,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: cff5543f996a8f24f8988057d5030b8f
     m_Address: UILoadScreen
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d268081d9ce253c4597fbec0a5f5f039
+    m_Address: UISaveSlot
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

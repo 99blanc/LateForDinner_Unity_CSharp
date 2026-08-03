@@ -2,5 +2,10 @@
 # Description: 게임 내 UI 메시지 현지화 데이터 관리 테이블,
 # Rule: 콤마 사용 불가. KEY는 고유 값이어야 하며 중복 불가. 언어별 텍스트에 포맷팅 파라미터({0} or {1} 등) 사용 가능,
 Key,Text
-# Index: UITitleScene,
-UI_Title_Scene_Press_Any_Key,Press any key to start.
+# Index: UITitleScreen,
+UI_Title_Screen_Text_Press_Any_Key,Press any key to start.
+# Index: UISaveSlot,
+UI_Save_Slot_Text_Slot,Day {0}
+UI_Save_Slot_Text_Day,{0}/{1}/{2}
+UI_Save_Slot_Text_Time,{0}:{1}:{2}
+UI_Save_Slot_Text_None,None

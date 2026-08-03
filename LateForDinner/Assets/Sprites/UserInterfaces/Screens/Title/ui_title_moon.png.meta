@@ -1,0 +1,219 @@
+fileFormatVersion: 2
+guid: 43f36eaf09e9b8f4b830d22b1b6ed3e7
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 8155597480847398465
+    second: ui_title_moon_0
+  - first:
+      213: 4618287621741827810
+    second: ui_title_moon_1
+  - first:
+      213: 2335802002752903846
+    second: ui_title_moon_2
+  - first:
+      213: -495743573787751790
+    second: ui_title_moon_3
+  - first:
+      213: 7943795619390374242
+    second: ui_title_moon_4
+  - first:
+      213: -6363796731566752969
+    second: ui_title_moon_5
+  - first:
+      213: -3649948179768791729
+    second: ui_title_moon_6
+  - first:
+      213: -4451548281913983299
+    second: ui_title_moon_7
+  - first:
+      213: 6287582495263092845
+    second: ui_title_moon_8
+  - first:
+      213: 6610705234598856840
+    second: ui_title_moon_9
+  - first:
+      213: 8176685466267080525
+    second: ui_title_moon_10
+  - first:
+      213: -8989048209141044243
+    second: ui_title_moon_11
+  - first:
+      213: -5801529007110545961
+    second: ui_title_moon_12
+  - first:
+      213: 2004605423445964332
+    second: ui_title_moon_13
+  - first:
+      213: 1759310625709016649
+    second: ui_title_moon_14
+  - first:
+      213: 1403083177962102679
+    second: ui_title_moon_15
+  - first:
+      213: 6653678767873919451
+    second: ui_title_moon_16
+  - first:
+      213: -2639968346178562782
+    second: ui_title_moon_17
+  - first:
+      213: 3551506002346404560
+    second: ui_title_moon_18
+  - first:
+      213: 7719157510174802645
+    second: ui_title_moon_19
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 0
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 200
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 1
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: ui_title_moon_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 300
+        height: 300
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 146daf8d2b08e2170800000000000000
+      internalID: 8155597480847398465
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5d7e6647ab30ca0439bea9456c161b8c
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      ui_title_moon_0: 8155597480847398465
+      ui_title_moon_1: 4618287621741827810
+      ui_title_moon_10: 8176685466267080525
+      ui_title_moon_11: -8989048209141044243
+      ui_title_moon_12: -5801529007110545961
+      ui_title_moon_13: 2004605423445964332
+      ui_title_moon_14: 1759310625709016649
+      ui_title_moon_15: 1403083177962102679
+      ui_title_moon_16: 6653678767873919451
+      ui_title_moon_17: -2639968346178562782
+      ui_title_moon_18: 3551506002346404560
+      ui_title_moon_19: 7719157510174802645
+      ui_title_moon_2: 2335802002752903846
+      ui_title_moon_3: -495743573787751790
+      ui_title_moon_4: 7943795619390374242
+      ui_title_moon_5: -6363796731566752969
+      ui_title_moon_6: -3649948179768791729
+      ui_title_moon_7: -4451548281913983299
+      ui_title_moon_8: 6287582495263092845
+      ui_title_moon_9: 6610705234598856840
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

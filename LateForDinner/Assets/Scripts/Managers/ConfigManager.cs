@@ -1,3 +1,4 @@
+using Cysharp.Text;
 using Cysharp.Threading.Tasks;
 using MemoryPack;
 using System.IO;
@@ -5,8 +6,8 @@ using UnityEngine;
 
 public class ConfigManager
 {
-    private string _temp => Path.Combine(Application.persistentDataPath, Literal.Files.Config_Temp);
-    private string _save => Path.Combine(Application.persistentDataPath, Literal.Files.Config);
+    private string _temp => Path.Combine(Application.persistentDataPath, ZString.Concat(Literal.Files.Config, Literal.Extensions.Temp));
+    private string _save => Path.Combine(Application.persistentDataPath, ZString.Concat(Literal.Files.Config, Literal.Extensions.Bytes));
     public Settings Settings { get; private set; } = new Settings();
 
     public async UniTask InitAsync()
@@ -24,7 +25,7 @@ public class ConfigManager
         try
         {
             byte[] bytes = await File.ReadAllBytesAsync(_save);
-            Settings = MemoryPackSerializer.Deserialize<Settings>(bytes);
+            Settings = MemoryPackSerializer.Deserialize<Settings>(bytes) ?? new Settings();
         }
         catch
         {

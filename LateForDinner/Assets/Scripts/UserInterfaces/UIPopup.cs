@@ -3,7 +3,7 @@ public class UIPopup : UserInterface
     public override void Init()
     {
         base.Init();
-        var elements = GetComponentsInChildren<UIElement>(true);
+        var elements = GetComponentsInChildren<UISlot>(true);
 
         for (int index = 0; index < elements.Length; index++)
             elements[index]?.Init();
@@ -11,7 +11,7 @@ public class UIPopup : UserInterface
 
     public virtual void Close()
     {
-        var elements = GetComponentsInChildren<UIElement>(true);
+        var elements = GetComponentsInChildren<UISlot>(true);
 
         foreach (var element in elements)
             element?.Close();

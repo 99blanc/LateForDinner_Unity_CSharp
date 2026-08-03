@@ -92,6 +92,16 @@ public class UserInterface : MonoBehaviour
         return cancel.Token;
     }
 
+    protected void CancelToken(string key)
+    {
+        if (_tokens.TryGetValue(key, out var cts))
+        {
+            cts?.Cancel();
+            cts?.Dispose();
+            _tokens.Remove(key);
+        }
+    }
+
     private void CancelAll()
     {
         foreach (var cts in _tokens.Values)

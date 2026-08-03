@@ -1,8 +1,8 @@
+using Cysharp.Text;
 using Cysharp.Threading.Tasks;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.IO;
-using UnityEngine;
 
 public class LocalizationManager
 {
@@ -18,9 +18,9 @@ public class LocalizationManager
 
     private async UniTask SyncAsync()
     {
-        string dir = GetDirectory();
+        string dir = Literal.Folders.Localizations.GetDirectory();
         string language = Managers.Config?.Settings?.Access?.language ?? Literal.Languages.Korean;
-        string path = Path.Combine(dir, $"Localization_{language.ToEnglish()}.json");
+        string path = Path.Combine(dir, $"{Literal.Files.Localization}_{language.ToEnglish()}{Literal.Extensions.Json}");
         string[] files = Directory.GetFiles(dir, "*.json");
 
         foreach (string file in files)
@@ -126,20 +126,10 @@ public class LocalizationManager
         return dict;
     }
 
-    private string GetDirectory()
-    {
-        string dir = Path.Combine(Application.persistentDataPath, "Localizations");
-
-        if (!Directory.Exists(dir))
-            Directory.CreateDirectory(dir);
-
-        return dir;
-    }
-
     public List<string> GetLanguages()
     {
         var languages = new List<string>();
-        string dir = GetDirectory();
+        string dir = Literal.Folders.Localizations.GetDirectory();
         string[] files = Directory.GetFiles(dir, "*.json");
 
         foreach (string file in files)
@@ -177,4 +167,63 @@ public class LocalizationManager
 
     public string Get(Localization id)
         => Get(id.ToString());
+
+    public string Get<T1>(Localization id, T1 arg1)
+    {
+        string text = Get(id);
+
+        try 
+        { 
+            return ZString.Format(text, arg1); 
+        }
+        catch 
+        { 
+            return text; 
+        }
+    }
+
+    public string Get<T1, T2>(Localization id, T1 arg1, T2 arg2)
+    {
+        string text = Get(id);
+        
+        try 
+        { 
+            return ZString.Format(text, arg1, arg2); 
+        }
+        catch 
+        { 
+            return text; 
+        }
+    }
+
+    public string Get<T1, T2, T3>(Localization id, T1 arg1, T2 arg2, T3 arg3)
+    {
+        string text = Get(id);
+
+        try 
+        { 
+            return ZString.Format(text, arg1, arg2, arg3); 
+        }
+        catch 
+        { 
+            return text; 
+        }
+    }
+
+    public string Get(Localization id, params object[] args)
+    {
+        string text = Get(id);
+        
+        if (args == null || args.Length == 0) 
+            return text;
+
+        try 
+        { 
+            return ZString.Format(text, args); 
+        }
+        catch 
+        { 
+            return text; 
+        }
+    }
 }

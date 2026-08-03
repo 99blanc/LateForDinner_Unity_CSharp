@@ -8,10 +8,7 @@ using UnityEngine.InputSystem;
 public class ControlManager
 {
     private InputActionAsset _action;
-    private readonly Dictionary<string, Subject<Unit>> _subjects = new Dictionary<string, Subject<Unit>>();
-    private readonly Dictionary<string, ReactiveProperty<Vector2>> _inputs = new Dictionary<string, ReactiveProperty<Vector2>>();
-    private readonly ReactiveProperty<string> _map = new ReactiveProperty<string>(string.Empty);
-    public ReadOnlyReactiveProperty<string> Map => _map;
+    private readonly Dictionary<string, InputAction> _caches = new Dictionary<string, InputAction>();
 
     public async UniTask InitAsync()
         => await LoadAsync();
@@ -28,79 +25,49 @@ public class ControlManager
         if (Managers.Config?.Settings != null && !string.IsNullOrEmpty(Managers.Config.Settings.Access.keybind))
             _action.LoadBindingOverridesFromJson(Managers.Config.Settings.Access.keybind);
 
-        Bind();
-        Switch(Literal.Maps.User);
+        CacheActions();
+        _action.Enable();
     }
 
-    private void Bind()
+    private void CacheActions()
     {
         if (_action == null)
             return;
+
+        _caches.Clear();
 
         foreach (var map in _action.actionMaps)
         {
             foreach (var action in map.actions)
-            {
-                if (action.expectedControlType == Literal.Maps.Vector2)
-                {
-                    var prop = new ReactiveProperty<Vector2>(Vector2.zero);
-                    _inputs[action.name] = prop;
-                    action.performed += ctx => prop.Value = ctx.ReadValue<Vector2>();
-                    action.canceled += _ => prop.Value = Vector2.zero;
-                }
-                else
-                {
-                    var subject = new Subject<Unit>();
-                    _subjects[action.name] = subject;
-                    action.performed += _ => subject.OnNext(Unit.Default);
-                }
-            }
+                _caches[action.name] = action;
         }
     }
 
-    public Observable<Unit> GetSubject(string action)
+    public bool IsPressed(string actionName)
+        => _caches.TryGetValue(actionName, out var action) && action.IsPressed();
+
+    public bool IsTriggered(string actionName)
+        => _caches.TryGetValue(actionName, out var action) && action.triggered;
+
+    public Vector2 GetVector2(string actionName)
     {
-        if (!_subjects.TryGetValue(action, out var subject))
-        {
-            subject = new Subject<Unit>();
-            _subjects[action] = subject;
-        }
+        if (_caches.TryGetValue(actionName, out var action))
+            return action.ReadValue<Vector2>();
 
-        return subject;
+        return Vector2.zero;
     }
 
-    public ReadOnlyReactiveProperty<Vector2> GetInput(string action)
+    public Observable<Unit> AsObservable(string action)
     {
-        if (!_inputs.TryGetValue(action, out var prop))
-        {
-            prop = new ReactiveProperty<Vector2>(Vector2.zero);
-            _inputs[action] = prop;
-        }
+        if (!_caches.TryGetValue(action, out var output) || output == null)
+            return Observable.Empty<Unit>();
 
-        return prop;
+        return Observable.FromEvent<InputAction.CallbackContext>(h => output.performed += h, h => output.performed -= h).Select(_ => Unit.Default);
     }
 
-    public void Switch(string map)
-    {
-        if (_action == null)
-            return;
+    public IDisposable Subscribe(string actionName, Action onPerformed)
+        => AsObservable(actionName).Subscribe(_ => onPerformed());
 
-        _action.Disable();
-        var targetMap = _action.FindActionMap(map);
-
-        if (targetMap != null)
-        {
-            targetMap.Enable();
-            _map.Value = map;
-        }
-    }
-
-    public IDisposable Subscribe(string action, Action onPerformed)
-        => GetSubject(action).Subscribe(_ => onPerformed());
-
-    public IDisposable Subscribe(string action, Action<Vector2> onValueChanged)
-        => GetInput(action).Subscribe(onValueChanged);
-    
     public string Save()
         => _action?.SaveBindingOverridesAsJson() ?? string.Empty;
 

@@ -34,6 +34,20 @@ public class Addressable
         EditorUtility.DisplayDialog("Addressables UI Setup", $"UserInterfaces: {uiCount} assets processed", "OK");
     }
 
+    [MenuItem("Tools/Addressables/Auto Setup Atlases")]
+    public static void SetupAtlases()
+    {
+        AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.Settings;
+
+        if (settings == null)
+            return;
+
+        int atlasCount = RegisterFolderToGroup(settings, "Assets/" + Literal.Paths.Atlases, Literal.Groups.Atlases);
+
+        AssetDatabase.SaveAssets();
+        EditorUtility.DisplayDialog("Addressables Atlas Setup", $"Atlases: {atlasCount} assets processed", "OK");
+    }
+
     private static int RegisterFolderToGroup(AddressableAssetSettings settings, string path, string name)
     {
         if (!Directory.Exists(path))

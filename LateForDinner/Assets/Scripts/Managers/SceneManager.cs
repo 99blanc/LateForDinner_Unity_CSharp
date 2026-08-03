@@ -6,9 +6,9 @@ public class SceneManager
     public async UniTask LoadAsync(string scene)
     {
         var loadScene = await Managers.UI.OpenScreenAsync<UILoadScreen>();
-        loadScene.PlayAsync().Forget();
 
         await loadScene.LoadAsync(0.1f, Managers.Localization.Get(Localization.Log_SceneManager_Load_Map));
+        await loadScene.PlayAsync();
 
         var async = UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(scene);
         async.allowSceneActivation = false;

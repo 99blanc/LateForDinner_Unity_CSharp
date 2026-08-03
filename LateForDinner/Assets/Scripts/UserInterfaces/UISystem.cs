@@ -1,5 +1,3 @@
-using UnityEngine;
-
 public class UISystem : UserInterface
 {
     public virtual void Close()

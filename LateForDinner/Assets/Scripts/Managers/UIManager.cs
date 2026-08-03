@@ -3,6 +3,8 @@ using Cysharp.Threading.Tasks;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.InputSystem.UI;
 using UnityEngine.UI;
 
 public class UIManager
@@ -17,10 +19,11 @@ public class UIManager
             {
                 _root = new GameObject { name = Literal.Roots.UserInterfaces };
                 _root.transform.SetParent(Managers.Instance.transform, false);
-                CreateLayer(Layer.Background, 0);
-                CreateLayer(Layer.Screen, 100);
-                CreateLayer(Layer.Popup, 200);
-                CreateLayer(Layer.System, 300);
+                EventSystem();
+                CreateLayer(Layer.Screen);
+                CreateLayer(Layer.Popup);
+                CreateLayer(Layer.System);
+                CreateLayer(Layer.Lock);
             }
 
             return _root;
@@ -39,6 +42,31 @@ public class UIManager
     private readonly List<UIPopup> _popups = new List<UIPopup>();
     private readonly Dictionary<UserInterface, IDisposable> _handles = new Dictionary<UserInterface, IDisposable>();
     private UIScreen _screen;
+    private UILock _lock;
+
+    public async UniTask InitAsync()
+    {
+        var _ = Root;
+        var (instance, rentHandle) = await Managers.Pool.PopAsync<UILock>(_layer[Layer.Lock]);
+
+        if (instance != null)
+        {
+            _lock = instance;
+            _lock.Init();
+        }
+    }
+
+    private void EventSystem()
+    {
+        var system = new GameObject { name = Literal.Roots.Events };
+        system.transform.SetParent(Managers.Instance.transform, false);
+        system.AddComponent<EventSystem>();
+#if ENABLE_INPUT_SYSTEM
+        system.AddComponent<InputSystemUIInputModule>();
+#else
+        system.AddComponent<StandaloneInputModule>();
+#endif
+    }
 
     private GameObject CreateCanvas(string name, Transform parent, int sortingOrder, out Canvas canvasOut)
     {
@@ -57,10 +85,10 @@ public class UIManager
         return gameObject;
     }
 
-    private void CreateLayer(Layer layer, int sortingOrder)
+    private void CreateLayer(Layer layer)
     {
-        string name = ZString.Concat(Literal.Roots.Layer, $"{layer}");
-        var gameObject = CreateCanvas(name, _root.transform, sortingOrder, out var canvas);
+        string name = ZString.Concat(Literal.Roots.Layers, $"{layer}");
+        var gameObject = CreateCanvas(name, _root.transform, (int)layer, out var canvas);
 
         if (layer == Layer.Screen)
             _canvas = canvas;
@@ -193,4 +221,21 @@ public class UIManager
         for (int index = 0; index < _popups.Count; index++)
             _popups[index].transform.SetSiblingIndex(siblingIndex++);
     }
+
+    public async UniTask LockAsync(Func<UniTask> action)
+    {
+        _lock?.SetActive(true);
+
+        try
+        {
+            await action();
+        }
+        finally
+        {
+            _lock?.SetActive(false);
+        }
+    }
+
+    public T GetScreen<T>() where T : UIScreen
+        => _screen as T;
 }
