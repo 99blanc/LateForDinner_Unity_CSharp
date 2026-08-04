@@ -21,7 +21,7 @@ public static class UIExtensions
         };
     }
 
-    public static void BindState(this UIBehaviour view, ReactiveProperty<ButtonState> prop, Action onClick, Component component, Action onResetState = null)
+    public static void BindButtonEvent(this UIBehaviour view, Action onClick, Component component, ReactiveProperty<ButtonState> prop, Action onResetState = null)
     {
         view.BindView(_ => prop.Value = ButtonState.Highlight, ViewEvent.Enter, component, prop);
         view.BindView(_ => prop.Value = ButtonState.Press, ViewEvent.Press, component, prop);
@@ -31,10 +31,12 @@ public static class UIExtensions
         view.BindView(_ => onClick?.Invoke(), ViewEvent.LeftClick, component, prop);
     }
 
-    public static void BindButton(this Image targetImage, ReadOnlyReactiveProperty<ButtonState> stateProp, string atlas, Component component)
+    public static void BindButtonState(this Image targetImage, ReadOnlyReactiveProperty<ButtonState> stateProp, string atlas, Component component)
     {
-        // TODO ::: async / await 패턴 더 안전하게 사용
-        stateProp.Subscribe(async state =>
+        if (targetImage == null) 
+            return;
+
+        stateProp.Subscribe(state =>
         {
             string name = state switch
             {
@@ -44,18 +46,16 @@ public static class UIExtensions
                 ButtonState.Disable => Define.Sprite.Button_Disable,
                 _ => Define.Sprite.Button_Normal
             };
-
-            Sprite sprite = await Managers.Resource.LoadSpriteAsync(atlas, name);
-
-            if (targetImage != null && name != null)
-                targetImage.sprite = sprite;
+            targetImage.sprite = Managers.Resource.GetSpriteFromAtlas(atlas, name);
         }).AddTo(component);
     }
 
-    public static void BindArrowButton(this Image targetImage, ReadOnlyReactiveProperty<ButtonState> stateProp, string atlas, Component component)
+    public static void BindButtonArrowState(this Image targetImage, ReadOnlyReactiveProperty<ButtonState> stateProp, string atlas, Component component)
     {
-        // TODO ::: async / await 패턴 더 안전하게 사용
-        stateProp.Subscribe(async state =>
+        if (targetImage == null)
+            return;
+
+        stateProp.Subscribe(state =>
         {
             string name = state switch
             {
@@ -65,10 +65,7 @@ public static class UIExtensions
                 _ => Define.Sprite.Button_Arrow_Normal
             };
 
-            Sprite sprite = await Managers.Resource.LoadSpriteAsync(atlas, name);
-
-            if (targetImage != null && name != null)
-                targetImage.sprite = sprite;
+            targetImage.sprite = Managers.Resource.GetSpriteFromAtlas(atlas, name);
         }).AddTo(component);
     }
 

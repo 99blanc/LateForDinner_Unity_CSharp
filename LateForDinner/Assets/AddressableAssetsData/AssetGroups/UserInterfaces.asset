@@ -25,6 +25,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 726c94b02841dbd43ada3ed5c0272a05
+    m_Address: UIOptionPopup
+    m_ReadOnly: 1
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: cff5543f996a8f24f8988057d5030b8f
     m_Address: UILoadScreen
     m_ReadOnly: 0

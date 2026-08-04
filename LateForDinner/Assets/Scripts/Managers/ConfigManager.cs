@@ -8,7 +8,7 @@ public class ConfigManager
 {
     private string _temp => Path.Combine(Application.persistentDataPath, ZString.Concat(Literal.Files.Config, Literal.Extensions.Temp));
     private string _save => Path.Combine(Application.persistentDataPath, ZString.Concat(Literal.Files.Config, Literal.Extensions.Bytes));
-    public Settings Settings { get; private set; } = new Settings();
+    public Option Option { get; private set; } = new Option();
 
     public async UniTask InitAsync()
         => await LoadAsync();
@@ -17,7 +17,7 @@ public class ConfigManager
     {
         if (!File.Exists(_save))
         {
-            Settings = new Settings();
+            Option = new Option();
             await SaveAsync();
             return;
         }
@@ -25,11 +25,11 @@ public class ConfigManager
         try
         {
             byte[] bytes = await File.ReadAllBytesAsync(_save);
-            Settings = MemoryPackSerializer.Deserialize<Settings>(bytes) ?? new Settings();
+            Option = MemoryPackSerializer.Deserialize<Option>(bytes) ?? new Option();
         }
         catch
         {
-            Settings = new Settings();
+            Option = new Option();
         }
 
         ApplyToEngine();
@@ -39,7 +39,7 @@ public class ConfigManager
     {
         try
         {
-            byte[] bytes = MemoryPackSerializer.Serialize(Settings);
+            byte[] bytes = MemoryPackSerializer.Serialize(Option);
             await File.WriteAllBytesAsync(_temp, bytes);
 
             if (File.Exists(_save))
@@ -57,7 +57,7 @@ public class ConfigManager
 
     public async UniTask ResetAsync()
     {
-        Settings = new Settings();
+        Option = new Option();
         Managers.Control.Reset();
 
         await SaveAsync();
@@ -65,17 +65,17 @@ public class ConfigManager
 
     public async UniTask SaveKeybindAsync()
     {
-        Settings.Access.keybind = Managers.Control.Save();
+        Option.Access.keybind = Managers.Control.Save();
 
         await SaveAsync();
     }
 
     public void ApplyToEngine()
     {
-        Screen.SetResolution(Settings.Graphic.rWidth, Settings.Graphic.rHeight, Settings.Graphic.screenMode);
-        QualitySettings.vSyncCount = Settings.Graphic.vSync ? 1 : 0;
-        Application.targetFrameRate = Settings.Graphic.frameRate;
-        QualitySettings.SetQualityLevel(Settings.Graphic.quality);
-        Application.runInBackground = !Settings.Sound.mBackground;
+        Screen.SetResolution(Option.Graphic.rWidth, Option.Graphic.rHeight, Option.Graphic.screenMode);
+        QualitySettings.vSyncCount = Option.Graphic.vSync ? 1 : 0;
+        Application.targetFrameRate = Option.Graphic.frameRate;
+        QualitySettings.SetQualityLevel(Option.Graphic.quality);
+        Application.runInBackground = !Option.Sound.mBackground;
     }
 }

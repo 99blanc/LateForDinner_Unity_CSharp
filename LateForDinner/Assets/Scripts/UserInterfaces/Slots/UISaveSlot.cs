@@ -1,6 +1,5 @@
 using Cysharp.Threading.Tasks;
 using R3;
-using UnityEngine;
 
 public class UISaveSlot : UISlot
 {
@@ -38,31 +37,31 @@ public class UISaveSlot : UISlot
         BindText(typeof(Texts));
         BindImage(typeof(Images));
         BindButton(typeof(Buttons));
-        GetImage((int)Images.SlotImage)?.BindButton(_button, Define.Atlas.UI_Common, this);
-        GetButton((int)Buttons.SlotButton).BindState(_button, OnSlotClicked, this, SwitchButton);
-        GetImage((int)Images.UpButtonImage)?.BindArrowButton(_upButton, Define.Atlas.UI_Common, this);
-        GetButton((int)Buttons.UpButton).BindState(_upButton, OnUpButtonClicked, this);
-        GetImage((int)Images.DownButtonImage)?.BindArrowButton(_downButton, Define.Atlas.UI_Common, this);
-        GetButton((int)Buttons.DownButton).BindState(_downButton, OnDownButtonClicked, this);
+        GetImage((int)Images.SlotImage)?.BindButtonState(_button, Define.Atlas.UI_Common, this);
+        GetButton((int)Buttons.SlotButton).BindButtonEvent(() => OnSlotClicked().Forget(), this, _button, SwitchButton);
+        GetImage((int)Images.UpButtonImage)?.BindButtonArrowState(_upButton, Define.Atlas.UI_Common, this);
+        GetButton((int)Buttons.UpButton).BindButtonEvent(() => OnUpButtonClicked().Forget(), this, _upButton);
+        GetImage((int)Images.DownButtonImage)?.BindButtonArrowState(_downButton, Define.Atlas.UI_Common, this);
+        GetButton((int)Buttons.DownButton).BindButtonEvent(() => OnDownButtonClicked().Forget(), this, _downButton);
     }
 
     public void SetIndex(int index)
     {
         _index = index;
         SwitchButton();
-        RefreshArrowButton();
-        Refresh().Forget();
+        RefreshArrow();
+        Refresh();
     }
 
-    public async UniTask Refresh()
+    public void Refresh()
     {
-        SlotMeta meta = meta = Managers.Save.MetaData.Slots[_index];
+        SlotMeta meta = Managers.Save.MetaData.Slots[_index];
         var slotText = GetText((int)Texts.SlotText);
         var dayText = GetText((int)Texts.DayText);
         var timeText = GetText((int)Texts.TimeText);
         var mealTimeImage = GetImage((int)Images.MealTimeImage);
         SwitchButton();
-        RefreshArrowButton();
+        RefreshArrow();
 
         if (meta.IsActive)
         {
@@ -70,13 +69,12 @@ public class UISaveSlot : UISlot
             dayText.text = Managers.Localization.Get(Localization.UI_Save_Slot_Text_Day, meta.Year, meta.Month, meta.Date);
             timeText.text = Managers.Localization.Get(Localization.UI_Save_Slot_Text_Time, meta.Hour, meta.Minute, meta.Second);
             string name = meta.Meal.ToSpriteAsMealTime();
-            Sprite sprite = await Managers.Resource.LoadSpriteAsync(Define.Atlas.UI_Common, name);
 
-            if (sprite != null)
-            {
-                mealTimeImage.sprite = sprite;
-                mealTimeImage.gameObject.SetActive(true);
-            }
+            if (mealTimeImage == null) 
+                return;
+
+            mealTimeImage.sprite = Managers.Resource.GetSpriteFromAtlas(Define.Atlas.UI_Common, name);
+            mealTimeImage.gameObject.SetActive(true);
         }
         else
         {
@@ -87,13 +85,13 @@ public class UISaveSlot : UISlot
         }
     }
 
-    private void RefreshArrowButton()
+    private void RefreshArrow()
     {
         var slotOrder = Managers.Save.MetaData.SlotOrder;
         int currentPos = slotOrder.IndexOf(_index);
         bool canMoveUp = currentPos > 0;
-        _upButton.Value = canMoveUp ? ButtonState.Normal : ButtonState.Disable;
         bool canMoveDown = currentPos >= 0 && currentPos < slotOrder.Count - 1;
+        _upButton.Value = canMoveUp ? ButtonState.Normal : ButtonState.Disable;
         _downButton.Value = canMoveDown ? ButtonState.Normal : ButtonState.Disable;
     }
 
@@ -103,7 +101,7 @@ public class UISaveSlot : UISlot
         _button.Value = meta.IsActive ? ButtonState.Normal : ButtonState.New;
     }
 
-    private async void OnSlotClicked()
+    private async UniTaskVoid OnSlotClicked()
     {
         // TODO ::: 슬롯 클릭 시 로드 또는 뉴게임 분기 처리
         await Managers.UI.LockAsync(async () =>
@@ -115,13 +113,12 @@ public class UISaveSlot : UISlot
             else
             {
                 Managers.Save.NewGame(_index);
-
-                await Refresh();
+                Refresh();
             }
         });
     }
 
-    private async void OnUpButtonClicked()
+    private async UniTaskVoid OnUpButtonClicked()
     {
         var slotOrder = Managers.Save.MetaData.SlotOrder;
         int currentPos = slotOrder.IndexOf(_index);
@@ -132,11 +129,11 @@ public class UISaveSlot : UISlot
 
             await Managers.Save.SwapSlotOrderAsync(_index, targetIndex);
 
-            _screen.RefreshSlots();
+            _screen.Refresh();
         }
     }
 
-    private async void OnDownButtonClicked()
+    private async UniTaskVoid OnDownButtonClicked()
     {
         var slotOrder = Managers.Save.MetaData.SlotOrder;
         int currentPos = slotOrder.IndexOf(_index);
@@ -146,7 +143,7 @@ public class UISaveSlot : UISlot
             int targetIndex = slotOrder[currentPos + 1];
             await Managers.Save.SwapSlotOrderAsync(_index, targetIndex);
 
-            _screen?.RefreshSlots();
+            _screen?.Refresh();
         }
     }
 

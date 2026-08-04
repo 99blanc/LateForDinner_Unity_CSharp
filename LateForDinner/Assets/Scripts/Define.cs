@@ -1,3 +1,5 @@
+using UnityEngine;
+
 public class Define
 {
     public class Save
@@ -6,8 +8,15 @@ public class Define
         public static readonly int[] Orders = new int[] { 0, 1, 2, 3, };
     }
 
+    public class Cursor
+    {
+        public static readonly Vector2 Hotspot = new Vector2(25f, 35f);
+    }
+
     public class Sprite
     {
+        public const string Cursor_Normal = "ui_common_cursor_normal";
+        public const string Cursor_Press = "ui_common_cursor_press";
         public const string Button_Normal = "ui_common_button_normal";
         public const string Button_New = "ui_common_button_new";
         public const string Button_Highlight = "ui_common_button_highlight";

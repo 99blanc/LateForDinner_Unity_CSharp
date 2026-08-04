@@ -1,7 +1,9 @@
 using Cysharp.Text;
 using Cysharp.Threading.Tasks;
+using R3;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem.UI;
@@ -41,8 +43,11 @@ public class UIManager
     private readonly Dictionary<Layer, Transform> _layer = new Dictionary<Layer, Transform>();
     private readonly List<UIPopup> _popups = new List<UIPopup>();
     private readonly Dictionary<UserInterface, IDisposable> _handles = new Dictionary<UserInterface, IDisposable>();
+    private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
     private UIScreen _screen;
     private UILock _lock;
+    private Vector2 _hotspot = Define.Cursor.Hotspot;
+    private IDisposable _handle;
 
     public async UniTask InitAsync()
     {
@@ -54,6 +59,32 @@ public class UIManager
             _lock = instance;
             _lock.Init();
         }
+
+        InitCursor();
+    }
+
+    private void InitCursor()
+    {
+        var normal = Managers.Resource.GetSpriteFromAtlas(Define.Atlas.UI_Common, Define.Sprite.Cursor_Normal);
+        var press = Managers.Resource.GetSpriteFromAtlas(Define.Atlas.UI_Common, Define.Sprite.Cursor_Press);
+        
+        if (normal == null || press == null)
+            return;
+
+        Texture2D first = Managers.Resource.GetTextureFromSprite(normal);
+        Texture2D last = Managers.Resource.GetTextureFromSprite(press);
+        _handle?.Dispose();
+        _handle = Observable.EveryUpdate()
+            .Where(_ => UnityEngine.InputSystem.Mouse.current != null)
+            .Subscribe(_ =>
+            {
+                var mouse = UnityEngine.InputSystem.Mouse.current;
+
+                if (mouse.leftButton.wasPressedThisFrame)
+                    Cursor.SetCursor(last, _hotspot, CursorMode.Auto);
+                else if (mouse.leftButton.wasReleasedThisFrame)
+                    Cursor.SetCursor(first, _hotspot, CursorMode.Auto);
+            });
     }
 
     private void EventSystem()
@@ -224,6 +255,9 @@ public class UIManager
 
     public async UniTask LockAsync(Func<UniTask> action)
     {
+        await _semaphore.WaitAsync();
+
+        var timer = UniTask.Delay(TimeSpan.FromSeconds(0.2f), ignoreTimeScale: true);
         _lock?.SetActive(true);
 
         try
@@ -232,7 +266,9 @@ public class UIManager
         }
         finally
         {
+            await timer;
             _lock?.SetActive(false);
+            _semaphore.Release();
         }
     }
 

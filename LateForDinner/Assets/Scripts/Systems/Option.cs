@@ -2,15 +2,15 @@ using MemoryPack;
 using UnityEngine;
 
 [MemoryPackable]
-public partial class Settings
+public partial class Option
 {
-    public SoundSettings Sound { get; set; } = SoundSettings.Default;
-    public GraphicSettings Graphic { get; set; } = GraphicSettings.Default;
-    public AccessSettings Access { get; set; } = AccessSettings.Default;
+    public SoundOption Sound { get; set; } = SoundOption.Default;
+    public GraphicOption Graphic { get; set; } = GraphicOption.Default;
+    public AccessOption Access { get; set; } = AccessOption.Default;
 }
 
 [MemoryPackable]
-public partial class SoundSettings
+public partial class SoundOption
 {
     public float vMaster;
     public float vBGM;
@@ -25,7 +25,7 @@ public partial class SoundSettings
     public bool mBackground;
 
     [MemoryPackIgnore]
-    public static SoundSettings Default => new SoundSettings() 
+    public static SoundOption Default => new SoundOption() 
     {
         vMaster = 1.0f,
         vBGM = 1.0f,
@@ -42,7 +42,7 @@ public partial class SoundSettings
 }
 
 [MemoryPackable]
-public partial class GraphicSettings
+public partial class GraphicOption
 {
     public int rWidth;
     public int rHeight;
@@ -54,7 +54,7 @@ public partial class GraphicSettings
     public bool bloom;
     public bool ao;
 
-    public static GraphicSettings Default => new GraphicSettings() 
+    public static GraphicOption Default => new GraphicOption() 
     {
         rWidth = 1920,
         rHeight = 1080,
@@ -69,14 +69,14 @@ public partial class GraphicSettings
 }
 
 [MemoryPackable]
-public partial class AccessSettings
+public partial class AccessOption
 {
     public string language;
     public string keybind;
     public bool modifierDash;
     public bool highContrast;
 
-    public static AccessSettings Default => new AccessSettings()
+    public static AccessOption Default => new AccessOption()
     {
         language = Literal.Languages.Korean,
         keybind = string.Empty,

@@ -22,8 +22,8 @@ public class ControlManager
 
         _action = UnityEngine.Object.Instantiate(original);
 
-        if (Managers.Config?.Settings != null && !string.IsNullOrEmpty(Managers.Config.Settings.Access.keybind))
-            _action.LoadBindingOverridesFromJson(Managers.Config.Settings.Access.keybind);
+        if (Managers.Config?.Option != null && !string.IsNullOrEmpty(Managers.Config.Option.Access.keybind))
+            _action.LoadBindingOverridesFromJson(Managers.Config.Option.Access.keybind);
 
         CacheActions();
         _action.Enable();

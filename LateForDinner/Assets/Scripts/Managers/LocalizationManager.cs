@@ -19,7 +19,7 @@ public class LocalizationManager
     private async UniTask SyncAsync()
     {
         string dir = Literal.Folders.Localizations.GetDirectory();
-        string language = Managers.Config?.Settings?.Access?.language ?? Literal.Languages.Korean;
+        string language = Managers.Config?.Option?.Access?.language ?? Literal.Languages.Korean;
         string path = Path.Combine(dir, $"{Literal.Files.Localization}_{language.ToEnglish()}{Literal.Extensions.Json}");
         string[] files = Directory.GetFiles(dir, "*.json");
 

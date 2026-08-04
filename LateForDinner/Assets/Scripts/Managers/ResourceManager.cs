@@ -8,12 +8,14 @@ using UnityEngine.U2D;
 public class ResourceManager
 {
     private readonly Dictionary<string, AsyncOperationHandle> _handles = new Dictionary<string, AsyncOperationHandle>();
+    private readonly Dictionary<string, SpriteAtlas> _atlases = new Dictionary<string, SpriteAtlas>();
 
     public async UniTask InitAsync()
     {
         _handles.Clear();
 
         await Addressables.InitializeAsync().ToUniTask();
+        await LoadAtlasAsync(Define.Atlas.UI_Common);
     }
 
     private async UniTask<T> LoadAsync<T>(string path) where T : Object
@@ -57,7 +59,17 @@ public class ResourceManager
         => await LoadAsync<T>(path);
 
     public async UniTask<SpriteAtlas> LoadAtlasAsync(string path)
-        => await LoadAsync<SpriteAtlas>(path);
+    {
+        if (_atlases.TryGetValue(path, out var atlas) && atlas != null)
+            return atlas;
+
+        atlas = await LoadAsync<SpriteAtlas>(path);
+
+        if (atlas != null)
+            _atlases[path] = atlas;
+
+        return atlas;
+    }
 
     public async UniTask<Sprite> LoadSpriteAsync(string path)
         => await LoadAsync<Sprite>(path);
@@ -91,6 +103,29 @@ public class ResourceManager
             return null;
 
         return Object.Instantiate(prefab, parent, hasWorldPosition);
+    }
+
+    public Sprite GetSpriteFromAtlas(string atlas, string sprite)
+    {
+        if (_atlases.TryGetValue(atlas, out var output) && output != null)
+            return output.GetSprite(sprite);
+
+        return null;
+    }
+
+    public Texture2D GetTextureFromSprite(Sprite sprite)
+    {
+        if (sprite == null) 
+            return null;
+
+        var rect = sprite.textureRect;
+        var original = sprite.texture;
+        Color[] pixels = original.GetPixels((int)rect.x, (int)rect.y, (int)rect.width, (int)rect.height);
+        Texture2D result = new Texture2D((int)rect.width, (int)rect.height, original.format, false);
+        result.SetPixels(pixels);
+        result.Apply();
+
+        return result;
     }
 
     public void Unload(string path)
