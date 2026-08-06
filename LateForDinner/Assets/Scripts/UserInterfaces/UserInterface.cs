@@ -6,7 +6,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UserInterface : MonoBehaviour
+public class UserInterface : MonoBehaviour, IPoolable
 {
     private Dictionary<Type, UnityEngine.Object[]> _views = new Dictionary<Type, UnityEngine.Object[]>();
     private Dictionary<string, CancellationTokenSource> _tokens = new Dictionary<string, CancellationTokenSource>();
@@ -24,6 +24,8 @@ public class UserInterface : MonoBehaviour
 
     public virtual void Init() 
         => _views.Clear();
+
+    public virtual void Get() { }
 
     protected void Bind<T>(Type type) where T : UnityEngine.Object
     {
@@ -61,6 +63,9 @@ public class UserInterface : MonoBehaviour
     protected void BindButton(Type type) 
         => Bind<Button>(type);
 
+    protected void BindScrollRect(Type type)
+        => Bind<ScrollRect>(type);
+
     protected void BindCanvasGroup(Type type)
         => Bind<CanvasGroup>(type);
 
@@ -75,6 +80,9 @@ public class UserInterface : MonoBehaviour
 
     protected Button GetButton(int index) 
         => Get<Button>(index);
+
+    protected ScrollRect GetScrollRect(int index)
+        => Get<ScrollRect>(index);
 
     protected CanvasGroup GetCanvasGroup(int index)
         => Get<CanvasGroup>(index);
@@ -113,9 +121,6 @@ public class UserInterface : MonoBehaviour
         _tokens.Clear();
     }
 
-    protected virtual void OnDisable()
-        => CancelAll();
-
-    protected virtual void OnDestroy()
+    public virtual void Release()
         => CancelAll();
 }

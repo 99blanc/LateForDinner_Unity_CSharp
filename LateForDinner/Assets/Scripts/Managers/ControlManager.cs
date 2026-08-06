@@ -7,11 +7,40 @@ using UnityEngine.InputSystem;
 
 public class ControlManager
 {
-    private InputActionAsset _action;
     private readonly Dictionary<string, InputAction> _caches = new Dictionary<string, InputAction>();
+    private InputActionAsset _action;
+    private Vector2 _hotspot = Define.Cursor.Hotspot;
+    private IDisposable _handle;
 
     public async UniTask InitAsync()
-        => await LoadAsync();
+    {
+        InitCursor();
+        await LoadAsync();
+    }
+
+    private void InitCursor()
+    {
+        var normal = Managers.Resource.GetSprite(Define.Atlas.UI_Common, Define.Sprite.Cursor_Normal);
+        var press = Managers.Resource.GetSprite(Define.Atlas.UI_Common, Define.Sprite.Cursor_Press);
+
+        if (normal == null || press == null)
+            return;
+
+        Texture2D first = Managers.Resource.GetTextureFromSprite(normal);
+        Texture2D last = Managers.Resource.GetTextureFromSprite(press);
+        _handle?.Dispose();
+        _handle = Observable.EveryUpdate()
+            .Where(_ => Mouse.current != null)
+            .Subscribe(_ =>
+            {
+                var mouse = Mouse.current;
+
+                if (mouse.leftButton.wasPressedThisFrame)
+                    Cursor.SetCursor(last, _hotspot, CursorMode.Auto);
+                else
+                    Cursor.SetCursor(first, _hotspot, CursorMode.Auto);
+            });
+    }
 
     private async UniTask LoadAsync()
     {

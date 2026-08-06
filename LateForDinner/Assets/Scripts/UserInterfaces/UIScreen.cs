@@ -1,21 +1,8 @@
 public class UIScreen : UserInterface
 {
-    public override void Init()
+    public override void Release()
     {
-        base.Init();
-        var elements = GetComponentsInChildren<UISlot>(true);
-
-        for (int index = 0; index < elements.Length; index++)
-            elements[index]?.Init();
-    }
-
-    public virtual void Close()
-    {
-        var elements = GetComponentsInChildren<UISlot>(true);
-
-        foreach (var element in elements)
-            element?.Close();
-
+        base.Release();
         Managers.UI.Close(this);
     }
 }

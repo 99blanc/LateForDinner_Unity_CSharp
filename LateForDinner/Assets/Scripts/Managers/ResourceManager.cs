@@ -8,14 +8,12 @@ using UnityEngine.U2D;
 public class ResourceManager
 {
     private readonly Dictionary<string, AsyncOperationHandle> _handles = new Dictionary<string, AsyncOperationHandle>();
-    private readonly Dictionary<string, SpriteAtlas> _atlases = new Dictionary<string, SpriteAtlas>();
 
     public async UniTask InitAsync()
     {
         _handles.Clear();
 
         await Addressables.InitializeAsync().ToUniTask();
-        await LoadAtlasAsync(Define.Atlas.UI_Common);
     }
 
     private async UniTask<T> LoadAsync<T>(string path) where T : Object
@@ -58,25 +56,12 @@ public class ResourceManager
     public async UniTask<T> LoadAssetAsync<T>(string path) where T : Object
         => await LoadAsync<T>(path);
 
-    public async UniTask<SpriteAtlas> LoadAtlasAsync(string path)
-    {
-        if (_atlases.TryGetValue(path, out var atlas) && atlas != null)
-            return atlas;
-
-        atlas = await LoadAsync<SpriteAtlas>(path);
-
-        if (atlas != null)
-            _atlases[path] = atlas;
-
-        return atlas;
-    }
-
     public async UniTask<Sprite> LoadSpriteAsync(string path)
         => await LoadAsync<Sprite>(path);
 
     public async UniTask<Sprite> LoadSpriteAsync(string atlas, string sprite)
     {
-        SpriteAtlas sprites = await LoadAtlasAsync(atlas);
+        SpriteAtlas sprites = await LoadAssetAsync<SpriteAtlas>(atlas);
 
         return sprites == null || sprites.GetSprite(sprite) == null ? null : sprites.GetSprite(sprite);
     }
@@ -97,7 +82,7 @@ public class ResourceManager
         return Object.Instantiate(prefab, parent, hasWorldPosition);
     }
 
-    public GameObject InstantiateAsync(GameObject prefab, Transform parent = null, bool hasWorldPosition = false)
+    public GameObject Instantiate(GameObject prefab, Transform parent = null, bool hasWorldPosition = false)
     {
         if (prefab == null)
             return null;
@@ -105,13 +90,35 @@ public class ResourceManager
         return Object.Instantiate(prefab, parent, hasWorldPosition);
     }
 
-    public Sprite GetSpriteFromAtlas(string atlas, string sprite)
+    public GameObject Instantiate(string path, Transform parent = null, bool hasWorldPosition = false)
     {
-        if (_atlases.TryGetValue(atlas, out var output) && output != null)
-            return output.GetSprite(sprite);
+        var prefab = Get<GameObject>(path);
+
+        if (prefab == null) 
+            return null;
+
+        return Object.Instantiate(prefab, parent, hasWorldPosition);
+    }
+
+    public T Get<T>(string path) where T : Object
+    {
+        if (_handles.TryGetValue(path, out var handle) && handle.IsValid() && handle.IsDone)
+            return handle.Result as T;
 
         return null;
     }
+
+    public T GetAsset<T>(string path) where T : Object
+        => Get<T>(path);
+
+    public Sprite GetSprite(string atlas, string sprite)
+        => Get<SpriteAtlas>(atlas)?.GetSprite(sprite);
+
+    public GameObject GetPrefab(string path)
+        => Get<GameObject>(path);
+
+    public TextAsset GetTextAsset(string path)
+        => Get<TextAsset>(path);
 
     public Texture2D GetTextureFromSprite(Sprite sprite)
     {

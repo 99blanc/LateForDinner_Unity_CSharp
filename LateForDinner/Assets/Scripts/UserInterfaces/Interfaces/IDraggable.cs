@@ -1,6 +1,7 @@
+using UnityEngine;
 using UnityEngine.EventSystems;
 
-public interface IDraggable : IDragHandler
+public interface IDraggable : IDragHandler, IEndDragHandler
 {
     void IDragHandler.OnDrag(PointerEventData data)
     {
@@ -9,8 +10,50 @@ public interface IDraggable : IDragHandler
             if (popup.RectTransform == null)
                 return;
 
+            if (!IsCursorInsideScreen(data))
+                return;
+
             float scaleFactor = Managers.UI.ScaleFactor;
-            popup.RectTransform.anchoredPosition += data.delta / scaleFactor;
+            Vector2 nextPosition = popup.RectTransform.anchoredPosition + (data.delta / scaleFactor);
+            nextPosition = ClampWithMargin(popup.RectTransform, nextPosition);
+            popup.RectTransform.anchoredPosition = nextPosition;
         }
     }
+
+    void IEndDragHandler.OnEndDrag(PointerEventData data) { }
+
+    private bool IsCursorInsideScreen(PointerEventData data)
+    {
+        Vector3 mousePos = data.position;
+
+        return mousePos.x >= 0 && mousePos.x <= Screen.width && mousePos.y >= 0 && mousePos.y <= Screen.height;
+    }
+
+    private Vector2 ClampWithMargin(RectTransform rectTransform, Vector2 targetPosition)
+    {
+        Canvas canvas = rectTransform.GetComponentInParent<Canvas>();
+
+        if (canvas == null)
+            return targetPosition;
+
+        RectTransform canvasRect = canvas.GetComponent<RectTransform>();
+
+        if (canvasRect == null)
+            return targetPosition;
+
+        Rect canvasRectArea = canvasRect.rect;
+        Vector2 popupSize = rectTransform.rect.size;
+        Vector2 pivot = rectTransform.pivot;
+        float allowedOverflowX = popupSize.x * Define.Scaler.Margin;
+        float allowedOverflowY = popupSize.y * Define.Scaler.Margin;
+        float minX = canvasRectArea.xMin - allowedOverflowX + (popupSize.x * pivot.x);
+        float maxX = canvasRectArea.xMax + allowedOverflowX - (popupSize.x * (1f - pivot.x));
+        float minY = canvasRectArea.yMin - allowedOverflowY + (popupSize.y * pivot.y);
+        float maxY = canvasRectArea.yMax + allowedOverflowY - (popupSize.y * (1f - pivot.y));
+        targetPosition.x = Mathf.Clamp(targetPosition.x, minX, maxX);
+        targetPosition.y = Mathf.Clamp(targetPosition.y, minY, maxY);
+
+        return targetPosition;
+    }
 }
+

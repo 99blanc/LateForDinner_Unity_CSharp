@@ -15,6 +15,11 @@ MonoBehaviour:
   m_GroupName: UserInterfaces
   m_GUID: 47595298b01c96f4e88de01f6be8fcce
   m_SerializeEntries:
+  - m_GUID: 1da368fd2bfdb9643b407a580e318866
+    m_Address: UIOptionPopup
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 457fc1c7f6a29cf4e8b85ab7eafd8948
     m_Address: UILock
     m_ReadOnly: 0

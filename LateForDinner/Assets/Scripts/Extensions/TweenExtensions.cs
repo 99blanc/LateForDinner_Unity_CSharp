@@ -5,6 +5,24 @@ using UnityEngine.UI;
 
 public static class TweenExtensions
 {
+    public static async UniTask<T> PlayAsync<T>(this UniTask<T> task) where T : UserInterface, IAnimatable
+    {
+        var screen = await task;
+
+        if (screen != null)
+            await screen.PlayAsync();
+
+        return screen;
+    }
+
+    public static async UniTask<T> PlayAsync<T>(this T user) where T : UserInterface, IAnimatable
+    {
+        if (user != null)
+            await user.PlayAsync();
+
+        return user;
+    }
+
     public static async UniTask FadeAsync(this Image image, float start, float end, float duration, float power = 1.0f, CancellationToken token = default)
     {
         float elapsedTime = 0f;

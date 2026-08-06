@@ -2,7 +2,7 @@ using Cysharp.Threading.Tasks;
 using R3;
 using UnityEngine;
 
-public class UISplashScreen : UIScreen
+public class UISplashScreen : UIScreen, IAnimatable
 {
     private enum Images 
     { 
@@ -16,13 +16,18 @@ public class UISplashScreen : UIScreen
     {
         base.Init();
         BindImage(typeof(Images));
+        Revert();
+        Managers.Control.Subscribe(Literal.Hotkeys.Submit, () => CancelToken("SplashTask")).AddTo(this);
+    }
+
+    public override void Get()
+        => Revert();
+
+    private void Revert()
+    {
         SetAlpha(Images.UnityImage, 0f);
         SetAlpha(Images.TeamImage, 0f);
         SetAlpha(Images.TitleImage, 0f);
-        Managers.Control.Subscribe(Literal.Hotkeys.Submit, () =>
-        {
-            CancelToken("SplashTask");
-        }).AddTo(this);
     }
 
     private void SetAlpha(Images imageType, float alpha)

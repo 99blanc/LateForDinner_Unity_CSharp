@@ -1,5 +1,8 @@
 public class UISlot : UserInterface
 {
-    public virtual void Close()
-        => Managers.Pool.Push(this);
+    public override void Release()
+    {
+        base.Release();
+        Managers.Pool.Push(this);
+    }
 }

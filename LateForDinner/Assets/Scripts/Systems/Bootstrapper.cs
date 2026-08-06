@@ -10,13 +10,9 @@ public class Bootstrapper
     private static async UniTask InitAsync()
     {
         await Managers.Instance.LoadAsync();
+        await Managers.Preload.Release_BootAsync();
+        await Managers.UI.OpenScreenAsync<UISplashScreen>().PlayAsync().Release();
 
-        var splash = await Managers.UI.OpenScreenAsync<UISplashScreen>();
-
-        await splash.PlayAsync();
-
-        splash.Close();
-
-        await Managers.UI.OpenScreenAsync<UITitleScreen>();
+        Managers.UI.OpenScreen<UITitleScreen>();
     }
 }

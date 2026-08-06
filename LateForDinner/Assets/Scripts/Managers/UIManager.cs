@@ -1,6 +1,5 @@
 using Cysharp.Text;
 using Cysharp.Threading.Tasks;
-using R3;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -21,7 +20,7 @@ public class UIManager
             {
                 _root = new GameObject { name = Literal.Roots.UserInterfaces };
                 _root.transform.SetParent(Managers.Instance.transform, false);
-                EventSystem();
+                Setup();
                 CreateLayer(Layer.Screen);
                 CreateLayer(Layer.Popup);
                 CreateLayer(Layer.System);
@@ -45,49 +44,8 @@ public class UIManager
     private readonly Dictionary<UserInterface, IDisposable> _handles = new Dictionary<UserInterface, IDisposable>();
     private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
     private UIScreen _screen;
-    private UILock _lock;
-    private Vector2 _hotspot = Define.Cursor.Hotspot;
-    private IDisposable _handle;
 
-    public async UniTask InitAsync()
-    {
-        var _ = Root;
-        var (instance, rentHandle) = await Managers.Pool.PopAsync<UILock>(_layer[Layer.Lock]);
-
-        if (instance != null)
-        {
-            _lock = instance;
-            _lock.Init();
-        }
-
-        InitCursor();
-    }
-
-    private void InitCursor()
-    {
-        var normal = Managers.Resource.GetSpriteFromAtlas(Define.Atlas.UI_Common, Define.Sprite.Cursor_Normal);
-        var press = Managers.Resource.GetSpriteFromAtlas(Define.Atlas.UI_Common, Define.Sprite.Cursor_Press);
-        
-        if (normal == null || press == null)
-            return;
-
-        Texture2D first = Managers.Resource.GetTextureFromSprite(normal);
-        Texture2D last = Managers.Resource.GetTextureFromSprite(press);
-        _handle?.Dispose();
-        _handle = Observable.EveryUpdate()
-            .Where(_ => UnityEngine.InputSystem.Mouse.current != null)
-            .Subscribe(_ =>
-            {
-                var mouse = UnityEngine.InputSystem.Mouse.current;
-
-                if (mouse.leftButton.wasPressedThisFrame)
-                    Cursor.SetCursor(last, _hotspot, CursorMode.Auto);
-                else if (mouse.leftButton.wasReleasedThisFrame)
-                    Cursor.SetCursor(first, _hotspot, CursorMode.Auto);
-            });
-    }
-
-    private void EventSystem()
+    private void Setup()
     {
         var system = new GameObject { name = Literal.Roots.Events };
         system.transform.SetParent(Managers.Instance.transform, false);
@@ -109,8 +67,9 @@ public class UIManager
         canvasOut.sortingOrder = sortingOrder;
         var scaler = gameObject.AddComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(3840f, 2160f);
+        scaler.referenceResolution = Define.Scaler.Resolution;
         scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.Shrink;
+        scaler.referencePixelsPerUnit = Define.Scaler.PixelsPerUnit;
         gameObject.AddComponent<GraphicRaycaster>();
 
         return gameObject;
@@ -135,12 +94,32 @@ public class UIManager
         if (_screen != null)
             Close(_screen);
 
+        var _ = Root;
         var (instance, rentHandle) = await Managers.Pool.PopAsync<T>(_layer[Layer.Screen]);
 
         if (instance == null)
             return null;
 
-        instance.Init();
+        _screen = instance;
+        _handles[instance] = rentHandle;
+
+        return instance;
+    }
+
+    public T OpenScreen<T>() where T : UIScreen
+    {
+        if (_screen is T existingScreen)
+            return existingScreen;
+
+        if (_screen != null)
+            Close(_screen);
+
+        var _ = Root;
+        var (instance, rentHandle) = Managers.Pool.Pop<T>(_layer[Layer.Screen]);
+
+        if (instance == null)
+            return null;
+
         _screen = instance;
         _handles[instance] = rentHandle;
 
@@ -155,12 +134,33 @@ public class UIManager
                 return popup as T;
         }
 
+        var _ = Root;
         var (instance, rentHandle) = await Managers.Pool.PopAsync<T>(_layer[Layer.Popup]);
 
         if (instance == null)
             return null;
 
-        instance.Init();
+        _popups.Add(instance);
+        _handles[instance] = rentHandle;
+        Refresh();
+
+        return instance;
+    }
+
+    public T OpenPopup<T>() where T : UIPopup
+    {
+        foreach (var popup in _popups)
+        {
+            if (popup is T)
+                return popup as T;
+        }
+
+        var _ = Root;
+        var (instance, rentHandle) = Managers.Pool.Pop<T>(_layer[Layer.Popup]);
+
+        if (instance == null)
+            return null;
+
         _popups.Add(instance);
         _handles[instance] = rentHandle;
         Refresh();
@@ -170,12 +170,25 @@ public class UIManager
 
     public async UniTask<T> OpenSystemAsync<T>() where T : UISystem
     {
+        var _ = Root;
         var (instance, rentHandle) = await Managers.Pool.PopAsync<T>(_layer[Layer.System]);
 
         if (instance == null)
             return null;
 
-        instance.Init();
+        _handles[instance] = rentHandle;
+
+        return instance;
+    }
+
+    public T OpenSystem<T>() where T : UISystem
+    {
+        var _ = Root;
+        var (instance, rentHandle) = Managers.Pool.Pop<T>(_layer[Layer.System]);
+
+        if (instance == null)
+            return null;
+
         _handles[instance] = rentHandle;
 
         return instance;
@@ -195,8 +208,11 @@ public class UIManager
             Refresh();
         }
 
-        _handles[ui].Dispose();
-        _handles.Remove(ui);
+        if (_handles.TryGetValue(ui, out var handle))
+        {
+            _handles?.Remove(ui);
+            handle?.Dispose();
+        }
     }
 
     public void Close<T>() where T : UserInterface
@@ -253,24 +269,31 @@ public class UIManager
             _popups[index].transform.SetSiblingIndex(siblingIndex++);
     }
 
-    public async UniTask LockAsync(Func<UniTask> action)
+    public async UniTask LockAsync(Func<UniTask> task)
     {
-        await _semaphore.WaitAsync();
-
         var timer = UniTask.Delay(TimeSpan.FromSeconds(0.2f), ignoreTimeScale: true);
-        _lock?.SetActive(true);
+        var (locker, rentHandle) = await Managers.Pool.PopAsync<UILock>(_layer[Layer.System]);
+        _handles[locker] = rentHandle;
+        locker.PlayAsync().Forget();
+
+        await _semaphore.WaitAsync();
 
         try
         {
-            await action();
+            await task();
         }
         finally
         {
             await timer;
-            _lock?.SetActive(false);
+
+            locker.Release();
+            _handles[locker].Dispose();
             _semaphore.Release();
         }
     }
+
+    public async UniTask LockAsync(UniTask task)
+        => await LockAsync(async () => await task);
 
     public T GetScreen<T>() where T : UIScreen
         => _screen as T;

@@ -16,56 +16,42 @@ public class PoolDebugger : EditorWindow
         if (!Application.isPlaying)
         {
             EditorGUILayout.HelpBox("Available only in Play Mode.", MessageType.Info);
-            
+
             return;
         }
 
         if (Managers.Pool == null)
         {
             EditorGUILayout.HelpBox("Managers.Pool has not been initialized yet.", MessageType.Warning);
-            
+
             return;
         }
 
         GUILayout.Label("Pool System Status (Grouped by Folders)", EditorStyles.boldLabel);
         EditorGUILayout.Space();
-        var registries = Managers.Pool.GetRegistrySnapshot();
-        var maps = Managers.Pool.GetMapsSnapshot();
+        Transform poolRoot = Managers.Pool.Root.transform;
         Dictionary<string, List<KeyValuePair<string, int>>> groupedPools = new Dictionary<string, List<KeyValuePair<string, int>>>();
         List<KeyValuePair<string, int>> rootPools = new List<KeyValuePair<string, int>>();
 
-        foreach (string folderName in maps.Values)
+        for (int index = 0; index < poolRoot.childCount; index++)
         {
+            Transform folder = poolRoot.GetChild(index);
+            string folderName = folder.name;
+
             if (!groupedPools.ContainsKey(folderName))
                 groupedPools[folderName] = new List<KeyValuePair<string, int>>();
-        }
 
-        foreach (var pair in registries)
-        {
-            string key = pair.Key;
-            int count = pair.Value;
-            var itemPair = new KeyValuePair<string, int>(key, count);
-            bool matched = false;
-
-            foreach (var mapPair in maps)
+            for (int sub = 0; sub < folder.childCount; sub++)
             {
-                string mapKey = mapPair.Key;
-                string folderName = mapPair.Value;
+                Transform pooledObj = folder.GetChild(sub);
+                string key = pooledObj.name;
+                int count = groupedPools[folderName].FindIndex(x => x.Key == key);
 
-                if (key.Contains(mapKey))
-                {
-                    if (groupedPools.ContainsKey(folderName))
-                    {
-                        groupedPools[folderName].Add(itemPair);
-                        matched = true;
-
-                        break;
-                    }
-                }
+                if (count != -1)
+                    groupedPools[folderName][count] = new KeyValuePair<string, int>(key, groupedPools[folderName][count].Value + 1);
+                else
+                    groupedPools[folderName].Add(new KeyValuePair<string, int>(key, 1));
             }
-
-            if (!matched)
-                rootPools.Add(itemPair);
         }
 
         foreach (var group in groupedPools)
@@ -78,7 +64,7 @@ public class PoolDebugger : EditorWindow
 
             int totalCount = 0;
 
-            foreach (var item in items) 
+            foreach (var item in items)
                 totalCount += item.Value;
 
             _outs[folderName] = EditorGUILayout.Foldout(_outs[folderName], $"{folderName} (Total Cached: {totalCount})", true);
@@ -104,31 +90,6 @@ public class PoolDebugger : EditorWindow
                 EditorGUILayout.Space(5);
             }
         }
-
-        if (rootPools.Count > 0)
-        {
-            if (!_outs.ContainsKey("Root"))
-                _outs["Root"] = true;
-
-            _outs["Root"] = EditorGUILayout.Foldout(_outs["Root"], $"Root / Others", true);
-            
-            if (_outs["Root"])
-            {
-                EditorGUI.indentLevel++;
-
-                foreach (var item in rootPools)
-                {
-                    EditorGUILayout.BeginHorizontal("box");
-                    EditorGUILayout.LabelField(item.Key, GUILayout.Width(200));
-                    EditorGUILayout.LabelField($"Count: {item.Value}", GUILayout.Width(100));
-                    EditorGUILayout.EndHorizontal();
-                }
-
-                EditorGUI.indentLevel--;
-            }
-        }
-
-        Repaint();
     }
 }
 #endif

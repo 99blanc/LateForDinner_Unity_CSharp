@@ -3,7 +3,7 @@ using Cysharp.Threading.Tasks;
 using System;
 using UnityEngine;
 
-public class UILoadScreen : UIScreen
+public class UILoadScreen : UIScreen, IAnimatable
 {
     private enum Texts
     {
@@ -15,7 +15,7 @@ public class UILoadScreen : UIScreen
         RotateImage
     }
 
-    private float _current = 0f;
+    private float _current;
 
     public override void Init()
     {
@@ -23,6 +23,9 @@ public class UILoadScreen : UIScreen
         BindText(typeof(Texts));
         BindImage(typeof(Images));
     }
+
+    public override void Get()
+        => _current = 0f;
 
     public async UniTask LoadAsync(float targetProgress, string message)
     {
@@ -64,7 +67,7 @@ public class UILoadScreen : UIScreen
         var image = GetImage((int)Images.RotateImage);
         var token = GetToken("RotateTask");
 
-        if (image == null) 
+        if (image == null)
             return;
 
         while (!token.IsCancellationRequested)

@@ -1,7 +1,8 @@
 using Cysharp.Threading.Tasks;
+using System;
 using UnityEngine;
 
-public class UILock : UserInterface
+public class UILock : UserInterface, IAnimatable
 {
     private enum Images
     {
@@ -13,15 +14,6 @@ public class UILock : UserInterface
     {
         base.Init();
         BindImage(typeof(Images));
-        SetActive(false);
-    }
-
-    public void SetActive(bool isActive)
-    {
-        gameObject.SetActive(isActive);
-
-        if (isActive)
-            PlayAsync().Forget();
     }
 
     public async UniTask PlayAsync()
@@ -32,11 +24,18 @@ public class UILock : UserInterface
         if (image == null)
             return;
 
-        while (!token.IsCancellationRequested)
+        try
         {
-            image.transform.Rotate(0f, 0f, -300f * Time.unscaledDeltaTime);
+            while (!token.IsCancellationRequested)
+            {
+                image.transform.Rotate(0f, 0f, -300f * Time.unscaledDeltaTime);
 
-            await UniTask.Yield(PlayerLoopTiming.Update, token);
+                await UniTask.Yield(PlayerLoopTiming.Update, token);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // DESC ::: 비동기 실행 후 탈출
         }
     }
 }

@@ -28,6 +28,7 @@ public class Managers : MonoBehaviour
     public static UIManager UI { get; private set; }
     public static ConsoleManager Console { get; private set; }
     public static SaveManager Save { get; private set; }
+    public static PreloadManager Preload { get; private set; }
 
     public async UniTask LoadAsync()
     {
@@ -42,14 +43,13 @@ public class Managers : MonoBehaviour
         UI = new UIManager();
         Console = new ConsoleManager();
         Save = new SaveManager();
+        Preload = new PreloadManager();
 
         await Resource.InitAsync();
         await Data.InitAsync();
         await Localization.InitAsync();
         await Config.InitAsync();
         await Control.InitAsync();
-        await Pool.InitAsync();
-        await UI.InitAsync();
         await Console.InitAsync();
         await Save.InitAsync();
     }

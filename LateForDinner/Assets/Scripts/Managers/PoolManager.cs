@@ -15,6 +15,7 @@ public class PoolManager
             {
                 _root = new GameObject { name = Literal.Roots.Pools };
                 _root.transform.SetParent(Managers.Instance.transform, false);
+                Setup();
             }
 
             return _root;
@@ -22,18 +23,11 @@ public class PoolManager
     }
     private readonly Dictionary<string, Queue<GameObject>> _registries = new Dictionary<string, Queue<GameObject>>();
     private readonly Dictionary<string, Transform> _folders = new Dictionary<string, Transform>();
+    private readonly Dictionary<GameObject, Transform> _parents = new Dictionary<GameObject, Transform>();
     private readonly Dictionary<string, string> _maps = new Dictionary<string, string>()
     {
         { Literal.Keys.UI, Literal.Roots.UserInterfaces },
     };
-
-    public async UniTask InitAsync()
-    {
-        // TODO ::: UI 프리팹이나 기본 이펙트 등 리소스 메모리 적재
-        Setup();
-
-        await UniTask.CompletedTask;
-    }
 
     private void Setup()
     {
@@ -51,6 +45,7 @@ public class PoolManager
     public async UniTask<(GameObject instance, IDisposable rentHandle)> PopAsync(string key, Transform parent = null)
     {
         GameObject instance = null;
+        bool isNew = false;
 
         if (_registries.TryGetValue(key, out var queue) && queue.Count > 0)
             instance = queue.Dequeue();
@@ -64,11 +59,22 @@ public class PoolManager
                 return (null, null);
 
             instance.name = key;
+            _parents[instance] = newParent;
+            isNew = true;
         }
         else
         {
-            instance.transform.SetParent(parent, false);
+            Transform original = parent != null ? parent : (_parents.TryGetValue(instance, out var p) ? p : Get(key));
+            instance.transform.SetParent(original, false);
             instance.SetActive(true);
+        }
+
+        if (instance.TryGetComponent<IPoolable>(out var poolable))
+        {
+            if (isNew)
+                poolable.Init();
+            else
+                poolable.Get();
         }
 
         GameObject target = instance;
@@ -85,11 +91,64 @@ public class PoolManager
         return (instance.GetComponentAssert<T>(), rentHandle);
     }
 
+    public (GameObject instance, IDisposable rentHandle) Pop(string key, Transform parent = null)
+    {
+        GameObject instance = null;
+        bool isNew = false;
+
+        if (_registries.TryGetValue(key, out var queue) && queue.Count > 0)
+            instance = queue.Dequeue();
+
+        if (instance == null)
+        {
+            Transform newParent = parent == null ? Get(key) : parent;
+            instance = Managers.Resource.Instantiate(key, newParent, false);
+
+            if (instance == null)
+                return (null, null);
+
+            instance.name = key;
+            _parents[instance] = newParent;
+            isNew = true;
+        }
+        else
+        {
+            Transform original = parent != null ? parent : (_parents.TryGetValue(instance, out var p) ? p : Get(key));
+            instance.transform.SetParent(original, false);
+            instance.SetActive(true);
+        }
+
+        if (instance.TryGetComponent<IPoolable>(out var poolable))
+        {
+            if (isNew)
+                poolable.Init();
+            else
+                poolable.Get();
+        }
+
+        GameObject target = instance;
+        IDisposable rentHandle = Disposable.Create(() => Push(target, key));
+
+        return (instance, rentHandle);
+    }
+
+    public (T component, IDisposable rentHandle) Pop<T>(Transform parent = null) where T : Component
+    {
+        string key = typeof(T).Name;
+        var (instance, rentHandle) = Pop(key, parent);
+
+        if (instance == null)
+            return (null, null);
+
+        return (instance.GetComponentAssert<T>(), rentHandle);
+    }
+
     public void Push(GameObject gameObject, string key = null)
     {
         if (gameObject == null) 
             return;
 
+        _parents[gameObject] = gameObject.transform.parent;
         string newKey = string.IsNullOrEmpty(key) ? gameObject.name : key;
 
         if (!_registries.ContainsKey(newKey))
@@ -104,6 +163,22 @@ public class PoolManager
     {
         if (component != null) 
             Push(component.gameObject, key);
+    }
+
+    public async UniTask PrewarmAsync<T>(int count, Transform parent = null) where T : Component
+    {
+        string key = typeof(T).Name;
+
+        if (_registries.TryGetValue(key, out var queue) && queue.Count >= count)
+            return;
+
+        for (int index = 0; index < count; index++)
+        {
+            var (instance, rentHandle) = await PopAsync<T>(parent);
+
+            if (instance != null)
+                rentHandle.Dispose();
+        }
     }
 
     private Transform Get(string key)
@@ -134,18 +209,6 @@ public class PoolManager
         }
 
         _registries.Clear();
+        _parents.Clear();
     }
-
-    public Dictionary<string, int> GetRegistrySnapshot()
-    {
-        var snapshot = new Dictionary<string, int>();
-
-        foreach (var pair in _registries)
-            snapshot[pair.Key] = pair.Value.Count;
-
-        return snapshot;
-    }
-
-    public Dictionary<string, string> GetMapsSnapshot()
-        => new Dictionary<string, string>(_maps);
 }

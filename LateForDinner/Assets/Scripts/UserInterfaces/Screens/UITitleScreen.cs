@@ -1,6 +1,7 @@
 using Cysharp.Threading.Tasks;
 using R3;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class UITitleScreen : UIScreen
 {
@@ -9,14 +10,14 @@ public class UITitleScreen : UIScreen
         PressAnyKeyText
     }
 
-    private enum Images
-    {
-        OptionImage
-    }
-
     private enum Buttons
     {
         OptionButton
+    }
+
+    private enum ScrollRects
+    {
+        LoadScrollRect
     }
 
     private enum Panels
@@ -31,53 +32,49 @@ public class UITitleScreen : UIScreen
         Load
     }
 
-    private UI_TitleState _state = UI_TitleState.Main;
+    private UI_TitleState _state;
     private UISaveSlot[] _slots;
 
     public override void Init()
     {
         base.Init();
         BindText(typeof(Texts));
-        GetText((int)Texts.PressAnyKeyText).text = Managers.Localization.Get(Localization.UI_Title_Screen_Text_Press_Any_Key);
+        BindButton(typeof(Buttons));
+        BindScrollRect(typeof(ScrollRects));
         BindCanvasGroup(typeof(Panels));
-        _slots = GetCanvasGroup((int)Panels.LoadPanel)?.GetComponentsInChildren<UISaveSlot>(true);
-        Switch(UI_TitleState.Main);
+        GetText((int)Texts.PressAnyKeyText).text = Managers.Localization.Get(Localization.UI_Title_Screen_Text_Press_Any_Key);
+        GetButton((int)Buttons.OptionButton).BindView(OnOptionClicked, ViewEvent.LeftClick, this);
+        _slots = new UISaveSlot[Define.Save.Amount];
+        var content = GetScrollRect((int)ScrollRects.LoadScrollRect).content;
 
-        if (_slots != null && _slots.Length > 0)
+        for (int index = 0; index < Define.Save.Amount; index++)
         {
-            Managers.Save.EnsureSlot(_slots.Length);
-
-            for (int index = 0; index < _slots.Length; index++)
-            {
-                _slots[index].SetScreen(this);
-                _slots[index].SetIndex(index);
-            }
+            var (slot, rentHandle) = Managers.Pool.Pop<UISaveSlot>(content);
+            _slots[index] = slot;
+            _slots[index].SetScreen(this);
         }
 
-        Managers.Control.Subscribe(Literal.Hotkeys.Cancel, () =>
-        {
-            Application.Quit();
-        }).AddTo(this);
-        Managers.Control.Subscribe(Literal.Hotkeys.Back, () =>
-        {
-            if (_state == UI_TitleState.Load)
-                Switch(UI_TitleState.Main);
-        }).AddTo(this);
-        Managers.Control.Subscribe(Literal.Hotkeys.Any, () =>
-        {
-            if (_state == UI_TitleState.Main)
-                Switch(UI_TitleState.Load);
-        }).AddTo(this);
+        Managers.Save.EnsureSlot(_slots.Length);
+        Managers.Control.Subscribe(Literal.Hotkeys.Cancel, Application.Quit).AddTo(this);
+        Managers.Control.Subscribe(Literal.Hotkeys.Any, OnAnyPressed).AddTo(this);
+        Switch(UI_TitleState.Main);
     }
+
+    public override void Get()
+        => Switch(_state);
+
+    private void OnOptionClicked(PointerEventData data)
+        => Managers.UI.OpenPopup<UIOptionPopup>();
+
+    private void OnAnyPressed()
+        => Switch(UI_TitleState.Load);
 
     private void Switch(UI_TitleState state)
     {
         _state = state;
         bool isMain = (_state == UI_TitleState.Main);
-        var mainGroup = GetCanvasGroup((int)Panels.MainPanel);
-        var loadGroup = GetCanvasGroup((int)Panels.LoadPanel);
-        mainGroup?.SetActivePanel(isMain);
-        loadGroup?.SetActivePanel(!isMain);
+        GetCanvasGroup((int)Panels.MainPanel).SetActivePanel(isMain);
+        GetCanvasGroup((int)Panels.LoadPanel).SetActivePanel(!isMain);
 
         if (!isMain)
             Refresh();
