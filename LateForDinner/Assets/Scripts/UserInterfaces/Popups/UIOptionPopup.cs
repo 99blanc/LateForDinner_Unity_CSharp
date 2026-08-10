@@ -144,9 +144,12 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
 
     private enum Dropdowns
     {
+        // DESC ::: GraphicPanel
         ResolutionDropdown,
         FullscreenDropdown,
-        QualityDropdown
+        QualityDropdown,
+        // DESC ::: AccessPanel
+        LanguageDropdown
     }
 
     private enum Panels
@@ -198,10 +201,12 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
         GetText((int)Texts.CancelButtonText).text = Managers.Localization.Get(Localization.UI_Option_Popup_Text_Cancel);
         GetText((int)Texts.DefaultButtonText).text = Managers.Localization.Get(Localization.UI_Option_Popup_Text_Default);
         Switch(UI_OptionState.Sound);
-        // DESC :: SoundPanel
+        // DESC ::: SoundPanel
         InitSoundPanel();
-        // DESC :: GraphicPanel
+        // DESC ::: GraphicPanel
         InitGraphicPanel();
+        // DESC ::: AccessPanel
+        InitAccessPanel();
     }
 
     private void InitSoundPanel()
@@ -312,6 +317,23 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
         GetText((int)Texts.AntialiasingText).text = Managers.Localization.Get(Localization.UI_Option_Popup_Text_Antialiasing);
         GetText((int)Texts.BloomText).text = Managers.Localization.Get(Localization.UI_Option_Popup_Text_Bloom);
         GetText((int)Texts.AOText).text = Managers.Localization.Get(Localization.UI_Option_Popup_Text_AO);
+    }
+
+    private void InitAccessPanel()
+    {
+        var languageDropdown = GetDropdown((int)Dropdowns.LanguageDropdown);
+
+        if (languageDropdown != null)
+        {
+            languageDropdown.ClearOptions();
+            List<string> languages = Managers.Localization.GetLanguages();
+            List<string> displayOptions = new List<string>();
+
+            foreach (var locale in languages)
+                displayOptions.Add(locale.ToNative());
+
+            languageDropdown.AddOptions(displayOptions);
+        }
     }
 
     private void InitResolution()
@@ -469,6 +491,18 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
         UpdateCheckmark(GetImage((int)Images.AntialiasingCheckmarkImage), option.Graphic.antiAliasing);
         UpdateCheckmark(GetImage((int)Images.BloomCheckmarkImage), option.Graphic.bloom);
         UpdateCheckmark(GetImage((int)Images.AOCheckmarkImage), option.Graphic.ambientOccusion);
+        // DESC ::: AccessPanel
+        var languageLocales = Managers.Localization.GetLanguages();
+        string currentLocale = Managers.Config?.Option?.Access?.language ?? Literal.Languages.Korean;
+
+        for (int index = 0; index < languageLocales.Count; index++)
+        {
+            if (languageLocales[index].Equals(currentLocale, StringComparison.OrdinalIgnoreCase))
+            {
+                GetDropdown((int)Dropdowns.LanguageDropdown).value = index;
+                break;
+            }
+        }
     }
 
     private void Sync()
@@ -510,6 +544,12 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
         option.Graphic.antiAliasing = GetToggle((int)Toggles.AntialiasingToggle).isOn;
         option.Graphic.bloom = GetToggle((int)Toggles.BloomToggle).isOn;
         option.Graphic.ambientOccusion = GetToggle((int)Toggles.AOToggle).isOn;
+        // DESC ::: AccessPanel
+        int langIndex = GetDropdown((int)Dropdowns.LanguageDropdown).value;
+        var languageLocales = Managers.Localization.GetLanguages();
+
+        if (languageLocales != null && langIndex < languageLocales.Count)
+            Managers.Config.Option.Access.language = languageLocales[langIndex];
     }
 
     private async UniTask OnApplyClicked(PointerEventData data)
