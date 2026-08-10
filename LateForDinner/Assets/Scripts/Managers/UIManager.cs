@@ -21,7 +21,7 @@ public class UIManager
                 _root = new GameObject { name = Literal.Roots.UserInterfaces };
                 _root.transform.SetParent(Managers.Instance.transform, false);
                 Setup();
-                CreateLayer(Layer.Screen);
+                CreateLayer(Layer.Display);
                 CreateLayer(Layer.Popup);
                 CreateLayer(Layer.System);
                 CreateLayer(Layer.Lock);
@@ -43,7 +43,7 @@ public class UIManager
     private readonly List<UIPopup> _popups = new List<UIPopup>();
     private readonly Dictionary<UserInterface, IDisposable> _handles = new Dictionary<UserInterface, IDisposable>();
     private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
-    private UIScreen _screen;
+    private UIDisplay _display;
 
     private void Setup()
     {
@@ -80,47 +80,47 @@ public class UIManager
         string name = ZString.Concat(Literal.Roots.Layers, $"{layer}");
         var gameObject = CreateCanvas(name, _root.transform, (int)layer, out var canvas);
 
-        if (layer == Layer.Screen)
+        if (layer == Layer.Display)
             _canvas = canvas;
 
         _layer[layer] = gameObject.transform;
     }
 
-    public async UniTask<T> OpenScreenAsync<T>() where T : UIScreen
+    public async UniTask<T> OpenDisplayAsync<T>() where T : UIDisplay
     {
-        if (_screen is T existingScreen)
-            return existingScreen;
+        if (_display is T existingDisplay)
+            return existingDisplay;
 
-        if (_screen != null)
-            Close(_screen);
+        if (_display != null)
+            Close(_display);
 
         var _ = Root;
-        var (instance, rentHandle) = await Managers.Pool.PopAsync<T>(_layer[Layer.Screen]);
+        var (instance, rentHandle) = await Managers.Pool.PopAsync<T>(_layer[Layer.Display]);
 
         if (instance == null)
             return null;
 
-        _screen = instance;
+        _display = instance;
         _handles[instance] = rentHandle;
 
         return instance;
     }
 
-    public T OpenScreen<T>() where T : UIScreen
+    public T OpenDisplay<T>() where T : UIDisplay
     {
-        if (_screen is T existingScreen)
+        if (_display is T existingScreen)
             return existingScreen;
 
-        if (_screen != null)
-            Close(_screen);
+        if (_display != null)
+            Close(_display);
 
         var _ = Root;
-        var (instance, rentHandle) = Managers.Pool.Pop<T>(_layer[Layer.Screen]);
+        var (instance, rentHandle) = Managers.Pool.Pop<T>(_layer[Layer.Display]);
 
         if (instance == null)
             return null;
 
-        _screen = instance;
+        _display = instance;
         _handles[instance] = rentHandle;
 
         return instance;
@@ -199,8 +199,8 @@ public class UIManager
         if (ui == null || !_handles.ContainsKey(ui))
             return;
 
-        if (_screen == ui)
-            _screen = null;
+        if (_display == ui)
+            _display = null;
 
         if (ui is UIPopup popup)
         {
@@ -234,7 +234,7 @@ public class UIManager
 
         _handles.Clear();
         _popups.Clear();
-        _screen = null;
+        _display = null;
         Refresh();
     }
 
@@ -295,6 +295,6 @@ public class UIManager
     public async UniTask LockAsync(UniTask task)
         => await LockAsync(async () => await task);
 
-    public T GetScreen<T>() where T : UIScreen
-        => _screen as T;
+    public T GetScreen<T>() where T : UIDisplay
+        => _display as T;
 }

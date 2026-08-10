@@ -3,6 +3,7 @@ using R3;
 using R3.Triggers;
 using System;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
@@ -38,13 +39,19 @@ public static class UIExtensions
         return prop.Value != ButtonState.Disable;
     }
 
-    public static void BindViewAsButton(this UIBehaviour view, Action<PointerEventData> action, ViewEvent type, Component component, ReactiveProperty<ButtonState> prop, Action onReset = null)
+    public static void BindViewAsButton(this UIBehaviour view, Action<PointerEventData> action, ViewEvent type, Component component, ReactiveProperty<ButtonState> prop, Func<bool> stayCondition = null)
     {
-        Action onAction = onReset ?? (() => prop.Value = ButtonState.Normal);
+        Action onReset = () =>
+        {
+            if (stayCondition != null && stayCondition())
+                return;
+
+            prop.Value = ButtonState.Normal;
+        };
         view.BindView(_ => prop.Value = ButtonState.Highlight, ViewEvent.Enter, component, prop);
         view.BindView(_ => prop.Value = ButtonState.Press, ViewEvent.Press, component, prop);
-        view.BindView(_ => onAction(), ViewEvent.Release, component, prop);
-        view.BindView(_ => onAction(), ViewEvent.Exit, component, prop);
+        view.BindView(_ => onReset(), ViewEvent.Release, component, prop);
+        view.BindView(_ => onReset(), ViewEvent.Exit, component, prop);
         view.BindView(action, type, component, prop);
     }
 
@@ -86,6 +93,20 @@ public static class UIExtensions
         }).AddTo(component);
     }
 
+    public static IDisposable BindScrollbar(this Scrollbar scrollbar, Action<float> action, Component component)
+    {
+        if (scrollbar == null) 
+            return null;
+
+        action(scrollbar.value);
+        UnityAction<float> listener = val => action(val);
+        scrollbar.onValueChanged.AddListener(listener);
+        var disposable = Disposable.Create(() => scrollbar.onValueChanged.RemoveListener(listener));
+        disposable.AddTo(component);
+
+        return disposable;
+    }
+
     public static async UniTask Lock(this UniTask task)
         => await Managers.UI.LockAsync(task);
 
@@ -97,6 +118,32 @@ public static class UIExtensions
             MealTime.Dinner => Define.Sprite.MealTime_Dinner,
             _ => Define.Sprite.MealTime_Breakfast
         };
+    }
+
+    public static void SetVisual(this Image boxImage, Image toggleImage = null, Scrollbar scrollbar = null, bool isEnabled = true)
+    {
+        Color targetColor = isEnabled ? Color.white : new Color(0.5f, 0.5f, 0.5f, 1f);
+
+        if (boxImage != null) 
+            boxImage.color = targetColor;
+
+        if (toggleImage != null) 
+            toggleImage.color = targetColor;
+
+        if (scrollbar != null)
+        {
+            scrollbar.interactable = isEnabled;
+
+            if (scrollbar.TryGetComponent<Image>(out var barImage))
+                barImage.color = targetColor;
+
+            if (scrollbar.targetGraphic is Graphic bgGraphic)
+                bgGraphic.color = targetColor;
+
+            if (scrollbar.handleRect != null && scrollbar.handleRect.TryGetComponent<Image>(out var handleImage))
+                handleImage.color = targetColor;
+        }
+
     }
 
     public static async UniTask Release<T>(this UniTask<T> task) where T : UserInterface

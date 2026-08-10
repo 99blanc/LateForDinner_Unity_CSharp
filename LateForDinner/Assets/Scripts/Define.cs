@@ -2,9 +2,15 @@ using UnityEngine;
 
 public class Define
 {
+    public class Framerate
+    {
+        public const int Start = 60;
+        public const int Step = 20;
+    }
+
     public class Save
     {
-        public const int Amount = 4;
+        public const int Amount = 8;
     }
 
     public class Cursor
@@ -16,7 +22,7 @@ public class Define
     {
         public static readonly Vector2 Resolution = new Vector2(3840f, 2160f);
         public const float PixelsPerUnit = 200f;
-        public const float Margin = 0.95f;
+        public const float Margin = 0.975f;
     }
 
     public class Sprite
@@ -39,6 +45,8 @@ public class Define
         public const string MealTime_Breakfast = "ui_common_image_mealtime_breakfast";
         public const string MealTime_Lunch = "ui_common_image_mealtime_lunch";
         public const string MealTime_Dinner = "ui_common_image_mealtime_dinner";
+        public const string Checkmark_Yes = "ui_common_image_yes";
+        public const string Checkmark_No = "ui_common_image_no";
     }
 
     public class Atlas

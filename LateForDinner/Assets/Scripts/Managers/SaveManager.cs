@@ -218,7 +218,7 @@ public class SaveManager
     {
         string dir = Literal.Folders.Saves.GetDirectory();
 
-        return Path.Combine(dir, $"{Literal.Files.Meta}_{Literal.Extensions.Data}");
+        return Path.Combine(dir, $"{Literal.Files.Meta}{Literal.Extensions.Data}");
     }
 
     private string GetMetaBackupPath()
@@ -226,7 +226,7 @@ public class SaveManager
         string dir = Literal.Folders.Saves.GetDirectory();
         string backup = Path.Combine(dir, Literal.Folders.Backups).GetDirectory();
 
-        return Path.Combine(backup, $"{Literal.Files.Meta}_{Literal.Extensions.Backup}");
+        return Path.Combine(backup, $"{Literal.Files.Meta}{Literal.Extensions.Backup}");
     }
 
     public async UniTask SwapSlotOrderAsync(int indexA, int indexB)

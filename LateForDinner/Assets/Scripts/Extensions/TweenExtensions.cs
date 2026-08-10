@@ -7,12 +7,12 @@ public static class TweenExtensions
 {
     public static async UniTask<T> PlayAsync<T>(this UniTask<T> task) where T : UserInterface, IAnimatable
     {
-        var screen = await task;
+        var display = await task;
 
-        if (screen != null)
-            await screen.PlayAsync();
+        if (display != null)
+            await display.PlayAsync();
 
-        return screen;
+        return display;
     }
 
     public static async UniTask<T> PlayAsync<T>(this T user) where T : UserInterface, IAnimatable

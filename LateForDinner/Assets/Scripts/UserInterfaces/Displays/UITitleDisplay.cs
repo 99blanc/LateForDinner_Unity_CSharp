@@ -3,7 +3,7 @@ using R3;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class UITitleScreen : UIScreen
+public class UITitleDisplay : UIDisplay
 {
     private enum Texts
     {
@@ -41,8 +41,8 @@ public class UITitleScreen : UIScreen
         BindText(typeof(Texts));
         BindButton(typeof(Buttons));
         BindScrollRect(typeof(ScrollRects));
-        BindCanvasGroup(typeof(Panels));
-        GetText((int)Texts.PressAnyKeyText).text = Managers.Localization.Get(Localization.UI_Title_Screen_Text_Press_Any_Key);
+        BindPanel(typeof(Panels));
+        GetText((int)Texts.PressAnyKeyText).text = Managers.Localization.Get(Localization.UI_Title_Display_Text_Press_Any_Key);
         GetButton((int)Buttons.OptionButton).BindView(OnOptionClicked, ViewEvent.LeftClick, this);
         _slots = new UISaveSlot[Define.Save.Amount];
         var content = GetScrollRect((int)ScrollRects.LoadScrollRect).content;
@@ -51,7 +51,7 @@ public class UITitleScreen : UIScreen
         {
             var (slot, rentHandle) = Managers.Pool.Pop<UISaveSlot>(content);
             _slots[index] = slot;
-            _slots[index].SetScreen(this);
+            _slots[index].SetDisplay(this);
         }
 
         Managers.Save.EnsureSlot(_slots.Length);
@@ -73,8 +73,8 @@ public class UITitleScreen : UIScreen
     {
         _state = state;
         bool isMain = (_state == UI_TitleState.Main);
-        GetCanvasGroup((int)Panels.MainPanel).SetActivePanel(isMain);
-        GetCanvasGroup((int)Panels.LoadPanel).SetActivePanel(!isMain);
+        GetPanel((int)Panels.MainPanel).SetActivePanel(isMain);
+        GetPanel((int)Panels.LoadPanel).SetActivePanel(!isMain);
 
         if (!isMain)
             Refresh();

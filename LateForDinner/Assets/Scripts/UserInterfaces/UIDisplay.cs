@@ -1,4 +1,4 @@
-public class UIScreen : UserInterface
+public class UIDisplay : UserInterface
 {
     public override void Release()
     {

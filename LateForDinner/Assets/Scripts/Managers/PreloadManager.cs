@@ -10,17 +10,19 @@ public class PreloadManager
         await _driver.RunAsync(async load =>
         {
             // TODO ::: 부트 시 필요한 게임 내 리소스 생성
-            await load.LoadAsync(0.3f, "Loading Game Data...");
-            await UniTask.Delay(300);
-            await load.LoadAsync(0.5f, "Preparing Asset Resources...");
+            await load.LoadAsync(0.2f, Managers.Localization.Get(Localization.Log_PreloadManager_Boot_Data));
+            await Managers.Config.LoadAsync();
+            await UniTask.Delay(200);
+            await load.LoadAsync(0.4f, Managers.Localization.Get(Localization.Log_PreloadManager_Boot_Asset));
             await Managers.Resource.LoadAssetAsync<SpriteAtlas>(Define.Atlas.UI_Common);
-            await load.LoadAsync(0.7f, "Preparing Object Pools...");
+            await load.LoadAsync(0.8f, Managers.Localization.Get(Localization.Log_PreloadManager_Boot_Object));
+            await load.LoadAsync(0.6f, Managers.Localization.Get(Localization.Log_PreloadManager_Boot_UI));
             await Managers.Pool.PrewarmAsync<UISaveSlot>(Define.Save.Amount);
             await Managers.Pool.PrewarmAsync<UIOptionPopup>(1);
-            await Managers.Pool.PrewarmAsync<UITitleScreen>(1);
-            await UniTask.Delay(300);
-            await load.LoadAsync(1.0f, "Complete!");
+            await Managers.Pool.PrewarmAsync<UITitleDisplay>(1);
             await UniTask.Delay(200);
+            await load.LoadAsync(1.0f, Managers.Localization.Get(Localization.Log_PreloadManager_Boot_Complete));
+            await UniTask.Delay(100);
         });
     }
 }

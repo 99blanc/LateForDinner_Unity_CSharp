@@ -63,10 +63,19 @@ public class UserInterface : MonoBehaviour, IPoolable
     protected void BindButton(Type type) 
         => Bind<Button>(type);
 
+    protected void BindToggle(Type type)
+        => Bind<Toggle>(type);
+
     protected void BindScrollRect(Type type)
         => Bind<ScrollRect>(type);
 
-    protected void BindCanvasGroup(Type type)
+    protected void BindScrollbar(Type type)
+        => Bind<Scrollbar>(type);
+
+    protected void BindDropdown(Type type)
+        => Bind<Dropdown>(type);
+
+    protected void BindPanel(Type type)
         => Bind<CanvasGroup>(type);
 
     protected GameObject GetObject(int index) 
@@ -81,10 +90,19 @@ public class UserInterface : MonoBehaviour, IPoolable
     protected Button GetButton(int index) 
         => Get<Button>(index);
 
+    protected Toggle GetToggle(int index)
+        => Get<Toggle>(index);
+
     protected ScrollRect GetScrollRect(int index)
         => Get<ScrollRect>(index);
 
-    protected CanvasGroup GetCanvasGroup(int index)
+    protected Scrollbar GetScrollbar(int index)
+        => Get<Scrollbar>(index);
+
+    protected Dropdown GetDropdown(int index)
+        => Get<Dropdown>(index);
+
+    protected CanvasGroup GetPanel(int index)
         => Get<CanvasGroup>(index);
 
     protected CancellationToken GetToken(string key)

@@ -10,9 +10,6 @@ public interface IDraggable : IDragHandler, IEndDragHandler
             if (popup.RectTransform == null)
                 return;
 
-            if (!IsCursorInsideScreen(data))
-                return;
-
             float scaleFactor = Managers.UI.ScaleFactor;
             Vector2 nextPosition = popup.RectTransform.anchoredPosition + (data.delta / scaleFactor);
             nextPosition = ClampWithMargin(popup.RectTransform, nextPosition);
@@ -21,13 +18,6 @@ public interface IDraggable : IDragHandler, IEndDragHandler
     }
 
     void IEndDragHandler.OnEndDrag(PointerEventData data) { }
-
-    private bool IsCursorInsideScreen(PointerEventData data)
-    {
-        Vector3 mousePos = data.position;
-
-        return mousePos.x >= 0 && mousePos.x <= Screen.width && mousePos.y >= 0 && mousePos.y <= Screen.height;
-    }
 
     private Vector2 ClampWithMargin(RectTransform rectTransform, Vector2 targetPosition)
     {

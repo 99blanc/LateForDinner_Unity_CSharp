@@ -36,7 +36,7 @@ MonoBehaviour:
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: cff5543f996a8f24f8988057d5030b8f
-    m_Address: UILoadScreen
+    m_Address: UILoadDisplay
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -46,12 +46,12 @@ MonoBehaviour:
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: db5fb29640be6474ea20ffe59a1d7d49
-    m_Address: UISplashScreen
+    m_Address: UISplashDisplay
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f726fb9de373d2f43b05b6e929bb27fe
-    m_Address: UITitleScreen
+    m_Address: UITitleDisplay
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

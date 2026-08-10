@@ -3,10 +3,10 @@ using System;
 
 public class LoadDriver
 {
-    public async UniTask RunAsync(Func<UILoadScreen, UniTask> task)
+    public async UniTask RunAsync(Func<UILoadDisplay, UniTask> task)
     {
         Managers.UI.CloseAll();
-        var load = await Managers.UI.OpenScreenAsync<UILoadScreen>();
+        var load = await Managers.UI.OpenDisplayAsync<UILoadDisplay>();
 
         if (load == null || task == null)
             return;

@@ -3,7 +3,7 @@ using Cysharp.Threading.Tasks;
 using System;
 using UnityEngine;
 
-public class UILoadScreen : UIScreen, IAnimatable
+public class UILoadDisplay : UIDisplay, IAnimatable
 {
     private enum Texts
     {

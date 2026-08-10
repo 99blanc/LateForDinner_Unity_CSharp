@@ -72,10 +72,10 @@ public class ConfigManager
 
     public void ApplyToEngine()
     {
-        Screen.SetResolution(Option.Graphic.rWidth, Option.Graphic.rHeight, Option.Graphic.screenMode);
+        Screen.SetResolution(Option.Graphic.rWidth, Option.Graphic.rHeight, Option.Graphic.screenMode, Option.Graphic.Resolution.refreshRateRatio);
         QualitySettings.vSyncCount = Option.Graphic.vSync ? 1 : 0;
-        Application.targetFrameRate = Option.Graphic.frameRate;
-        QualitySettings.SetQualityLevel(Option.Graphic.quality);
-        Application.runInBackground = !Option.Sound.mBackground;
+        Application.targetFrameRate = Option.Graphic.rRefreshRate;
+        QualitySettings.SetQualityLevel((int)Option.Graphic.quality);
+        Application.runInBackground = !Option.Sound.mute;
     }
 }

@@ -7,7 +7,7 @@ public class UISaveSlot : UISlot
     private readonly ReactiveProperty<ButtonState> _button = new ReactiveProperty<ButtonState>(ButtonState.Normal);
     private readonly ReactiveProperty<ButtonState> _upButton = new ReactiveProperty<ButtonState>(ButtonState.Normal);
     private readonly ReactiveProperty<ButtonState> _downButton = new ReactiveProperty<ButtonState>(ButtonState.Normal);
-    private UITitleScreen _screen;
+    private UITitleDisplay _display;
     private int _index;
 
     private enum Texts
@@ -116,7 +116,7 @@ public class UISaveSlot : UISlot
 
             await Managers.Save.SwapSlotOrderAsync(_index, targetIndex);
 
-            _screen.Refresh();
+            _display.Refresh();
         }
     }
 
@@ -131,10 +131,10 @@ public class UISaveSlot : UISlot
 
             await Managers.Save.SwapSlotOrderAsync(_index, targetIndex);
 
-            _screen.Refresh();
+            _display.Refresh();
         }
     }
 
-    public void SetScreen(UITitleScreen screen)
-        => _screen = screen;
+    public void SetDisplay(UITitleDisplay display)
+        => _display = display;
 }

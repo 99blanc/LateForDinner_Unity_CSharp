@@ -22,7 +22,7 @@ public partial class SoundOption
     public bool mAmbient;
     public bool mSFX;
     public bool mUI;
-    public bool mBackground;
+    public bool mute;
 
     [MemoryPackIgnore]
     public static SoundOption Default => new SoundOption() 
@@ -32,12 +32,12 @@ public partial class SoundOption
         vAmbient = 1.0f,
         vSFX = 1.0f,
         vUI = 1.0f,
-        mMaster = false,
-        mBGM = false,
-        mAmbient = false,
-        mSFX = false,
-        mUI = false,
-        mBackground = true
+        mMaster = true,
+        mBGM = true,
+        mAmbient = true,
+        mSFX = true,
+        mUI = true,
+        mute = true
     };
 }
 
@@ -46,26 +46,83 @@ public partial class GraphicOption
 {
     public int rWidth;
     public int rHeight;
+    public int rRefreshRate;
     public FullScreenMode screenMode;
     public bool vSync;
     public bool antiAliasing;
-    public int quality;
-    public int frameRate;
+    public Quality quality;
     public bool bloom;
-    public bool ao;
+    public bool ambientOccusion;
 
-    public static GraphicOption Default => new GraphicOption() 
+    [MemoryPackIgnore]
+    public Resolution Resolution
     {
-        rWidth = 1920,
-        rHeight = 1080,
-        screenMode = FullScreenMode.FullScreenWindow,
-        vSync = true,
-        antiAliasing = false,
-        quality = 1,
-        frameRate = 60,
-        bloom = true,
-        ao = true
-    };
+        get => new Resolution
+        {
+            width = rWidth,
+            height = rHeight,
+            refreshRateRatio = new RefreshRate { numerator = (uint)rRefreshRate, denominator = 1 }
+        };
+        set
+        {
+            rWidth = value.width;
+            rHeight = value.height;
+            rRefreshRate = Mathf.RoundToInt((float)value.refreshRateRatio.numerator / value.refreshRateRatio.denominator);
+        }
+    }
+
+    [MemoryPackIgnore]
+    public static GraphicOption Default
+    {
+        get
+        {
+            int targetWidth = 1920;
+            int targetHeight = 1080;
+            int targetRefreshRate = 60;
+            Resolution[] resolutions = Screen.resolutions;
+
+            if (resolutions != null && resolutions.Length > 0)
+            {
+                int maxWidth = 0;
+
+                foreach (var res in resolutions)
+                {
+                    if (res.width > maxWidth)
+                        maxWidth = res.width;
+                }
+
+                double maxRefreshRate = 0;
+
+                foreach (var res in resolutions)
+                {
+                    if (res.width == maxWidth)
+                    {
+                        double currentRefresh = res.refreshRateRatio.value;
+                        if (currentRefresh > maxRefreshRate)
+                        {
+                            maxRefreshRate = currentRefresh;
+                            targetWidth = res.width;
+                            targetHeight = res.height;
+                            targetRefreshRate = Mathf.RoundToInt((float)currentRefresh);
+                        }
+                    }
+                }
+            }
+
+            return new GraphicOption()
+            {
+                rWidth = targetWidth,
+                rHeight = targetHeight,
+                rRefreshRate = targetRefreshRate,
+                screenMode = FullScreenMode.FullScreenWindow,
+                vSync = true,
+                antiAliasing = false,
+                quality = Quality.High,
+                bloom = true,
+                ambientOccusion = true
+            };
+        }
+    }
 }
 
 [MemoryPackable]
@@ -76,6 +133,7 @@ public partial class AccessOption
     public bool modifierDash;
     public bool highContrast;
 
+    [MemoryPackIgnore]
     public static AccessOption Default => new AccessOption()
     {
         language = Literal.Languages.Korean,
