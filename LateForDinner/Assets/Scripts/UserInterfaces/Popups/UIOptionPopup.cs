@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -175,6 +174,8 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
     private UI_OptionState _state;
     private Resolution[] _resolutions;
     private List<UIKeybindSlot> _keybinds = new List<UIKeybindSlot>();
+    private string _initialKeybindJson;
+    private bool _initialModifierDash;
 
     public override void Init()
     {
@@ -204,10 +205,10 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
         GetText((int)Texts.SoundButtonText).text = Managers.Localization.Get(Localization.UI_Option_Popup_Text_Sound);
         GetText((int)Texts.GraphicButtonText).text = Managers.Localization.Get(Localization.UI_Option_Popup_Text_Graphic);
         GetText((int)Texts.AccessButtonText).text = Managers.Localization.Get(Localization.UI_Option_Popup_Text_Access);
-        GetText((int)Texts.ApplyButtonText).text = Managers.Localization.Get(Localization.UI_Option_Popup_Text_Apply);
-        GetText((int)Texts.CompleteButtonText).text = Managers.Localization.Get(Localization.UI_Option_Popup_Text_Complete);
-        GetText((int)Texts.CancelButtonText).text = Managers.Localization.Get(Localization.UI_Option_Popup_Text_Cancel);
-        GetText((int)Texts.DefaultButtonText).text = Managers.Localization.Get(Localization.UI_Option_Popup_Text_Default);
+        GetText((int)Texts.ApplyButtonText).text = Managers.Localization.Get(Localization.Apply);
+        GetText((int)Texts.CompleteButtonText).text = Managers.Localization.Get(Localization.Complete);
+        GetText((int)Texts.CancelButtonText).text = Managers.Localization.Get(Localization.Cancel);
+        GetText((int)Texts.DefaultButtonText).text = Managers.Localization.Get(Localization.Default);
         Switch(UI_OptionState.Sound);
         // DESC ::: SoundPanel
         InitSoundPanel();
@@ -344,17 +345,17 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
         }
 
         var content = GetScrollRect((int)ScrollRects.KeybindScrollRect).content;
+        var (dashSlot, dashRentHandle) = Managers.Pool.Pop<UIKeybindSlot>(content);
+        _keybinds.Add(dashSlot);
+        dashSlot.SetupDashCommand((name, json) => { });
 
-        //foreach (var action in Managers.Control.GetBindableActions())
-        //{
-        //    var (slot, rentHandle) = Managers.Pool.Pop<UIKeybindSlot>(content);
-        //    _keybinds.Add(slot);
-        //    string actionName = action.name;
-        //    slot.Setup(actionName, action, (name, json) =>
-        //    {
-        //        Managers.Config.Option.Access.keybind = json;
-        //    });
-        //}
+        foreach (var action in Managers.Control.GetBindableActions())
+        {
+            var (slot, rentHandle) = Managers.Pool.Pop<UIKeybindSlot>(content);
+            _keybinds.Add(slot);
+            string actionName = action.name;
+            slot.Setup(actionName, action, (name, json) => { });
+        }
     }
 
     private void InitResolution()
@@ -391,6 +392,12 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
 
     public override void Get()
     {
+        _initialKeybindJson = Managers.Config.Option.Access.keybind;
+        _initialModifierDash = Managers.Config.Option.Access.modifierDash;
+
+        if (!string.IsNullOrEmpty(_initialKeybindJson))
+            Managers.Control.LoadBindingFromJson(_initialKeybindJson);
+
         Switch(_state);
         Refresh();
     }
@@ -523,6 +530,9 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
                 break;
             }
         }
+
+        foreach (var slot in _keybinds)
+            slot.Refresh();
     }
 
     private void Sync()
@@ -590,12 +600,24 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
     }
 
     private void OnCancelClicked(PointerEventData data)
-        => Release();
+    {
+        if (!string.IsNullOrEmpty(_initialKeybindJson))
+            Managers.Control.LoadBindingFromJson(_initialKeybindJson);
+
+        Managers.Config.Option.Access.modifierDash = _initialModifierDash;
+
+        foreach (var slot in _keybinds)
+            slot.Refresh();
+
+        Release();
+    }
 
     private async UniTask OnDefaultClick(PointerEventData data)
     {
         await Managers.Config.ResetAsync().Lock();
+
         Managers.Control.Reset();
+        Managers.Config.Option.Access.modifierDash = AccessOption.Default.modifierDash;
         Refresh();
     }
 }

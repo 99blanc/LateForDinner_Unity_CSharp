@@ -4,8 +4,8 @@ public class Literal
     {
         public const string Right = "Right";
         public const string Left = "Left";
-        public const string DownClimbSneakDashDrop = "DownClimb/Sneak/Dash/Drop";
-        public const string UpClimbThrow = "UpClimb/Throw";
+        public const string DownUtility = "DownUtility";
+        public const string UpUtility = "UpUtility";
         public const string Dash = "Dash";
         public const string Jump = "Jump";
         public const string Attack = "Attack";
@@ -115,7 +115,7 @@ public class Literal
 
     public class Localizations
     {
-        public const string Action = "UI_Option_Popup_Action_";
+        public const string Action = "Action_";
     }
 
     public class Maps

@@ -8,15 +8,10 @@ UI_Title_Display_Text_Press_Any_Key,Press any key to start.
 UI_Save_Slot_Text_Slot,Day {0}
 UI_Save_Slot_Text_Day,{0}/{1}/{2}
 UI_Save_Slot_Text_Time,{0}:{1}:{2}
-UI_Save_Slot_Text_None,None
 # Index: UIOptionPopup,
 UI_Option_Popup_Text_Sound,사운드
 UI_Option_Popup_Text_Graphic,그래픽
 UI_Option_Popup_Text_Access,접근성
-UI_Option_Popup_Text_Apply,적용
-UI_Option_Popup_Text_Complete,완료
-UI_Option_Popup_Text_Cancel,취소
-UI_Option_Popup_Text_Default,기본값
 UI_Option_Popup_Text_Master,마스터 볼륨
 UI_Option_Popup_Text_BGM,음악
 UI_Option_Popup_Text_Ambient,환경음
@@ -37,10 +32,7 @@ UI_Option_Popup_Text_Vsync,수직 동기화
 UI_Option_Popup_Text_Antialiasing,안티 앨리어싱
 UI_Option_Popup_Text_Bloom,블룸
 UI_Option_Popup_Text_AO,앰비언트 오클루전
-UI_Option_Popup_Text_Language,언어
 UI_Option_Popup_Text_Keybind,키보드 조작 설정
 UI_Option_Popup_Text_Bind,>설정할 키 입력<
-UI_Option_Popup_Text_Reset,초기화
-UI_Option_Popup_Text_Switch,전환
-UI_Option_Popup_Text_Modifier,대쉬키+방향키
+UI_Option_Popup_Text_Modifier,대시키+방향키
 UI_Option_Popup_Text_Tap,방향키 더블탭

@@ -74,7 +74,7 @@ public class UISaveSlot : UISlot
         }
         else
         {
-            slotText.text = Managers.Localization.Get(Localization.UI_Save_Slot_Text_None);
+            slotText.text = Managers.Localization.Get(Localization.None);
             dayText.text = string.Empty;
             timeText.text = string.Empty;
             mealTimeImage?.gameObject.SetActive(false);

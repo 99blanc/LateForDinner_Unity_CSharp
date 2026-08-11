@@ -22,17 +22,31 @@ public class ControlManager
 
         Texture2D first = Managers.Resource.GetTextureFromSprite(normal);
         Texture2D last = Managers.Resource.GetTextureFromSprite(press);
+        Debug.Log($"Cursor Texture Size - Width: {first.width}, Height: {first.height}");
         _handle?.Dispose();
         _handle = Observable.EveryUpdate()
         .Where(_ => Mouse.current != null)
         .Subscribe(_ =>
         {
-            var mouse = Mouse.current;
+            if (!Application.isFocused)
+            {
+                Cursor.SetCursor(null, Vector2.zero, CursorMode.ForceSoftware);
+                return;
+            }
 
-            if (mouse.leftButton.wasPressedThisFrame)
-                Cursor.SetCursor(last, _hotspot, CursorMode.Auto);
+            var mouse = Mouse.current;
+            Vector2 mousePos = mouse.position.ReadValue();
+
+            if (mousePos.x < 0 || mousePos.x > Screen.width || mousePos.y < 0 || mousePos.y > Screen.height)
+            {
+                Cursor.SetCursor(null, Vector2.zero, CursorMode.ForceSoftware);
+                return;
+            }
+
+            if (mouse.leftButton.isPressed)
+                Cursor.SetCursor(last, _hotspot, CursorMode.ForceSoftware);
             else
-                Cursor.SetCursor(first, _hotspot, CursorMode.Auto);
+                Cursor.SetCursor(first, _hotspot, CursorMode.ForceSoftware);
         });
     }
 
@@ -93,6 +107,19 @@ public class ControlManager
 
     public IEnumerable<KeyValuePair<string, InputAction>> GetActions()
         => _caches;
+
+    public void LoadBindingFromJson(string json)
+    {
+        if (_action == null)
+            return;
+
+        if (string.IsNullOrEmpty(json))
+            _action.RemoveAllBindingOverrides();
+        else
+            _action.LoadBindingOverridesFromJson(json);
+
+        CacheActions();
+    }
 
     public List<InputAction> GetBindableActions()
     {

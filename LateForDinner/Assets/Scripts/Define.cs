@@ -15,7 +15,7 @@ public class Define
 
     public class Cursor
     {
-        public static readonly Vector2 Hotspot = new Vector2(25f, 35f);
+        public static readonly Vector2 Hotspot = new Vector2(26f, 36f);
     }
 
     public class Scaler

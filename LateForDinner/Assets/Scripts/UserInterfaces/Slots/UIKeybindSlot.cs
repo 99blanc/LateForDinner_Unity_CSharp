@@ -56,7 +56,7 @@ public class UIKeybindSlot : UISlot
         _onRebindCompleted = onRebindCompleted;
 
         GetText((int)Texts.ActionNameText).text = Managers.Localization.Get(ZString.Concat(Literal.Localizations.Action, _actionName));
-        GetText((int)Texts.ResetText).text = Managers.Localization.Get(Localization.UI_Option_Popup_Text_Reset);
+        GetText((int)Texts.ResetText).text = Managers.Localization.Get(Localization.Reset);
         Refresh();
     }
 
@@ -65,8 +65,8 @@ public class UIKeybindSlot : UISlot
         _slotMode = SlotMode.DashCommandToggle;
         _targetAction = null;
         _onRebindCompleted = onRebindCompleted;
-        GetText((int)Texts.ActionNameText).text = Managers.Localization.Get(Managers.Localization.Get(Localization.UI_Option_Popup_Text_Access));
-        GetText((int)Texts.ResetText).text = Managers.Localization.Get(Localization.UI_Option_Popup_Text_Switch);
+        GetText((int)Texts.ActionNameText).text = Managers.Localization.Get(Localization.Action_DashCommand);
+        GetText((int)Texts.ResetText).text = Managers.Localization.Get(Localization.Switch);
         Refresh();
     }
 
@@ -97,7 +97,6 @@ public class UIKeybindSlot : UISlot
         bool currentMode = Managers.Config.Option.Access.modifierDash;
         Managers.Config.Option.Access.modifierDash = !currentMode;
         Refresh();
-        _onRebindCompleted?.Invoke(_actionName, Managers.Control.Save());
     }
 
     private void StartInteractiveRebind()
@@ -119,7 +118,6 @@ public class UIKeybindSlot : UISlot
             operation.Dispose();
             _targetAction.Enable();
             Refresh();
-            _onRebindCompleted?.Invoke(_actionName, Managers.Control.Save());
         })
         .OnCancel(operation =>
         {
@@ -138,10 +136,9 @@ public class UIKeybindSlot : UISlot
 
         _targetAction.RemoveAllBindingOverrides();
         Refresh();
-        _onRebindCompleted?.Invoke(_actionName, Managers.Control.Save());
     }
 
-    private void Refresh()
+    public void Refresh()
     {
         if (_slotMode == SlotMode.DashCommandToggle)
         {

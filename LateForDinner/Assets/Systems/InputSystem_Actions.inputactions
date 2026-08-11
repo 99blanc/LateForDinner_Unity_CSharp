@@ -25,7 +25,7 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "DownClimb/Sneak/Dash/Drop",
+                    "name": "DownUtility",
                     "type": "Button",
                     "id": "93cd3701-ff6a-45bb-85ec-ceb51e675010",
                     "expectedControlType": "",
@@ -34,7 +34,7 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "UpClimb/Throw",
+                    "name": "UpUtility",
                     "type": "Button",
                     "id": "73ec3a18-c259-4180-be8a-0bfad3cb42ad",
                     "expectedControlType": "",
@@ -215,7 +215,7 @@
                     "name": "",
                     "id": "29e9bf95-0c68-482e-b988-aca6dcb2619b",
                     "path": "<Keyboard>/leftShift",
-                    "interactions": "Tap",
+                    "interactions": "",
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
                     "action": "Dash",
@@ -228,7 +228,7 @@
                     "path": "<Keyboard>/leftArrow",
                     "interactions": "",
                     "processors": "",
-                    "groups": "",
+                    "groups": ";Keyboard&Mouse",
                     "action": "Left",
                     "isComposite": false,
                     "isPartOfComposite": false
@@ -239,7 +239,7 @@
                     "path": "<Keyboard>/rightArrow",
                     "interactions": "",
                     "processors": "",
-                    "groups": "",
+                    "groups": ";Keyboard&Mouse",
                     "action": "Right",
                     "isComposite": false,
                     "isPartOfComposite": false
@@ -250,8 +250,8 @@
                     "path": "<Keyboard>/downArrow",
                     "interactions": "",
                     "processors": "",
-                    "groups": "",
-                    "action": "DownClimb/Sneak/Dash/Drop",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "DownUtility",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -261,7 +261,7 @@
                     "path": "<Keyboard>/i",
                     "interactions": "",
                     "processors": "",
-                    "groups": "",
+                    "groups": ";Keyboard&Mouse",
                     "action": "Inventory",
                     "isComposite": false,
                     "isPartOfComposite": false
@@ -272,8 +272,8 @@
                     "path": "<Keyboard>/upArrow",
                     "interactions": "",
                     "processors": "",
-                    "groups": "",
-                    "action": "UpClimb/Throw",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "UpUtility",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -283,7 +283,7 @@
                     "path": "<Keyboard>/q",
                     "interactions": "",
                     "processors": "",
-                    "groups": "",
+                    "groups": ";Keyboard&Mouse",
                     "action": "Active",
                     "isComposite": false,
                     "isPartOfComposite": false
