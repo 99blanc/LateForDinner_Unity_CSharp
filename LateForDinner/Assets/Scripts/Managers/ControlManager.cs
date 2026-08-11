@@ -22,7 +22,6 @@ public class ControlManager
 
         Texture2D first = Managers.Resource.GetTextureFromSprite(normal);
         Texture2D last = Managers.Resource.GetTextureFromSprite(press);
-        Debug.Log($"Cursor Texture Size - Width: {first.width}, Height: {first.height}");
         _handle?.Dispose();
         _handle = Observable.EveryUpdate()
         .Where(_ => Mouse.current != null)

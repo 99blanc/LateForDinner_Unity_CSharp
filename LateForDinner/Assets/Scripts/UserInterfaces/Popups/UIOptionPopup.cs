@@ -31,6 +31,7 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
         CompleteButtonText,
         CancelButtonText,
         DefaultButtonText,
+        // TODO ::: BoxText를 InputField로 변경 후 Scrollbar와 연동
         // DESC ::: SoundPanel
         MasterText,
         MasterBoxText,
@@ -348,7 +349,8 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
         var (dashSlot, dashRentHandle) = Managers.Pool.Pop<UIKeybindSlot>(content);
         _keybinds.Add(dashSlot);
         dashSlot.SetupDashCommand((name, json) => { });
-
+        
+        // TODO ::: 입력 키 중복 불가 처리
         foreach (var action in Managers.Control.GetBindableActions())
         {
             var (slot, rentHandle) = Managers.Pool.Pop<UIKeybindSlot>(content);
