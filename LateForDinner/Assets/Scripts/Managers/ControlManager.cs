@@ -12,13 +12,7 @@ public class ControlManager
     private Vector2 _hotspot = Define.Cursor.Hotspot;
     private IDisposable _handle;
 
-    public async UniTask InitAsync()
-    {
-        InitCursor();
-        await LoadAsync();
-    }
-
-    private void InitCursor()
+    public void GetCursor()
     {
         var normal = Managers.Resource.GetSprite(Define.Atlas.UI_Common, Define.Sprite.Cursor_Normal);
         var press = Managers.Resource.GetSprite(Define.Atlas.UI_Common, Define.Sprite.Cursor_Press);
@@ -30,19 +24,19 @@ public class ControlManager
         Texture2D last = Managers.Resource.GetTextureFromSprite(press);
         _handle?.Dispose();
         _handle = Observable.EveryUpdate()
-            .Where(_ => Mouse.current != null)
-            .Subscribe(_ =>
-            {
-                var mouse = Mouse.current;
+        .Where(_ => Mouse.current != null)
+        .Subscribe(_ =>
+        {
+            var mouse = Mouse.current;
 
-                if (mouse.leftButton.wasPressedThisFrame)
-                    Cursor.SetCursor(last, _hotspot, CursorMode.Auto);
-                else
-                    Cursor.SetCursor(first, _hotspot, CursorMode.Auto);
-            });
+            if (mouse.leftButton.wasPressedThisFrame)
+                Cursor.SetCursor(last, _hotspot, CursorMode.Auto);
+            else
+                Cursor.SetCursor(first, _hotspot, CursorMode.Auto);
+        });
     }
 
-    private async UniTask LoadAsync()
+    public async UniTask LoadAsync()
     {
         var original = await Managers.Resource.LoadAssetAsync<InputActionAsset>(Literal.Assets.InputActionAsset);
         
@@ -96,6 +90,26 @@ public class ControlManager
 
     public IDisposable Subscribe(string actionName, Action onPerformed)
         => AsObservable(actionName).Subscribe(_ => onPerformed());
+
+    public IEnumerable<KeyValuePair<string, InputAction>> GetActions()
+        => _caches;
+
+    public List<InputAction> GetBindableActions()
+    {
+        var list = new List<InputAction>();
+
+        if (_action == null)
+            return list;
+
+        var userMap = _action.FindActionMap(Literal.Maps.User);
+
+        if (userMap != null)
+        {
+            foreach (var action in userMap.actions)
+                list.Add(action);
+        }
+        return list;
+    }
 
     public string Save()
         => _action?.SaveBindingOverridesAsJson() ?? string.Empty;

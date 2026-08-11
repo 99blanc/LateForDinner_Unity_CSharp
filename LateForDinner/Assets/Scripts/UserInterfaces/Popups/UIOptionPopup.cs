@@ -1,13 +1,14 @@
 using Cysharp.Threading.Tasks;
 using R3;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using System.Linq;
 using ZLinq;
-using System;
 
 public class UIOptionPopup : UIPopup, IDraggable, IFocusable
 {
@@ -133,6 +134,11 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
         AOToggle
     }
 
+    private enum ScrollRects
+    {
+        KeybindScrollRect
+    }
+
     private enum Scrollbars
     {
         MasterScrollbar,
@@ -168,6 +174,7 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
 
     private UI_OptionState _state;
     private Resolution[] _resolutions;
+    private List<UIKeybindSlot> _keybinds = new List<UIKeybindSlot>();
 
     public override void Init()
     {
@@ -176,6 +183,7 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
         BindImage(typeof(Images));
         BindButton(typeof(Buttons));
         BindToggle(typeof(Toggles));
+        BindScrollRect(typeof(ScrollRects));
         BindScrollbar(typeof(Scrollbars));
         BindDropdown(typeof(Dropdowns));
         BindPanel(typeof(Panels));
@@ -334,6 +342,19 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
 
             languageDropdown.AddOptions(displayOptions);
         }
+
+        var content = GetScrollRect((int)ScrollRects.KeybindScrollRect).content;
+
+        //foreach (var action in Managers.Control.GetBindableActions())
+        //{
+        //    var (slot, rentHandle) = Managers.Pool.Pop<UIKeybindSlot>(content);
+        //    _keybinds.Add(slot);
+        //    string actionName = action.name;
+        //    slot.Setup(actionName, action, (name, json) =>
+        //    {
+        //        Managers.Config.Option.Access.keybind = json;
+        //    });
+        //}
     }
 
     private void InitResolution()
@@ -429,7 +450,6 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
     private void Refresh()
     {
         var option = Managers.Config.Option;
-        // TODO ::: Managers.Config.Option 안의 SoundOption, GraphicOption, AccessOption 값을 각 패널에 반영
         // DESC :: SoundPanel
         GetScrollbar((int)Scrollbars.MasterScrollbar).value = option.Sound.vMaster;
         GetScrollbar((int)Scrollbars.BGMScrollbar).value = option.Sound.vBGM;
@@ -508,7 +528,6 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
     private void Sync()
     {
         var option = Managers.Config.Option;
-        // TODO ::: 유저가 팝업 내에서 변경한 UI 값을 Managers.Config.Option 에 거꾸로 반영
         // DESC :: SoundPanel
         option.Sound.vMaster = GetScrollbar((int)Scrollbars.MasterScrollbar).value;
         option.Sound.vBGM = GetScrollbar((int)Scrollbars.BGMScrollbar).value;
@@ -550,6 +569,8 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
 
         if (languageLocales != null && langIndex < languageLocales.Count)
             Managers.Config.Option.Access.language = languageLocales[langIndex];
+
+        option.Access.keybind = Managers.Control.Save();
     }
 
     private async UniTask OnApplyClicked(PointerEventData data)
@@ -574,7 +595,7 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
     private async UniTask OnDefaultClick(PointerEventData data)
     {
         await Managers.Config.ResetAsync().Lock();
-
+        Managers.Control.Reset();
         Refresh();
     }
 }

@@ -10,9 +10,6 @@ public class ConfigManager
     private string _save => Path.Combine(Application.persistentDataPath, ZString.Concat(Literal.Files.Config, Literal.Extensions.Bytes));
     public Option Option { get; private set; } = new Option();
 
-    public async UniTask InitAsync()
-        => await LoadAsync();
-
     public async UniTask LoadAsync()
     {
         if (!File.Exists(_save))

@@ -12,7 +12,6 @@ public class LocalizationManager
     public async UniTask InitAsync()
     {
         await SyncAsync();
-
         RefreshAsync();
     }
 

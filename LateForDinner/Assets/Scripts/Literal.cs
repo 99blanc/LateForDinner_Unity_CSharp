@@ -2,10 +2,32 @@ public class Literal
 {
     public class Hotkeys
     {
-        public const string Submit = "Submit";
-        public const string Cancel = "Cancel";
-        public const string Back = "Back";
+        public const string Right = "Right";
+        public const string Left = "Left";
+        public const string DownClimbSneakDashDrop = "DownClimb/Sneak/Dash/Drop";
+        public const string UpClimbThrow = "UpClimb/Throw";
+        public const string Dash = "Dash";
+        public const string Jump = "Jump";
+        public const string Attack = "Attack";
+        public const string Interact = "Interact";
+        public const string QuickSlot1 = "QuickSlot1";
+        public const string QuickSlot2 = "QuickSlot2";
+        public const string QuickSlot3 = "QuickSlot3";
+        public const string QuickSlot4 = "QuickSlot4";
+        public const string Inventory = "Inventory";
+        public const string Active = "Active";
+        public const string Look = "Look";
+        public const string Point = "Point";
         public const string Any = "Any";
+        public const string Cancel = "Cancel";
+        public const string Submit = "Submit";
+        public const string Back = "Back";
+    }
+
+    public class Schemes
+    {
+        public const string KeyboardAndMouse = "Keyboard&Mouse";
+        public const string Mouse = "Mouse";
     }
 
     public class Languages
@@ -91,8 +113,14 @@ public class Literal
         public const string Json = ".json";
     }
 
+    public class Localizations
+    {
+        public const string Action = "UI_Option_Popup_Action_";
+    }
+
     public class Maps
     {
         public const string User = "User";
+        public const string UI = "UI";
     }
 }

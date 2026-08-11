@@ -48,8 +48,6 @@ public class Managers : MonoBehaviour
         await Resource.InitAsync();
         await Data.InitAsync();
         await Localization.InitAsync();
-        await Config.InitAsync();
-        await Control.InitAsync();
         await Console.InitAsync();
         await Save.InitAsync();
     }

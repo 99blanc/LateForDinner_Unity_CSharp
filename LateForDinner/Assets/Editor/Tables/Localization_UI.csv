@@ -24,7 +24,7 @@ UI_Option_Popup_Text_SFX,효과음
 UI_Option_Popup_Text_UI,UI 볼륨
 UI_Option_Popup_Text_Mute,프로그램 백그라운드 시 음소거
 UI_Option_Popup_Text_Resolution,해상도
-UI_Option_Popup_Text_Resolution_Dropdown,{0} x {1} {2}hz
+UI_Option_Popup_Text_Resolution_Dropdown,{0} x {1} ({2}hz)
 UI_Option_Popup_Text_Fullscreen,창모드
 UI_Option_Popup_Text_Fullscreen_FullscreenWindow,전체화면
 UI_Option_Popup_Text_Fullscreen_Windowed,창모드
@@ -37,3 +37,10 @@ UI_Option_Popup_Text_Vsync,수직 동기화
 UI_Option_Popup_Text_Antialiasing,안티 앨리어싱
 UI_Option_Popup_Text_Bloom,블룸
 UI_Option_Popup_Text_AO,앰비언트 오클루전
+UI_Option_Popup_Text_Language,언어
+UI_Option_Popup_Text_Keybind,키보드 조작 설정
+UI_Option_Popup_Text_Bind,>설정할 키 입력<
+UI_Option_Popup_Text_Reset,초기화
+UI_Option_Popup_Text_Switch,전환
+UI_Option_Popup_Text_Modifier,대쉬키+방향키
+UI_Option_Popup_Text_Tap,방향키 더블탭

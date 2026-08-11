@@ -12,6 +12,7 @@ public class PreloadManager
             // TODO ::: 부트 시 필요한 게임 내 리소스 생성
             await load.LoadAsync(0.2f, Managers.Localization.Get(Localization.Log_PreloadManager_Boot_Data));
             await Managers.Config.LoadAsync();
+            await Managers.Control.LoadAsync();
             await UniTask.Delay(200);
             await load.LoadAsync(0.4f, Managers.Localization.Get(Localization.Log_PreloadManager_Boot_Asset));
             await Managers.Resource.LoadAssetAsync<SpriteAtlas>(Define.Atlas.UI_Common);

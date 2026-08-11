@@ -38,4 +38,11 @@ public enum Localization
     UI_Option_Popup_Text_Antialiasing,
     UI_Option_Popup_Text_Bloom,
     UI_Option_Popup_Text_AO,
+    UI_Option_Popup_Text_Language,
+    UI_Option_Popup_Text_Keybind,
+    UI_Option_Popup_Text_Bind,
+    UI_Option_Popup_Text_Reset,
+    UI_Option_Popup_Text_Switch,
+    UI_Option_Popup_Text_Modifier,
+    UI_Option_Popup_Text_Tap,
 }
