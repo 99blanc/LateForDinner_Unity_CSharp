@@ -1,6 +1,7 @@
 using Cysharp.Text;
 using R3;
 using System;
+using System.Collections.Generic;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
@@ -37,6 +38,9 @@ public class UIKeybindSlot : UISlot
     private InputAction _targetAction;
     private string _actionName;
     private Action<string, string> _onRebindCompleted;
+    private List<UIKeybindSlot> _keybinds;
+    private Func<bool> _checkIsRebinding;
+    private Action<bool> _setIsRebinding;
 
     public override void Init()
     {
@@ -49,12 +53,14 @@ public class UIKeybindSlot : UISlot
         GetButton((int)Buttons.ResetButton).BindViewAsButton(OnResetOrSwitchButtonClicked, ViewEvent.LeftClick, this, _resetButtonState);
     }
 
-    public void Setup(string actionName, InputAction action, Action<string, string> onRebindCompleted)
+    public void Setup(string actionName, InputAction action, List<UIKeybindSlot> popupKeybinds, Func<bool> checkIsRebinding, Action<bool> setIsRebinding, Action<string, string> onRebindCompleted)
     {
         _actionName = actionName;
         _targetAction = action;
+        _keybinds = popupKeybinds;
+        _checkIsRebinding = checkIsRebinding;
+        _setIsRebinding = setIsRebinding;
         _onRebindCompleted = onRebindCompleted;
-
         GetText((int)Texts.ActionNameText).text = Managers.Localization.Get(ZString.Concat(Literal.Localizations.Action, _actionName));
         GetText((int)Texts.ResetText).text = Managers.Localization.Get(Localization.Reset);
         Refresh();
@@ -101,33 +107,39 @@ public class UIKeybindSlot : UISlot
 
     private void StartInteractiveRebind()
     {
-        if (_targetAction == null)
+        if (_checkIsRebinding != null && _checkIsRebinding())
             return;
 
+        if (_targetAction == null) 
+            return;
+
+        _setIsRebinding?.Invoke(true);
         _targetAction.Disable();
         int bindingIndex = _targetAction.GetBindingIndex(InputBinding.MaskByGroup(Literal.Schemes.KeyboardAndMouse));
-
-        if (bindingIndex == -1)
+        
+        if (bindingIndex == -1) 
             return;
 
-        GetText((int)Texts.KeybindButtonText).text = Managers.Localization.Get(Localization.UI_Option_Popup_Text_Bind);
         var rebindOperation = _targetAction.PerformInteractiveRebinding(bindingIndex).WithControlsExcluding(Literal.Schemes.Mouse)
         .OnComplete(operation =>
         {
-            string newCompositeOrPath = _targetAction.bindings[bindingIndex].effectivePath;
+            string newPath = _targetAction.bindings[bindingIndex].effectivePath;
             bool isDuplicate = false;
 
-            foreach (var action in Managers.Control.GetBindableActions())
+            if (_keybinds != null)
             {
-                if (action == _targetAction)
-                    continue;
-
-                int otherIndex = action.GetBindingIndex(InputBinding.MaskByGroup(Literal.Schemes.KeyboardAndMouse));
-                
-                if (otherIndex != -1 && action.bindings[otherIndex].effectivePath == newCompositeOrPath)
+                foreach (var slot in _keybinds)
                 {
-                    isDuplicate = true;
-                    break;
+                    if (slot == this || slot._targetAction == null) 
+                        continue;
+
+                    int otherIndex = slot._targetAction.GetBindingIndex(InputBinding.MaskByGroup(Literal.Schemes.KeyboardAndMouse));
+                    
+                    if (otherIndex != -1 && slot._targetAction.bindings[otherIndex].effectivePath == newPath)
+                    {
+                        isDuplicate = true;
+                        break;
+                    }
                 }
             }
 
@@ -135,13 +147,13 @@ public class UIKeybindSlot : UISlot
             {
                 _targetAction.RemoveBindingOverride(bindingIndex);
                 operation.Dispose();
-                _targetAction.Enable();
-                Refresh();
+                StartInteractiveRebind();
                 return;
             }
 
             operation.Dispose();
             _targetAction.Enable();
+            _setIsRebinding?.Invoke(false);
             _onRebindCompleted?.Invoke(_actionName, _targetAction.SaveBindingOverridesAsJson());
             Refresh();
         })
@@ -149,6 +161,7 @@ public class UIKeybindSlot : UISlot
         {
             operation.Dispose();
             _targetAction.Enable();
+            _setIsRebinding?.Invoke(false);
             Refresh();
         });
 

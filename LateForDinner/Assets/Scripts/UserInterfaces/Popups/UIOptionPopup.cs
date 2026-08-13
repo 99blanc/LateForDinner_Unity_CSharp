@@ -184,6 +184,7 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
     private Resolution[] _resolutions;
     private List<UIKeybindSlot> _keybinds = new List<UIKeybindSlot>();
     private bool _isUpdatingVolume;
+    private bool _isRebinding = false;
     private bool _initialModifierDash;
     private string _initialKeybindJson;
 
@@ -359,14 +360,15 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
         var (dashSlot, dashRentHandle) = Managers.Pool.Pop<UIKeybindSlot>(content);
         _keybinds.Add(dashSlot);
         dashSlot.SetupDashCommand((name, json) => { });
-        
-        // TODO ::: 입력 키 중복 불가 처리
+
         foreach (var action in Managers.Control.GetBindableActions())
         {
             var (slot, rentHandle) = Managers.Pool.Pop<UIKeybindSlot>(content);
             _keybinds.Add(slot);
-            string actionName = action.name;
-            slot.Setup(actionName, action, (name, json) => { });
+            slot.Setup(action.name, action, _keybinds,
+                () => _isRebinding,
+                (isBusy) => _isRebinding = isBusy,
+                (name, json) => { });
         }
     }
 
