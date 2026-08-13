@@ -36,9 +36,11 @@ public class UIKeybindSlot : UISlot
     private InputAction _targetAction;
     private string _actionName;
     private Action<string, string> _onRebindCompleted;
+    private InputActionRebindingExtensions.RebindingOperation _currentOperation;
     private List<UIKeybindSlot> _keybinds;
     private Func<bool> _isLocked;
     private Action<bool> _setLock;
+    private bool _isWaitingForInput;
 
     public override void Init()
     {
@@ -64,19 +66,45 @@ public class UIKeybindSlot : UISlot
         Refresh();
     }
 
-    public void SetupDashCommand(Action<string, string> complete)
+    public void SetupDashCommand(Func<bool> locked, Action<bool> lockAction, Action<string, string> complete)
     {
         _slotMode = SlotMode.DashCommandToggle;
         _targetAction = null;
+        _isLocked = locked;
+        _setLock = lockAction;
         _onRebindCompleted = complete;
         SetActionText(Localization.Action_DashCommand);
         SetResetText(Localization.Switch);
         Refresh();
     }
 
+    private bool IsAnySlotWaiting()
+    {
+        if (_keybinds == null)
+            return _isWaitingForInput;
+
+        if (_isWaitingForInput)
+            return true;
+
+        return _keybinds.Any(slot => slot != null && slot._isWaitingForInput);
+    }
+    private bool IsPopupLocked()
+    {
+        if (IsAnySlotWaiting())
+            return true;
+
+        if (_isLocked != null && _isLocked())
+            return true;
+
+        return false;
+    }
+
     private void OnClickKeybind(PointerEventData data)
     {
-        if (HandleDash()) 
+        if (IsPopupLocked())
+            return;
+
+        if (HandleDash())
             return;
 
         StartRebind();
@@ -84,7 +112,16 @@ public class UIKeybindSlot : UISlot
 
     private void OnClickReset(PointerEventData data)
     {
-        if (HandleDash()) 
+        if (_isWaitingForInput)
+        {
+            _currentOperation?.Cancel();
+            return;
+        }
+
+        if (IsPopupLocked())
+            return;
+
+        if (HandleDash())
             return;
 
         ResetBinding();
@@ -102,12 +139,10 @@ public class UIKeybindSlot : UISlot
 
     private void StartRebind()
     {
-        if (_isLocked != null && _isLocked()) 
+        if (IsPopupLocked() || _targetAction == null) 
             return;
 
-        if (_targetAction == null) 
-            return;
-
+        _isWaitingForInput = true;
         _setLock?.Invoke(true);
         _targetAction.Disable();
         int index = GetIndex();
@@ -127,11 +162,12 @@ public class UIKeybindSlot : UISlot
 
     private void BeginOperation(int index)
     {
-        var operation = _targetAction.PerformInteractiveRebinding(index)
+        _currentOperation?.Dispose();
+        _currentOperation = _targetAction.PerformInteractiveRebinding(index)
         .WithControlsExcluding(Literal.Schemes.Mouse)
         .OnComplete(op => OnComplete(op, index))
         .OnCancel(op => OnCancel(op));
-        operation.Start();
+        _currentOperation.Start();
     }
 
     private void OnComplete(InputActionRebindingExtensions.RebindingOperation op, int index)
@@ -147,13 +183,13 @@ public class UIKeybindSlot : UISlot
 
     private bool IsDuplicate(int index)
     {
-        if (_keybinds == null) 
+        if (_keybinds == null)
             return false;
 
         string path = _targetAction.bindings[index].effectivePath;
         return _keybinds
-        .Where(s => s != this && s._targetAction != null)
-        .Any(s => s.MatchPath(path));
+        .Where(s => s._targetAction != null)
+        .Any(s => s != this && s.MatchPath(path));
     }
 
     private bool MatchPath(string path)
@@ -162,8 +198,8 @@ public class UIKeybindSlot : UISlot
 
     private void Retry(InputActionRebindingExtensions.RebindingOperation op, int index)
     {
-        _targetAction.RemoveBindingOverride(index);
-        op.Dispose();
+        CleanUp(op);
+        Refresh();
         StartRebind();
     }
 
@@ -182,6 +218,11 @@ public class UIKeybindSlot : UISlot
 
     private void CleanUp(InputActionRebindingExtensions.RebindingOperation op)
     {
+        _isWaitingForInput = false;
+
+        if (_currentOperation == op)
+            _currentOperation = null;
+
         op?.Dispose();
         _targetAction.Enable();
         _setLock?.Invoke(false);
@@ -193,6 +234,7 @@ public class UIKeybindSlot : UISlot
             return;
 
         _targetAction.RemoveAllBindingOverrides();
+        _onRebindCompleted?.Invoke(_actionName, _targetAction.SaveBindingOverridesAsJson());
         Refresh();
     }
 

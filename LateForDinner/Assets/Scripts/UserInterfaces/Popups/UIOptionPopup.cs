@@ -332,15 +332,17 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
         }
 
         var content = GetScrollRect((int)ScrollRects.KeybindScrollRect).content;
+        Func<bool> isRebindingCheck = () => _isRebinding;
+        Action<bool> setRebindingLock = isBusy => _isRebinding = isBusy;
         var (dashSlot, _) = Managers.Pool.Pop<UIKeybindSlot>(content);
         _keybinds.Add(dashSlot);
-        dashSlot.SetupDashCommand((_, _) => { });
+        dashSlot.SetupDashCommand(isRebindingCheck, setRebindingLock, (_, _) => { });
 
         foreach (var action in Managers.Control.GetBindableActions())
         {
             var (slot, _) = Managers.Pool.Pop<UIKeybindSlot>(content);
             _keybinds.Add(slot);
-            slot.Setup(action.name, action, _keybinds, () => _isRebinding, isBusy => _isRebinding = isBusy, (_, _) => { });
+            slot.Setup(action.name, action, _keybinds, isRebindingCheck, setRebindingLock, (_, _) => { });
         }
     }
 
