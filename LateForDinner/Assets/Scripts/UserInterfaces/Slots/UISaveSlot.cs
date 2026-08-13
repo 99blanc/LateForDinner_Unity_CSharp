@@ -10,19 +10,19 @@ public class UISaveSlot : UISlot
     private UITitleDisplay _display;
     private int _index;
 
-    private enum Texts
-    {
-        DayText,
-        TimeText,
-        SlotText
-    }
-
     private enum Images
     {
         MealTimeImage,
         SlotImage,
         UpButtonImage,
         DownButtonImage
+    }
+
+    private enum Texts
+    {
+        DayText,
+        TimeText,
+        SlotText
     }
 
     private enum Buttons
@@ -35,8 +35,8 @@ public class UISaveSlot : UISlot
     public override void Init()
     {
         base.Init();
-        BindText(typeof(Texts));
         BindImage(typeof(Images));
+        BindText(typeof(Texts));
         BindButton(typeof(Buttons));
         GetImage((int)Images.SlotImage).BindState(_button, Define.Atlas.UI_Common, this);
         GetImage((int)Images.UpButtonImage).BindStateAsArrow(_upButton, Define.Atlas.UI_Common, this);

@@ -5,14 +5,14 @@ using UnityEngine;
 
 public class UILoadDisplay : UIDisplay, IAnimatable
 {
-    private enum Texts
-    {
-        MessageText
-    }
-
     private enum Images
     {
         RotateImage
+    }
+
+    private enum Texts
+    {
+        MessageText
     }
 
     private float _current;
@@ -20,8 +20,8 @@ public class UILoadDisplay : UIDisplay, IAnimatable
     public override void Init()
     {
         base.Init();
-        BindText(typeof(Texts));
         BindImage(typeof(Images));
+        BindText(typeof(Texts));
     }
 
     public override void Get()

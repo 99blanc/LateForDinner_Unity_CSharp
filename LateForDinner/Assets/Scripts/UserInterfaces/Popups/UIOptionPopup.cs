@@ -22,38 +22,6 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
     private readonly ReactiveProperty<ButtonState> _fullscreenArrowButton = new ReactiveProperty<ButtonState>(ButtonState.Normal);
     private readonly ReactiveProperty<ButtonState> _qualityArrowButton = new ReactiveProperty<ButtonState>(ButtonState.Normal);
 
-    private enum Texts
-    {
-        SoundButtonText,
-        GraphicButtonText,
-        AccessButtonText,
-        ApplyButtonText,
-        CompleteButtonText,
-        CancelButtonText,
-        DefaultButtonText,
-        // TODO ::: BoxText를 InputField로 변경 후 Scrollbar와 연동
-        // DESC ::: SoundPanel
-        MasterText,
-        MasterBoxText,
-        BGMText,
-        BGMBoxText,
-        AmbientText,
-        AmbientBoxText,
-        SFXText,
-        SFXBoxText,
-        UIText,
-        UIBoxText,
-        MuteText,
-        // DESC ::: GraphicPanel
-        ResolutionText,
-        FullscreenText,
-        QualityText,
-        VsyncText,
-        AntialiasingText,
-        BloomText,
-        AOText
-    }
-
     private enum Images
     {
         SoundButtonImage,
@@ -64,19 +32,19 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
         CancelButtonImage,
         DefaultButtonImage,
         // DESC ::: SoundPanel
-        MasterBoxImage,
+        MasterInputImage,
         MasterToggleImage,
         MasterCheckmarkImage,
-        BGMBoxImage,
+        BGMInputImage,
         BGMToggleImage,
         BGMCheckmarkImage,
-        AmbientBoxImage,
+        AmbientInputImage,
         AmbientToggleImage,
         AmbientCheckmarkImage,
-        SFXBoxImage,
+        SFXInputImage,
         SFXToggleImage,
         SFXCheckmarkImage,
-        UIBoxImage,
+        UIInputImage,
         UIToggleImage,
         UICheckmarkImage,
         MuteToggleImage,
@@ -99,6 +67,46 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
         BloomCheckmarkImage,
         AOToggleImage,
         AOCheckmarkImage
+    }
+
+    private enum Texts
+    {
+        SoundButtonText,
+        GraphicButtonText,
+        AccessButtonText,
+        ApplyButtonText,
+        CompleteButtonText,
+        CancelButtonText,
+        DefaultButtonText,
+        // DESC ::: SoundPanel
+        MasterText,
+        MasterInputText,
+        BGMText,
+        BGMInputText,
+        AmbientText,
+        AmbientInputText,
+        SFXText,
+        SFXInputText,
+        UIText,
+        UIInputText,
+        MuteText,
+        // DESC ::: GraphicPanel
+        ResolutionText,
+        FullscreenText,
+        QualityText,
+        VsyncText,
+        AntialiasingText,
+        BloomText,
+        AOText
+    }
+
+    private enum InputFields
+    {
+        MasterInputField,
+        BGMInputField,
+        AmbientInputField,
+        SFXInputField,
+        UIInputField
     }
 
     private enum Buttons
@@ -175,14 +183,16 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
     private UI_OptionState _state;
     private Resolution[] _resolutions;
     private List<UIKeybindSlot> _keybinds = new List<UIKeybindSlot>();
-    private string _initialKeybindJson;
+    private bool _isUpdatingVolume;
     private bool _initialModifierDash;
+    private string _initialKeybindJson;
 
     public override void Init()
     {
         base.Init();
-        BindText(typeof(Texts));
         BindImage(typeof(Images));
+        BindText(typeof(Texts));
+        BindInputField(typeof(InputFields));
         BindButton(typeof(Buttons));
         BindToggle(typeof(Toggles));
         BindScrollRect(typeof(ScrollRects));
@@ -225,31 +235,31 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
         {
             bool isOn = GetToggle((int)Toggles.MasterToggle).isOn;
             UpdateCheckmark(GetImage((int)Images.MasterCheckmarkImage), isOn);
-            GetImage((int)Images.MasterBoxImage).SetVisual(GetImage((int)Images.MasterToggleImage), GetScrollbar((int)Scrollbars.MasterScrollbar), isOn);
+            GetImage((int)Images.MasterInputImage).SetVisual(GetImage((int)Images.MasterToggleImage), GetScrollbar((int)Scrollbars.MasterScrollbar), isOn);
         }, ViewEvent.LeftClick, this);
         GetToggle((int)Toggles.BGMToggle).BindView(_ =>
         {
             bool isOn = GetToggle((int)Toggles.BGMToggle).isOn;
             UpdateCheckmark(GetImage((int)Images.BGMCheckmarkImage), isOn);
-            GetImage((int)Images.BGMBoxImage).SetVisual(GetImage((int)Images.BGMToggleImage), GetScrollbar((int)Scrollbars.BGMScrollbar), isOn);
+            GetImage((int)Images.BGMInputImage).SetVisual(GetImage((int)Images.BGMToggleImage), GetScrollbar((int)Scrollbars.BGMScrollbar), isOn);
         }, ViewEvent.LeftClick, this);
         GetToggle((int)Toggles.AmbientToggle).BindView(_ =>
         {
             bool isOn = GetToggle((int)Toggles.AmbientToggle).isOn;
             UpdateCheckmark(GetImage((int)Images.AmbientCheckmarkImage), isOn);
-            GetImage((int)Images.AmbientBoxImage).SetVisual(GetImage((int)Images.AmbientToggleImage), GetScrollbar((int)Scrollbars.AmbientScrollbar), isOn);
+            GetImage((int)Images.AmbientInputImage).SetVisual(GetImage((int)Images.AmbientToggleImage), GetScrollbar((int)Scrollbars.AmbientScrollbar), isOn);
         }, ViewEvent.LeftClick, this);
         GetToggle((int)Toggles.SFXToggle).BindView(_ =>
         {
             bool isOn = GetToggle((int)Toggles.SFXToggle).isOn;
             UpdateCheckmark(GetImage((int)Images.SFXCheckmarkImage), isOn);
-            GetImage((int)Images.SFXBoxImage).SetVisual(GetImage((int)Images.SFXToggleImage), GetScrollbar((int)Scrollbars.SFXScrollbar), isOn);
+            GetImage((int)Images.SFXInputImage).SetVisual(GetImage((int)Images.SFXToggleImage), GetScrollbar((int)Scrollbars.SFXScrollbar), isOn);
         }, ViewEvent.LeftClick, this);
         GetToggle((int)Toggles.UIToggle).BindView(_ =>
         {
             bool isOn = GetToggle((int)Toggles.UIToggle).isOn;
             UpdateCheckmark(GetImage((int)Images.UICheckmarkImage), isOn);
-            GetImage((int)Images.UIBoxImage).SetVisual(GetImage((int)Images.UIToggleImage), GetScrollbar((int)Scrollbars.UIScrollbar), isOn);
+            GetImage((int)Images.UIInputImage).SetVisual(GetImage((int)Images.UIToggleImage), GetScrollbar((int)Scrollbars.UIScrollbar), isOn);
         }, ViewEvent.LeftClick, this);
         GetToggle((int)Toggles.MuteToggle).BindView(_ =>
         {
@@ -257,11 +267,11 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
             UpdateCheckmark(GetImage((int)Images.MuteCheckmarkImage), isOn);
             GetImage((int)Images.MuteToggleImage).SetVisual(null, null, isOn);
         }, ViewEvent.LeftClick, this);
-        GetScrollbar((int)Scrollbars.MasterScrollbar).BindScrollbar(val => UpdateVolume(GetText((int)Texts.MasterBoxText), val), this);
-        GetScrollbar((int)Scrollbars.BGMScrollbar).BindScrollbar(val => UpdateVolume(GetText((int)Texts.BGMBoxText), val), this);
-        GetScrollbar((int)Scrollbars.AmbientScrollbar).BindScrollbar(val => UpdateVolume(GetText((int)Texts.AmbientBoxText), val), this);
-        GetScrollbar((int)Scrollbars.SFXScrollbar).BindScrollbar(val => UpdateVolume(GetText((int)Texts.SFXBoxText), val), this);
-        GetScrollbar((int)Scrollbars.UIScrollbar).BindScrollbar(val => UpdateVolume(GetText((int)Texts.UIBoxText), val), this);
+        BindVolumeControl(Scrollbars.MasterScrollbar, InputFields.MasterInputField);
+        BindVolumeControl(Scrollbars.BGMScrollbar, InputFields.BGMInputField);
+        BindVolumeControl(Scrollbars.AmbientScrollbar, InputFields.AmbientInputField);
+        BindVolumeControl(Scrollbars.SFXScrollbar, InputFields.SFXInputField);
+        BindVolumeControl(Scrollbars.UIScrollbar, InputFields.UIInputField);
         GetText((int)Texts.MasterText).text = Managers.Localization.Get(Localization.UI_Option_Popup_Text_Master);
         GetText((int)Texts.BGMText).text = Managers.Localization.Get(Localization.UI_Option_Popup_Text_BGM);
         GetText((int)Texts.AmbientText).text = Managers.Localization.Get(Localization.UI_Option_Popup_Text_Ambient);
@@ -441,10 +451,15 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
         _accessButton.Value = (_state == UI_OptionState.Access) ? ButtonState.Disable     : ButtonState.Normal;
     }
 
-    private void UpdateVolume(TMP_Text text, float value)
+    private void UpdateVolume(TMP_InputField inputField, float value)
     {
+        if (inputField == null)
+            return;
+
+        _isUpdatingVolume = true;
         int percent = Mathf.RoundToInt(value * 100f);
-        text.text = percent.ToString();
+        inputField.text = percent.ToString();
+        _isUpdatingVolume = false;
     }
 
     private void UpdateCheckmark(Image image, bool isOn)
@@ -456,6 +471,65 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
         image.sprite = Managers.Resource.GetSprite(Define.Atlas.UI_Common, sprite);
     }
 
+    private void BindVolumeControl(Scrollbars scrollbarEnum, InputFields inputFieldEnum)
+    {
+        var scrollbar = GetScrollbar((int)scrollbarEnum);
+        var inputField = GetInputField((int)inputFieldEnum);
+
+        if (scrollbar == null || inputField == null)
+            return;
+
+        scrollbar.BindScrollbar(val =>
+        {
+            if (_isUpdatingVolume)
+                return;
+
+            _isUpdatingVolume = true;
+            int percent = Mathf.RoundToInt(val * 100f);
+            inputField.text = percent.ToString();
+            _isUpdatingVolume = false;
+        }, this);
+        inputField.BindInputField(text =>
+        {
+            if (_isUpdatingVolume)
+                return;
+
+            if (string.IsNullOrEmpty(text))
+                return;
+
+            if (int.TryParse(text, out int percent))
+            {
+                if (percent > 100)
+                {
+                    percent = 100;
+                    _isUpdatingVolume = true;
+                    inputField.text = "100";
+                    _isUpdatingVolume = false;
+                }
+                else if (percent < 0)
+                    percent = 0;
+
+                _isUpdatingVolume = true;
+                scrollbar.value = percent / 100f;
+                _isUpdatingVolume = false;
+            }
+        }, this);
+        inputField.BindInputEndEdit(text =>
+        {
+            if (_isUpdatingVolume)
+                return;
+
+            if (string.IsNullOrEmpty(text) || !int.TryParse(text, out int percent))
+                percent = 0;
+
+            percent = Mathf.Clamp(percent, 0, 100);
+            _isUpdatingVolume = true;
+            inputField.text = percent.ToString();
+            scrollbar.value = percent / 100f;
+            _isUpdatingVolume = false;
+        }, this);
+    }
+
     private void Refresh()
     {
         var option = Managers.Config.Option;
@@ -465,22 +539,22 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
         GetScrollbar((int)Scrollbars.AmbientScrollbar).value = option.Sound.vAmbient;
         GetScrollbar((int)Scrollbars.SFXScrollbar).value = option.Sound.vSFX;
         GetScrollbar((int)Scrollbars.UIScrollbar).value = option.Sound.vUI;
-        UpdateVolume(GetText((int)Texts.MasterBoxText), option.Sound.vMaster);
-        UpdateVolume(GetText((int)Texts.BGMBoxText), option.Sound.vBGM);
-        UpdateVolume(GetText((int)Texts.AmbientBoxText), option.Sound.vAmbient);
-        UpdateVolume(GetText((int)Texts.SFXBoxText), option.Sound.vSFX);
-        UpdateVolume(GetText((int)Texts.UIBoxText), option.Sound.vUI);
+        UpdateVolume(GetInputField((int)InputFields.MasterInputField), option.Sound.vMaster);
+        UpdateVolume(GetInputField((int)InputFields.BGMInputField), option.Sound.vBGM);
+        UpdateVolume(GetInputField((int)InputFields.AmbientInputField), option.Sound.vAmbient);
+        UpdateVolume(GetInputField((int)InputFields.SFXInputField), option.Sound.vSFX);
+        UpdateVolume(GetInputField((int)InputFields.UIInputField), option.Sound.vUI);
         GetToggle((int)Toggles.MasterToggle).isOn = option.Sound.mMaster;
         GetToggle((int)Toggles.BGMToggle).isOn = option.Sound.mBGM;
         GetToggle((int)Toggles.AmbientToggle).isOn = option.Sound.mAmbient;
         GetToggle((int)Toggles.SFXToggle).isOn = option.Sound.mSFX;
         GetToggle((int)Toggles.UIToggle).isOn = option.Sound.mUI;
         GetToggle((int)Toggles.MuteToggle).isOn = option.Sound.mute;
-        GetImage((int)Images.MasterBoxImage).SetVisual(GetImage((int)Images.MasterToggleImage), GetScrollbar((int)Scrollbars.MasterScrollbar), option.Sound.mMaster);
-        GetImage((int)Images.BGMBoxImage).SetVisual(GetImage((int)Images.BGMToggleImage), GetScrollbar((int)Scrollbars.BGMScrollbar), option.Sound.mBGM);
-        GetImage((int)Images.AmbientBoxImage).SetVisual(GetImage((int)Images.AmbientToggleImage), GetScrollbar((int)Scrollbars.AmbientScrollbar), option.Sound.mAmbient);
-        GetImage((int)Images.SFXBoxImage).SetVisual(GetImage((int)Images.SFXToggleImage), GetScrollbar((int)Scrollbars.SFXScrollbar), option.Sound.mSFX);
-        GetImage((int)Images.UIBoxImage).SetVisual(GetImage((int)Images.UIToggleImage), GetScrollbar((int)Scrollbars.UIScrollbar), option.Sound.mUI);
+        GetImage((int)Images.MasterInputImage).SetVisual(GetImage((int)Images.MasterToggleImage), GetScrollbar((int)Scrollbars.MasterScrollbar), option.Sound.mMaster);
+        GetImage((int)Images.BGMInputImage).SetVisual(GetImage((int)Images.BGMToggleImage), GetScrollbar((int)Scrollbars.BGMScrollbar), option.Sound.mBGM);
+        GetImage((int)Images.AmbientInputImage).SetVisual(GetImage((int)Images.AmbientToggleImage), GetScrollbar((int)Scrollbars.AmbientScrollbar), option.Sound.mAmbient);
+        GetImage((int)Images.SFXInputImage).SetVisual(GetImage((int)Images.SFXToggleImage), GetScrollbar((int)Scrollbars.SFXScrollbar), option.Sound.mSFX);
+        GetImage((int)Images.UIInputImage).SetVisual(GetImage((int)Images.UIToggleImage), GetScrollbar((int)Scrollbars.UIScrollbar), option.Sound.mUI);
         UpdateCheckmark(GetImage((int)Images.MasterCheckmarkImage), option.Sound.mMaster);
         UpdateCheckmark(GetImage((int)Images.BGMCheckmarkImage), option.Sound.mBGM);
         UpdateCheckmark(GetImage((int)Images.AmbientCheckmarkImage), option.Sound.mAmbient);

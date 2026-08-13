@@ -60,6 +60,9 @@ public class UserInterface : MonoBehaviour, IPoolable
     protected void BindText(Type type) 
         => Bind<TMP_Text>(type);
 
+    protected void BindInputField(Type type)
+        => Bind<TMP_InputField>(type);
+
     protected void BindButton(Type type) 
         => Bind<Button>(type);
 
@@ -86,6 +89,9 @@ public class UserInterface : MonoBehaviour, IPoolable
 
     protected TMP_Text GetText(int index) 
         => Get<TMP_Text>(index);
+
+    protected TMP_InputField GetInputField(int index)
+        => Get<TMP_InputField>(index);
 
     protected Button GetButton(int index) 
         => Get<Button>(index);

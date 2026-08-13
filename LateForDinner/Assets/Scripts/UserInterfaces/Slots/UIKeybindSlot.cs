@@ -8,17 +8,17 @@ public class UIKeybindSlot : UISlot
 {
     private readonly ReactiveProperty<ButtonState> _resetButtonState = new ReactiveProperty<ButtonState>(ButtonState.Normal);
 
+    private enum Images
+    {
+        KeybindButtonImage,
+        ResetButtonImage
+    }
+
     private enum Texts
     {
         ActionNameText,
         KeybindButtonText,
         ResetText
-    }
-
-    private enum Images
-    {
-        KeybindButtonImage,
-        ResetButtonImage
     }
 
     private enum Buttons
@@ -41,8 +41,8 @@ public class UIKeybindSlot : UISlot
     public override void Init()
     {
         base.Init();
-        BindText(typeof(Texts));
         BindImage(typeof(Images));
+        BindText(typeof(Texts));
         BindButton(typeof(Buttons));
         GetImage((int)Images.ResetButtonImage).BindState(_resetButtonState, Define.Atlas.UI_Common, this);
         GetButton((int)Buttons.KeybindButton).BindView(OnKeybindButtonClicked, ViewEvent.LeftClick, this, _resetButtonState);
@@ -101,22 +101,48 @@ public class UIKeybindSlot : UISlot
 
     private void StartInteractiveRebind()
     {
-        if (_targetAction == null) 
+        if (_targetAction == null)
             return;
 
         _targetAction.Disable();
         int bindingIndex = _targetAction.GetBindingIndex(InputBinding.MaskByGroup(Literal.Schemes.KeyboardAndMouse));
 
-        if (bindingIndex == -1) 
+        if (bindingIndex == -1)
             return;
 
         GetText((int)Texts.KeybindButtonText).text = Managers.Localization.Get(Localization.UI_Option_Popup_Text_Bind);
-        var rebindOperation = _targetAction.PerformInteractiveRebinding(bindingIndex)
-        .WithControlsExcluding(Literal.Schemes.Mouse)
+        var rebindOperation = _targetAction.PerformInteractiveRebinding(bindingIndex).WithControlsExcluding(Literal.Schemes.Mouse)
         .OnComplete(operation =>
         {
+            string newCompositeOrPath = _targetAction.bindings[bindingIndex].effectivePath;
+            bool isDuplicate = false;
+
+            foreach (var action in Managers.Control.GetBindableActions())
+            {
+                if (action == _targetAction)
+                    continue;
+
+                int otherIndex = action.GetBindingIndex(InputBinding.MaskByGroup(Literal.Schemes.KeyboardAndMouse));
+                
+                if (otherIndex != -1 && action.bindings[otherIndex].effectivePath == newCompositeOrPath)
+                {
+                    isDuplicate = true;
+                    break;
+                }
+            }
+
+            if (isDuplicate)
+            {
+                _targetAction.RemoveBindingOverride(bindingIndex);
+                operation.Dispose();
+                _targetAction.Enable();
+                Refresh();
+                return;
+            }
+
             operation.Dispose();
             _targetAction.Enable();
+            _onRebindCompleted?.Invoke(_actionName, _targetAction.SaveBindingOverridesAsJson());
             Refresh();
         })
         .OnCancel(operation =>

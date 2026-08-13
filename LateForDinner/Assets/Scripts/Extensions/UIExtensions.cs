@@ -3,9 +3,9 @@ using R3;
 using R3.Triggers;
 using System;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using TMPro;
 
 public static class UIExtensions
 {
@@ -93,18 +93,30 @@ public static class UIExtensions
         }).AddTo(component);
     }
 
-    public static IDisposable BindScrollbar(this Scrollbar scrollbar, Action<float> action, Component component)
+    public static void BindScrollbar(this Scrollbar scrollbar, Action<float> action, Component component)
     {
-        if (scrollbar == null) 
-            return null;
+        if (scrollbar == null)
+            return;
 
         action(scrollbar.value);
-        UnityAction<float> listener = val => action(val);
-        scrollbar.onValueChanged.AddListener(listener);
-        var disposable = Disposable.Create(() => scrollbar.onValueChanged.RemoveListener(listener));
-        disposable.AddTo(component);
+        scrollbar.OnValueChangedAsObservable().Subscribe(action).AddTo(component);
+    }
 
-        return disposable;
+    public static void BindInputField(this TMP_InputField inputField, Action<string> action, Component component)
+    {
+        if (inputField == null)
+            return;
+
+        action(inputField.text);
+        inputField.OnValueChangedAsObservable().Subscribe(action).AddTo(component);
+    }
+
+    public static void BindInputEndEdit(this TMP_InputField inputField, Action<string> action, Component component)
+    {
+        if (inputField == null)
+            return;
+
+        inputField.OnEndEditAsObservable().Subscribe(action).AddTo(component);
     }
 
     public static async UniTask Lock(this UniTask task)
@@ -124,10 +136,10 @@ public static class UIExtensions
     {
         Color targetColor = isEnabled ? Color.white : new Color(0.5f, 0.5f, 0.5f, 1f);
 
-        if (boxImage != null) 
+        if (boxImage != null)
             boxImage.color = targetColor;
 
-        if (toggleImage != null) 
+        if (toggleImage != null)
             toggleImage.color = targetColor;
 
         if (scrollbar != null)
@@ -143,7 +155,6 @@ public static class UIExtensions
             if (scrollbar.handleRect != null && scrollbar.handleRect.TryGetComponent<Image>(out var handleImage))
                 handleImage.color = targetColor;
         }
-
     }
 
     public static async UniTask Release<T>(this UniTask<T> task) where T : UserInterface
