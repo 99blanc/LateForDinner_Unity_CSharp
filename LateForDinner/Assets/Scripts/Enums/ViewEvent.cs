@@ -2,8 +2,8 @@ public enum ViewEvent
 {
     Enter,
     Exit,
-    Press,
     Release,
+    Press,
     LeftClick,
     RightClick,
     DoubleClick

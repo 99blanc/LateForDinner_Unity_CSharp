@@ -21,18 +21,19 @@ public static class Table
         if (!Directory.Exists(dir))
             Directory.CreateDirectory(dir);
 
-        var uniqueKeys = records.Where(data => !string.IsNullOrWhiteSpace(data.Key)).Select(data => data.Key.Trim()).Distinct().ToList();
+        var uniqueKeys = records
+        .Where(data => !string.IsNullOrWhiteSpace(data.Key))
+        .Select(data => data.Key.Trim())
+        .Distinct()
+        .ToList();
+        using var writer = new StreamWriter(filePath);
+        writer.WriteLine("public enum Localization");
+        writer.WriteLine("{");
 
-        using (var writer = new StreamWriter(filePath))
-        {
-            writer.WriteLine("public enum Localization");
-            writer.WriteLine("{");
+        for (int i = 0; i < uniqueKeys.Count; i++)
+            writer.WriteLine($"    {uniqueKeys[i]},");
 
-            foreach (var key in uniqueKeys)
-                writer.WriteLine($"    {key},");
-
-            writer.WriteLine("}");
-        }
+        writer.WriteLine("}");
     }
 
     public static void Bake<T>(string name, List<T> data)
@@ -56,27 +57,17 @@ public static class Table
         if (!File.Exists(csvPath))
         {
             EditorUtility.DisplayDialog("Conversion Failed", $"File does not exist:\n{csvPath}", "OK");
-            
             return;
         }
 
-        var config = new CsvConfiguration(CultureInfo.InvariantCulture)
-        {
-            Comment = '#',
-            AllowComments = true,
-            IgnoreBlankLines = true,
-            HeaderValidated = null,
-            MissingFieldFound = null,
-        };
+        var config = CreateCsvConfiguration();
 
         try
         {
-            using (var reader = new StreamReader(csvPath))
-            using (var csv = new CsvReader(reader, config))
-            {
-                var records = csv.GetRecords<T>().ToList();
-                Bake(name, records);
-            }
+            using var reader = new StreamReader(csvPath);
+            using var csv = new CsvReader(reader, config);
+            var records = csv.GetRecords<T>().ToList();
+            Bake(name, records);
         }
         catch
         {
@@ -87,43 +78,53 @@ public static class Table
     public static void ConvertAndMergeLocalization(List<string> filePaths)
     {
         var mergedRecords = new List<LocalizationData>();
-        var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+        var config = CreateCsvConfiguration();
+
+        for (int index = 0; index < filePaths.Count; index++)
         {
-            Comment = '#',
-            AllowComments = true,
-            IgnoreBlankLines = true,
-            HeaderValidated = null,
-            MissingFieldFound = null,
-        };
+            string filePath = filePaths[index];
 
-        foreach (var filePath in filePaths)
-        {
-            try
-            {
-                using (var reader = new StreamReader(filePath))
-                using (var csv = new CsvReader(reader, config))
-                {
-                    var records = csv.GetRecords<LocalizationData>().ToList();
-
-                    foreach (var record in records)
-                    {
-                        if (record.Key != null)
-                            record.Key = record.Key.Trim();
-                    }
-
-                    mergedRecords.AddRange(records);
-                }
-            }
-            catch
-            {
-                EditorUtility.DisplayDialog("Localization Conversion Error", $"Failed to parse localization file:\n{Path.GetFileName(filePath)}", "OK");
-                
+            if (!TryReadLocalizationFile(filePath, config, mergedRecords))
                 return;
-            }
         }
 
         GenerateLocalizationKey(mergedRecords);
         Bake("Localization", mergedRecords);
+    }
+
+    private static CsvConfiguration CreateCsvConfiguration() => new(CultureInfo.InvariantCulture)
+    {
+        Comment = '#',
+        AllowComments = true,
+        IgnoreBlankLines = true,
+        HeaderValidated = null,
+        MissingFieldFound = null,
+    };
+
+    private static bool TryReadLocalizationFile(string filePath, CsvConfiguration config, List<LocalizationData> mergedRecords)
+    {
+        try
+        {
+            using var reader = new StreamReader(filePath);
+            using var csv = new CsvReader(reader, config);
+            var records = csv.GetRecords<LocalizationData>().ToList();
+
+            for (int index = 0; index < records.Count; index++)
+            {
+                var record = records[index];
+
+                if (record.Key != null)
+                    record.Key = record.Key.Trim();
+            }
+
+            mergedRecords.AddRange(records);
+            return true;
+        }
+        catch
+        {
+            EditorUtility.DisplayDialog("Localization Conversion Error", $"Failed to parse localization file:\n{Path.GetFileName(filePath)}", "OK");
+            return false;
+        }
     }
 }
 #endif

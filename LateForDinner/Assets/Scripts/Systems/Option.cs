@@ -25,7 +25,7 @@ public partial class SoundOption
     public bool mute;
 
     [MemoryPackIgnore]
-    public static SoundOption Default => new SoundOption() 
+    public static SoundOption Default => new SoundOption()
     {
         vMaster = 1.0f,
         vBGM = 1.0f,
@@ -76,38 +76,7 @@ public partial class GraphicOption
     {
         get
         {
-            int targetWidth = 1920;
-            int targetHeight = 1080;
-            int targetRefreshRate = 60;
-            Resolution[] resolutions = Screen.resolutions;
-
-            if (resolutions != null && resolutions.Length > 0)
-            {
-                int maxWidth = 0;
-
-                foreach (var res in resolutions)
-                {
-                    if (res.width > maxWidth)
-                        maxWidth = res.width;
-                }
-
-                double maxRefreshRate = 0;
-
-                foreach (var res in resolutions)
-                {
-                    if (res.width == maxWidth)
-                    {
-                        double currentRefresh = res.refreshRateRatio.value;
-                        if (currentRefresh > maxRefreshRate)
-                        {
-                            maxRefreshRate = currentRefresh;
-                            targetWidth = res.width;
-                            targetHeight = res.height;
-                            targetRefreshRate = Mathf.RoundToInt((float)currentRefresh);
-                        }
-                    }
-                }
-            }
+            var (targetWidth, targetHeight, targetRefreshRate) = GetBestResolution();
 
             return new GraphicOption()
             {
@@ -122,6 +91,53 @@ public partial class GraphicOption
                 ambientOccusion = true
             };
         }
+    }
+
+    private static (int width, int height, int refreshRate) GetBestResolution()
+    {
+        int targetWidth = 1920;
+        int targetHeight = 1080;
+        int targetRefreshRate = 60;
+        Resolution[] resolutions = Screen.resolutions;
+
+        if (resolutions == null || resolutions.Length <= 0)
+            return (targetWidth, targetHeight, targetRefreshRate);
+
+        int maxWidth = GetMaxWidth(resolutions);
+        double maxRefreshRate = 0;
+
+        for (int ndex = 0; ndex < resolutions.Length; ndex++)
+        {
+            var res = resolutions[ndex];
+
+            if (res.width != maxWidth)
+                continue;
+
+            double currentRefresh = res.refreshRateRatio.value;
+
+            if (currentRefresh <= maxRefreshRate)
+                continue;
+
+            maxRefreshRate = currentRefresh;
+            targetWidth = res.width;
+            targetHeight = res.height;
+            targetRefreshRate = Mathf.RoundToInt((float)currentRefresh);
+        }
+
+        return (targetWidth, targetHeight, targetRefreshRate);
+    }
+
+    private static int GetMaxWidth(Resolution[] resolutions)
+    {
+        int maxWidth = 0;
+
+        for (int index = 0; index < resolutions.Length; index++)
+        {
+            if (resolutions[index].width > maxWidth)
+                maxWidth = resolutions[index].width;
+        }
+
+        return maxWidth;
     }
 }
 

@@ -23,13 +23,8 @@ public class DataManager
             if (asset == null)
                 return new List<T>();
 
-            byte[] encryptedBytes = asset.bytes;
-            byte[] decryptedBytes = new byte[encryptedBytes.Length];
-
-            for (int index = 0; index < encryptedBytes.Length; index++)
-                decryptedBytes[index] = (byte)(encryptedBytes[index] ^ Key.Values[index % Key.Values.Length]);
-            
-            return MemoryPackSerializer.Deserialize<List<T>>(decryptedBytes);
+            byte[] decryptedBytes = DecryptAssetBytes(asset.bytes);
+            return MemoryPackSerializer.Deserialize<List<T>>(decryptedBytes) ?? new List<T>();
         }
         catch
         {
@@ -38,24 +33,44 @@ public class DataManager
     }
 
     private async UniTask<Dictionary<TKey, TValue>> LoadDictionaryAsync<TKey, TValue>(string name, Func<TValue, TKey> keySelector)
-    {  
+    {
         var list = await LoadListAsync<TValue>(name);
 
-        if (list == null) 
+        if (list == null || list.Count == 0)
             return new Dictionary<TKey, TValue>();
 
-        var dictionary = new Dictionary<TKey, TValue>();
+        var dictionary = new Dictionary<TKey, TValue>(list.Count);
 
-        foreach (var item in list)
+        for (int index = 0; index < list.Count; index++)
         {
+            var item = list[index];
+
+            if (item == null)
+                continue;
+
             TKey key = keySelector(item);
 
-            if (dictionary.ContainsKey(key))
+            if (key == null || dictionary.ContainsKey(key))
                 continue;
 
             dictionary.Add(key, item);
         }
 
         return dictionary;
+    }
+
+    private byte[] DecryptAssetBytes(byte[] encryptedBytes)
+    {
+        if (encryptedBytes == null || encryptedBytes.Length == 0)
+            return Array.Empty<byte>();
+
+        byte[] decryptedBytes = new byte[encryptedBytes.Length];
+        byte[] keyValues = Key.Values;
+        int keyLength = keyValues.Length;
+
+        for (int index = 0; index < encryptedBytes.Length; index++)
+            decryptedBytes[index] = (byte)(encryptedBytes[index] ^ keyValues[index % keyLength]);
+
+        return decryptedBytes;
     }
 }

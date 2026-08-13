@@ -2,45 +2,43 @@ using Cysharp.Text;
 using R3;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using ZLinq;
 
 public class UIKeybindSlot : UISlot
 {
     private readonly ReactiveProperty<ButtonState> _resetButtonState = new ReactiveProperty<ButtonState>(ButtonState.Normal);
-
-    private enum Images
-    {
-        KeybindButtonImage,
-        ResetButtonImage
-    }
-
-    private enum Texts
-    {
-        ActionNameText,
-        KeybindButtonText,
-        ResetText
-    }
-
-    private enum Buttons
-    {
-        KeybindButton,
-        ResetButton
-    }
-
-    private enum SlotMode 
+    
+    private enum Images 
     { 
-        ActionRebind, 
-        DashCommandToggle 
+        KeybindButtonImage, 
+        ResetButtonImage 
     }
+
+    private enum Texts 
+    { 
+        ActionNameText, 
+        KeybindButtonText, 
+        ResetText 
+    }
+
+    private enum Buttons 
+    { 
+        KeybindButton, 
+        ResetButton 
+    }
+
+    private enum SlotMode { ActionRebind, DashCommandToggle }
 
     private SlotMode _slotMode;
     private InputAction _targetAction;
     private string _actionName;
     private Action<string, string> _onRebindCompleted;
     private List<UIKeybindSlot> _keybinds;
-    private Func<bool> _checkIsRebinding;
-    private Action<bool> _setIsRebinding;
+    private Func<bool> _isLocked;
+    private Action<bool> _setLock;
 
     public override void Init()
     {
@@ -49,123 +47,144 @@ public class UIKeybindSlot : UISlot
         BindText(typeof(Texts));
         BindButton(typeof(Buttons));
         GetImage((int)Images.ResetButtonImage).BindState(_resetButtonState, Define.Atlas.UI_Common, this);
-        GetButton((int)Buttons.KeybindButton).BindView(OnKeybindButtonClicked, ViewEvent.LeftClick, this, _resetButtonState);
-        GetButton((int)Buttons.ResetButton).BindViewAsButton(OnResetOrSwitchButtonClicked, ViewEvent.LeftClick, this, _resetButtonState);
+        GetButton((int)Buttons.KeybindButton).BindView(OnClickKeybind, ViewEvent.LeftClick, this, _resetButtonState);
+        GetButton((int)Buttons.ResetButton).BindViewAsButton(OnClickReset, ViewEvent.LeftClick, this, _resetButtonState);
     }
 
-    public void Setup(string actionName, InputAction action, List<UIKeybindSlot> popupKeybinds, Func<bool> checkIsRebinding, Action<bool> setIsRebinding, Action<string, string> onRebindCompleted)
+    public void Setup(string action, InputAction target, List<UIKeybindSlot> slots, Func<bool> locked, Action<bool> lockAction, Action<string, string> complete)
     {
-        _actionName = actionName;
-        _targetAction = action;
-        _keybinds = popupKeybinds;
-        _checkIsRebinding = checkIsRebinding;
-        _setIsRebinding = setIsRebinding;
-        _onRebindCompleted = onRebindCompleted;
-        GetText((int)Texts.ActionNameText).text = Managers.Localization.Get(ZString.Concat(Literal.Localizations.Action, _actionName));
-        GetText((int)Texts.ResetText).text = Managers.Localization.Get(Localization.Reset);
+        _actionName = action;
+        _targetAction = target;
+        _keybinds = slots;
+        _isLocked = locked;
+        _setLock = lockAction;
+        _onRebindCompleted = complete;
+        SetActionText(_actionName);
+        SetResetText(Localization.Reset);
         Refresh();
     }
 
-    public void SetupDashCommand(Action<string, string> onRebindCompleted)
+    public void SetupDashCommand(Action<string, string> complete)
     {
         _slotMode = SlotMode.DashCommandToggle;
         _targetAction = null;
-        _onRebindCompleted = onRebindCompleted;
-        GetText((int)Texts.ActionNameText).text = Managers.Localization.Get(Localization.Action_DashCommand);
-        GetText((int)Texts.ResetText).text = Managers.Localization.Get(Localization.Switch);
+        _onRebindCompleted = complete;
+        SetActionText(Localization.Action_DashCommand);
+        SetResetText(Localization.Switch);
         Refresh();
     }
 
-    private void OnKeybindButtonClicked(PointerEventData data)
+    private void OnClickKeybind(PointerEventData data)
     {
-        if (_slotMode == SlotMode.DashCommandToggle)
-        {
-            ToggleDashMode();
+        if (HandleDash()) 
             return;
-        }
 
-        StartInteractiveRebind();
+        StartRebind();
     }
 
-    private void OnResetOrSwitchButtonClicked(PointerEventData data)
+    private void OnClickReset(PointerEventData data)
     {
-        if (_slotMode == SlotMode.DashCommandToggle)
-        {
-            ToggleDashMode();
+        if (HandleDash()) 
             return;
-        }
 
         ResetBinding();
     }
 
-    private void ToggleDashMode()
+    private bool HandleDash()
     {
-        bool currentMode = Managers.Config.Option.Access.modifierDash;
-        Managers.Config.Option.Access.modifierDash = !currentMode;
+        if (_slotMode != SlotMode.DashCommandToggle) 
+            return false;
+
+        Managers.Config.Option.Access.modifierDash = !Managers.Config.Option.Access.modifierDash;
         Refresh();
+        return true;
     }
 
-    private void StartInteractiveRebind()
+    private void StartRebind()
     {
-        if (_checkIsRebinding != null && _checkIsRebinding())
+        if (_isLocked != null && _isLocked()) 
             return;
 
         if (_targetAction == null) 
             return;
 
-        _setIsRebinding?.Invoke(true);
+        _setLock?.Invoke(true);
         _targetAction.Disable();
-        int bindingIndex = _targetAction.GetBindingIndex(InputBinding.MaskByGroup(Literal.Schemes.KeyboardAndMouse));
-        
-        if (bindingIndex == -1) 
+        int index = GetIndex();
+
+        if (index == -1)
+        {
+            CleanUp(null);
             return;
+        }
 
-        var rebindOperation = _targetAction.PerformInteractiveRebinding(bindingIndex).WithControlsExcluding(Literal.Schemes.Mouse)
-        .OnComplete(operation =>
+        SetKeybindText(Localization.UI_Option_Popup_Text_Bind);
+        BeginOperation(index);
+    }
+
+    private int GetIndex()
+        => _targetAction.GetBindingIndex(InputBinding.MaskByGroup(Literal.Schemes.KeyboardAndMouse));
+
+    private void BeginOperation(int index)
+    {
+        var operation = _targetAction.PerformInteractiveRebinding(index)
+        .WithControlsExcluding(Literal.Schemes.Mouse)
+        .OnComplete(op => OnComplete(op, index))
+        .OnCancel(op => OnCancel(op));
+        operation.Start();
+    }
+
+    private void OnComplete(InputActionRebindingExtensions.RebindingOperation op, int index)
+    {
+        if (IsDuplicate(index))
         {
-            string newPath = _targetAction.bindings[bindingIndex].effectivePath;
-            bool isDuplicate = false;
+            Retry(op, index);
+            return;
+        }
 
-            if (_keybinds != null)
-            {
-                foreach (var slot in _keybinds)
-                {
-                    if (slot == this || slot._targetAction == null) 
-                        continue;
+        Success(op);
+    }
 
-                    int otherIndex = slot._targetAction.GetBindingIndex(InputBinding.MaskByGroup(Literal.Schemes.KeyboardAndMouse));
-                    
-                    if (otherIndex != -1 && slot._targetAction.bindings[otherIndex].effectivePath == newPath)
-                    {
-                        isDuplicate = true;
-                        break;
-                    }
-                }
-            }
+    private bool IsDuplicate(int index)
+    {
+        if (_keybinds == null) 
+            return false;
 
-            if (isDuplicate)
-            {
-                _targetAction.RemoveBindingOverride(bindingIndex);
-                operation.Dispose();
-                StartInteractiveRebind();
-                return;
-            }
+        string path = _targetAction.bindings[index].effectivePath;
+        return _keybinds
+        .Where(s => s != this && s._targetAction != null)
+        .Any(s => s.MatchPath(path));
+    }
 
-            operation.Dispose();
-            _targetAction.Enable();
-            _setIsRebinding?.Invoke(false);
-            _onRebindCompleted?.Invoke(_actionName, _targetAction.SaveBindingOverridesAsJson());
-            Refresh();
-        })
-        .OnCancel(operation =>
-        {
-            operation.Dispose();
-            _targetAction.Enable();
-            _setIsRebinding?.Invoke(false);
-            Refresh();
-        });
+    private bool MatchPath(string path)
+        => GetIndex() != -1 && _targetAction.bindings[GetIndex()].effectivePath == path;
 
-        rebindOperation.Start();
+
+    private void Retry(InputActionRebindingExtensions.RebindingOperation op, int index)
+    {
+        _targetAction.RemoveBindingOverride(index);
+        op.Dispose();
+        StartRebind();
+    }
+
+    private void Success(InputActionRebindingExtensions.RebindingOperation op)
+    {
+        CleanUp(op);
+        _onRebindCompleted?.Invoke(_actionName, _targetAction.SaveBindingOverridesAsJson());
+        Refresh();
+    }
+
+    private void OnCancel(InputActionRebindingExtensions.RebindingOperation op)
+    {
+        CleanUp(op);
+        Refresh();
+    }
+
+    private void CleanUp(InputActionRebindingExtensions.RebindingOperation op)
+    {
+        op?.Dispose();
+        _targetAction.Enable();
+        _setLock?.Invoke(false);
     }
 
     private void ResetBinding()
@@ -182,16 +201,28 @@ public class UIKeybindSlot : UISlot
         if (_slotMode == SlotMode.DashCommandToggle)
         {
             bool isModifier = Managers.Config.Option.Access.modifierDash;
-            GetText((int)Texts.KeybindButtonText).text = isModifier ? Managers.Localization.Get(Localization.UI_Option_Popup_Text_Modifier) : Managers.Localization.Get(Localization.UI_Option_Popup_Text_Tap);
+            SetKeybindText(isModifier ? Localization.UI_Option_Popup_Text_Modifier : Localization.UI_Option_Popup_Text_Tap);
             return;
         }
 
-        if (_targetAction != null)
-        {
-            int bindingIndex = _targetAction.GetBindingIndex(InputBinding.MaskByGroup(Literal.Schemes.KeyboardAndMouse));
+        int index = GetIndex();
 
-            if (bindingIndex != -1)
-                GetText((int)Texts.KeybindButtonText).text = _targetAction.GetBindingDisplayString(bindingIndex);
-        }
+        if (_targetAction != null && index != -1)
+            SetRawKeybindText(_targetAction.GetBindingDisplayString(index));
     }
+
+    private void SetActionText(string actionName)
+        => GetText((int)Texts.ActionNameText).text = Managers.Localization.Get(ZString.Concat(Literal.Localizations.Action, actionName));
+
+    private void SetActionText(Localization localizationKey)
+        => GetText((int)Texts.ActionNameText).text = Managers.Localization.Get(localizationKey);
+
+    private void SetResetText(Localization localizationKey)
+        => GetText((int)Texts.ResetText).text = Managers.Localization.Get(localizationKey);
+
+    private void SetKeybindText(Localization localizationKey)
+        => GetText((int)Texts.KeybindButtonText).text = Managers.Localization.Get(localizationKey);
+
+    private void SetRawKeybindText(string displayText)
+        => GetText((int)Texts.KeybindButtonText).text = displayText;
 }

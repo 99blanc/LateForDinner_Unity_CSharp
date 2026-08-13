@@ -12,15 +12,12 @@ public class PoolManager
         get
         {
             if (_root == null)
-            {
-                _root = new GameObject { name = Literal.Roots.Pools };
-                _root.transform.SetParent(Managers.Instance.transform, false);
-                Setup();
-            }
+                InitRoot();
 
             return _root;
         }
     }
+
     private readonly Dictionary<string, Queue<GameObject>> _registries = new Dictionary<string, Queue<GameObject>>();
     private readonly Dictionary<string, Transform> _folders = new Dictionary<string, Transform>();
     private readonly Dictionary<GameObject, Transform> _parents = new Dictionary<GameObject, Transform>();
@@ -29,57 +26,35 @@ public class PoolManager
         { Literal.Keys.UI, Literal.Roots.UserInterfaces },
     };
 
-    private void Setup()
+    private void InitRoot()
+    {
+        _root = new GameObject { name = Literal.Roots.Pools };
+        _root.transform.SetParent(Managers.Instance.transform, false);
+        SetupFolders();
+    }
+
+    private void SetupFolders()
     {
         foreach (var folderName in _maps.Values)
         {
-            if (!_folders.ContainsKey(folderName))
-            {
-                Transform folder = new GameObject { name = folderName }.transform;
-                folder.SetParent(Root.transform, false);
-                _folders.Add(folderName, folder);
-            }
+            if (_folders.ContainsKey(folderName))
+                continue;
+
+            Transform folder = new GameObject { name = folderName }.transform;
+            folder.SetParent(Root.transform, false);
+            _folders.Add(folderName, folder);
         }
     }
 
     public async UniTask<(GameObject instance, IDisposable rentHandle)> PopAsync(string key, Transform parent = null)
     {
-        GameObject instance = null;
-        bool isNew = false;
-
-        if (_registries.TryGetValue(key, out var queue) && queue.Count > 0)
-            instance = queue.Dequeue();
+        var (instance, isNew) = await GetOrCreateInstanceAsync(key, parent);
 
         if (instance == null)
-        {
-            Transform newParent = parent == null ? Get(key) : parent;
-            instance = await Managers.Resource.InstantiateAsync(key, newParent, false);
+            return (null, null);
 
-            if (instance == null)
-                return (null, null);
-
-            instance.name = key;
-            _parents[instance] = newParent;
-            isNew = true;
-        }
-        else
-        {
-            Transform original = parent != null ? parent : (_parents.TryGetValue(instance, out var p) ? p : Get(key));
-            instance.transform.SetParent(original, false);
-            instance.SetActive(true);
-        }
-
-        if (instance.TryGetComponent<IPoolable>(out var poolable))
-        {
-            if (isNew)
-                poolable.Init();
-            else
-                poolable.Get();
-        }
-
-        GameObject target = instance;
-        IDisposable rentHandle = Disposable.Create(() => Push(target, key));
-
+        InitializePoolable(instance, isNew);
+        IDisposable rentHandle = Disposable.Create(() => Push(instance, key));
         return (instance, rentHandle);
     }
 
@@ -88,47 +63,21 @@ public class PoolManager
         string key = typeof(T).Name;
         var (instance, rentHandle) = await PopAsync(key, parent);
 
+        if (instance == null)
+            return (null, null);
+
         return (instance.GetComponentAssert<T>(), rentHandle);
     }
 
     public (GameObject instance, IDisposable rentHandle) Pop(string key, Transform parent = null)
     {
-        GameObject instance = null;
-        bool isNew = false;
-
-        if (_registries.TryGetValue(key, out var queue) && queue.Count > 0)
-            instance = queue.Dequeue();
+        var (instance, isNew) = GetOrCreateInstance(key, parent);
 
         if (instance == null)
-        {
-            Transform newParent = parent == null ? Get(key) : parent;
-            instance = Managers.Resource.Instantiate(key, newParent, false);
+            return (null, null);
 
-            if (instance == null)
-                return (null, null);
-
-            instance.name = key;
-            _parents[instance] = newParent;
-            isNew = true;
-        }
-        else
-        {
-            Transform original = parent != null ? parent : (_parents.TryGetValue(instance, out var p) ? p : Get(key));
-            instance.transform.SetParent(original, false);
-            instance.SetActive(true);
-        }
-
-        if (instance.TryGetComponent<IPoolable>(out var poolable))
-        {
-            if (isNew)
-                poolable.Init();
-            else
-                poolable.Get();
-        }
-
-        GameObject target = instance;
-        IDisposable rentHandle = Disposable.Create(() => Push(target, key));
-
+        InitializePoolable(instance, isNew);
+        IDisposable rentHandle = Disposable.Create(() => Push(instance, key));
         return (instance, rentHandle);
     }
 
@@ -145,7 +94,7 @@ public class PoolManager
 
     public void Push(GameObject gameObject, string key = null)
     {
-        if (gameObject == null) 
+        if (gameObject == null)
             return;
 
         _parents[gameObject] = gameObject.transform.parent;
@@ -154,14 +103,14 @@ public class PoolManager
         if (!_registries.ContainsKey(newKey))
             _registries.Add(newKey, new Queue<GameObject>());
 
-        gameObject.SetActive(false); 
-        gameObject.transform.SetParent(Get(newKey), false);
+        gameObject.SetActive(false);
+        gameObject.transform.SetParent(GetFolder(newKey), false);
         _registries[newKey].Enqueue(gameObject);
     }
 
     public void Push(Component component, string key = null)
     {
-        if (component != null) 
+        if (component != null)
             Push(component.gameObject, key);
     }
 
@@ -181,15 +130,76 @@ public class PoolManager
         }
     }
 
-    private Transform Get(string key)
+    private async UniTask<(GameObject instance, bool isNew)> GetOrCreateInstanceAsync(string key, Transform parent)
+    {
+        if (_registries.TryGetValue(key, out var queue) && queue.Count > 0)
+        {
+            var cachedInstance = queue.Dequeue();
+            PrepareCachedInstance(cachedInstance, parent, key);
+            return (cachedInstance, false);
+        }
+
+        Transform newParent = parent == null ? GetFolder(key) : parent;
+        var newInstance = await Managers.Resource.InstantiateAsync(key, newParent, false);
+
+        if (newInstance == null)
+            return (null, false);
+
+        newInstance.name = key;
+        _parents[newInstance] = newParent;
+        return (newInstance, true);
+    }
+
+    private (GameObject instance, bool isNew) GetOrCreateInstance(string key, Transform parent)
+    {
+        if (_registries.TryGetValue(key, out var queue) && queue.Count > 0)
+        {
+            var cachedInstance = queue.Dequeue();
+            PrepareCachedInstance(cachedInstance, parent, key);
+            return (cachedInstance, false);
+        }
+
+        Transform newParent = parent == null ? GetFolder(key) : parent;
+        var newInstance = Managers.Resource.Instantiate(key, newParent, false);
+
+        if (newInstance == null)
+            return (null, false);
+
+        newInstance.name = key;
+        _parents[newInstance] = newParent;
+        return (newInstance, true);
+    }
+
+    private void PrepareCachedInstance(GameObject instance, Transform parent, string key)
+    {
+        Transform original = parent != null ? parent : (_parents.TryGetValue(instance, out var p) ? p : GetFolder(key));
+        instance.transform.SetParent(original, false);
+        instance.SetActive(true);
+    }
+
+    private void InitializePoolable(GameObject instance, bool isNew)
+    {
+        if (!instance.TryGetComponent<IPoolable>(out var poolable))
+            return;
+
+        if (isNew)
+        {
+            poolable.Init();
+            return;
+        }
+
+        poolable.Get();
+    }
+
+    private Transform GetFolder(string key)
     {
         foreach (var pair in _maps)
         {
-            if (key.Contains(pair.Key))
-            {
-                if (_folders.TryGetValue(pair.Value, out var folder) && folder != null)
-                    return folder;
-            }
+            if (!key.Contains(pair.Key))
+                continue;
+
+            if (_folders.TryGetValue(pair.Value, out var folder) && folder != null)
+                return folder;
         }
 
         return Root.transform;
@@ -203,7 +213,7 @@ public class PoolManager
             {
                 GameObject instance = queue.Dequeue();
 
-                if (instance != null) 
+                if (instance != null)
                     UnityEngine.Object.Destroy(instance);
             }
         }

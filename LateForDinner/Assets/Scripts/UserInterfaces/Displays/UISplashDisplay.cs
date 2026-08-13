@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class UISplashDisplay : UIDisplay, IAnimatable
 {
-    private enum Images 
-    { 
+    private enum Images
+    {
         BackgroundImage,
         UnityImage,
         TeamImage,
@@ -34,12 +34,12 @@ public class UISplashDisplay : UIDisplay, IAnimatable
     {
         var image = GetImage((int)imageType);
 
-        if (image != null)
-        {
-            var color = image.color;
-            color.a = alpha;
-            image.color = color;
-        }
+        if (image == null)
+            return;
+
+        var color = image.color;
+        color.a = alpha;
+        image.color = color;
     }
 
     public async UniTask PlayAsync()
@@ -50,7 +50,6 @@ public class UISplashDisplay : UIDisplay, IAnimatable
             var unityImage = GetImage((int)Images.UnityImage);
             var teamImage = GetImage((int)Images.TeamImage);
             var titleImage = GetImage((int)Images.TitleImage);
-
             await unityImage.FadeAsync(0f, 1f, 1.2f, token: token);
             await UniTask.Delay(1000, cancellationToken: token);
             await unityImage.FadeAsync(1f, 0f, 1.2f, token: token);

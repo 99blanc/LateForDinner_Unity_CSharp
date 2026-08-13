@@ -1,6 +1,7 @@
 using Cysharp.Text;
 using Cysharp.Threading.Tasks;
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -22,8 +23,10 @@ public class LocalizationManager
         string path = Path.Combine(dir, $"{Literal.Files.Localization}_{language.ToEnglish().ToLower()}{Literal.Extensions.Json}");
         string[] files = Directory.GetFiles(dir, "*.json");
 
-        foreach (string file in files)
+        for (int index = 0; index < files.Length; index++)
         {
+            string file = files[index];
+
             try
             {
                 string json = await File.ReadAllTextAsync(file);
@@ -69,18 +72,17 @@ public class LocalizationManager
 
                 foreach (var pair in defaultData)
                 {
-                    if (!_overrides.ContainsKey(pair.Key))
-                    {
-                        _overrides[pair.Key] = pair.Value;
-                        addedCount++;
-                    }
+                    if (_overrides.ContainsKey(pair.Key))
+                        continue;
+
+                    _overrides[pair.Key] = pair.Value;
+                    addedCount++;
                 }
 
                 if (addedCount > 0)
                 {
                     file.Locate = language;
                     file.Translations = _overrides;
-
                     await SaveAsync(path, file);
                 }
             }
@@ -116,11 +118,11 @@ public class LocalizationManager
     {
         var dict = new Dictionary<string, string>();
 
-        if (Managers.Data != null)
-        {
-            foreach (var data in Managers.Data.Localization.Values)
-                dict[data.Key] = data.Text;
-        }
+        if (Managers.Data == null)
+            return dict;
+
+        foreach (var data in Managers.Data.Localization.Values)
+            dict[data.Key] = data.Text;
 
         return dict;
     }
@@ -131,18 +133,20 @@ public class LocalizationManager
         string dir = Literal.Folders.Localizations.GetDirectory();
         string[] files = Directory.GetFiles(dir, "*.json");
 
-        foreach (string file in files)
+        for (int index = 0; index < files.Length; index++)
         {
+            string file = files[index];
+
             try
             {
                 string json = File.ReadAllText(file);
                 var format = JsonConvert.DeserializeObject<LocalizationFormat>(json);
 
-                if (format != null && !string.IsNullOrEmpty(format.Locate))
-                {
-                    if (!languages.Contains(format.Locate))
-                        languages.Add(format.Locate);
-                }
+                if (format == null || string.IsNullOrEmpty(format.Locate))
+                    continue;
+
+                if (!languages.Contains(format.Locate))
+                    languages.Add(format.Locate);
             }
             catch
             {
@@ -164,65 +168,43 @@ public class LocalizationManager
         return id;
     }
 
-    public string Get(Localization id)
+    public string Get(Localization id) 
         => Get(id.ToString());
-
-    public string Get<T1>(Localization id, T1 arg1)
-    {
-        string text = Get(id);
-
-        try 
-        { 
-            return ZString.Format(text, arg1); 
-        }
-        catch 
-        { 
-            return text; 
-        }
-    }
-
-    public string Get<T1, T2>(Localization id, T1 arg1, T2 arg2)
-    {
-        string text = Get(id);
-        
-        try 
-        { 
-            return ZString.Format(text, arg1, arg2); 
-        }
-        catch 
-        { 
-            return text; 
-        }
-    }
-
-    public string Get<T1, T2, T3>(Localization id, T1 arg1, T2 arg2, T3 arg3)
-    {
-        string text = Get(id);
-
-        try 
-        { 
-            return ZString.Format(text, arg1, arg2, arg3); 
-        }
-        catch 
-        { 
-            return text; 
-        }
-    }
+    public string Get<T1>(Localization id, T1 arg1) 
+        => FormatText(id, text => ZString.Format(text, arg1));
+    public string Get<T1, T2>(Localization id, T1 arg1, T2 arg2) 
+        => FormatText(id, text => ZString.Format(text, arg1, arg2));
+    public string Get<T1, T2, T3>(Localization id, T1 arg1, T2 arg2, T3 arg3) 
+        => FormatText(id, text => ZString.Format(text, arg1, arg2, arg3));
 
     public string Get(Localization id, params object[] args)
     {
         string text = Get(id);
-        
-        if (args == null || args.Length == 0) 
+
+        if (args == null || args.Length == 0)
             return text;
 
-        try 
-        { 
-            return ZString.Format(text, args); 
+        try
+        {
+            return ZString.Format(text, args);
         }
-        catch 
-        { 
-            return text; 
+        catch
+        {
+            return text;
+        }
+    }
+
+    private string FormatText(Localization id, Func<string, string> formatAction)
+    {
+        string text = Get(id);
+
+        try
+        {
+            return formatAction(text);
+        }
+        catch
+        {
+            return text;
         }
     }
 }

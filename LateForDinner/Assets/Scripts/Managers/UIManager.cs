@@ -12,40 +12,39 @@ public class UIManager
 {
     private Canvas _canvas;
     private GameObject _root;
+
     public GameObject Root
     {
         get
         {
             if (_root == null)
-            {
-                _root = new GameObject { name = Literal.Roots.UserInterfaces };
-                _root.transform.SetParent(Managers.Instance.transform, false);
-                Setup();
-                CreateLayer(Layer.Display);
-                CreateLayer(Layer.Popup);
-                CreateLayer(Layer.System);
-                CreateLayer(Layer.Lock);
-            }
+                InitRoot();
 
             return _root;
         }
     }
-    public float ScaleFactor
-    {
-        get
-        {
-            var _ = Root;
 
-            return _canvas != null ? _canvas.scaleFactor : 1f;
-        }
-    }
+    public float ScaleFactor 
+        => _canvas != null ? _canvas.scaleFactor : 1f;
+
     private readonly Dictionary<Layer, Transform> _layer = new Dictionary<Layer, Transform>();
     private readonly List<UIPopup> _popups = new List<UIPopup>();
     private readonly Dictionary<UserInterface, IDisposable> _handles = new Dictionary<UserInterface, IDisposable>();
     private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
     private UIDisplay _display;
 
-    private void Setup()
+    private void InitRoot()
+    {
+        _root = new GameObject { name = Literal.Roots.UserInterfaces };
+        _root.transform.SetParent(Managers.Instance.transform, false);
+        SetupEventSystem();
+        CreateLayer(Layer.Display);
+        CreateLayer(Layer.Popup);
+        CreateLayer(Layer.System);
+        CreateLayer(Layer.Lock);
+    }
+
+    private void SetupEventSystem()
     {
         var system = new GameObject { name = Literal.Roots.Events };
         system.transform.SetParent(Managers.Instance.transform, false);
@@ -71,7 +70,6 @@ public class UIManager
         scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.Shrink;
         scaler.referencePixelsPerUnit = Define.Scaler.PixelsPerUnit;
         gameObject.AddComponent<GraphicRaycaster>();
-
         return gameObject;
     }
 
@@ -102,7 +100,6 @@ public class UIManager
 
         _display = instance;
         _handles[instance] = rentHandle;
-
         return instance;
     }
 
@@ -122,7 +119,6 @@ public class UIManager
 
         _display = instance;
         _handles[instance] = rentHandle;
-
         return instance;
     }
 
@@ -130,8 +126,8 @@ public class UIManager
     {
         foreach (var popup in _popups)
         {
-            if (popup is T)
-                return popup as T;
+            if (popup is T targetPopup)
+                return targetPopup;
         }
 
         var _ = Root;
@@ -143,7 +139,6 @@ public class UIManager
         _popups.Add(instance);
         _handles[instance] = rentHandle;
         Refresh();
-
         return instance;
     }
 
@@ -151,8 +146,8 @@ public class UIManager
     {
         foreach (var popup in _popups)
         {
-            if (popup is T)
-                return popup as T;
+            if (popup is T targetPopup)
+                return targetPopup;
         }
 
         var _ = Root;
@@ -164,7 +159,6 @@ public class UIManager
         _popups.Add(instance);
         _handles[instance] = rentHandle;
         Refresh();
-
         return instance;
     }
 
@@ -177,7 +171,6 @@ public class UIManager
             return null;
 
         _handles[instance] = rentHandle;
-
         return instance;
     }
 
@@ -190,7 +183,6 @@ public class UIManager
             return null;
 
         _handles[instance] = rentHandle;
-
         return instance;
     }
 
@@ -210,7 +202,7 @@ public class UIManager
 
         if (_handles.TryGetValue(ui, out var handle))
         {
-            _handles?.Remove(ui);
+            _handles.Remove(ui);
             handle?.Dispose();
         }
     }
@@ -240,15 +232,12 @@ public class UIManager
 
     public bool CloseTop()
     {
-        if (_popups.Count > 0)
-        {
-            var topPopup = _popups[_popups.Count - 1];
-            Close(topPopup);
+        if (_popups.Count <= 0)
+            return false;
 
-            return true;
-        }
-
-        return false;
+        var topPopup = _popups[_popups.Count - 1];
+        Close(topPopup);
+        return true;
     }
 
     public void Focus(UIPopup popup)
@@ -275,7 +264,6 @@ public class UIManager
         var (locker, rentHandle) = await Managers.Pool.PopAsync<UILock>(_layer[Layer.System]);
         _handles[locker] = rentHandle;
         locker.PlayAsync().Forget();
-
         await _semaphore.WaitAsync();
 
         try
@@ -285,16 +273,15 @@ public class UIManager
         finally
         {
             await timer;
-
             locker.Release();
             _handles[locker].Dispose();
             _semaphore.Release();
         }
     }
 
-    public async UniTask LockAsync(UniTask task)
+    public async UniTask LockAsync(UniTask task) 
         => await LockAsync(async () => await task);
 
-    public T GetScreen<T>() where T : UIDisplay
+    public T GetScreen<T>() where T : UIDisplay 
         => _display as T;
 }

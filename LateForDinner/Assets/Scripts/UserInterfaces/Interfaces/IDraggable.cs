@@ -5,16 +5,13 @@ public interface IDraggable : IDragHandler, IEndDragHandler
 {
     void IDragHandler.OnDrag(PointerEventData data)
     {
-        if (this is UIPopup popup)
-        {
-            if (popup.RectTransform == null)
-                return;
+        if (!(this is UIPopup popup) || popup.RectTransform == null)
+            return;
 
-            float scaleFactor = Managers.UI.ScaleFactor;
-            Vector2 nextPosition = popup.RectTransform.anchoredPosition + (data.delta / scaleFactor);
-            nextPosition = ClampWithMargin(popup.RectTransform, nextPosition);
-            popup.RectTransform.anchoredPosition = nextPosition;
-        }
+        float scaleFactor = Managers.UI.ScaleFactor;
+        Vector2 nextPosition = popup.RectTransform.anchoredPosition + (data.delta / scaleFactor);
+        nextPosition = ClampWithMargin(popup.RectTransform, nextPosition);
+        popup.RectTransform.anchoredPosition = nextPosition;
     }
 
     void IEndDragHandler.OnEndDrag(PointerEventData data) { }
@@ -22,13 +19,9 @@ public interface IDraggable : IDragHandler, IEndDragHandler
     private Vector2 ClampWithMargin(RectTransform rectTransform, Vector2 targetPosition)
     {
         Canvas canvas = rectTransform.GetComponentInParent<Canvas>();
+        RectTransform canvasRect = canvas.GetComponentAssert<RectTransform>();
 
-        if (canvas == null)
-            return targetPosition;
-
-        RectTransform canvasRect = canvas.GetComponent<RectTransform>();
-
-        if (canvasRect == null)
+        if (canvas == null || canvasRect == null)
             return targetPosition;
 
         Rect canvasRectArea = canvasRect.rect;
@@ -42,8 +35,6 @@ public interface IDraggable : IDragHandler, IEndDragHandler
         float maxY = canvasRectArea.yMax + allowedOverflowY - (popupSize.y * (1f - pivot.y));
         targetPosition.x = Mathf.Clamp(targetPosition.x, minX, maxX);
         targetPosition.y = Mathf.Clamp(targetPosition.y, minY, maxY);
-
         return targetPosition;
     }
 }
-

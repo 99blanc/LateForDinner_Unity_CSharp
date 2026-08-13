@@ -10,7 +10,7 @@ public class SaveManager
     public SaveMeta MetaData { get; private set; } = new SaveMeta();
     public Save CurrentData { get; private set; } = new Save();
 
-    public async UniTask InitAsync()
+    public async UniTask InitAsync() 
         => await MetaAsync();
 
     public async UniTask LoadAsync(int index)
@@ -23,14 +23,15 @@ public class SaveManager
 
         try
         {
-            if (File.Exists(path))
+            if (!File.Exists(path))
             {
-                byte[] bytes = await File.ReadAllBytesAsync(path);
-                CurrentData = MemoryPackSerializer.Deserialize<Save>(bytes) ?? new Save();
-                _currentSlot = index;
-            }
-            else
                 NewGame(index);
+                return;
+            }
+
+            byte[] bytes = await File.ReadAllBytesAsync(path);
+            CurrentData = MemoryPackSerializer.Deserialize<Save>(bytes) ?? new Save();
+            _currentSlot = index;
         }
         catch
         {
@@ -40,7 +41,7 @@ public class SaveManager
 
     public async UniTask SaveAsync()
     {
-        if (_currentSlot < 0) 
+        if (_currentSlot < 0)
             return;
 
         string path = GetPath(_currentSlot);
@@ -77,13 +78,15 @@ public class SaveManager
 
         try
         {
-            if (File.Exists(path))
+            if (!File.Exists(path))
             {
-                byte[] bytes = await File.ReadAllBytesAsync(path);
-                MetaData = MemoryPackSerializer.Deserialize<SaveMeta>(bytes) ?? new SaveMeta();
-            }
-            else
                 MetaData = new SaveMeta();
+                ValidateMeta();
+                return;
+            }
+
+            byte[] bytes = await File.ReadAllBytesAsync(path);
+            MetaData = MemoryPackSerializer.Deserialize<SaveMeta>(bytes) ?? new SaveMeta();
         }
         catch
         {
@@ -95,31 +98,23 @@ public class SaveManager
 
     public void EnsureSlot(int count)
     {
-        if (MetaData.Slots == null)
-            MetaData.Slots = new List<SlotMeta>();
-
-        if (MetaData.SlotOrder == null)
-            MetaData.SlotOrder = new List<int>();
+        InitMetaCollectionsIfNeeded();
 
         while (MetaData.Slots.Count < count)
             MetaData.Slots.Add(new SlotMeta());
 
-        if (MetaData.SlotOrder.Count != MetaData.Slots.Count)
-        {
-            MetaData.SlotOrder.Clear();
+        if (MetaData.SlotOrder.Count == MetaData.Slots.Count)
+            return;
 
-            for (int index = 0; index < MetaData.Slots.Count; index++)
-                MetaData.SlotOrder.Add(index);
-        }
+        MetaData.SlotOrder.Clear();
+
+        for (int ndex = 0; ndex < MetaData.Slots.Count; ndex++)
+            MetaData.SlotOrder.Add(ndex);
     }
 
     private void ValidateMeta()
     {
-        if (MetaData.Slots == null)
-            MetaData.Slots = new List<SlotMeta>();
-
-        if (MetaData.SlotOrder == null)
-            MetaData.SlotOrder = new List<int>();
+        InitMetaCollectionsIfNeeded();
 
         if (MetaData.SlotOrder.Count != MetaData.Slots.Count)
         {
@@ -136,10 +131,18 @@ public class SaveManager
         }
     }
 
-    private void SyncMeta()
+    private void InitMetaCollectionsIfNeeded()
     {
         if (MetaData.Slots == null)
             MetaData.Slots = new List<SlotMeta>();
+
+        if (MetaData.SlotOrder == null)
+            MetaData.SlotOrder = new List<int>();
+    }
+
+    private void SyncMeta()
+    {
+        InitMetaCollectionsIfNeeded();
 
         if (MetaData.Slots[_currentSlot] == null)
             MetaData.Slots[_currentSlot] = new SlotMeta();
@@ -174,14 +177,14 @@ public class SaveManager
 
             await File.WriteAllBytesAsync(path, bytes);
         }
-        catch 
-        { 
-            /// DESC ::: 예외 발생 시 무시
+        catch
+        {
+            // DESC ::: 예외 발생 시 무시
         }
     }
 
-    public void Select(int index)
-        => _currentSlot = index;
+    public void Select(int index) =>
+        _currentSlot = index;
 
     public void Clear(int index)
     {
@@ -202,7 +205,6 @@ public class SaveManager
     private string GetPath(int slot)
     {
         string dir = Literal.Folders.Saves.GetDirectory();
-
         return Path.Combine(dir, $"{Literal.Files.Save}_{slot}{Literal.Extensions.Data}");
     }
 
@@ -210,14 +212,12 @@ public class SaveManager
     {
         string dir = Literal.Folders.Saves.GetDirectory();
         string backup = Path.Combine(dir, Literal.Folders.Backups).GetDirectory();
-
         return Path.Combine(backup, $"{Literal.Files.Save}_{slot}{Literal.Extensions.Backup}");
     }
 
     private string GetMetaPath()
     {
         string dir = Literal.Folders.Saves.GetDirectory();
-
         return Path.Combine(dir, $"{Literal.Files.Meta}{Literal.Extensions.Data}");
     }
 
@@ -225,25 +225,23 @@ public class SaveManager
     {
         string dir = Literal.Folders.Saves.GetDirectory();
         string backup = Path.Combine(dir, Literal.Folders.Backups).GetDirectory();
-
         return Path.Combine(backup, $"{Literal.Files.Meta}{Literal.Extensions.Backup}");
     }
 
     public async UniTask SwapSlotOrderAsync(int indexA, int indexB)
     {
-        if (MetaData.SlotOrder == null) 
+        if (MetaData.SlotOrder == null)
             return;
 
         int posA = MetaData.SlotOrder.IndexOf(indexA);
         int posB = MetaData.SlotOrder.IndexOf(indexB);
 
-        if (posA < 0 || posB < 0) 
+        if (posA < 0 || posB < 0)
             return;
 
         int temp = MetaData.SlotOrder[posA];
         MetaData.SlotOrder[posA] = MetaData.SlotOrder[posB];
         MetaData.SlotOrder[posB] = temp;
-
         await SaveMetaAsync();
     }
 }

@@ -9,7 +9,7 @@ public class ControlManager
 {
     private readonly Dictionary<string, InputAction> _caches = new Dictionary<string, InputAction>();
     private InputActionAsset _action;
-    private Vector2 _hotspot = Define.Cursor.Hotspot;
+    private readonly Vector2 _hotspot = Define.Cursor.Hotspot;
     private IDisposable _handle;
 
     public void GetCursor()
@@ -25,28 +25,7 @@ public class ControlManager
         _handle?.Dispose();
         _handle = Observable.EveryUpdate()
         .Where(_ => Mouse.current != null)
-        .Subscribe(_ =>
-        {
-            if (!Application.isFocused)
-            {
-                Cursor.SetCursor(null, Vector2.zero, CursorMode.ForceSoftware);
-                return;
-            }
-
-            var mouse = Mouse.current;
-            Vector2 mousePos = mouse.position.ReadValue();
-
-            if (mousePos.x < 0 || mousePos.x > Screen.width || mousePos.y < 0 || mousePos.y > Screen.height)
-            {
-                Cursor.SetCursor(null, Vector2.zero, CursorMode.ForceSoftware);
-                return;
-            }
-
-            if (mouse.leftButton.isPressed)
-                Cursor.SetCursor(last, _hotspot, CursorMode.ForceSoftware);
-            else
-                Cursor.SetCursor(first, _hotspot, CursorMode.ForceSoftware);
-        });
+        .Subscribe(_ => UpdateCursorState(first, last));
     }
 
     public async UniTask LoadAsync()
@@ -71,18 +50,48 @@ public class ControlManager
             return;
 
         _caches.Clear();
+        var actionMaps = _action.actionMaps;
 
-        foreach (var map in _action.actionMaps)
+        for (int index = 0; index < actionMaps.Count; index++)
         {
-            foreach (var action in map.actions)
+            var map = actionMaps[index];
+            var actions = map.actions;
+
+            for (int sub = 0; sub < actions.Count; sub++)
+            {
+                var action = actions[sub];
                 _caches[action.name] = action;
+            }
         }
     }
 
-    public bool IsPressed(string actionName)
+    private void UpdateCursorState(Texture2D normalCursor, Texture2D pressCursor)
+    {
+        if (!Application.isFocused)
+        {
+            Cursor.SetCursor(null, Vector2.zero, CursorMode.ForceSoftware);
+            return;
+        }
+
+        var mouse = Mouse.current;
+        Vector2 mousePos = mouse.position.ReadValue();
+
+        if (mousePos.x < 0 || mousePos.x > Screen.width || mousePos.y < 0 || mousePos.y > Screen.height)
+        {
+            Cursor.SetCursor(null, Vector2.zero, CursorMode.ForceSoftware);
+            return;
+        }
+
+        if (mouse.leftButton.isPressed)
+            Cursor.SetCursor(pressCursor, _hotspot, CursorMode.ForceSoftware);
+        else
+            Cursor.SetCursor(normalCursor, _hotspot, CursorMode.ForceSoftware);
+    }
+
+    public bool IsPressed(string actionName) 
         => _caches.TryGetValue(actionName, out var action) && action.IsPressed();
 
-    public bool IsTriggered(string actionName)
+    public bool IsTriggered(string actionName) 
         => _caches.TryGetValue(actionName, out var action) && action.triggered;
 
     public Vector2 GetVector2(string actionName)
@@ -98,13 +107,14 @@ public class ControlManager
         if (!_caches.TryGetValue(action, out var output) || output == null)
             return Observable.Empty<Unit>();
 
-        return Observable.FromEvent<InputAction.CallbackContext>(h => output.performed += h, h => output.performed -= h).Select(_ => Unit.Default);
+        return Observable.FromEvent<InputAction.CallbackContext>(h => output.performed += h, h => output.performed -= h)
+        .Select(_ => Unit.Default);
     }
 
-    public IDisposable Subscribe(string actionName, Action onPerformed)
+    public IDisposable Subscribe(string actionName, Action onPerformed) 
         => AsObservable(actionName).Subscribe(_ => onPerformed());
 
-    public IEnumerable<KeyValuePair<string, InputAction>> GetActions()
+    public IEnumerable<KeyValuePair<string, InputAction>> GetActions() 
         => _caches;
 
     public void LoadBindingFromJson(string json)
@@ -129,17 +139,20 @@ public class ControlManager
 
         var userMap = _action.FindActionMap(Literal.Maps.User);
 
-        if (userMap != null)
-        {
-            foreach (var action in userMap.actions)
-                list.Add(action);
-        }
+        if (userMap == null)
+            return list;
+
+        var actions = userMap.actions;
+
+        for (int index = 0; index < actions.Count; index++)
+            list.Add(actions[index]);
+
         return list;
     }
 
-    public string Save()
+    public string Save() 
         => _action?.SaveBindingOverridesAsJson() ?? string.Empty;
 
-    public void Reset()
+    public void Reset() 
         => _action?.RemoveAllBindingOverrides();
 }

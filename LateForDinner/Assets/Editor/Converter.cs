@@ -17,25 +17,16 @@ public class Converter
             return;
 
         string[] csvFiles = Directory.GetFiles(path, "*.csv");
-        List<string> localizationFiles = new List<string>();
-        List<string> otherFiles = new List<string>();
-
-        foreach (var file in csvFiles)
-        {
-            string name = Path.GetFileNameWithoutExtension(file);
-
-            if (name.StartsWith("Localization", StringComparison.OrdinalIgnoreCase))
-                localizationFiles.Add(file);
-            else
-                otherFiles.Add(file);
-        }
-
+        var localizationFiles = new List<string>();
+        var otherFiles = new List<string>();
+        CategorizeFiles(csvFiles, localizationFiles, otherFiles);
         int total = otherFiles.Count + (localizationFiles.Count > 0 ? 1 : 0);
         int success = 0;
         int currentProgress = 0;
 
-        foreach (var file in otherFiles)
+        for (int index = 0; index < otherFiles.Count; index++)
         {
+            string file = otherFiles[index];
             string name = Path.GetFileNameWithoutExtension(file);
             EditorUtility.DisplayProgressBar("Converting Tables...", $"Processing: {name}", (float)currentProgress / total);
 
@@ -59,47 +50,63 @@ public class Converter
         EditorUtility.DisplayDialog("Table Bake", $"Conversion Complete: {success} converted", "OK");
     }
 
+    private static void CategorizeFiles(string[] csvFiles, List<string> localizationFiles, List<string> otherFiles)
+    {
+        for (int index = 0; index < csvFiles.Length; index++)
+        {
+            string file = csvFiles[index];
+            string name = Path.GetFileNameWithoutExtension(file);
+
+            if (name.StartsWith("Localization", StringComparison.OrdinalIgnoreCase))
+                localizationFiles.Add(file);
+            else
+                otherFiles.Add(file);
+        }
+    }
+
     private static bool ConvertTable(string name)
     {
         Type dataType = FindType(name);
 
-        if (dataType != null)
-        {
-            MethodInfo method = typeof(Table).GetMethod("Convert", BindingFlags.Public | BindingFlags.Static);
-            MethodInfo genericMethod = method.MakeGenericMethod(dataType);
-            genericMethod.Invoke(null, new object[] { name });
-
-            return true;
-        }
-        else
+        if (dataType == null)
         {
             EditorUtility.ClearProgressBar();
             EditorUtility.DisplayDialog("Table Conversion Warning", $"Matching data type not found for table:\n'{name}'", "OK");
-
             return false;
         }
+
+        MethodInfo method = typeof(Table).GetMethod("Convert", BindingFlags.Public | BindingFlags.Static);
+        
+        if (method == null)
+            return false;
+
+        MethodInfo genericMethod = method.MakeGenericMethod(dataType);
+        genericMethod.Invoke(null, new object[] { name });
+        return true;
     }
 
     private static bool ConvertAndEncryptionMergeLocalization(List<string> files)
     {
         MethodInfo method = typeof(Table).GetMethod("ConvertAndMergeLocalization", BindingFlags.Public | BindingFlags.Static);
+        
+        if (method == null)
+            return false;
 
-        if (method != null)
-        {
-            method.Invoke(null, new object[] { files });
-            
-            return true;
-        }
-
-        return false;
+        method.Invoke(null, new object[] { files });
+        return true;
     }
 
     private static Type FindType(string name)
     {
-        foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+        var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+
+        for (int index = 0; index < assemblies.Length; index++)
         {
-            foreach (var type in assembly.GetTypes())
+            var types = assemblies[index].GetTypes();
+
+            for (int sub = 0; sub < types.Length; sub++)
             {
+                var type = types[sub];
                 if (type.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
                     return type;
             }

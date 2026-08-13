@@ -7,11 +7,7 @@ public class LoadDriver
     {
         Managers.UI.CloseAll();
         var load = await Managers.UI.OpenDisplayAsync<UILoadDisplay>();
-
-        if (load == null || task == null)
-            return;
-
-        load.PlayAsync().Forget();
+        load?.PlayAsync().Forget();
 
         try
         {
@@ -19,7 +15,7 @@ public class LoadDriver
         }
         finally
         {
-            load.Release();
+            load?.Release();
         }
     }
 }

@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 public class ScriptExplorer : EditorWindow
 {
-    private Vector2 _position;
+    private Vector2 _scrollPosition;
     private List<string> _paths = new List<string>();
 
     [MenuItem("Tools/Scripts/Open Script Explorer")]
@@ -25,22 +25,41 @@ public class ScriptExplorer : EditorWindow
 
     private void OnGUI()
     {
-        if (GUILayout.Button("Refresh Script List")) 
+        DrawRefreshButton();
+        DrawScriptList();
+    }
+
+    private void DrawRefreshButton()
+    {
+        if (GUILayout.Button("Refresh Script List"))
             RefreshScriptList();
+    }
 
-        _position = EditorGUILayout.BeginScrollView(_position);
+    private void DrawScriptList()
+    {
+        _scrollPosition = EditorGUILayout.BeginScrollView(_scrollPosition);
 
-        foreach (var path in _paths)
+        for (int index = 0; index < _paths.Count; index++)
         {
-            string name = Path.GetFileName(path);
-            if (GUILayout.Button(name, EditorStyles.label))
-            {
-                var script = AssetDatabase.LoadAssetAtPath<MonoScript>(FileUtil.GetProjectRelativePath(path));
-                AssetDatabase.OpenAsset(script);
-            }
+            string path = _paths[index];
+            string scriptName = Path.GetFileName(path);
+
+            if (!GUILayout.Button(scriptName, EditorStyles.label))
+                continue;
+
+            OpenScript(path);
         }
 
         EditorGUILayout.EndScrollView();
+    }
+
+    private void OpenScript(string absolutePath)
+    {
+        string relativePath = FileUtil.GetProjectRelativePath(absolutePath);
+        var script = AssetDatabase.LoadAssetAtPath<MonoScript>(relativePath);
+
+        if (script != null)
+            AssetDatabase.OpenAsset(script);
     }
 }
 #endif

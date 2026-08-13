@@ -9,14 +9,12 @@ public class Managers : MonoBehaviour
         get
         {
             if (_instance == null)
-            {
-                _instance = new GameObject { name = Literal.Roots.Managers }.AddComponent<Managers>();
-                DontDestroyOnLoad(_instance);
-            }
+                InitInstance();
 
             return _instance;
         }
     }
+
     public static LogManager Log { get; private set; }
     public static ResourceManager Resource { get; private set; }
     public static DataManager Data { get; private set; }
@@ -32,6 +30,19 @@ public class Managers : MonoBehaviour
 
     public async UniTask LoadAsync()
     {
+        CreateManagers();
+        await InitializeManagersAsync();
+    }
+
+    private static void InitInstance()
+    {
+        var gameObject = new GameObject { name = Literal.Roots.Managers };
+        _instance = gameObject.AddComponent<Managers>();
+        DontDestroyOnLoad(_instance);
+    }
+
+    private void CreateManagers()
+    {
         Log = new LogManager();
         Resource = new ResourceManager();
         Data = new DataManager();
@@ -44,7 +55,10 @@ public class Managers : MonoBehaviour
         Console = new ConsoleManager();
         Save = new SaveManager();
         Preload = new PreloadManager();
+    }
 
+    private async UniTask InitializeManagersAsync()
+    {
         await Resource.InitAsync();
         await Data.InitAsync();
         await Localization.InitAsync();
@@ -52,4 +66,3 @@ public class Managers : MonoBehaviour
         await Save.InitAsync();
     }
 }
-

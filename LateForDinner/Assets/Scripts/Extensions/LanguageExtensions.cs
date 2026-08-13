@@ -8,7 +8,6 @@ public static class LanguageExtensions
         {
             var culture = CultureInfo.GetCultureInfo(language);
             string native = culture.IsNeutralCulture ? culture.EnglishName : culture.Parent.EnglishName;
-
             return char.ToUpper(native[0]) + native.Substring(1);
         }
         catch

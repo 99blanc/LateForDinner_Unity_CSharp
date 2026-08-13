@@ -21,15 +21,11 @@ public class UILock : UserInterface, IAnimatable
         var image = GetImage((int)Images.RotateImage);
         var token = GetToken("RotateTask");
 
-        if (image == null)
-            return;
-
         try
         {
             while (!token.IsCancellationRequested)
             {
-                image.transform.Rotate(0f, 0f, -300f * Time.unscaledDeltaTime);
-
+                image?.transform.Rotate(0f, 0f, -300f * Time.unscaledDeltaTime);
                 await UniTask.Yield(PlayerLoopTiming.Update, token);
             }
         }

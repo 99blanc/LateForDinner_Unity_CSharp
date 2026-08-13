@@ -29,7 +29,6 @@ public class Addressable
             return;
 
         int uiCount = RegisterFolderToGroup(settings, "Assets/" + Literal.Paths.UserInterfaces, Literal.Groups.UserInterfaces);
-
         AssetDatabase.SaveAssets();
         EditorUtility.DisplayDialog("Addressables UI Setup", $"UserInterfaces: {uiCount} assets processed", "OK");
     }
@@ -43,7 +42,6 @@ public class Addressable
             return;
 
         int atlasCount = RegisterFolderToGroup(settings, "Assets/" + Literal.Paths.Atlases, Literal.Groups.Atlases);
-
         AssetDatabase.SaveAssets();
         EditorUtility.DisplayDialog("Addressables Atlas Setup", $"Atlases: {atlasCount} assets processed", "OK");
     }

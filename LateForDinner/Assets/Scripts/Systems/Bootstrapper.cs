@@ -11,11 +11,8 @@ public class Bootstrapper
     {
         await Managers.Instance.LoadAsync();
         await Managers.Preload.Release_BootAsync();
-
         Managers.Control.GetCursor();
-
         await Managers.UI.OpenDisplayAsync<UISplashDisplay>().PlayAsync().Release();
-
         Managers.UI.OpenDisplay<UITitleDisplay>();
     }
 }

@@ -8,23 +8,36 @@ public class DropdownGroup : MonoBehaviour
 
     public void Register(Dropdown dropdown)
     {
-        if (!_dropdowns.Contains(dropdown))
-            _dropdowns.Add(dropdown);
+        if (dropdown == null || _dropdowns.Contains(dropdown))
+            return;
+
+        _dropdowns.Add(dropdown);
     }
 
     public void Unregister(Dropdown dropdown)
     {
-        if (_dropdowns.Contains(dropdown))
-            _dropdowns.Remove(dropdown);
+        if (dropdown == null)
+            return;
+
+        _dropdowns.Remove(dropdown);
+
+        if (_currentOpenDropdown == dropdown)
+            _currentOpenDropdown = null;
     }
 
     public void NotifyDropdownOpened(Dropdown openedDropdown)
     {
-        foreach (var dropdown in _dropdowns)
+        if (openedDropdown == null)
+            return;
+
+        for (int index = 0; index < _dropdowns.Count; index++)
         {
+            var dropdown = _dropdowns[index];
+
             if (dropdown != openedDropdown && dropdown.IsOpen)
                 dropdown.Close();
         }
+
         _currentOpenDropdown = openedDropdown;
     }
 

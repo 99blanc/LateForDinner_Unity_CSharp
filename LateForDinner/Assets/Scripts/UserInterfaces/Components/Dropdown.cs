@@ -34,7 +34,8 @@ public class Dropdown : MonoBehaviour, IPointerClickHandler
     [Serializable]
     public class DropdownEvent : UnityEvent<int> { }
     public DropdownEvent onValueChanged = new DropdownEvent();
-    private bool _isOpen = false;
+
+    private bool _isOpen;
     public bool IsOpen => _isOpen;
     private readonly List<GameObject> _itemPool = new List<GameObject>();
 
@@ -56,14 +57,10 @@ public class Dropdown : MonoBehaviour, IPointerClickHandler
     }
 
     private void OnEnable()
-    {
-        _dropdownGroup?.Register(this);
-    }
+        => _dropdownGroup?.Register(this);
 
     private void OnDisable()
-    {
-        _dropdownGroup?.Unregister(this);
-    }
+        => _dropdownGroup?.Unregister(this);
 
     private void Start()
     {
@@ -78,13 +75,16 @@ public class Dropdown : MonoBehaviour, IPointerClickHandler
 
     private void Refresh()
     {
-        if (CaptionText != null)
+        if (CaptionText == null)
+            return;
+
+        if (Options.Count > 0 && _value >= 0 && _value < Options.Count)
         {
-            if (Options.Count > 0 && _value >= 0 && _value < Options.Count)
-                CaptionText.text = Options[_value].text;
-            else
-                CaptionText.text = string.Empty;
+            CaptionText.text = Options[_value].text;
+            return;
         }
+
+        CaptionText.text = string.Empty;
     }
 
     public void OnPointerClick(PointerEventData eventData)
@@ -111,28 +111,7 @@ public class Dropdown : MonoBehaviour, IPointerClickHandler
         _dropdownGroup?.NotifyDropdownOpened(this);
         BuildItemContainer();
         Template.gameObject.SetActive(true);
-
-        if (!Template.horizontal && !Template.vertical && Template.content != null)
-        {
-            float itemHeight = 0f;
-
-            if (_itemPool.Count > 0 && _itemPool[0] != null)
-            {
-                if (_itemPool[0].TryGetComponent<RectTransform>(out var rectTransform))
-                    itemHeight = rectTransform.rect.height;
-            }
-
-            float totalHeight = itemHeight * Options.Count;
-            var templateRect = Template.transform as RectTransform;
-
-            if (templateRect != null)
-            {
-                Vector2 size = templateRect.sizeDelta;
-                size.y = totalHeight;
-                templateRect.sizeDelta = size;
-            }
-        }
-
+        AdjustTemplateHeight();
         _isOpen = true;
         UpdateArrowRotation();
     }
@@ -170,8 +149,11 @@ public class Dropdown : MonoBehaviour, IPointerClickHandler
 
     public void AddOptions(List<string> options)
     {
-        foreach (var option in options)
-            Options.Add(new OptionData { text = option });
+        if (options == null)
+            return;
+
+        for (int index = 0; index < options.Count; index++)
+            Options.Add(new OptionData { text = options[index] });
 
         Refresh();
     }
@@ -188,52 +170,77 @@ public class Dropdown : MonoBehaviour, IPointerClickHandler
 
         Transform itemTemplate = ItemText.transform.parent;
 
-        for (int i = 0; i < Options.Count; i++)
+        for (int index = 0; index < Options.Count; index++)
         {
-            int index = i;
-            GameObject itemObj;
-
-            if (i < _itemPool.Count)
-                itemObj = _itemPool[i];
-            else
-            {
-                if (i == 0)
-                    itemObj = itemTemplate.gameObject;
-                else
-                    itemObj = Instantiate(itemTemplate.gameObject, Template.content);
-
-                _itemPool.Add(itemObj);
-            }
-
+            int sub = index;
+            GameObject itemObj = GetOrCreateItem(index, itemTemplate);
             itemObj.SetActive(true);
-            var textComponent = itemObj.GetComponentInChildren<TMP_Text>();
+            UpdateItemContent(itemObj, sub);
+        }
+    }
 
-            if (textComponent != null)
-                textComponent.text = Options[i].text;
+    private GameObject GetOrCreateItem(int index, Transform itemTemplate)
+    {
+        if (index < _itemPool.Count)
+            return _itemPool[index];
 
-            var toggle = itemObj.GetComponent<Toggle>();
+        GameObject itemObj = index == 0 ? itemTemplate.gameObject : Instantiate(itemTemplate.gameObject, Template.content);
+        _itemPool.Add(itemObj);
+        return itemObj;
+    }
 
-            if (toggle != null)
-            {
-                toggle.isOn = (index == _value);
-                toggle.onValueChanged.RemoveAllListeners();
-                toggle.onValueChanged.AddListener(isOn =>
-                {
-                    if (isOn)
-                        SelectOption(index);
-                    else if (index == _value)
-                        toggle.isOn = true;
-                });
-            }
+    private void UpdateItemContent(GameObject itemObj, int index)
+    {
+        var textComponent = itemObj.GetComponentInChildren<TMP_Text>();
+
+        if (textComponent != null)
+            textComponent.text = Options[index].text;
+
+        var toggle = itemObj.GetComponentAssert<Toggle>();
+
+        if (toggle == null)
+            return;
+
+        toggle.isOn = (index == _value);
+        toggle.onValueChanged.RemoveAllListeners();
+        toggle.onValueChanged.AddListener(isOn =>
+        {
+            if (isOn)
+                SelectOption(index);
+            else if (index == _value)
+                toggle.isOn = true;
+        });
+    }
+
+    private void AdjustTemplateHeight()
+    {
+        if (Template.horizontal || Template.vertical || Template.content == null)
+            return;
+
+        float itemHeight = 0f;
+
+        if (_itemPool.Count > 0 && _itemPool[0] != null)
+        {
+            if (_itemPool[0].TryGetComponent<RectTransform>(out var rectTransform))
+                itemHeight = rectTransform.rect.height;
+        }
+
+        float totalHeight = itemHeight * Options.Count;
+
+        if (Template.transform is RectTransform templateRect)
+        {
+            Vector2 size = templateRect.sizeDelta;
+            size.y = totalHeight;
+            templateRect.sizeDelta = size;
         }
     }
 
     private void HideAllItems()
     {
-        foreach (var item in _itemPool)
+        for (int index = 0; index < _itemPool.Count; index++)
         {
-            if (item != null)
-                item.SetActive(false);
+            if (_itemPool[index] != null)
+                _itemPool[index].SetActive(false);
         }
     }
 }

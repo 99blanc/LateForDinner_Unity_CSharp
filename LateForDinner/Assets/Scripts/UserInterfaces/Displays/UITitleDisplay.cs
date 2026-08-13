@@ -26,11 +26,7 @@ public class UITitleDisplay : UIDisplay
         LoadPanel
     }
 
-    private enum UI_TitleState
-    {
-        Main,
-        Load
-    }
+    private enum UI_TitleState { Main, Load }
 
     private UI_TitleState _state;
     private UISaveSlot[] _slots;
@@ -42,37 +38,47 @@ public class UITitleDisplay : UIDisplay
         BindButton(typeof(Buttons));
         BindScrollRect(typeof(ScrollRects));
         BindPanel(typeof(Panels));
-        GetText((int)Texts.PressAnyKeyText).text = Managers.Localization.Get(Localization.UI_Title_Display_Text_Press_Any_Key);
-        GetButton((int)Buttons.OptionButton).BindView(OnOptionClicked, ViewEvent.LeftClick, this);
-        _slots = new UISaveSlot[Define.Save.Amount];
-        var content = GetScrollRect((int)ScrollRects.LoadScrollRect).content;
-
-        for (int index = 0; index < Define.Save.Amount; index++)
-        {
-            var (slot, rentHandle) = Managers.Pool.Pop<UISaveSlot>(content);
-            _slots[index] = slot;
-            _slots[index].SetDisplay(this);
-        }
-
+        InitTexts();
+        InitButtons();
+        InitSaveSlots();
         Managers.Save.EnsureSlot(_slots.Length);
         Managers.Control.Subscribe(Literal.Hotkeys.Cancel, Application.Quit).AddTo(this);
         Managers.Control.Subscribe(Literal.Hotkeys.Any, OnAnyPressed).AddTo(this);
         Switch(UI_TitleState.Main);
     }
 
-    public override void Get()
+    private void InitTexts()
+        => SetText(Texts.PressAnyKeyText, Localization.UI_Title_Display_Text_Press_Any_Key);
+
+    private void InitButtons()
+        => GetButton((int)Buttons.OptionButton).BindView(OnClickOption, ViewEvent.LeftClick, this);
+
+    private void InitSaveSlots()
+    {
+        _slots = new UISaveSlot[Define.Save.Amount];
+        var content = GetScrollRect((int)ScrollRects.LoadScrollRect).content;
+
+        for (int index = 0; index < Define.Save.Amount; index++)
+        {
+            var (slot, _) = Managers.Pool.Pop<UISaveSlot>(content);
+            _slots[index] = slot;
+            _slots[index].SetDisplay(this);
+        }
+    }
+
+    public override void Get() 
         => Switch(_state);
 
-    private void OnOptionClicked(PointerEventData data)
+    private void OnClickOption(PointerEventData data) 
         => Managers.UI.OpenPopup<UIOptionPopup>();
 
-    private void OnAnyPressed()
+    private void OnAnyPressed() 
         => Switch(UI_TitleState.Load);
 
     private void Switch(UI_TitleState state)
     {
         _state = state;
-        bool isMain = (_state == UI_TitleState.Main);
+        bool isMain = _state == UI_TitleState.Main;
         GetPanel((int)Panels.MainPanel).SetActivePanel(isMain);
         GetPanel((int)Panels.LoadPanel).SetActivePanel(!isMain);
 
@@ -82,18 +88,21 @@ public class UITitleDisplay : UIDisplay
 
     public void Refresh()
     {
-        if (_slots == null || _slots.Length == 0) 
+        if (_slots == null || _slots.Length == 0)
             return;
 
         var slotOrder = Managers.Save.MetaData.SlotOrder;
 
-        for (int index = 0; index < _slots.Length; index++)
+        for (int i = 0; i < _slots.Length; i++)
         {
-            if (index < slotOrder.Count)
-            {
-                int saveSlotIndex = slotOrder[index];
-                _slots[index].SetIndex(saveSlotIndex);
-            }
+            if (i >= slotOrder.Count)
+                continue;
+
+            int saveSlotIndex = slotOrder[i];
+            _slots[i].SetIndex(saveSlotIndex);
         }
     }
+
+    private void SetText(Texts textEnum, Localization key) 
+        => GetText((int)textEnum).text = Managers.Localization.Get(key);
 }

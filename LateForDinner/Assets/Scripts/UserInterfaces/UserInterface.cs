@@ -11,6 +11,7 @@ public class UserInterface : MonoBehaviour, IPoolable
     private Dictionary<Type, UnityEngine.Object[]> _views = new Dictionary<Type, UnityEngine.Object[]>();
     private Dictionary<string, CancellationTokenSource> _tokens = new Dictionary<string, CancellationTokenSource>();
     private RectTransform _rectTransform;
+
     public RectTransform RectTransform
     {
         get
@@ -36,7 +37,9 @@ public class UserInterface : MonoBehaviour, IPoolable
         for (int index = 0; index < values.Length; index++)
         {
             string childName = ZString.Concat(values.GetValue(index));
-            newView[index] = typeof(T) == typeof(GameObject) ? gameObject.FindChildAssert<Transform>(childName, true) : gameObject.FindChildAssert<T>(childName, true);
+            newView[index] = typeof(T) == typeof(GameObject)
+            ? gameObject.FindChildAssert<Transform>(childName, true)
+            : gameObject.FindChildAssert<T>(childName, true);
         }
     }
 
@@ -53,62 +56,44 @@ public class UserInterface : MonoBehaviour, IPoolable
 
     protected void BindObject(Type type) 
         => Bind<GameObject>(type);
-      
     protected void BindImage(Type type) 
         => Bind<Image>(type);
-
     protected void BindText(Type type) 
         => Bind<TMP_Text>(type);
-
-    protected void BindInputField(Type type)
+    protected void BindInputField(Type type) 
         => Bind<TMP_InputField>(type);
-
     protected void BindButton(Type type) 
         => Bind<Button>(type);
-
-    protected void BindToggle(Type type)
+    protected void BindToggle(Type type) 
         => Bind<Toggle>(type);
-
-    protected void BindScrollRect(Type type)
+    protected void BindScrollRect(Type type) 
         => Bind<ScrollRect>(type);
-
-    protected void BindScrollbar(Type type)
+    protected void BindScrollbar(Type type) 
         => Bind<Scrollbar>(type);
-
-    protected void BindDropdown(Type type)
+    protected void BindDropdown(Type type) 
         => Bind<Dropdown>(type);
-
-    protected void BindPanel(Type type)
+    protected void BindPanel(Type type) 
         => Bind<CanvasGroup>(type);
 
     protected GameObject GetObject(int index) 
         => Get<GameObject>(index);
-
     protected Image GetImage(int index) 
         => Get<Image>(index);
-
     protected TMP_Text GetText(int index) 
         => Get<TMP_Text>(index);
-
-    protected TMP_InputField GetInputField(int index)
+    protected TMP_InputField GetInputField(int index) 
         => Get<TMP_InputField>(index);
-
     protected Button GetButton(int index) 
         => Get<Button>(index);
-
-    protected Toggle GetToggle(int index)
+    protected Toggle GetToggle(int index) 
         => Get<Toggle>(index);
-
-    protected ScrollRect GetScrollRect(int index)
+    protected ScrollRect GetScrollRect(int index) 
         => Get<ScrollRect>(index);
-
-    protected Scrollbar GetScrollbar(int index)
+    protected Scrollbar GetScrollbar(int index) 
         => Get<Scrollbar>(index);
-
-    protected Dropdown GetDropdown(int index)
+    protected Dropdown GetDropdown(int index) 
         => Get<Dropdown>(index);
-
-    protected CanvasGroup GetPanel(int index)
+    protected CanvasGroup GetPanel(int index) 
         => Get<CanvasGroup>(index);
 
     protected CancellationToken GetToken(string key)
@@ -126,12 +111,12 @@ public class UserInterface : MonoBehaviour, IPoolable
 
     protected void CancelToken(string key)
     {
-        if (_tokens.TryGetValue(key, out var cts))
-        {
-            cts?.Cancel();
-            cts?.Dispose();
-            _tokens.Remove(key);
-        }
+        if (!_tokens.TryGetValue(key, out var cts))
+            return;
+
+        cts?.Cancel();
+        cts?.Dispose();
+        _tokens.Remove(key);
     }
 
     private void CancelAll()
@@ -145,6 +130,6 @@ public class UserInterface : MonoBehaviour, IPoolable
         _tokens.Clear();
     }
 
-    public virtual void Release()
-        => CancelAll();
+    public virtual void Release() =>
+        CancelAll();
 }

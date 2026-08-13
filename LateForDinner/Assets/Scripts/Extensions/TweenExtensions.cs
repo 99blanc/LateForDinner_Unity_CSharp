@@ -25,44 +25,39 @@ public static class TweenExtensions
 
     public static async UniTask FadeAsync(this Image image, float start, float end, float duration, float power = 1.0f, CancellationToken token = default)
     {
+        if (image == null)
+            return;
+
+        SetImageAlpha(image, start);
         float elapsedTime = 0f;
-        Color color = image.color;
-        color.a = start;
-        image.color = color;
 
         while (elapsedTime < duration)
         {
             token.ThrowIfCancellationRequested();
             elapsedTime += Time.unscaledDeltaTime;
-            float rawTime = Mathf.Clamp01(elapsedTime / duration);
-            float normalizedTime = 1f - Mathf.Pow(1f - rawTime, power);
-            color.a = Mathf.Lerp(start, end, normalizedTime);
-            image.color = color;
-
+            float normalizedTime = CalculateNormalizedTime(elapsedTime, duration, power);
+            SetImageAlpha(image, Mathf.Lerp(start, end, normalizedTime));
             await UniTask.Yield(PlayerLoopTiming.Update, token);
         }
 
-        color.a = end;
-        image.color = color;
+        SetImageAlpha(image, end);
     }
 
     public static async UniTask FadeAsync(this CanvasGroup canvas, float start, float end, float duration, float power = 1.0f, CancellationToken token = default)
     {
-        if (canvas == null) 
+        if (canvas == null)
             return;
 
         canvas.blocksRaycasts = true;
-        float elapsedTime = 0f;
         canvas.alpha = start;
+        float elapsedTime = 0f;
 
         while (elapsedTime < duration)
         {
             token.ThrowIfCancellationRequested();
             elapsedTime += Time.unscaledDeltaTime;
-            float rawTime = Mathf.Clamp01(elapsedTime / duration);
-            float normalizedTime = 1f - Mathf.Pow(1f - rawTime, power);
+            float normalizedTime = CalculateNormalizedTime(elapsedTime, duration, power);
             canvas.alpha = Mathf.Lerp(start, end, normalizedTime);
-
             await UniTask.Yield(PlayerLoopTiming.Update, token);
         }
 
@@ -74,31 +69,41 @@ public static class TweenExtensions
 
     public static async UniTask TogglePanelAsync(this CanvasGroup canvas, bool isActive, float duration = 0.2f, CancellationToken token = default)
     {
-        if (canvas == null) 
+        if (canvas == null)
             return;
 
         if (isActive)
         {
             canvas.blocksRaycasts = true;
-
             await canvas.FadeAsync(canvas.alpha, 1f, duration, 1f, token);
+            return;
         }
-        else
-        {
-            await canvas.FadeAsync(canvas.alpha, 0f, duration, 1f, token);
 
-            canvas.blocksRaycasts = false;
-            canvas.interactable = false;
-        }
+        await canvas.FadeAsync(canvas.alpha, 0f, duration, 1f, token);
+        canvas.blocksRaycasts = false;
+        canvas.interactable = false;
     }
 
     public static void SetActivePanel(this CanvasGroup canvas, bool isActive)
     {
-        if (canvas == null) 
+        if (canvas == null)
             return;
 
         canvas.alpha = isActive ? 1f : 0f;
         canvas.interactable = isActive;
         canvas.blocksRaycasts = isActive;
+    }
+
+    private static float CalculateNormalizedTime(float elapsedTime, float duration, float power)
+    {
+        float rawTime = Mathf.Clamp01(elapsedTime / duration);
+        return 1f - Mathf.Pow(1f - rawTime, power);
+    }
+
+    private static void SetImageAlpha(Image image, float alpha)
+    {
+        var color = image.color;
+        color.a = alpha;
+        image.color = color;
     }
 }

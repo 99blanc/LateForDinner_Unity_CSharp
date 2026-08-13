@@ -5,33 +5,43 @@ public static class UnityExtensions
 {
     public static T FindChild<T>(this GameObject gameObject, string name = null, bool recursive = false) where T : Object
     {
-        if (!gameObject) 
+        if (!gameObject)
             return null;
 
         if (recursive)
+            return FindChildRecursive<T>(gameObject, name);
+
+        return FindChildDirect<T>(gameObject, name);
+    }
+
+    private static T FindChildRecursive<T>(GameObject gameObject, string name) where T : Object
+    {
+        var components = gameObject.GetComponentsInChildren<T>(true);
+
+        for (int index = 0; index < components.Length; index++)
         {
-            T[] components = gameObject.GetComponentsInChildren<T>(true);
+            var component = components[index];
 
-            for (int index = 0; index < components.Length; index++)
-            {
-                T component = components[index];
-
-                if (string.IsNullOrEmpty(name) || ZString.Equals(name, component.name))
-                    return component;
-            }
+            if (string.IsNullOrEmpty(name) || ZString.Equals(name, component.name))
+                return component;
         }
-        else
+
+        return null;
+    }
+
+    private static T FindChildDirect<T>(GameObject gameObject, string name) where T : Object
+    {
+        var transform = gameObject.transform;
+
+        for (int index = 0; index < transform.childCount; index++)
         {
-            for (int index = 0; index < gameObject.transform.childCount; index++)
-            {
-                Transform child = gameObject.transform.GetChild(index);
+            var child = transform.GetChild(index);
 
-                if (!string.IsNullOrEmpty(name) && !ZString.Equals(name, child.name))
-                    continue;
+            if (!string.IsNullOrEmpty(name) && !ZString.Equals(name, child.name))
+                continue;
 
-                if (child.TryGetComponent<T>(out var component))
-                    return component;
-            }
+            if (child.TryGetComponent<T>(out var component))
+                return component;
         }
 
         return null;
@@ -39,32 +49,22 @@ public static class UnityExtensions
 
     public static GameObject FindChild(this GameObject gameObject, string name = null, bool recursive = false)
     {
-        Transform transform = FindChild<Transform>(gameObject, name, recursive);
-
+        var transform = FindChild<Transform>(gameObject, name, recursive);
         return transform != null ? transform.gameObject : null;
     }
 
-    public static T FindChildAssert<T>(this GameObject gameObject, string name = null, bool recursive = false) where T : Object
-    {
-        T target = FindChild<T>(gameObject, name, recursive);
-
-        return target;
-    }
+    public static T FindChildAssert<T>(this GameObject gameObject, string name = null, bool recursive = false) where T : Object 
+        => FindChild<T>(gameObject, name, recursive);
 
     public static GameObject FindChildAssert(this GameObject gameObject, string name = null, bool recursive = false)
     {
-        Transform target = FindChild<Transform>(gameObject, name, recursive);
-
+        var target = FindChild<Transform>(gameObject, name, recursive);
         return target != null ? target.gameObject : null;
     }
 
-    public static T GetComponentAssert<T>(this Component component) where T : Component
-    {
-        T newComponent = component.GetComponent<T>();
+    public static T GetComponentAssert<T>(this Component component) where T : Component 
+        => component.GetComponent<T>();
 
-        return newComponent;
-    }
-
-    public static T GetComponentAssert<T>(this GameObject gameObject) where T : Component
+    public static T GetComponentAssert<T>(this GameObject gameObject) where T : Component 
         => gameObject.GetComponent<T>();
 }
