@@ -15,7 +15,7 @@ public class PreloadManager
             await Managers.Control.LoadAsync();
             await UniTask.Delay(200);
             await load.LoadAsync(0.4f, Managers.Localization.Get(Localization.Log_PreloadManager_Boot_Asset));
-            await Managers.Resource.LoadAssetAsync<SpriteAtlas>(Define.Atlas.UI_Common);
+            await Managers.Resource.LoadAssetAsync<SpriteAtlas>(Define.Atlas.Common);
             await load.LoadAsync(0.8f, Managers.Localization.Get(Localization.Log_PreloadManager_Boot_Object));
             await load.LoadAsync(0.6f, Managers.Localization.Get(Localization.Log_PreloadManager_Boot_UI));
             await Managers.Pool.PrewarmAsync<UIKeybindSlot>(Managers.Control.GetBindableActions().Count + 1);

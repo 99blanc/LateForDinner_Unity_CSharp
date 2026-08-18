@@ -21,6 +21,7 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
     private readonly ReactiveProperty<ButtonState> _resolutionArrowButton = new ReactiveProperty<ButtonState>(ButtonState.Normal);
     private readonly ReactiveProperty<ButtonState> _fullscreenArrowButton = new ReactiveProperty<ButtonState>(ButtonState.Normal);
     private readonly ReactiveProperty<ButtonState> _qualityArrowButton = new ReactiveProperty<ButtonState>(ButtonState.Normal);
+    private readonly ReactiveProperty<ButtonState> _languageArrowButton = new ReactiveProperty<ButtonState>(ButtonState.Normal);
 
     private enum Images
     {
@@ -64,7 +65,8 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
         BloomToggleImage,
         BloomCheckmarkImage,
         AOToggleImage,
-        AOCheckmarkImage
+        AOCheckmarkImage,
+        LanguageArrowImage
     }
 
     private enum Texts
@@ -116,7 +118,8 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
         DefaultButton,
         ResolutionButton,
         FullscreenButton,
-        QualityButton
+        QualityButton,
+        LanguageButton
     }
 
     private enum Toggles
@@ -198,13 +201,13 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
 
     private void BindButtonStates()
     {
-        GetImage((int)Images.SoundButtonImage).BindState(_soundButton, Define.Atlas.UI_Common, this);
-        GetImage((int)Images.GraphicButtonImage).BindState(_graphicButton, Define.Atlas.UI_Common, this);
-        GetImage((int)Images.AccessButtonImage).BindState(_accessButton, Define.Atlas.UI_Common, this);
-        GetImage((int)Images.ApplyButtonImage).BindState(_applyButton, Define.Atlas.UI_Common, this);
-        GetImage((int)Images.CompleteButtonImage).BindState(_completeButton, Define.Atlas.UI_Common, this);
-        GetImage((int)Images.CancelButtonImage).BindState(_cancelButton, Define.Atlas.UI_Common, this);
-        GetImage((int)Images.DefaultButtonImage).BindState(_defaultButton, Define.Atlas.UI_Common, this);
+        GetImage((int)Images.SoundButtonImage).BindState(_soundButton, Define.Atlas.Common, this);
+        GetImage((int)Images.GraphicButtonImage).BindState(_graphicButton, Define.Atlas.Common, this);
+        GetImage((int)Images.AccessButtonImage).BindState(_accessButton, Define.Atlas.Common, this);
+        GetImage((int)Images.ApplyButtonImage).BindState(_applyButton, Define.Atlas.Common, this);
+        GetImage((int)Images.CompleteButtonImage).BindState(_completeButton, Define.Atlas.Common, this);
+        GetImage((int)Images.CancelButtonImage).BindState(_cancelButton, Define.Atlas.Common, this);
+        GetImage((int)Images.DefaultButtonImage).BindState(_defaultButton, Define.Atlas.Common, this);
     }
 
     private void BindButtonActions()
@@ -268,9 +271,9 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
     private void InitGraphicPanel()
     {
         InitResolution();
-        GetImage((int)Images.ResolutionArrowImage).BindStateAsArrow(_resolutionArrowButton, Define.Atlas.UI_Common, this);
-        GetImage((int)Images.FullscreenArrowImage).BindStateAsArrow(_fullscreenArrowButton, Define.Atlas.UI_Common, this);
-        GetImage((int)Images.QualityArrowImage).BindStateAsArrow(_qualityArrowButton, Define.Atlas.UI_Common, this);
+        GetImage((int)Images.ResolutionArrowImage).BindStateAsArrow(_resolutionArrowButton, Define.Atlas.Common, this);
+        GetImage((int)Images.FullscreenArrowImage).BindStateAsArrow(_fullscreenArrowButton, Define.Atlas.Common, this);
+        GetImage((int)Images.QualityArrowImage).BindStateAsArrow(_qualityArrowButton, Define.Atlas.Common, this);
         BindArrowDropdownButton(Buttons.ResolutionButton, _resolutionArrowButton);
         BindArrowDropdownButton(Buttons.FullscreenButton, _fullscreenArrowButton);
         BindArrowDropdownButton(Buttons.QualityButton, _qualityArrowButton);
@@ -322,6 +325,8 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
 
     private void InitAccessPanel()
     {
+        GetImage((int)Images.LanguageArrowImage).BindStateAsArrow(_languageArrowButton, Define.Atlas.Common, this);
+        BindArrowDropdownButton(Buttons.LanguageButton, _languageArrowButton);
         var languageDropdown = GetDropdown((int)Dropdowns.LanguageDropdown);
 
         if (languageDropdown != null)
@@ -425,7 +430,7 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
             return;
 
         string sprite = isOn ? Define.Sprite.Checkmark_Yes : Define.Sprite.Checkmark_No;
-        image.sprite = Managers.Resource.GetSprite(Define.Atlas.UI_Common, sprite);
+        image.sprite = Managers.Resource.GetSprite(Define.Atlas.Common, sprite);
     }
 
     private void BindVolumeControl(Scrollbars scrollbarEnum, InputFields inputFieldEnum)
@@ -635,14 +640,27 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
         Managers.Config.Option.Access.keybind = Managers.Control.Save();
     }
 
+    private void CancelAllRebinds()
+    {
+        foreach (var slot in _keybinds)
+        {
+            if (slot != null)
+                slot.CancelRebind();
+        }
+
+        _isRebinding = false;
+    }
+
     private async UniTask OnClickApply(PointerEventData data)
     {
+        CancelAllRebinds();
         Sync();
         await Managers.Config.SaveAsync().Lock();
     }
 
     private async UniTask OnClickComplete(PointerEventData data)
     {
+        CancelAllRebinds();
         Sync();
         await Managers.Config.SaveAsync().Lock();
         Release();
@@ -650,6 +668,8 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
 
     private void OnClickCancel(PointerEventData data)
     {
+        CancelAllRebinds();
+
         if (!string.IsNullOrEmpty(_initialKeybindJson))
             Managers.Control.LoadBindingFromJson(_initialKeybindJson);
 
@@ -663,6 +683,8 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
 
     private async UniTask OnClickDefault(PointerEventData data)
     {
+        CancelAllRebinds();
+
         await Managers.Config.ResetAsync().Lock();
         Managers.Control.Reset();
         Managers.Config.Option.Access.modifierDash = AccessOption.Default.modifierDash;

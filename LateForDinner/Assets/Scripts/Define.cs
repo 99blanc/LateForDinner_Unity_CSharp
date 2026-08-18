@@ -51,6 +51,6 @@ public class Define
 
     public class Atlas
     {
-        public const string UI_Common = "UI_Common";
+        public const string Common = "common_atlas";
     }
 }

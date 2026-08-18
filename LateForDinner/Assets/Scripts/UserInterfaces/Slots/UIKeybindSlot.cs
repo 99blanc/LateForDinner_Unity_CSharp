@@ -48,7 +48,7 @@ public class UIKeybindSlot : UISlot
         BindImage(typeof(Images));
         BindText(typeof(Texts));
         BindButton(typeof(Buttons));
-        GetImage((int)Images.ResetButtonImage).BindState(_resetButtonState, Define.Atlas.UI_Common, this);
+        GetImage((int)Images.ResetButtonImage).BindState(_resetButtonState, Define.Atlas.Common, this);
         GetButton((int)Buttons.KeybindButton).BindView(OnClickKeybind, ViewEvent.LeftClick, this, _resetButtonState);
         GetButton((int)Buttons.ResetButton).BindViewAsButton(OnClickReset, ViewEvent.LeftClick, this, _resetButtonState);
     }
@@ -157,6 +157,13 @@ public class UIKeybindSlot : UISlot
         BeginOperation(index);
     }
 
+    public void CancelRebind()
+    {
+        _currentOperation?.Cancel();
+        CleanUp(_currentOperation);
+        Refresh();
+    }
+
     private int GetIndex()
         => _targetAction.GetBindingIndex(InputBinding.MaskByGroup(Literal.Schemes.KeyboardAndMouse));
 
@@ -223,8 +230,10 @@ public class UIKeybindSlot : UISlot
         if (_currentOperation == op)
             _currentOperation = null;
 
+        if (_targetAction != null)
+            _targetAction.Enable();
+
         op?.Dispose();
-        _targetAction.Enable();
         _setLock?.Invoke(false);
     }
 

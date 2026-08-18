@@ -38,9 +38,9 @@ public class UISaveSlot : UISlot
         BindImage(typeof(Images));
         BindText(typeof(Texts));
         BindButton(typeof(Buttons));
-        GetImage((int)Images.SlotImage).BindState(_button, Define.Atlas.UI_Common, this);
-        GetImage((int)Images.UpButtonImage).BindStateAsArrow(_upButton, Define.Atlas.UI_Common, this);
-        GetImage((int)Images.DownButtonImage).BindStateAsArrow(_downButton, Define.Atlas.UI_Common, this);
+        GetImage((int)Images.SlotImage).BindState(_button, Define.Atlas.Common, this);
+        GetImage((int)Images.UpButtonImage).BindStateAsArrow(_upButton, Define.Atlas.Common, this);
+        GetImage((int)Images.DownButtonImage).BindStateAsArrow(_downButton, Define.Atlas.Common, this);
         GetButton((int)Buttons.SlotButton).BindViewAsButton(async data => await OnClickSlot(data), ViewEvent.LeftClick, this, _button);
         GetButton((int)Buttons.UpButton).BindViewAsButton(data => OnClickUp(data).Forget(), ViewEvent.LeftClick, this, _upButton);
         GetButton((int)Buttons.DownButton).BindViewAsButton(data => OnClickDown(data).Forget(), ViewEvent.LeftClick, this, _downButton);
@@ -151,6 +151,6 @@ public class UISaveSlot : UISlot
         var image = GetImage((int)Images.MealTimeImage);
 
         if (image != null)
-            image.sprite = Managers.Resource.GetSprite(Define.Atlas.UI_Common, spriteName);
+            image.sprite = Managers.Resource.GetSprite(Define.Atlas.Common, spriteName);
     }
 }

@@ -14,8 +14,8 @@ public class ControlManager
 
     public void GetCursor()
     {
-        var normal = Managers.Resource.GetSprite(Define.Atlas.UI_Common, Define.Sprite.Cursor_Normal);
-        var press = Managers.Resource.GetSprite(Define.Atlas.UI_Common, Define.Sprite.Cursor_Press);
+        var normal = Managers.Resource.GetSprite(Define.Atlas.Common, Define.Sprite.Cursor_Normal);
+        var press = Managers.Resource.GetSprite(Define.Atlas.Common, Define.Sprite.Cursor_Press);
 
         if (normal == null || press == null)
             return;
@@ -41,7 +41,8 @@ public class ControlManager
             _action.LoadBindingOverridesFromJson(Managers.Config.Option.Access.keybind);
 
         CacheActions();
-        _action.Enable();
+        EnableMap(Literal.Maps.User);
+        EnableMap(Literal.Maps.UI);
     }
 
     private void CacheActions()
@@ -86,6 +87,18 @@ public class ControlManager
             Cursor.SetCursor(pressCursor, _hotspot, CursorMode.ForceSoftware);
         else
             Cursor.SetCursor(normalCursor, _hotspot, CursorMode.ForceSoftware);
+    }
+
+    public void EnableMap(string mapName)
+    {
+        var map = _action?.FindActionMap(mapName);
+        map?.Enable();
+    }
+
+    public void DisableMap(string mapName)
+    {
+        var map = _action?.FindActionMap(mapName);
+        map?.Disable();
     }
 
     public bool IsPressed(string actionName) 
