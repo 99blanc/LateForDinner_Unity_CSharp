@@ -1,6 +1,7 @@
 using Cysharp.Text;
 using Cysharp.Threading.Tasks;
 using MemoryPack;
+using System;
 using System.IO;
 using UnityEngine;
 
@@ -21,19 +22,24 @@ public class ConfigManager
         {
             Option = new Option();
             await SaveAsync();
-            return;
+            Log.System(Localization.Log_Config_CreatedNew);
+        }
+        else
+        {
+            try
+            {
+                byte[] bytes = await File.ReadAllBytesAsync(SavePath);
+                Option = MemoryPackSerializer.Deserialize<Option>(bytes) ?? new Option();
+                Log.Info(Localization.Log_Config_LoadedSuccessfully);
+            }
+            catch
+            {
+                Log.Warning(Localization.Log_Config_LoadFailed);
+                Option = new Option();
+            }
         }
 
-        try
-        {
-            byte[] bytes = await File.ReadAllBytesAsync(SavePath);
-            Option = MemoryPackSerializer.Deserialize<Option>(bytes) ?? new Option();
-        }
-        catch
-        {
-            Option = new Option();
-        }
-
+        CheckCommandLineArguments();
         ApplyToEngine();
     }
 
@@ -51,7 +57,7 @@ public class ConfigManager
         }
         catch
         {
-            // DESC ::: 예외 발생 시 무시
+            Log.Error(Localization.Log_Config_SaveFailed);
         }
 
         ApplyToEngine();
@@ -62,12 +68,38 @@ public class ConfigManager
         Option = new Option();
         Managers.Control?.Reset();
         await SaveAsync();
+        Log.System(Localization.Log_Config_Reset);
     }
 
     public async UniTask SaveKeybindAsync()
     {
         Option.Access.keybind = Managers.Control?.Save() ?? string.Empty;
         await SaveAsync();
+    }
+
+    private void CheckCommandLineArguments()
+    {
+        string[] args = Environment.GetCommandLineArgs();
+
+        if (args == null)
+            return;
+
+        Option.Debug.enableConsole = false;
+        Option.Debug.isDebugMode = false;
+
+        foreach (string arg in args)
+        {
+            if (arg.Equals(Define.Execute.Console, StringComparison.OrdinalIgnoreCase))
+            {
+                Option.Debug.enableConsole = true;
+                Log.System(Localization.Log_Config_ConsoleEnabled);
+            }
+            if (arg.Equals(Define.Execute.Debug, StringComparison.OrdinalIgnoreCase))
+            {
+                Option.Debug.isDebugMode = true;
+                Log.System(Localization.Log_Config_DebugEnabled);
+            }
+        }
     }
 
     public void ApplyToEngine()

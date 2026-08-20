@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using R3;
+using System;
 using UnityEngine;
 
 public class UISplashDisplay : UIDisplay, IAnimatable
@@ -17,7 +18,7 @@ public class UISplashDisplay : UIDisplay, IAnimatable
         base.Init();
         BindImage(typeof(Images));
         Revert();
-        Managers.Control.Subscribe(Literal.Hotkeys.Submit, () => CancelToken("SplashTask")).AddTo(this);
+        Managers.Control.Subscribe(Literal.Hotkeys.Any, () => CancelToken("SplashTask")).AddTo(this);
     }
 
     public override void Get()
@@ -61,9 +62,9 @@ public class UISplashDisplay : UIDisplay, IAnimatable
             await titleImage.FadeAsync(0f, 1f, 0.2f, 2.0f, token: token);
             await UniTask.Delay(2000, cancellationToken: token);
         }
-        catch (System.OperationCanceledException)
+        catch (OperationCanceledException)
         {
-            Log.System(Localization.UI_Splash_Screen_Skip);
+            Log.System(Localization.UI_Splash_Display_Skip);
         }
     }
 }

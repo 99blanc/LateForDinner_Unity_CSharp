@@ -4,8 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.InputSystem.UI;
 using UnityEngine.UI;
 
 public class UIManager
@@ -37,23 +35,11 @@ public class UIManager
     {
         _root = new GameObject { name = Literal.Roots.UserInterfaces };
         _root.transform.SetParent(Managers.Instance.transform, false);
-        SetupEventSystem();
         CreateLayer(Layer.Display);
         CreateLayer(Layer.Popup);
         CreateLayer(Layer.System);
         CreateLayer(Layer.Lock);
-    }
-
-    private void SetupEventSystem()
-    {
-        var system = new GameObject { name = Literal.Roots.Events };
-        system.transform.SetParent(Managers.Instance.transform, false);
-        system.AddComponent<EventSystem>();
-#if ENABLE_INPUT_SYSTEM
-        system.AddComponent<InputSystemUIInputModule>();
-#else
-        system.AddComponent<StandaloneInputModule>();
-#endif
+        Log.System(Localization.Log_UI_RootInitialized);
     }
 
     private GameObject CreateCanvas(string name, Transform parent, int sortingOrder, out Canvas canvasOut)
@@ -84,6 +70,12 @@ public class UIManager
         _layer[layer] = gameObject.transform;
     }
 
+    public void Setup()
+    {
+        var system = Managers.Resource.Instantiate(Literal.Assets.EventSystem, Managers.Instance.transform, false);
+        system.name = Literal.Roots.Events;
+    }
+
     public async UniTask<T> OpenDisplayAsync<T>() where T : UIDisplay
     {
         if (_display is T existingDisplay)
@@ -96,7 +88,10 @@ public class UIManager
         var (instance, rentHandle) = await Managers.Pool.PopAsync<T>(_layer[Layer.Display]);
 
         if (instance == null)
+        {
+            Log.Error(Localization.Log_UI_OpenDisplayFailed, typeof(T).Name);
             return null;
+        }
 
         _display = instance;
         _handles[instance] = rentHandle;
@@ -115,7 +110,10 @@ public class UIManager
         var (instance, rentHandle) = Managers.Pool.Pop<T>(_layer[Layer.Display]);
 
         if (instance == null)
+        {
+            Log.Error(Localization.Log_UI_OpenDisplayFailed, typeof(T).Name);
             return null;
+        }
 
         _display = instance;
         _handles[instance] = rentHandle;
@@ -134,7 +132,10 @@ public class UIManager
         var (instance, rentHandle) = await Managers.Pool.PopAsync<T>(_layer[Layer.Popup]);
 
         if (instance == null)
+        {
+            Log.Error(Localization.Log_UI_OpenPopupFailed, typeof(T).Name);
             return null;
+        }
 
         _popups.Add(instance);
         _handles[instance] = rentHandle;
@@ -154,7 +155,10 @@ public class UIManager
         var (instance, rentHandle) = Managers.Pool.Pop<T>(_layer[Layer.Popup]);
 
         if (instance == null)
+        {
+            Log.Error(Localization.Log_UI_OpenPopupFailed, typeof(T).Name);
             return null;
+        }
 
         _popups.Add(instance);
         _handles[instance] = rentHandle;
@@ -168,7 +172,10 @@ public class UIManager
         var (instance, rentHandle) = await Managers.Pool.PopAsync<T>(_layer[Layer.System]);
 
         if (instance == null)
+        {
+            Log.Error(Localization.Log_UI_OpenSystemFailed, typeof(T).Name);
             return null;
+        }
 
         _handles[instance] = rentHandle;
         return instance;
@@ -180,7 +187,10 @@ public class UIManager
         var (instance, rentHandle) = Managers.Pool.Pop<T>(_layer[Layer.System]);
 
         if (instance == null)
+        {
+            Log.Error(Localization.Log_UI_OpenSystemFailed, typeof(T).Name);
             return null;
+        }
 
         _handles[instance] = rentHandle;
         return instance;
@@ -284,4 +294,15 @@ public class UIManager
 
     public T GetScreen<T>() where T : UIDisplay 
         => _display as T;
+
+    public T GetSystem<T>() where T : UISystem
+    {
+        foreach (var pair in _handles)
+        {
+            if (pair.Key is T targetSystem)
+                return targetSystem;
+        }
+
+        return null;
+    }
 }

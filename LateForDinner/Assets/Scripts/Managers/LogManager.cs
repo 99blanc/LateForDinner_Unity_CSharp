@@ -1,13 +1,40 @@
 using Cysharp.Text;
 using R3;
 using System;
+using System.Collections.Generic;
+using UnityEditor.U2D.Aseprite;
 using UnityEngine;
 
 public class LogManager
 {
-    private readonly Subject<string> _logSubject = new Subject<string>();
-    public Observable<string> OnLogAdded 
+    private readonly Subject<LogData> _logSubject = new Subject<LogData>();
+    private readonly ReactiveProperty<bool> _isReady = new ReactiveProperty<bool>(false);
+    private readonly Queue<Action> _pendingLogs = new Queue<Action>();
+    private readonly List<LogData> _logs = new List<LogData>();
+    public IReadOnlyList<LogData> Logs => _logs;
+    public Observable<LogData> OnLogAdded 
         => _logSubject;
+
+    public void Setup()
+    {
+        _isReady.Value = true;
+
+        while (_pendingLogs.Count > 0)
+            _pendingLogs.Dequeue()?.Invoke();
+
+        Write(Localization.Log_Log_SetupCompleted, LogType.System);
+    }
+
+    private void ProcessLog(Action logAction)
+    {
+        if (!_isReady.Value)
+        {
+            _pendingLogs.Enqueue(logAction);
+            return;
+        }
+
+        logAction();
+    }
 
     private void Publish(string log, LogType type)
     {
@@ -22,10 +49,19 @@ public class LogManager
 
     public void Write(string message, LogType type)
     {
-        string prefix = GetLogPrefix(type);
-        string log = ZString.Format(Literal.Messages.Format, DateTime.Now, prefix, message);
-        _logSubject.OnNext(log);
-        Publish(log, type);
+        ProcessLog(() =>
+        {
+            string prefix = GetLogPrefix(type);
+            string log = ZString.Format(Literal.Messages.Format, DateTime.Now, prefix, message);
+            var logData = new LogData { Message = log, Type = type };
+            _logs.Add(logData);
+
+            if (_logs.Count > Define.Log.Storage)
+                _logs.RemoveAt(0);
+
+            _logSubject.OnNext(logData);
+            Publish(log, type);
+        });
     }
 
     public void Write(Localization key, LogType type) 
@@ -42,16 +78,22 @@ public class LogManager
 
     public void Write(Localization key, LogType type, params object[] args)
     {
-        string message = GetMessage(key);
-        string formatted = (args != null && args.Length > 0) ? ZString.Format(message, args) : message;
-        Write(formatted, type);
+        ProcessLog(() =>
+        {
+            string message = GetMessage(key);
+            string formatted = (args != null && args.Length > 0) ? ZString.Format(message, args) : message;
+            Write(formatted, type);
+        });
     }
 
     private void WriteFormatted(Localization key, LogType type, Func<string, string> formatAction)
     {
-        string message = GetMessage(key);
-        string formatted = formatAction(message);
-        Write(formatted, type);
+        ProcessLog(() =>
+        {
+            string message = GetMessage(key);
+            string formatted = formatAction(message);
+            Write(formatted, type);
+        });
     }
 
     private string GetLogPrefix(LogType type)

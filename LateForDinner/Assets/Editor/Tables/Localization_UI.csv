@@ -1,7 +1,11 @@
 # Table Type: Localization,
-# Description: 게임 내 UI 메시지 현지화 데이터 관리 테이블,
+# Description: 게임 내 UI 컴포넌트 및 메시지 현지화 데이터 관리 테이블,
 # Rule: 콤마 사용 불가. KEY는 고유 값이어야 하며 중복 불가. 언어별 텍스트에 포맷팅 파라미터({0} or {1} 등) 사용 가능,
 Key,Text
+# Index: UIConsoleSystem,
+UI_Console_System_AutoComplete_Candidates,자동 완성 후보: {0}
+# Index: UIFPSSystem,
+UI_FPS_System_Indicator,FPS: {0}
 # Index: UITitleDisplay,
 UI_Title_Display_Text_Press_Any_Key,Press any key to start.
 # Index: UISaveSlot,

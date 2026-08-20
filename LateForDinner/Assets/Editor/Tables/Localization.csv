@@ -11,6 +11,12 @@ Default,기본값
 Language,언어
 Reset,초기화
 Switch,전환
+# Index: Console,
+Console_Input,> {0}
+Console_Help_Header,--- 사용 가능한 명령어 목록 ---
+Console_Help_Format,- {0}: {1}
+Console_Help_Detail,[{0}] {1}
+# Index: Action,
 Action_Right,이동(우)
 Action_Left,이동(좌)
 Action_DownUtility,하강/앉기/드랍

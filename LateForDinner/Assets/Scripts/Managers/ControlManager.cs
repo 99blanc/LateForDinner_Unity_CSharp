@@ -12,7 +12,13 @@ public class ControlManager
     private readonly Vector2 _hotspot = Define.Cursor.Hotspot;
     private IDisposable _handle;
 
-    public void GetCursor()
+    public void Setup()
+    {
+        SetupCursor();
+        SetupConsoleToggle();
+    }
+
+    private void SetupCursor()
     {
         var normal = Managers.Resource.GetSprite(Define.Atlas.Common, Define.Sprite.Cursor_Normal);
         var press = Managers.Resource.GetSprite(Define.Atlas.Common, Define.Sprite.Cursor_Press);
@@ -28,12 +34,28 @@ public class ControlManager
         .Subscribe(_ => UpdateCursorState(first, last));
     }
 
+    public IDisposable SetupConsoleToggle()
+    {
+        return AsObservable(Literal.Hotkeys.Console).Subscribe(_ =>
+        {
+            var console = Managers.UI.GetSystem<UIConsoleSystem>();
+
+            if (console != null)
+                Managers.UI.Close(console);
+            else
+                Managers.UI.OpenSystem<UIConsoleSystem>();
+        });
+    }
+
     public async UniTask LoadAsync()
     {
         var original = await Managers.Resource.LoadAssetAsync<InputActionAsset>(Literal.Assets.InputActionAsset);
         
         if (original == null)
+        {
+            Log.Error(Localization.Log_Control_AssetLoadFailed, Literal.Assets.InputActionAsset);
             return;
+        }
 
         _action = UnityEngine.Object.Instantiate(original);
 
@@ -43,6 +65,7 @@ public class ControlManager
         CacheActions();
         EnableMap(Literal.Maps.User);
         EnableMap(Literal.Maps.UI);
+        Log.Info(Localization.Log_Control_LoadedSuccessfully);
     }
 
     private void CacheActions()
@@ -92,7 +115,14 @@ public class ControlManager
     public void EnableMap(string mapName)
     {
         var map = _action?.FindActionMap(mapName);
-        map?.Enable();
+
+        if (map == null)
+        {
+            Log.Warning(Localization.Log_Control_MapNotFound, mapName);
+            return;
+        }
+
+        map.Enable();
     }
 
     public void DisableMap(string mapName)

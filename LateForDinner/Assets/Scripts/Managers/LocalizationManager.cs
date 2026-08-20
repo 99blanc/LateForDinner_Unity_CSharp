@@ -14,6 +14,7 @@ public class LocalizationManager
     {
         await SyncAsync();
         RefreshAsync();
+        Log.Info(Localization.Log_Localization_LoadedSuccessfully);
     }
 
     private async UniTask SyncAsync()
@@ -40,7 +41,7 @@ public class LocalizationManager
             }
             catch
             {
-                // DESC ::: 예외 발생 시 무시
+                Log.Warning(Localization.Log_Localization_FileReadFailed, Path.GetFileName(file));
             }
         }
 
@@ -68,7 +69,7 @@ public class LocalizationManager
             {
                 _overrides = file.Translations;
                 var defaultData = GetLocalizations();
-                int addedCount = 0;
+                int changeCount = 0;
 
                 foreach (var pair in defaultData)
                 {
@@ -76,14 +77,29 @@ public class LocalizationManager
                         continue;
 
                     _overrides[pair.Key] = pair.Value;
-                    addedCount++;
+                    changeCount++;
                 }
 
-                if (addedCount > 0)
+                var keysToRemove = new List<string>();
+
+                foreach (var key in _overrides.Keys)
+                {
+                    if (!defaultData.ContainsKey(key))
+                        keysToRemove.Add(key);
+                }
+
+                foreach (var key in keysToRemove)
+                {
+                    _overrides.Remove(key);
+                    changeCount++;
+                }
+
+                if (changeCount > 0)
                 {
                     file.Locate = language;
                     file.Translations = _overrides;
                     await SaveAsync(path, file);
+                    Log.System(Localization.Log_Localization_Synced, changeCount);
                 }
             }
 
@@ -91,7 +107,7 @@ public class LocalizationManager
         }
         catch
         {
-            // DESC ::: 예외 발생 시 무시
+            Log.Error(Localization.Log_Localization_SyncFailed);
         }
     }
 
@@ -104,7 +120,7 @@ public class LocalizationManager
         }
         catch
         {
-            // DESC ::: 예외 발생 시 무시
+            Log.Error(Localization.Log_Localization_SaveFailed, Path.GetFileName(path));
         }
     }
 
@@ -150,7 +166,7 @@ public class LocalizationManager
             }
             catch
             {
-                // DESC ::: 예외 발생 시 무시
+                Log.Warning(Localization.Log_Localization_LanguageFileParseFailed, Path.GetFileName(file));
             }
         }
 

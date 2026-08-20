@@ -381,6 +381,12 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
         Refresh();
     }
 
+    public override void Release()
+    {
+        base.Release();
+        CloseAllDropdowns();
+    }
+
     private void OnClickSound(PointerEventData data) 
         => SwitchState(UI_OptionState.Sound);
 
@@ -400,6 +406,7 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
 
     private void Switch(UI_OptionState state)
     {
+        CloseAllDropdowns();
         _state = state;
         GetPanel((int)Panels.SoundPanel).SetActivePanel(_state == UI_OptionState.Sound);
         GetPanel((int)Panels.GraphicPanel).SetActivePanel(_state == UI_OptionState.Graphic);
@@ -420,7 +427,16 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
             return;
 
         _isUpdatingVolume = true;
-        inputField.text = Mathf.RoundToInt(value * 100f).ToString();
+        string newText = Mathf.RoundToInt(value * 100f).ToString();
+
+        if (inputField.text != newText)
+        {
+            inputField.text = newText;
+
+            if (!inputField.isFocused)
+                inputField.MoveTextEnd(false);
+        }
+
         _isUpdatingVolume = false;
     }
 
@@ -446,6 +462,9 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
             if (_isUpdatingVolume)
                 return;
 
+            if (inputField.isFocused)
+                inputField.DeactivateInputField();
+
             _isUpdatingVolume = true;
             inputField.text = Mathf.RoundToInt(val * 100f).ToString();
             _isUpdatingVolume = false;
@@ -463,9 +482,11 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
                 percent = 100;
                 _isUpdatingVolume = true;
                 inputField.text = "100";
+                inputField.MoveTextEnd(false);
                 _isUpdatingVolume = false;
             }
-            else if (percent < 0)
+
+            if (percent < 0)
                 percent = 0;
 
             _isUpdatingVolume = true;
@@ -477,9 +498,7 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
             if (_isUpdatingVolume)
                 return;
 
-            if (string.IsNullOrEmpty(text) || !int.TryParse(text, out int percent))
-                percent = 0;
-
+            int percent = string.IsNullOrEmpty(text) || !int.TryParse(text, out int parsedValue) ? 0 : parsedValue;
             percent = Mathf.Clamp(percent, 0, 100);
             _isUpdatingVolume = true;
             inputField.text = percent.ToString();
@@ -501,7 +520,6 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
     private void RefreshSoundPanel()
     {
         var sound = Managers.Config.Option.Sound;
-
         GetScrollbar((int)Scrollbars.MasterScrollbar).value = sound.vMaster;
         GetScrollbar((int)Scrollbars.BGMScrollbar).value = sound.vBGM;
         GetScrollbar((int)Scrollbars.AmbientScrollbar).value = sound.vAmbient;
@@ -535,12 +553,12 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
         for (int index = 0; index < _resolutions.Length; index++)
         {
             int hz = Mathf.RoundToInt((float)_resolutions[index].refreshRateRatio.numerator / _resolutions[index].refreshRateRatio.denominator);
-            
-            if (_resolutions[index].width == graphic.rWidth && _resolutions[index].height == graphic.rHeight && hz == graphic.rRefreshRate)
-            {
-                GetDropdown((int)Dropdowns.ResolutionDropdown).value = index;
-                break;
-            }
+
+            if (_resolutions[index].width != graphic.rWidth || _resolutions[index].height != graphic.rHeight || hz != graphic.rRefreshRate)
+                continue;
+
+            GetDropdown((int)Dropdowns.ResolutionDropdown).value = index;
+            break;
         }
 
         GetDropdown((int)Dropdowns.FullscreenDropdown).value = graphic.screenMode switch
@@ -554,7 +572,7 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
         SetGraphicToggleAndVisual(Toggles.VsyncToggle, Images.VsyncToggleImage, Images.VsyncCheckmarkImage, graphic.vSync);
         SetGraphicToggleAndVisual(Toggles.AntialiasingToggle, Images.AntialiasingToggleImage, Images.AntialiasingCheckmarkImage, graphic.antiAliasing);
         SetGraphicToggleAndVisual(Toggles.BloomToggle, Images.BloomToggleImage, Images.BloomCheckmarkImage, graphic.bloom);
-        SetGraphicToggleAndVisual(Toggles.AOToggle, Images.AOToggleImage, Images.AOCheckmarkImage, graphic.ambientOccusion);
+        SetGraphicToggleAndVisual(Toggles.AOToggle, Images.AOCheckmarkImage, Images.AOCheckmarkImage, graphic.ambientOccusion);
     }
 
     private void SetGraphicToggleAndVisual(Toggles toggle, Images toggleImage, Images checkmark, bool isOn)
@@ -571,11 +589,11 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
 
         for (int index = 0; index < languageLocales.Count; index++)
         {
-            if (languageLocales[index].Equals(currentLocale, StringComparison.OrdinalIgnoreCase))
-            {
-                GetDropdown((int)Dropdowns.LanguageDropdown).value = index;
-                break;
-            }
+            if (!languageLocales[index].Equals(currentLocale, StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            GetDropdown((int)Dropdowns.LanguageDropdown).value = index;
+            break;
         }
     }
 
@@ -651,19 +669,41 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
         _isRebinding = false;
     }
 
+    private void CloseAllDropdowns()
+    {
+        GetDropdown((int)Dropdowns.ResolutionDropdown)?.Close();
+        GetDropdown((int)Dropdowns.FullscreenDropdown)?.Close();
+        GetDropdown((int)Dropdowns.QualityDropdown)?.Close();
+        GetDropdown((int)Dropdowns.LanguageDropdown)?.Close();
+    }
+
     private async UniTask OnClickApply(PointerEventData data)
     {
-        CancelAllRebinds();
-        Sync();
-        await Managers.Config.SaveAsync().Lock();
+        try
+        {
+            CancelAllRebinds();
+            Sync();
+            await Managers.Config.SaveAsync().Lock();
+        }
+        catch
+        {
+            Log.Error(Localization.UI_Option_Popup_ApplyFailed);
+        }
     }
 
     private async UniTask OnClickComplete(PointerEventData data)
     {
-        CancelAllRebinds();
-        Sync();
-        await Managers.Config.SaveAsync().Lock();
-        Release();
+        try
+        {
+            CancelAllRebinds();
+            Sync();
+            await Managers.Config.SaveAsync().Lock();
+            Release();
+        }
+        catch
+        {
+            Log.Error(Localization.UI_Option_Popup_CompleteFailed);
+        }
     }
 
     private void OnClickCancel(PointerEventData data)
@@ -683,12 +723,18 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
 
     private async UniTask OnClickDefault(PointerEventData data)
     {
-        CancelAllRebinds();
-
-        await Managers.Config.ResetAsync().Lock();
-        Managers.Control.Reset();
-        Managers.Config.Option.Access.modifierDash = AccessOption.Default.modifierDash;
-        Refresh();
+        try
+        {
+            CancelAllRebinds();
+            await Managers.Config.ResetAsync().Lock();
+            Managers.Control.Reset();
+            Managers.Config.Option.Access.modifierDash = AccessOption.Default.modifierDash;
+            Refresh();
+        }
+        catch
+        {
+            Log.Error(Localization.UI_Option_Popup_DefaultFailed);
+        }
     }
 
     private void SetText(Texts textEnum, Localization key) 

@@ -143,7 +143,10 @@ public class PoolManager
         var newInstance = await Managers.Resource.InstantiateAsync(key, newParent, false);
 
         if (newInstance == null)
+        {
+            Log.Error(Localization.Log_Pool_InstantiateFailed, key);
             return (null, false);
+        }
 
         newInstance.name = key;
         _parents[newInstance] = newParent;
@@ -163,7 +166,10 @@ public class PoolManager
         var newInstance = Managers.Resource.Instantiate(key, newParent, false);
 
         if (newInstance == null)
+        {
+            Log.Error(Localization.Log_Pool_InstantiateFailed, key);
             return (null, false);
+        }
 
         newInstance.name = key;
         _parents[newInstance] = newParent;
@@ -207,6 +213,8 @@ public class PoolManager
 
     public void Clear()
     {
+        int totalDestroyed = 0;
+
         foreach (var queue in _registries.Values)
         {
             while (queue.Count > 0)
@@ -214,11 +222,15 @@ public class PoolManager
                 GameObject instance = queue.Dequeue();
 
                 if (instance != null)
+                {
                     UnityEngine.Object.Destroy(instance);
+                    totalDestroyed++;
+                }
             }
         }
 
         _registries.Clear();
         _parents.Clear();
+        Log.System(Localization.Log_Pool_Cleared, totalDestroyed);
     }
 }

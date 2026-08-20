@@ -19,7 +19,10 @@ public class SaveManager
         string backupPath = GetBackupPath(index);
 
         if (!File.Exists(path) && File.Exists(backupPath))
+        {
             File.Copy(backupPath, path, true);
+            Log.Warning(Localization.Log_Save_RestoredFromBackup, index);
+        }
 
         try
         {
@@ -32,9 +35,11 @@ public class SaveManager
             byte[] bytes = await File.ReadAllBytesAsync(path);
             CurrentData = MemoryPackSerializer.Deserialize<Save>(bytes) ?? new Save();
             _currentSlot = index;
+            Log.System(Localization.Log_Save_LoadSuccess, index);
         }
         catch
         {
+            Log.Error(Localization.Log_Save_LoadFailed, index);
             NewGame(index);
         }
     }
@@ -61,10 +66,11 @@ public class SaveManager
 
             await File.WriteAllBytesAsync(path, bytes);
             await SaveMetaAsync();
+            Log.System(Localization.Log_Save_SaveSuccess, _currentSlot);
         }
         catch
         {
-            // DESC ::: 슬롯 저장에 실패한 경우
+            Log.Error(Localization.Log_Save_SaveFailed, _currentSlot);
         }
     }
 
@@ -90,6 +96,7 @@ public class SaveManager
         }
         catch
         {
+            Log.Error(Localization.Log_Save_MetaLoadFailed);
             MetaData = new SaveMeta();
         }
 
@@ -179,7 +186,7 @@ public class SaveManager
         }
         catch
         {
-            // DESC ::: 예외 발생 시 무시
+            Log.Error(Localization.Log_Save_MetaSaveFailed);
         }
     }
 
@@ -200,6 +207,7 @@ public class SaveManager
         _currentSlot = slotIndex;
         CurrentData = new Save();
         SyncMeta();
+        Log.System(Localization.Log_Save_NewGameStarted, slotIndex);
     }
 
     private string GetPath(int slot)

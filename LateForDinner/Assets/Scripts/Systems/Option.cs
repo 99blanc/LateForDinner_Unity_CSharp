@@ -7,6 +7,7 @@ public partial class Option
     public SoundOption Sound { get; set; } = SoundOption.Default;
     public GraphicOption Graphic { get; set; } = GraphicOption.Default;
     public AccessOption Access { get; set; } = AccessOption.Default;
+    public DebugOption Debug { get; set; } = DebugOption.Default;
 }
 
 [MemoryPackable]
@@ -156,5 +157,19 @@ public partial class AccessOption
         keybind = string.Empty,
         modifierDash = false,
         highContrast = false
+    };
+}
+
+[MemoryPackable]
+public partial class DebugOption
+{
+    public bool isDebugMode;
+    public bool enableConsole;
+
+    [MemoryPackIgnore]
+    public static DebugOption Default => new DebugOption()
+    {
+        isDebugMode = false,
+        enableConsole = false
     };
 }

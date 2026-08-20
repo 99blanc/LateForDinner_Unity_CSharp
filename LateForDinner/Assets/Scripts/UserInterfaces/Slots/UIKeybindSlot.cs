@@ -169,12 +169,20 @@ public class UIKeybindSlot : UISlot
 
     private void BeginOperation(int index)
     {
-        _currentOperation?.Dispose();
-        _currentOperation = _targetAction.PerformInteractiveRebinding(index)
-        .WithControlsExcluding(Literal.Schemes.Mouse)
-        .OnComplete(op => OnComplete(op, index))
-        .OnCancel(op => OnCancel(op));
-        _currentOperation.Start();
+        try
+        {
+            _currentOperation?.Dispose();
+            _currentOperation = _targetAction.PerformInteractiveRebinding(index)
+            .WithControlsExcluding(Literal.Schemes.Mouse)
+            .OnComplete(op => OnComplete(op, index))
+            .OnCancel(op => OnCancel(op));
+            _currentOperation.Start();
+        }
+        catch
+        {
+            Log.Error(Localization.UI_Keybind_Slot_RebindFailed, _actionName);
+            CleanUp(_currentOperation);
+        }
     }
 
     private void OnComplete(InputActionRebindingExtensions.RebindingOperation op, int index)

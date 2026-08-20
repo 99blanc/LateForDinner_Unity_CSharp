@@ -8,7 +8,7 @@ using UnityEngine;
 
 public class Converter
 {
-    [MenuItem("Tools/Tables/Convert All Tables")]
+    [MenuItem("Tools/Table/Convert All Tables")]
     public static void ConvertAll()
     {
         string path = Path.Combine(Application.dataPath, Literal.Paths.Tables);
@@ -115,7 +115,7 @@ public class Converter
         return null;
     }
 
-    [MenuItem("Tools/Tables/Open Table Folder")]
+    [MenuItem("Tools/Table/Open Table Folder")]
     public static void OpenTableFolder()
     {
         string path = Path.Combine(Application.dataPath, Literal.Paths.Tables);

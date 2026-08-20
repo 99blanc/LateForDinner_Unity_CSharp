@@ -2,10 +2,26 @@ using UnityEngine;
 
 public class Define
 {
+    public class Alert
+    {
+        public const int Count = 5;
+    }
+
+    public class Log
+    {
+        public const int Storage = 1000;
+    }
+
+    public class Command
+    {
+        public const int History = 50;
+    }
+
     public class Framerate
     {
         public const int Start = 60;
         public const int Step = 20;
+        public const float PollingTime = 0.5f;
     }
 
     public class Save
@@ -47,6 +63,12 @@ public class Define
         public const string MealTime_Dinner = "ui_common_image_mealtime_dinner";
         public const string Checkmark_Yes = "ui_common_image_yes";
         public const string Checkmark_No = "ui_common_image_no";
+    }
+
+    public class Execute
+    {
+        public const string Console = "-console";
+        public const string Debug = "-debug";
     }
 
     public class Atlas

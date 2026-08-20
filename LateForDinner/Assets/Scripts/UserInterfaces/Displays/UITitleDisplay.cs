@@ -93,13 +93,13 @@ public class UITitleDisplay : UIDisplay
 
         var slotOrder = Managers.Save.MetaData.SlotOrder;
 
-        for (int i = 0; i < _slots.Length; i++)
+        for (int index = 0; index < _slots.Length; index++)
         {
-            if (i >= slotOrder.Count)
+            if (index >= slotOrder.Count)
                 continue;
 
-            int saveSlotIndex = slotOrder[i];
-            _slots[i].SetIndex(saveSlotIndex);
+            int saveSlotIndex = slotOrder[index];
+            _slots[index].SetIndex(saveSlotIndex);
         }
     }
 

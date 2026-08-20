@@ -85,42 +85,63 @@ public class UISaveSlot : UISlot
 
     private async UniTask OnClickSlot(PointerEventData data)
     {
-        SlotMeta meta = Managers.Save.MetaData.Slots[_index];
-
-        if (meta.IsActive)
+        try
         {
-            await Managers.Save.LoadAsync(_index).Lock();
-            return;
-        }
+            SlotMeta meta = Managers.Save.MetaData.Slots[_index];
 
-        Managers.Save.NewGame(_index);
-        Refresh();
+            if (meta.IsActive)
+            {
+                await Managers.Save.LoadAsync(_index).Lock();
+                return;
+            }
+
+            Managers.Save.NewGame(_index);
+            Refresh();
+        }
+        catch
+        {
+            Log.Error(Localization.UI_Save_Slot_SlotClickFailed, _index);
+        }
     }
 
     private async UniTask OnClickUp(PointerEventData data)
     {
-        var slotOrder = Managers.Save.MetaData.SlotOrder;
-        int currentPos = slotOrder.IndexOf(_index);
+        try
+        {
+            var slotOrder = Managers.Save.MetaData.SlotOrder;
+            int currentPos = slotOrder.IndexOf(_index);
 
-        if (currentPos <= 0)
-            return;
+            if (currentPos <= 0)
+                return;
 
-        int targetIndex = slotOrder[currentPos - 1];
-        await Managers.Save.SwapSlotOrderAsync(_index, targetIndex);
-        _display.Refresh();
+            int targetIndex = slotOrder[currentPos - 1];
+            await Managers.Save.SwapSlotOrderAsync(_index, targetIndex);
+            _display?.Refresh();
+        }
+        catch
+        {
+            Log.Error(Localization.UI_Save_Slot_MoveUpFailed, _index);
+        }
     }
 
     private async UniTask OnClickDown(PointerEventData data)
     {
-        var slotOrder = Managers.Save.MetaData.SlotOrder;
-        int currentPos = slotOrder.IndexOf(_index);
+        try
+        {
+            var slotOrder = Managers.Save.MetaData.SlotOrder;
+            int currentPos = slotOrder.IndexOf(_index);
 
-        if (currentPos < 0 || currentPos >= slotOrder.Count - 1)
-            return;
+            if (currentPos < 0 || currentPos >= slotOrder.Count - 1)
+                return;
 
-        int targetIndex = slotOrder[currentPos + 1];
-        await Managers.Save.SwapSlotOrderAsync(_index, targetIndex);
-        _display.Refresh();
+            int targetIndex = slotOrder[currentPos + 1];
+            await Managers.Save.SwapSlotOrderAsync(_index, targetIndex);
+            _display?.Refresh();
+        }
+        catch
+        {
+            Log.Error(Localization.UI_Save_Slot_MoveDownFailed, _index);
+        }
     }
 
     public void SetDisplay(UITitleDisplay display) 

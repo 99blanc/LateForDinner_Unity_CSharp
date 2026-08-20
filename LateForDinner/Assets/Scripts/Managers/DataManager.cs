@@ -12,6 +12,7 @@ public class DataManager
     {
         // TODO ::: 데이터 테이블 추가 입력
         Localization = await LoadDictionaryAsync<string, LocalizationData>(Literal.Tables.Localization, data => data.Key);
+        Log.Info(global::Localization.Log_Data_LoadedSuccessfully, Literal.Tables.Localization);
     }
 
     private async UniTask<List<T>> LoadListAsync<T>(string name)
@@ -21,13 +22,17 @@ public class DataManager
             TextAsset asset = await Managers.Resource.LoadTextAssetAsync(name);
 
             if (asset == null)
+            {
+                Log.Error(global::Localization.Log_Data_AssetNotFound, name);
                 return new List<T>();
+            }
 
             byte[] decryptedBytes = DecryptAssetBytes(asset.bytes);
             return MemoryPackSerializer.Deserialize<List<T>>(decryptedBytes) ?? new List<T>();
         }
         catch
         {
+            Log.Warning(global::Localization.Log_Data_DeserializeFailed, name);
             return new List<T>();
         }
     }
@@ -50,8 +55,14 @@ public class DataManager
 
             TKey key = keySelector(item);
 
-            if (key == null || dictionary.ContainsKey(key))
+            if (key == null)
                 continue;
+
+            if (dictionary.ContainsKey(key))
+            {
+                Log.Warning(global::Localization.Log_Data_DuplicateKey, name, key.ToString());
+                continue;
+            }
 
             dictionary.Add(key, item);
         }

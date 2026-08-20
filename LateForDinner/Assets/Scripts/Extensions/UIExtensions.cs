@@ -119,6 +119,15 @@ public static class UIExtensions
         inputField.OnEndEditAsObservable().Subscribe(action).AddTo(component);
     }
 
+    public static void BindInputSubmit(this TMP_InputField inputField, Action<string> action, Component component)
+    {
+        if (inputField is InputField customInput)
+        {
+            customInput.OnSubmitAction = action;
+            Disposable.Create(() => customInput.OnSubmitAction = null).AddTo(component);
+        }
+    }
+
     public static async UniTask Lock(this UniTask task)
         => await Managers.UI.LockAsync(task);
 

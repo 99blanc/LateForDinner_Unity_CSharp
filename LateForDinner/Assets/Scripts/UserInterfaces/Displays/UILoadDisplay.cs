@@ -59,6 +59,10 @@ public class UILoadDisplay : UIDisplay, IAnimatable
         {
             // DESC ::: 새로운 값이 들어와 기존 애니메이션 중단하는 경우
         }
+        catch (Exception)
+        {
+            Log.Error(Localization.UI_Load_Display_AnimationFailed);
+        }
     }
 
     public async UniTask PlayAsync()
@@ -77,6 +81,10 @@ public class UILoadDisplay : UIDisplay, IAnimatable
         catch (OperationCanceledException)
         {
             // DESC ::: 비동기 실행 후 탈출
+        }
+        catch (Exception)
+        {
+            Log.Error(Localization.UI_Load_Display_RotateFailed);
         }
     }
 

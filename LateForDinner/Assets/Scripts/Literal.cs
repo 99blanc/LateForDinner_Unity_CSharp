@@ -22,6 +22,12 @@ public class Literal
         public const string Cancel = "Cancel";
         public const string Submit = "Submit";
         public const string Back = "Back";
+        public const string Console = "Console";
+        public const string Tab = "Tab";
+        public const string RightClick = "RightClick";
+        public const string LeftClick = "LeftClick";
+        public const string Up = "Up";
+        public const string Down = "Down";
     }
 
     public class Schemes
@@ -54,7 +60,8 @@ public class Literal
         public const string Tables = "Editor/Tables/";
         public const string Binaries = "Binaries/";
         public const string Systems = "Systems/";
-        public const string UserInterfaces = "Prefabs/UserInterfaces/";
+        public const string SystemPrefabs = "Prefabs/Systems/";
+        public const string UIPrefabs = "Prefabs/UserInterfaces/";
         public const string Atlases = "Atlases/";
     }
 
@@ -94,6 +101,7 @@ public class Literal
     public class Assets
     {
         public const string InputActionAsset = "InputSystem_Actions";
+        public const string EventSystem = "EventSystem";
     }
 
     public class Files 
