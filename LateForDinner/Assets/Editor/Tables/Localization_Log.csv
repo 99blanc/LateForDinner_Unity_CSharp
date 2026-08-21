@@ -23,6 +23,9 @@ Log_Data_LoadedSuccessfully,[DataManager] 데이터 테이블 '{0}'을(를) 성�
 Log_Data_AssetNotFound,[DataManager] 데이터 에셋을 찾을 수 없습니다: '{0}'
 Log_Data_DeserializeFailed,[DataManager] 테이블 '{0}'의 역직렬화 중 오류가 발생했습니다.
 Log_Data_DuplicateKey,[DataManager] 테이블 '{0}'에서 중복된 키가 발견되어 무시됩니다: '{1}'
+# Index: FeedbackManager,
+Log_Feedback_AlertPopup_Cancelled,[FeedbackManager] 알림 팝업 대기가 취소되었습니다.
+Log_Feedback_ConfirmPopup_Cancelled,[FeedbackManager] 확인 팝업 대기가 취소되었습니다.
 # Index: LocalizationManager,
 Log_Localization_LoadedSuccessfully,[LocalizationManager] 현지화 시스템을 성공적으로 불러왔습니다.
 Log_Localization_FileReadFailed,[LocalizationManager] 현지화 파일('{0}')을 읽는 중 오류가 발생했습니다.

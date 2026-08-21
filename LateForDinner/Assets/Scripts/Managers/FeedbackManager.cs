@@ -44,5 +44,47 @@ public class FeedbackManager
 
         await toastSystem.PushToastAsync(message);
     }
-}
 
+    public async UniTask AlertAsync(string title, string message)
+    {
+        var popup = await Managers.UI.OpenPopupAsync<UIAlertPopup>();
+
+        if (popup == null) 
+            return;
+
+        bool isClosed = false;
+        popup.Setup(title, message, () => { isClosed = true; });
+
+        try
+        {
+            await UniTask.WaitUntil(() => isClosed || popup == null || !popup.gameObject.activeSelf);
+        }
+        catch (OperationCanceledException) 
+        {
+            Log.System(Localization.Log_Feedback_AlertPopup_Cancelled);
+        }
+    }
+
+    public async UniTask<bool> ConfirmAsync(string title, string message)
+    {
+        var popup = await Managers.UI.OpenPopupAsync<UIConfirmPopup>();
+
+        if (popup == null) 
+            return false;
+
+        bool result = false;
+        bool isClosed = false;
+        popup.Setup(title, message, onConfirm: () => { result = true; isClosed = true; }, onCancel: () => { result = false; isClosed = true; });
+
+        try
+        {
+            await UniTask.WaitUntil(() => isClosed || popup == null || !popup.gameObject.activeSelf);
+        }
+        catch (OperationCanceledException) 
+        {
+            Log.System(Localization.Log_Feedback_ConfirmPopup_Cancelled);
+        }
+
+        return result;
+    }
+}

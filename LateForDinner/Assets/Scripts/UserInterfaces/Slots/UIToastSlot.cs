@@ -39,12 +39,7 @@ public class UIToastSlot : UISlot
     }
 
     private void SetMessageText(string message)
-    {
-        var textComponent = GetText((int)Texts.MessageText);
-
-        if (textComponent != null)
-            textComponent.text = message;
-    }
+        => GetText((int)Texts.MessageText).text = message;
 
     private async UniTaskVoid FadeAndExpireAsync(float duration, Action onExpire, CancellationToken token)
     {

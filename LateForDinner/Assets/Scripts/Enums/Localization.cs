@@ -72,6 +72,8 @@ public enum Localization
     Log_Data_AssetNotFound,
     Log_Data_DeserializeFailed,
     Log_Data_DuplicateKey,
+    Log_Feedback_AlertPopup_Cancelled,
+    Log_Feedback_ConfirmPopup_Cancelled,
     Log_Localization_LoadedSuccessfully,
     Log_Localization_FileReadFailed,
     Log_Localization_Synced,
