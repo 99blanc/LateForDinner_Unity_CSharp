@@ -2,7 +2,6 @@ using Cysharp.Text;
 using Cysharp.Threading.Tasks;
 using System;
 using System.Collections.Generic;
-using System.Threading;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -22,13 +21,12 @@ public class UIManager
         }
     }
 
-    public float ScaleFactor 
+    public float ScaleFactor
         => _canvas != null ? _canvas.scaleFactor : 1f;
 
     private readonly Dictionary<Layer, Transform> _layer = new Dictionary<Layer, Transform>();
     private readonly List<UIPopup> _popups = new List<UIPopup>();
     private readonly Dictionary<UserInterface, IDisposable> _handles = new Dictionary<UserInterface, IDisposable>();
-    private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
     private UIDisplay _display;
 
     private void InitRoot()
@@ -166,10 +164,15 @@ public class UIManager
         return instance;
     }
 
-    public async UniTask<T> OpenSystemAsync<T>() where T : UISystem
+    public async UniTask<T> OpenSystemAsync<T>(Layer layer = Layer.System) where T : UISystem
     {
+        var existingSystem = GetSystem<T>();
+
+        if (existingSystem != null)
+            return existingSystem;
+
         var _ = Root;
-        var (instance, rentHandle) = await Managers.Pool.PopAsync<T>(_layer[Layer.System]);
+        var (instance, rentHandle) = await Managers.Pool.PopAsync<T>(_layer[layer]);
 
         if (instance == null)
         {
@@ -181,10 +184,15 @@ public class UIManager
         return instance;
     }
 
-    public T OpenSystem<T>() where T : UISystem
+    public T OpenSystem<T>(Layer layer = Layer.System) where T : UISystem
     {
+        var existingSystem = GetSystem<T>();
+
+        if (existingSystem != null)
+            return existingSystem;
+
         var _ = Root;
-        var (instance, rentHandle) = Managers.Pool.Pop<T>(_layer[Layer.System]);
+        var (instance, rentHandle) = Managers.Pool.Pop<T>(_layer[layer]);
 
         if (instance == null)
         {
@@ -194,6 +202,20 @@ public class UIManager
 
         _handles[instance] = rentHandle;
         return instance;
+    }
+
+    public T GetScreen<T>() where T : UIDisplay
+    => _display as T;
+
+    public T GetSystem<T>() where T : UISystem
+    {
+        foreach (var pair in _handles)
+        {
+            if (pair.Key is T targetSystem)
+                return targetSystem;
+        }
+
+        return null;
     }
 
     public void Close(UserInterface ui)
@@ -266,43 +288,5 @@ public class UIManager
 
         for (int index = 0; index < _popups.Count; index++)
             _popups[index].transform.SetSiblingIndex(siblingIndex++);
-    }
-
-    public async UniTask LockAsync(Func<UniTask> task)
-    {
-        var timer = UniTask.Delay(TimeSpan.FromSeconds(0.2f), ignoreTimeScale: true);
-        var (locker, rentHandle) = await Managers.Pool.PopAsync<UILock>(_layer[Layer.System]);
-        _handles[locker] = rentHandle;
-        locker.PlayAsync().Forget();
-        await _semaphore.WaitAsync();
-
-        try
-        {
-            await task();
-        }
-        finally
-        {
-            await timer;
-            locker.Release();
-            _handles[locker].Dispose();
-            _semaphore.Release();
-        }
-    }
-
-    public async UniTask LockAsync(UniTask task) 
-        => await LockAsync(async () => await task);
-
-    public T GetScreen<T>() where T : UIDisplay 
-        => _display as T;
-
-    public T GetSystem<T>() where T : UISystem
-    {
-        foreach (var pair in _handles)
-        {
-            if (pair.Key is T targetSystem)
-                return targetSystem;
-        }
-
-        return null;
     }
 }

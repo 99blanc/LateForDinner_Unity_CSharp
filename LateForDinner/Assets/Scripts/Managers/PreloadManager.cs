@@ -20,10 +20,10 @@ public class PreloadManager
             await load.LoadAsync(0.6f, Managers.Localization.Get(Localization.Log_Preload_Boot_Object));
             await Managers.Resource.LoadPrefabAsync(Literal.Assets.EventSystem);
             await load.LoadAsync(0.8f, Managers.Localization.Get(Localization.Log_Preload_Boot_UI));
-            await Managers.Pool.PrewarmAsync<UIAlertSlot>(Define.Alert.Count);
+            await Managers.Pool.PrewarmAsync<UIToastSlot>(Define.Toast.Count);
             await Managers.Pool.PrewarmAsync<UIKeybindSlot>(Managers.Control.GetBindableActions().Count + 1);
             await Managers.Pool.PrewarmAsync<UISaveSlot>(Define.Save.Amount);
-            await Managers.Pool.PrewarmAsync<UIAlertSystem>(1);
+            await Managers.Pool.PrewarmAsync<UIToastSystem>(1);
             await Managers.Pool.PrewarmAsync<UIOptionPopup>(1);
             await Managers.Pool.PrewarmAsync<UITitleDisplay>(1);
             await Managers.Pool.PrewarmAsync<UIConsoleSystem>(1);

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 3621280805396051996}
   - component: {fileID: 1239861037807616040}
   m_Layer: 5
-  m_Name: UIAlertSlot
+  m_Name: UIToastSlot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -59,7 +59,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 2411035836482792933}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 39cb1594af4eb8a4691d1f901c25eb2f, type: 3}
+  m_Script: {fileID: 11500000, guid: 9a268b855eae2fa478fade46b0e9a1a5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIAlertSlot
 --- !u!1 &4745259398654217975
@@ -170,13 +170,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: New Text
+  m_text: 'TOAST '
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: a32d8ada4a5e71445a6d2a938dd1faa3, type: 2}
   m_sharedMaterial: {fileID: 8539109268822746669, guid: a32d8ada4a5e71445a6d2a938dd1faa3, type: 2}
@@ -220,7 +220,7 @@ MonoBehaviour:
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
-  m_TextWrappingMode: 1
+  m_TextWrappingMode: 0
   m_wordWrappingRatios: 0.4
   m_overflowMode: 0
   m_linkedTextComponent: {fileID: 0}

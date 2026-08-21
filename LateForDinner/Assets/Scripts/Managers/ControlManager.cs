@@ -193,6 +193,12 @@ public class ControlManager
         return list;
     }
 
+    public string CreateBindingSnapshot() 
+        => Save();
+
+    public void RestoreBindingSnapshot(string snapshotJson)
+        => LoadBindingFromJson(snapshotJson);
+
     public string Save() 
         => _action?.SaveBindingOverridesAsJson() ?? string.Empty;
 

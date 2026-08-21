@@ -9,7 +9,7 @@ public class ScriptExplorer : EditorWindow
     private Vector2 _scrollPosition;
     private List<string> _paths = new List<string>();
 
-    [MenuItem("Tools/Script/Open Script Explorer")]
+    [MenuItem("Tools/Scripts/Open Script Explorer")]
     public static void ShowWindow()
     {
         var window = GetWindow<ScriptExplorer>("Script Explorer");

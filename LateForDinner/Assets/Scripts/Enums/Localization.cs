@@ -110,6 +110,7 @@ public enum Localization
     UI_Option_Popup_ApplyFailed,
     UI_Option_Popup_CompleteFailed,
     UI_Option_Popup_DefaultFailed,
+    UI_Option_Popup_Keybind_Duplicate,
     UI_Load_Display_AnimationFailed,
     UI_Load_Display_RotateFailed,
     UI_Splash_Display_Skip,

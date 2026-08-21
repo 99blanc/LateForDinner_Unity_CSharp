@@ -10,24 +10,24 @@ using ZLinq;
 public class UIKeybindSlot : UISlot
 {
     private readonly ReactiveProperty<ButtonState> _resetButtonState = new ReactiveProperty<ButtonState>(ButtonState.Normal);
-    
-    private enum Images 
-    { 
-        KeybindButtonImage, 
-        ResetButtonImage 
+
+    private enum Images
+    {
+        KeybindButtonImage,
+        ResetButtonImage
     }
 
-    private enum Texts 
-    { 
-        ActionNameText, 
-        KeybindButtonText, 
-        ResetText 
+    private enum Texts
+    {
+        ActionNameText,
+        KeybindButtonText,
+        ResetText
     }
 
-    private enum Buttons 
-    { 
-        KeybindButton, 
-        ResetButton 
+    private enum Buttons
+    {
+        KeybindButton,
+        ResetButton
     }
 
     private enum SlotMode { ActionRebind, DashCommandToggle }
@@ -35,7 +35,8 @@ public class UIKeybindSlot : UISlot
     private SlotMode _slotMode;
     private InputAction _targetAction;
     private string _actionName;
-    private Action<string, string> _onRebindCompleted;
+    private string _previousPath;
+    private Action<string, string> _onDuplicated;
     private InputActionRebindingExtensions.RebindingOperation _currentOperation;
     private List<UIKeybindSlot> _keybinds;
     private Func<bool> _isLocked;
@@ -53,26 +54,25 @@ public class UIKeybindSlot : UISlot
         GetButton((int)Buttons.ResetButton).BindViewAsButton(OnClickReset, ViewEvent.LeftClick, this, _resetButtonState);
     }
 
-    public void Setup(string action, InputAction target, List<UIKeybindSlot> slots, Func<bool> locked, Action<bool> lockAction, Action<string, string> complete)
+    public void Setup(string action, InputAction target, List<UIKeybindSlot> slots, Func<bool> locked, Action<bool> lockAction, Action<string, string> onDuplicated)
     {
         _actionName = action;
         _targetAction = target;
         _keybinds = slots;
         _isLocked = locked;
         _setLock = lockAction;
-        _onRebindCompleted = complete;
+        _onDuplicated = onDuplicated;
         SetActionText(_actionName);
         SetResetText(Localization.Reset);
         Refresh();
     }
 
-    public void SetupDashCommand(Func<bool> locked, Action<bool> lockAction, Action<string, string> complete)
+    public void SetupDashCommand(Func<bool> locked, Action<bool> lockAction)
     {
         _slotMode = SlotMode.DashCommandToggle;
         _targetAction = null;
         _isLocked = locked;
         _setLock = lockAction;
-        _onRebindCompleted = complete;
         SetActionText(Localization.Action_DashCommand);
         SetResetText(Localization.Switch);
         Refresh();
@@ -88,16 +88,9 @@ public class UIKeybindSlot : UISlot
 
         return _keybinds.Any(slot => slot != null && slot._isWaitingForInput);
     }
+
     private bool IsPopupLocked()
-    {
-        if (IsAnySlotWaiting())
-            return true;
-
-        if (_isLocked != null && _isLocked())
-            return true;
-
-        return false;
-    }
+        => IsAnySlotWaiting() || (_isLocked?.Invoke() ?? false);
 
     private void OnClickKeybind(PointerEventData data)
     {
@@ -129,7 +122,7 @@ public class UIKeybindSlot : UISlot
 
     private bool HandleDash()
     {
-        if (_slotMode != SlotMode.DashCommandToggle) 
+        if (_slotMode != SlotMode.DashCommandToggle)
             return false;
 
         Managers.Config.Option.Access.modifierDash = !Managers.Config.Option.Access.modifierDash;
@@ -139,20 +132,18 @@ public class UIKeybindSlot : UISlot
 
     private void StartRebind()
     {
-        if (IsPopupLocked() || _targetAction == null) 
+        if (IsPopupLocked() || _targetAction == null)
             return;
 
-        _isWaitingForInput = true;
-        _setLock?.Invoke(true);
-        _targetAction.Disable();
         int index = GetIndex();
 
         if (index == -1)
-        {
-            CleanUp(null);
             return;
-        }
 
+        _previousPath = _targetAction.bindings[index].effectivePath;
+        _isWaitingForInput = true;
+        _setLock?.Invoke(true);
+        _targetAction.Disable();
         SetKeybindText(Localization.UI_Option_Popup_Text_Bind);
         BeginOperation(index);
     }
@@ -160,8 +151,7 @@ public class UIKeybindSlot : UISlot
     public void CancelRebind()
     {
         _currentOperation?.Cancel();
-        CleanUp(_currentOperation);
-        Refresh();
+        EndRebind(_currentOperation);
     }
 
     private int GetIndex()
@@ -175,63 +165,71 @@ public class UIKeybindSlot : UISlot
             _currentOperation = _targetAction.PerformInteractiveRebinding(index)
             .WithControlsExcluding(Literal.Schemes.Mouse)
             .OnComplete(op => OnComplete(op, index))
-            .OnCancel(op => OnCancel(op));
+            .OnCancel(op => EndRebind(op));
             _currentOperation.Start();
         }
         catch
         {
             Log.Error(Localization.UI_Keybind_Slot_RebindFailed, _actionName);
-            CleanUp(_currentOperation);
+            EndRebind(_currentOperation);
         }
     }
 
     private void OnComplete(InputActionRebindingExtensions.RebindingOperation op, int index)
     {
-        if (IsDuplicate(index))
+        if (IsDuplicate(index, out string duplicateActionName, out string duplicateKeyName))
         {
+            if (!string.IsNullOrEmpty(_previousPath))
+                _targetAction.ApplyBindingOverride(index, _previousPath);
+
+            _onDuplicated?.Invoke(duplicateActionName, duplicateKeyName);
             Retry(op, index);
             return;
         }
 
-        Success(op);
+        EndRebind(op);
     }
 
-    private bool IsDuplicate(int index)
+    private bool IsDuplicate(int index, out string duplicateActionName, out string duplicateKeyName)
     {
+        duplicateActionName = string.Empty;
+        duplicateKeyName = string.Empty;
+
         if (_keybinds == null)
             return false;
 
         string path = _targetAction.bindings[index].effectivePath;
-        return _keybinds
+        var duplicatedSlot = _keybinds
         .Where(s => s._targetAction != null)
-        .Any(s => s != this && s.MatchPath(path));
+        .FirstOrDefault(s => s != this && s.MatchPath(path));
+
+        if (duplicatedSlot != null)
+        {
+            int targetIndex = duplicatedSlot.GetIndex();
+
+            if (targetIndex != -1)
+            {
+                string locKey = ZString.Concat(Literal.Localizations.Action, duplicatedSlot._actionName);
+                duplicateActionName = Managers.Localization.Get(locKey);
+                duplicateKeyName = duplicatedSlot._targetAction.GetBindingDisplayString(targetIndex);
+            }
+
+            return true;
+        }
+
+        return false;
     }
 
     private bool MatchPath(string path)
         => GetIndex() != -1 && _targetAction.bindings[GetIndex()].effectivePath == path;
 
-
     private void Retry(InputActionRebindingExtensions.RebindingOperation op, int index)
     {
-        CleanUp(op);
-        Refresh();
+        EndRebind(op);
         StartRebind();
     }
 
-    private void Success(InputActionRebindingExtensions.RebindingOperation op)
-    {
-        CleanUp(op);
-        _onRebindCompleted?.Invoke(_actionName, _targetAction.SaveBindingOverridesAsJson());
-        Refresh();
-    }
-
-    private void OnCancel(InputActionRebindingExtensions.RebindingOperation op)
-    {
-        CleanUp(op);
-        Refresh();
-    }
-
-    private void CleanUp(InputActionRebindingExtensions.RebindingOperation op)
+    private void EndRebind(InputActionRebindingExtensions.RebindingOperation op)
     {
         _isWaitingForInput = false;
 
@@ -243,15 +241,15 @@ public class UIKeybindSlot : UISlot
 
         op?.Dispose();
         _setLock?.Invoke(false);
+        Refresh();
     }
 
     private void ResetBinding()
     {
-        if (_targetAction == null) 
+        if (_targetAction == null)
             return;
 
         _targetAction.RemoveAllBindingOverrides();
-        _onRebindCompleted?.Invoke(_actionName, _targetAction.SaveBindingOverridesAsJson());
         Refresh();
     }
 
@@ -272,7 +270,6 @@ public class UIKeybindSlot : UISlot
 
     private void SetActionText(string actionName)
         => GetText((int)Texts.ActionNameText).text = Managers.Localization.Get(ZString.Concat(Literal.Localizations.Action, actionName));
-
     private void SetActionText(Localization localizationKey)
         => GetText((int)Texts.ActionNameText).text = Managers.Localization.Get(localizationKey);
 

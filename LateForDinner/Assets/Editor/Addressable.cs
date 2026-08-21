@@ -6,7 +6,7 @@ using System.IO;
 
 public class Addressable
 {
-    [MenuItem("Tools/Addressable/Auto Setup All")]
+    [MenuItem("Tools/Addressables/Auto Setup All")]
     public static void SetupAll()
     {
         AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.Settings;
@@ -22,7 +22,7 @@ public class Addressable
         EditorUtility.DisplayDialog("Addressables Setup", $"Binaries: {binariesCount}\nSystems: {systemsCount + systemPrefabsCount}\nUserInterfaces: {uiCount}\nTotal processed", "OK");
     }
 
-    [MenuItem("Tools/Addressable/Auto Setup Binaries and Systems")]
+    [MenuItem("Tools/Addressables/Auto Setup Binaries and Systems")]
     public static void SetupSystems()
     {
         AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.Settings;
@@ -37,7 +37,7 @@ public class Addressable
         EditorUtility.DisplayDialog("Addressables Setup", $"Binaries: {binariesCount} registered\nSystems: {systemsCount + systemPrefabsCount} registered", "OK");
     }
 
-    [MenuItem("Tools/Addressable/Auto Setup UserInterfaces")]
+    [MenuItem("Tools/Addressables/Auto Setup UserInterfaces")]
     public static void SetupUserInterfaces()
     {
         AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.Settings;
@@ -50,7 +50,7 @@ public class Addressable
         EditorUtility.DisplayDialog("Addressables UI Setup", $"UserInterfaces: {uiCount} assets processed", "OK");
     }
 
-    [MenuItem("Tools/Addressable/Auto Setup Atlases")]
+    [MenuItem("Tools/Addressables/Auto Setup Atlases")]
     public static void SetupAtlases()
     {
         AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.Settings;
@@ -97,7 +97,7 @@ public class Addressable
         return count;
     }
 
-    [MenuItem("Tools/Addressable/Clean Addresses to File Names")]
+    [MenuItem("Tools/Addressables/Clean Addresses to File Names")]
     public static void CleanAddresses()
     {
         AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.Settings;

@@ -3,9 +3,9 @@ using System.IO;
 using UnityEditor;
 using UnityEngine;
 
-public class SaveDataCleaner
+public class FileCleaner
 {
-    [MenuItem("Tools/Data/Delete Config File")]
+    [MenuItem("Tools/Files/Delete Config File")]
     public static void DeleteConfig()
     {
         if (!EditorUtility.DisplayDialog("Warning", "Are you sure you want to delete the config file?", "Yes", "No"))
@@ -32,7 +32,7 @@ public class SaveDataCleaner
         EditorUtility.DisplayDialog("Config Cleaner", message, "OK");
     }
 
-    [MenuItem("Tools/Data/Delete All Save Files")]
+    [MenuItem("Tools/Files/Delete All Save Files")]
     public static void DeleteAllSaves()
     {
         if (!EditorUtility.DisplayDialog("Warning", "Are you sure you want to delete all save data and metadata?", "Yes", "No"))
@@ -50,7 +50,34 @@ public class SaveDataCleaner
             EditorUtility.DisplayDialog("Save Cleaner", "Save folder does not exist.", "OK");
     }
 
-    [MenuItem("Tools/Data/Open Persistent Data Path")]
+    [MenuItem("Tools/Files/Delete All Localization Files")]
+    public static void DeleteAllLocalizations()
+    {
+        if (!EditorUtility.DisplayDialog("Warning", "Are you sure you want to delete all localization files?", "Yes", "No"))
+            return;
+
+        string localizationDir = Literal.Folders.Localizations.GetDirectory();
+
+        if (Directory.Exists(localizationDir))
+        {
+            string[] files = Directory.GetFiles(localizationDir, "*.json");
+            bool deleted = false;
+
+            foreach (var file in files)
+            {
+                File.Delete(file);
+                deleted = true;
+            }
+
+            AssetDatabase.Refresh();
+            string message = deleted ? "All localization files have been deleted successfully." : "No localization files found.";
+            EditorUtility.DisplayDialog("Localization Cleaner", message, "OK");
+        }
+        else
+            EditorUtility.DisplayDialog("Localization Cleaner", "Localization folder does not exist.", "OK");
+    }
+
+    [MenuItem("Tools/Files/Open Persistent Data Path")]
     public static void OpenPersistentDataPath()
     {
         if (Directory.Exists(Application.persistentDataPath))

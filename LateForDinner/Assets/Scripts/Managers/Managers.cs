@@ -27,6 +27,7 @@ public class Managers : MonoBehaviour
     public static ConsoleManager Console { get; private set; }
     public static SaveManager Save { get; private set; }
     public static PreloadManager Preload { get; private set; }
+    public static FeedbackManager Feedback { get; private set; }
 
     public async UniTask LoadAsync()
     {
@@ -55,6 +56,7 @@ public class Managers : MonoBehaviour
         Console = new ConsoleManager();
         Save = new SaveManager();
         Preload = new PreloadManager();
+        Feedback = new FeedbackManager();
     }
 
     private async UniTask InitializeManagersAsync()

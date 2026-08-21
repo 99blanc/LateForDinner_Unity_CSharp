@@ -2,9 +2,10 @@ using UnityEngine;
 
 public class Define
 {
-    public class Alert
+    public class Toast
     {
         public const int Count = 5;
+        public const float Delay = 0.2f;
     }
 
     public class Log

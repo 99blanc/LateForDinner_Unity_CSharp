@@ -2,7 +2,7 @@ using Cysharp.Threading.Tasks;
 using System;
 using System.Threading;
 
-public class UIAlertSlot : UISlot
+public class UIToastSlot : UISlot
 {
     private enum Texts
     {
@@ -19,6 +19,16 @@ public class UIAlertSlot : UISlot
         base.Init();
         BindText(typeof(Texts));
         BindPanel(typeof(Panels));
+    }
+
+    public override void Get()
+    {
+        base.Get();
+
+        var canvasGroup = GetPanel((int)Panels.SlotPanel);
+
+        if (canvasGroup != null)
+            canvasGroup.alpha = 0f;
     }
 
     public void Setup(string message, Action onExpire)
@@ -42,14 +52,9 @@ public class UIAlertSlot : UISlot
 
         try
         {
-            if (canvasGroup != null)
-                await canvasGroup.FadeAsync(0f, 1f, 0.15f, 1f, token);
-
+            await canvasGroup.FadeAsync(0f, 1f, 0.15f, 1f, token);
             await UniTask.Delay(TimeSpan.FromSeconds(duration), ignoreTimeScale: true, cancellationToken: token);
-
-            if (canvasGroup != null)
-                await canvasGroup.FadeAsync(1f, 0f, 0.2f, 1f, token);
-
+            await canvasGroup.FadeAsync(1f, 0f, Define.Toast.Delay, 1f, token);
             onExpire?.Invoke();
         }
         catch (OperationCanceledException)

@@ -128,19 +128,6 @@ public static class UIExtensions
         }
     }
 
-    public static async UniTask Lock(this UniTask task)
-        => await Managers.UI.LockAsync(task);
-
-    public static string ToSpriteAsMealTime(this MealTime mealTime)
-    {
-        return mealTime switch
-        {
-            MealTime.Lunch => Define.Sprite.MealTime_Lunch,
-            MealTime.Dinner => Define.Sprite.MealTime_Dinner,
-            _ => Define.Sprite.MealTime_Breakfast
-        };
-    }
-
     public static void SetVisual(this Image boxImage, Image toggleImage = null, Scrollbar scrollbar = null, bool isEnabled = true)
     {
         Color targetColor = isEnabled ? Color.white : new Color(0.5f, 0.5f, 0.5f, 1f);
@@ -165,15 +152,4 @@ public static class UIExtensions
                 handleImage.color = targetColor;
         }
     }
-
-    public static async UniTask Release<T>(this UniTask<T> task) where T : UserInterface
-    {
-        var user = await task;
-
-        if (user != null)
-            user.Release();
-    }
-
-    public static async UniTask Release(this UniTask task)
-        => await task;
 }

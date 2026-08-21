@@ -72,6 +72,7 @@ UI_Save_Slot_MoveDownFailed,[UISaveSlot] 슬롯({0}) 아래로 이동 중 예외
 UI_Option_Popup_ApplyFailed,[UIOptionPopup] 옵션 적용 중 예외가 발생했습니다.
 UI_Option_Popup_CompleteFailed,[UIOptionPopup] 옵션 완료 저장 중 예외가 발생했습니다.
 UI_Option_Popup_DefaultFailed,[UIOptionPopup] 옵션 초기화 중 예외가 발생했습니다.
+UI_Option_Popup_Keybind_Duplicate,[UIOptionPopup] 이미 '{0}'에 '{1}'키가 지정되어 있습니다.
 # Index: UILoadDisplay,
 UI_Load_Display_AnimationFailed,[UILoadDisplay] 로딩 애니메이션 진행 중 예외가 발생했습니다.
 UI_Load_Display_RotateFailed,[UILoadDisplay] 로딩 회전 애니메이션 중 예외가 발생했습니다.

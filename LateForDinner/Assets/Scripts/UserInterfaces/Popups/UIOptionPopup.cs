@@ -177,6 +177,7 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
     private bool _isRebinding;
     private bool _initialModifierDash;
     private string _initialKeybindJson;
+    private string _initialBindingSnapshot;
 
     public override void Init()
     {
@@ -341,13 +342,18 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
         Action<bool> setRebindingLock = isBusy => _isRebinding = isBusy;
         var (dashSlot, _) = Managers.Pool.Pop<UIKeybindSlot>(content);
         _keybinds.Add(dashSlot);
-        dashSlot.SetupDashCommand(isRebindingCheck, setRebindingLock, (_, _) => { });
+        dashSlot.SetupDashCommand(isRebindingCheck, setRebindingLock);
 
         foreach (var action in Managers.Control.GetBindableActions())
         {
             var (slot, _) = Managers.Pool.Pop<UIKeybindSlot>(content);
             _keybinds.Add(slot);
-            slot.Setup(action.name, action, _keybinds, isRebindingCheck, setRebindingLock, (_, _) => { });
+            slot.Setup(action.name, action, _keybinds, isRebindingCheck, setRebindingLock,
+            (duplicateActionName, duplicateKeyName) =>
+            {
+                // DESC ::: 중복된 키 입력 시 토스트 출력
+                Managers.Feedback.ToastAsync(Managers.Localization.Get(Localization.UI_Option_Popup_Keybind_Duplicate, duplicateActionName, duplicateKeyName)).Forget();
+            });
         }
     }
 
@@ -357,7 +363,7 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
         resolutionDropdown.ClearOptions();
         _resolutions = Screen.resolutions
         .Select(r => new Resolution { width = r.width, height = r.height, refreshRateRatio = r.refreshRateRatio })
-        .GroupBy(r => new { r.width, r.height, hz = Mathf.RoundToInt((float)r.refreshRateRatio.numerator / r.refreshRateRatio.denominator) })
+        .GroupBy(r => new { r.width, r.height, hz = Math.Round((double)r.refreshRateRatio.numerator / r.refreshRateRatio.denominator, 1) })
         .Select(g => g.First())
         .OrderBy(r => r.width)
         .ThenBy(r => r.height)
@@ -377,6 +383,7 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
         if (!string.IsNullOrEmpty(_initialKeybindJson))
             Managers.Control.LoadBindingFromJson(_initialKeybindJson);
 
+        _initialBindingSnapshot = Managers.Control.CreateBindingSnapshot();
         Switch(_state);
         Refresh();
     }
@@ -477,20 +484,18 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
             if (!int.TryParse(text, out int percent))
                 return;
 
-            if (percent > 100)
+            int clampedPercent = Mathf.Clamp(percent, 0, 100);
+
+            if (percent != clampedPercent)
             {
-                percent = 100;
                 _isUpdatingVolume = true;
-                inputField.text = "100";
+                inputField.text = clampedPercent.ToString();
                 inputField.MoveTextEnd(false);
                 _isUpdatingVolume = false;
             }
 
-            if (percent < 0)
-                percent = 0;
-
             _isUpdatingVolume = true;
-            scrollbar.value = percent / 100f;
+            scrollbar.value = clampedPercent / 100f;
             _isUpdatingVolume = false;
         }, this);
         inputField.BindInputEndEdit(text =>
@@ -552,9 +557,9 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
 
         for (int index = 0; index < _resolutions.Length; index++)
         {
-            int hz = Mathf.RoundToInt((float)_resolutions[index].refreshRateRatio.numerator / _resolutions[index].refreshRateRatio.denominator);
+            float currentHz = (float)_resolutions[index].refreshRateRatio.numerator / _resolutions[index].refreshRateRatio.denominator;
 
-            if (_resolutions[index].width != graphic.rWidth || _resolutions[index].height != graphic.rHeight || hz != graphic.rRefreshRate)
+            if (_resolutions[index].width != graphic.rWidth || _resolutions[index].height != graphic.rHeight || Mathf.Abs(currentHz - graphic.rRefreshRate) > 1f)
                 continue;
 
             GetDropdown((int)Dropdowns.ResolutionDropdown).value = index;
@@ -684,6 +689,9 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
             CancelAllRebinds();
             Sync();
             await Managers.Config.SaveAsync().Lock();
+            _initialKeybindJson = Managers.Config.Option.Access.keybind;
+            _initialModifierDash = Managers.Config.Option.Access.modifierDash;
+            _initialBindingSnapshot = Managers.Control.CreateBindingSnapshot();
         }
         catch
         {
@@ -709,6 +717,9 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
     private void OnClickCancel(PointerEventData data)
     {
         CancelAllRebinds();
+
+        if (!string.IsNullOrEmpty(_initialBindingSnapshot))
+            Managers.Control.RestoreBindingSnapshot(_initialBindingSnapshot);
 
         if (!string.IsNullOrEmpty(_initialKeybindJson))
             Managers.Control.LoadBindingFromJson(_initialKeybindJson);
