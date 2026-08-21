@@ -48,7 +48,7 @@ public class CommandRegistry
         var debug = Managers.Config.Option.Debug;
         debug.isDebugMode = !debug.isDebugMode;
         Managers.Config.SaveAsync().Forget();
-        Log.Info(Localization.Command_Debug_Toggle, debug.isDebugMode);
+        Log.Info(Localization.Command_Debug_Toggle, debug.isDebugMode.ToString());
     }
 
     private void OnCommandClear(string[] args)

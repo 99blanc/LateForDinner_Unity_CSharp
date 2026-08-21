@@ -10,7 +10,7 @@ public class PreloadManager
         Log.System(Localization.Log_Preload_BootStarted);
         await _driver.RunAsync(async load =>
         {
-            // TODO ::: 부트 시 필요한 게임 내 리소스 생성
+            // DESC ::: 부트 시 필요한 게임 내 리소스 생성
             await load.LoadAsync(0.2f, Managers.Localization.Get(Localization.Log_Preload_Boot_Data));
             await Managers.Config.LoadAsync();
             await Managers.Control.LoadAsync();
