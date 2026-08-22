@@ -18,7 +18,7 @@ public class UILockSystem : UISystem, IAnimatable
 
     public async UniTask PlayAsync()
     {
-        var image = GetImage((int)Images.RotateImage);
+        var image = GetImage(Images.RotateImage);
         var token = GetToken("RotateTask");
 
         try

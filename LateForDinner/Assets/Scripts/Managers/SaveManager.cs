@@ -193,13 +193,19 @@ public class SaveManager
     public void Select(int index) =>
         _currentSlot = index;
 
-    public void Clear(int index)
+    public async UniTask ClearAsync(int index)
     {
         EnsureSlot(index + 1);
         MetaData.Slots[index] = new SlotMeta();
         CurrentData = new Save();
         _currentSlot = index;
-        SaveAsync().Forget();
+        await SaveMetaAsync();
+        string path = GetPath(index);
+
+        if (File.Exists(path))
+            File.Delete(path);
+
+        Log.System(Localization.Log_Save_ClearSuccess, index);
     }
 
     public void NewGame(int slotIndex)
@@ -213,14 +219,16 @@ public class SaveManager
     private string GetPath(int slot)
     {
         string dir = Literal.Folders.Saves.GetDirectory();
-        return Path.Combine(dir, $"{Literal.Files.Save}_{slot}{Literal.Extensions.Data}");
+        string fileName = (slot == 0) ? $"{Literal.Files.Save}_{Literal.Files.Auto}{Literal.Extensions.Data}" : $"{Literal.Files.Save}_{slot}{Literal.Extensions.Data}";
+        return Path.Combine(dir, fileName);
     }
 
     private string GetBackupPath(int slot)
     {
         string dir = Literal.Folders.Saves.GetDirectory();
         string backup = Path.Combine(dir, Literal.Folders.Backups).GetDirectory();
-        return Path.Combine(backup, $"{Literal.Files.Save}_{slot}{Literal.Extensions.Backup}");
+        string fileName = (slot == 0) ? $"{Literal.Files.Save}_{Literal.Files.Auto}{Literal.Extensions.Backup}" : $"{Literal.Files.Save}_{slot}{Literal.Extensions.Backup}";
+        return Path.Combine(backup, fileName);
     }
 
     private string GetMetaPath()

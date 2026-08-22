@@ -14,6 +14,8 @@ public class UIToastSlot : UISlot
         SlotPanel
     }
 
+    private Func<string> _messageProvider;
+
     public override void Init()
     {
         base.Init();
@@ -24,25 +26,60 @@ public class UIToastSlot : UISlot
     public override void Get()
     {
         base.Get();
-        var canvasGroup = GetPanel((int)Panels.SlotPanel);
-
-        if (canvasGroup != null)
-            canvasGroup.alpha = 0f;
+        GetPanel(Panels.SlotPanel).alpha = 0f;
     }
 
-    public void Setup(string message, Action onExpire)
+    public override void Refresh()
     {
-        SetMessageText(message);
+        base.Refresh();
+
+        if (_messageProvider != null)
+            GetText(Texts.MessageText).text = _messageProvider();
+    }
+
+    public void Setup(Localization messageKey, Action onExpire)
+    {
+        _messageProvider = () => Managers.Localization.Get(messageKey);
+        Refresh();
         var token = GetToken("AlertExpireTask");
         FadeAndExpireAsync(3f, onExpire, token).Forget();
     }
 
-    private void SetMessageText(string message)
-        => GetText((int)Texts.MessageText).text = message;
+    public void Setup<T1>(Localization messageKey, Action onExpire, T1 arg1)
+    {
+        _messageProvider = () => Managers.Localization.Get(messageKey, arg1);
+        Refresh();
+        var token = GetToken("AlertExpireTask");
+        FadeAndExpireAsync(3f, onExpire, token).Forget();
+    }
+
+    public void Setup<T1, T2>(Localization messageKey, Action onExpire, T1 arg1, T2 arg2)
+    {
+        _messageProvider = () => Managers.Localization.Get(messageKey, arg1, arg2);
+        Refresh();
+        var token = GetToken("AlertExpireTask");
+        FadeAndExpireAsync(3f, onExpire, token).Forget();
+    }
+
+    public void Setup<T1, T2, T3>(Localization messageKey, Action onExpire, T1 arg1, T2 arg2, T3 arg3)
+    {
+        _messageProvider = () => Managers.Localization.Get(messageKey, arg1, arg2, arg3);
+        Refresh();
+        var token = GetToken("AlertExpireTask");
+        FadeAndExpireAsync(3f, onExpire, token).Forget();
+    }
+
+    public void Setup(Localization messageKey, Action onExpire, params object[] args)
+    {
+        _messageProvider = () => (args != null && args.Length > 0) ? Managers.Localization.Get(messageKey, args) : Managers.Localization.Get(messageKey);
+        Refresh();
+        var token = GetToken("AlertExpireTask");
+        FadeAndExpireAsync(3f, onExpire, token).Forget();
+    }
 
     private async UniTaskVoid FadeAndExpireAsync(float duration, Action onExpire, CancellationToken token)
     {
-        var canvasGroup = GetPanel((int)Panels.SlotPanel);
+        var canvasGroup = GetPanel(Panels.SlotPanel);
 
         try
         {

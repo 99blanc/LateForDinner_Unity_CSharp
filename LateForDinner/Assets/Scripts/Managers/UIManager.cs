@@ -137,7 +137,7 @@ public class UIManager
 
         _popups.Add(instance);
         _handles[instance] = rentHandle;
-        Refresh();
+        RefreshPopup();
         return instance;
     }
 
@@ -160,7 +160,7 @@ public class UIManager
 
         _popups.Add(instance);
         _handles[instance] = rentHandle;
-        Refresh();
+        RefreshPopup();
         return instance;
     }
 
@@ -229,7 +229,7 @@ public class UIManager
         if (ui is UIPopup popup)
         {
             _popups.Remove(popup);
-            Refresh();
+            RefreshPopup();
         }
 
         if (_handles.TryGetValue(ui, out var handle))
@@ -259,10 +259,10 @@ public class UIManager
         _handles.Clear();
         _popups.Clear();
         _display = null;
-        Refresh();
+        RefreshPopup();
     }
 
-    public bool CloseFocus()
+    public bool CloseFocusPopup()
     {
         if (_popups.Count <= 0)
             return false;
@@ -272,21 +272,30 @@ public class UIManager
         return true;
     }
 
-    public void Focus(UIPopup popup)
+    public void FocusPopup(UIPopup popup)
     {
         if (popup == null || !_popups.Contains(popup))
             return;
 
         _popups.Remove(popup);
         _popups.Add(popup);
-        Refresh();
+        RefreshPopup();
     }
 
-    private void Refresh()
+    private void RefreshPopup()
     {
         int siblingIndex = 0;
 
         for (int index = 0; index < _popups.Count; index++)
             _popups[index].transform.SetSiblingIndex(siblingIndex++);
+    }
+
+    public void RefreshAll()
+    {
+        foreach (var ui in _handles.Keys)
+        {
+            if (ui != null)
+                ui.Refresh();
+        }
     }
 }

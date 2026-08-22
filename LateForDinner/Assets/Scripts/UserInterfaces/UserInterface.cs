@@ -31,13 +31,15 @@ public abstract class UserInterface : MonoBehaviour, IPoolable
         _initialAnchoredPosition = RectTransform.anchoredPosition;
     }
 
-    public virtual void Get() 
+    public virtual void Get()
         => RectTransform.anchoredPosition = _initialAnchoredPosition;
+
+    public virtual void Refresh() { }
 
     public virtual void Release()
         => CancelAll();
 
-    public virtual void Close() 
+    public virtual void Close()
         => Managers.UI.Close(this);
 
     protected void Bind<T>(Type type) where T : UnityEngine.Object
@@ -55,10 +57,12 @@ public abstract class UserInterface : MonoBehaviour, IPoolable
         }
     }
 
-    protected T Get<T>(int index) where T : UnityEngine.Object
+    protected T Get<T, TEnum>(TEnum element) where T : UnityEngine.Object where TEnum : Enum
     {
         if (!_views.TryGetValue(typeof(T), out var newView))
             return null;
+
+        int index = Convert.ToInt32(element);
 
         if (index < 0 || index >= newView.Length)
             return null;
@@ -66,47 +70,47 @@ public abstract class UserInterface : MonoBehaviour, IPoolable
         return newView[index] as T;
     }
 
-    protected void BindObject(Type type) 
+    protected void BindObject(Type type)
         => Bind<GameObject>(type);
-    protected void BindImage(Type type) 
+    protected void BindImage(Type type)
         => Bind<Image>(type);
-    protected void BindText(Type type) 
+    protected void BindText(Type type)
         => Bind<TMP_Text>(type);
-    protected void BindInputField(Type type) 
+    protected void BindInputField(Type type)
         => Bind<TMP_InputField>(type);
-    protected void BindButton(Type type) 
+    protected void BindButton(Type type)
         => Bind<Button>(type);
-    protected void BindToggle(Type type) 
+    protected void BindToggle(Type type)
         => Bind<Toggle>(type);
-    protected void BindScrollRect(Type type) 
+    protected void BindScrollRect(Type type)
         => Bind<ScrollRect>(type);
-    protected void BindScrollbar(Type type) 
+    protected void BindScrollbar(Type type)
         => Bind<Scrollbar>(type);
-    protected void BindDropdown(Type type) 
+    protected void BindDropdown(Type type)
         => Bind<Dropdown>(type);
-    protected void BindPanel(Type type) 
+    protected void BindPanel(Type type)
         => Bind<CanvasGroup>(type);
 
-    protected GameObject GetObject(int index) 
-        => Get<GameObject>(index);
-    protected Image GetImage(int index) 
-        => Get<Image>(index);
-    protected TMP_Text GetText(int index) 
-        => Get<TMP_Text>(index);
-    protected TMP_InputField GetInputField(int index) 
-        => Get<TMP_InputField>(index);
-    protected Button GetButton(int index) 
-        => Get<Button>(index);
-    protected Toggle GetToggle(int index) 
-        => Get<Toggle>(index);
-    protected ScrollRect GetScrollRect(int index) 
-        => Get<ScrollRect>(index);
-    protected Scrollbar GetScrollbar(int index) 
-        => Get<Scrollbar>(index);
-    protected Dropdown GetDropdown(int index) 
-        => Get<Dropdown>(index);
-    protected CanvasGroup GetPanel(int index) 
-        => Get<CanvasGroup>(index);
+    protected GameObject GetObject<TEnum>(TEnum element) where TEnum : Enum
+        => Get<GameObject, TEnum>(element);
+    protected Image GetImage<TEnum>(TEnum element) where TEnum : Enum
+        => Get<Image, TEnum>(element);
+    protected TMP_Text GetText<TEnum>(TEnum element) where TEnum : Enum
+        => Get<TMP_Text, TEnum>(element);
+    protected TMP_InputField GetInputField<TEnum>(TEnum element) where TEnum : Enum
+        => Get<TMP_InputField, TEnum>(element);
+    protected Button GetButton<TEnum>(TEnum element) where TEnum : Enum
+        => Get<Button, TEnum>(element);
+    protected Toggle GetToggle<TEnum>(TEnum element) where TEnum : Enum
+        => Get<Toggle, TEnum>(element);
+    protected ScrollRect GetScrollRect<TEnum>(TEnum element) where TEnum : Enum
+        => Get<ScrollRect, TEnum>(element);
+    protected Scrollbar GetScrollbar<TEnum>(TEnum element) where TEnum : Enum
+        => Get<Scrollbar, TEnum>(element);
+    protected Dropdown GetDropdown<TEnum>(TEnum element) where TEnum : Enum
+        => Get<Dropdown, TEnum>(element);
+    protected CanvasGroup GetPanel<TEnum>(TEnum element) where TEnum : Enum
+        => Get<CanvasGroup, TEnum>(element);
 
     protected CancellationToken GetToken(string key)
     {

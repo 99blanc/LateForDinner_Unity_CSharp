@@ -24,6 +24,8 @@ public class UIAlertPopup : UIPopup, IDraggable, IFocusable
     }
 
     private Action _onConfirm;
+    private Localization _cachedTitleKey;
+    private Func<string> _messageProvider;
 
     public override void Init()
     {
@@ -31,16 +33,56 @@ public class UIAlertPopup : UIPopup, IDraggable, IFocusable
         BindImage(typeof(Images));
         BindText(typeof(Texts));
         BindButton(typeof(Buttons));
-        GetImage((int)Images.ConfirmButtonImage).BindState(_confirmButtonState, Define.Atlas.Common, this);
-        GetButton((int)Buttons.ConfirmButton).BindViewAsButton(_ => OnClickConfirm(), ViewEvent.LeftClick, this, _confirmButtonState);
+        GetImage(Images.ConfirmButtonImage).BindState(_confirmButtonState, Define.Atlas.Common, this);
+        GetButton(Buttons.ConfirmButton).BindViewAsButton(_ => OnClickConfirm(), ViewEvent.LeftClick, this, _confirmButtonState);
         Managers.Control.Subscribe(Literal.Hotkeys.Submit, OnClickConfirm).AddTo(this);
     }
 
-    public void Setup(string title, string message, Action onConfirm = null)
+    public override void Refresh()
+    {
+        base.Refresh();
+        GetText(Texts.AlertText).text = Managers.Localization.Get(_cachedTitleKey);
+        GetText(Texts.MessageText).text = _messageProvider();
+    }
+
+    public void Setup(Localization titleKey, Localization messageKey, Action onConfirm = null)
     {
         _onConfirm = onConfirm;
-        GetText((int)Texts.AlertText).text = title;
-        GetText((int)Texts.MessageText).text = message;
+        _cachedTitleKey = titleKey;
+        _messageProvider = () => Managers.Localization.Get(messageKey);
+        Refresh();
+    }
+
+    public void Setup<T1>(Localization titleKey, Localization messageKey, Action onConfirm, T1 arg1)
+    {
+        _onConfirm = onConfirm;
+        _cachedTitleKey = titleKey;
+        _messageProvider = () => Managers.Localization.Get(messageKey, arg1);
+        Refresh();
+    }
+
+    public void Setup<T1, T2>(Localization titleKey, Localization messageKey, Action onConfirm, T1 arg1, T2 arg2)
+    {
+        _onConfirm = onConfirm;
+        _cachedTitleKey = titleKey;
+        _messageProvider = () => Managers.Localization.Get(messageKey, arg1, arg2);
+        Refresh();
+    }
+
+    public void Setup<T1, T2, T3>(Localization titleKey, Localization messageKey, Action onConfirm, T1 arg1, T2 arg2, T3 arg3)
+    {
+        _onConfirm = onConfirm;
+        _cachedTitleKey = titleKey;
+        _messageProvider = () => Managers.Localization.Get(messageKey, arg1, arg2, arg3);
+        Refresh();
+    }
+
+    public void Setup(Localization titleKey, Localization messageKey, Action onConfirm, params object[] args)
+    {
+        _onConfirm = onConfirm;
+        _cachedTitleKey = titleKey;
+        _messageProvider = () => (args != null && args.Length > 0) ? Managers.Localization.Get(messageKey, args) : Managers.Localization.Get(messageKey);
+        Refresh();
     }
 
     private void OnClickConfirm()

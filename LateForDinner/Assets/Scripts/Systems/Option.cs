@@ -38,7 +38,7 @@ public partial class SoundOption
         mAmbient = true,
         mSFX = true,
         mUI = true,
-        mute = true
+        mute = false,
     };
 }
 
@@ -148,15 +148,13 @@ public partial class AccessOption
     public string language;
     public string keybind;
     public bool modifierDash;
-    public bool highContrast;
 
     [MemoryPackIgnore]
     public static AccessOption Default => new AccessOption()
     {
         language = Literal.Languages.Korean,
         keybind = string.Empty,
-        modifierDash = false,
-        highContrast = false
+        modifierDash = false
     };
 }
 

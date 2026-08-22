@@ -33,7 +33,7 @@ public class UILoadDisplay : UIDisplay, IAnimatable
 
     public async UniTask LoadAsync(float targetProgress, string message)
     {
-        var messageText = GetText((int)Texts.MessageText);
+        var messageText = GetText(Texts.MessageText);
 
         if (messageText == null)
             return;
@@ -70,7 +70,7 @@ public class UILoadDisplay : UIDisplay, IAnimatable
 
     public async UniTask PlayAsync()
     {
-        var image = GetImage((int)Images.RotateImage);
+        var image = GetImage(Images.RotateImage);
         var token = GetToken("RotateTask");
 
         try

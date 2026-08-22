@@ -36,7 +36,7 @@ public class UIConsoleSystem : UISystem
         BindText(typeof(Texts));
         BindInputField(typeof(InputFields));
         BindScrollRect(typeof(ScrollRects));
-        _inputField = GetInputField((int)InputFields.CommandInputField);
+        _inputField = GetInputField(InputFields.CommandInputField);
         _inputField.BindInputSubmit(OnPressSubmit, this);
         Managers.Control.Subscribe(Literal.Hotkeys.Up, OnPressUp).AddTo(this);
         Managers.Control.Subscribe(Literal.Hotkeys.Down, OnPressDown).AddTo(this);
@@ -61,8 +61,8 @@ public class UIConsoleSystem : UISystem
 
     private void RefreshLogUI()
     {
-        var contentText = GetText((int)Texts.LogContentText);
-        var scrollRect = GetScrollRect((int)ScrollRects.LogScrollRect);
+        var contentText = GetText(Texts.LogContentText);
+        var scrollRect = GetScrollRect(ScrollRects.LogScrollRect);
 
         if (contentText == null || scrollRect == null)
             return;

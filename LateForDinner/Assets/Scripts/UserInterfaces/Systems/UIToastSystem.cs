@@ -9,7 +9,7 @@ public class UIToastSystem : UISystem
         ToastPanel
     }
 
-    private readonly Queue<string> _messageQueue = new Queue<string>();
+    private readonly Queue<Action<UIToastSlot>> _toastQueue = new Queue<Action<UIToastSlot>>();
     private readonly HashSet<UIToastSlot> _activeSlots = new HashSet<UIToastSlot>();
     private const int _maxCount = Define.Toast.Count;
     private bool _isProcessingQueue;
@@ -20,9 +20,9 @@ public class UIToastSystem : UISystem
         BindPanel(typeof(Panels));
     }
 
-    public async UniTask PushToastAsync(string message)
+    private async UniTask EnqueueToastAsync(Action<UIToastSlot> setupAction)
     {
-        _messageQueue.Enqueue(message);
+        _toastQueue.Enqueue(setupAction);
 
         if (_isProcessingQueue)
             return;
@@ -34,9 +34,9 @@ public class UIToastSystem : UISystem
     {
         _isProcessingQueue = true;
 
-        while (_messageQueue.Count > 0)
+        while (_toastQueue.Count > 0)
         {
-            var containerTransform = GetPanel((int)Panels.ToastPanel)?.transform;
+            var containerTransform = GetPanel(Panels.ToastPanel)?.transform;
 
             if (containerTransform == null)
                 break;
@@ -44,21 +44,34 @@ public class UIToastSystem : UISystem
             while (_activeSlots.Count >= _maxCount)
                 await UniTask.Yield(PlayerLoopTiming.Update);
 
-            string message = _messageQueue.Dequeue();
+            var setupAction = _toastQueue.Dequeue();
             var (slot, _) = await Managers.Pool.PopAsync<UIToastSlot>(containerTransform);
 
             if (slot == null)
                 continue;
 
             _activeSlots.Add(slot);
-            slot.Setup(message, () =>
-            {
-                _activeSlots.Remove(slot);
-                slot.Close();
-            });
+            setupAction(slot);
             await UniTask.Delay(TimeSpan.FromSeconds(Define.Toast.Delay), ignoreTimeScale: true);
         }
 
         _isProcessingQueue = false;
+    }
+
+    public async UniTask PushToastAsync(Localization key)
+        => await EnqueueToastAsync(slot => slot.Setup(key, () => ReleaseSlot(slot)));
+    public async UniTask PushToastAsync<T1>(Localization key, T1 arg1)
+        => await EnqueueToastAsync(slot => slot.Setup(key, () => ReleaseSlot(slot), arg1));
+    public async UniTask PushToastAsync<T1, T2>(Localization key, T1 arg1, T2 arg2)
+        => await EnqueueToastAsync(slot => slot.Setup(key, () => ReleaseSlot(slot), arg1, arg2));
+    public async UniTask PushToastAsync<T1, T2, T3>(Localization key, T1 arg1, T2 arg2, T3 arg3)
+        => await EnqueueToastAsync(slot => slot.Setup(key, () => ReleaseSlot(slot), arg1, arg2, arg3));
+    public async UniTask PushToastAsync(Localization key, params object[] args)
+        => await EnqueueToastAsync(slot => slot.Setup(key, () => ReleaseSlot(slot), args));
+
+    private void ReleaseSlot(UIToastSlot slot)
+    {
+        _activeSlots.Remove(slot);
+        slot.Close();
     }
 }

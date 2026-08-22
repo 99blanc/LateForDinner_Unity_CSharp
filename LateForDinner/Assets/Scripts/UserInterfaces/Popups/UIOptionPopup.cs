@@ -176,6 +176,7 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
     private bool _isUpdatingVolume;
     private bool _isRebinding;
     private bool _initialModifierDash;
+    private string _initialLanguage;
     private string _initialKeybindJson;
     private string _initialBindingSnapshot;
 
@@ -193,7 +194,6 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
         BindPanel(typeof(Panels));
         BindButtonStates();
         BindButtonActions();
-        InitStaticTexts();
         Switch(UI_OptionState.Sound);
         InitSoundPanel();
         InitGraphicPanel();
@@ -202,24 +202,24 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
 
     private void BindButtonStates()
     {
-        GetImage((int)Images.SoundButtonImage).BindState(_soundButton, Define.Atlas.Common, this);
-        GetImage((int)Images.GraphicButtonImage).BindState(_graphicButton, Define.Atlas.Common, this);
-        GetImage((int)Images.AccessButtonImage).BindState(_accessButton, Define.Atlas.Common, this);
-        GetImage((int)Images.ApplyButtonImage).BindState(_applyButton, Define.Atlas.Common, this);
-        GetImage((int)Images.CompleteButtonImage).BindState(_completeButton, Define.Atlas.Common, this);
-        GetImage((int)Images.CancelButtonImage).BindState(_cancelButton, Define.Atlas.Common, this);
-        GetImage((int)Images.DefaultButtonImage).BindState(_defaultButton, Define.Atlas.Common, this);
+        GetImage(Images.SoundButtonImage).BindState(_soundButton, Define.Atlas.Common, this);
+        GetImage(Images.GraphicButtonImage).BindState(_graphicButton, Define.Atlas.Common, this);
+        GetImage(Images.AccessButtonImage).BindState(_accessButton, Define.Atlas.Common, this);
+        GetImage(Images.ApplyButtonImage).BindState(_applyButton, Define.Atlas.Common, this);
+        GetImage(Images.CompleteButtonImage).BindState(_completeButton, Define.Atlas.Common, this);
+        GetImage(Images.CancelButtonImage).BindState(_cancelButton, Define.Atlas.Common, this);
+        GetImage(Images.DefaultButtonImage).BindState(_defaultButton, Define.Atlas.Common, this);
     }
 
     private void BindButtonActions()
     {
-        GetButton((int)Buttons.SoundButton).BindViewAsButton(OnClickSound, ViewEvent.LeftClick, this, _soundButton);
-        GetButton((int)Buttons.GraphicButton).BindViewAsButton(OnClickGraphic, ViewEvent.LeftClick, this, _graphicButton);
-        GetButton((int)Buttons.AccessButton).BindViewAsButton(OnClickAccess, ViewEvent.LeftClick, this, _accessButton);
-        GetButton((int)Buttons.ApplyButton).BindViewAsButton(async data => await OnClickApply(data), ViewEvent.LeftClick, this, _applyButton);
-        GetButton((int)Buttons.CompleteButton).BindViewAsButton(async data => await OnClickComplete(data), ViewEvent.LeftClick, this, _completeButton);
-        GetButton((int)Buttons.CancelButton).BindViewAsButton(OnClickCancel, ViewEvent.LeftClick, this, _cancelButton);
-        GetButton((int)Buttons.DefaultButton).BindViewAsButton(async data => await OnClickDefault(data), ViewEvent.LeftClick, this, _defaultButton);
+        GetButton(Buttons.SoundButton).BindViewAsButton(OnClickSound, ViewEvent.LeftClick, this, _soundButton);
+        GetButton(Buttons.GraphicButton).BindViewAsButton(OnClickGraphic, ViewEvent.LeftClick, this, _graphicButton);
+        GetButton(Buttons.AccessButton).BindViewAsButton(OnClickAccess, ViewEvent.LeftClick, this, _accessButton);
+        GetButton(Buttons.ApplyButton).BindViewAsButton(async data => await OnClickApply(data), ViewEvent.LeftClick, this, _applyButton);
+        GetButton(Buttons.CompleteButton).BindViewAsButton(async data => await OnClickComplete(data), ViewEvent.LeftClick, this, _completeButton);
+        GetButton(Buttons.CancelButton).BindViewAsButton(async data => await OnClickCancel(data), ViewEvent.LeftClick, this, _cancelButton);
+        GetButton(Buttons.DefaultButton).BindViewAsButton(async data => await OnClickDefault(data), ViewEvent.LeftClick, this, _defaultButton);
     }
 
     private void InitStaticTexts()
@@ -240,11 +240,11 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
         BindToggleAction(Toggles.AmbientToggle, Images.AmbientCheckmarkImage, Images.AmbientInputImage, Toggles.AmbientToggle, Scrollbars.AmbientScrollbar);
         BindToggleAction(Toggles.SFXToggle, Images.SFXCheckmarkImage, Images.SFXInputImage, Toggles.SFXToggle, Scrollbars.SFXScrollbar);
         BindToggleAction(Toggles.UIToggle, Images.UICheckmarkImage, Images.UIInputImage, Toggles.UIToggle, Scrollbars.UIScrollbar);
-        GetToggle((int)Toggles.MuteToggle).BindView(_ =>
+        GetToggle(Toggles.MuteToggle).BindView(_ =>
         {
-            bool isOn = GetToggle((int)Toggles.MuteToggle).isOn;
-            UpdateCheckmark(GetImage((int)Images.MuteCheckmarkImage), isOn);
-            GetImage((int)Images.MuteToggleImage).SetVisual(null, null, isOn);
+            bool isOn = GetToggle(Toggles.MuteToggle).isOn;
+            UpdateCheckmark(GetImage(Images.MuteCheckmarkImage), isOn);
+            GetImage(Images.MuteToggleImage).SetVisual(null, null, isOn);
         }, ViewEvent.LeftClick, this);
         BindVolumeControl(Scrollbars.MasterScrollbar, InputFields.MasterInputField);
         BindVolumeControl(Scrollbars.BGMScrollbar, InputFields.BGMInputField);
@@ -261,20 +261,20 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
 
     private void BindToggleAction(Toggles toggleEnum, Images checkmarkEnum, Images inputImageEnum, Toggles toggleImageEnum, Scrollbars scrollbarEnum)
     {
-        GetToggle((int)toggleEnum).BindView(_ =>
+        GetToggle(toggleEnum).BindView(_ =>
         {
-            bool isOn = GetToggle((int)toggleEnum).isOn;
-            UpdateCheckmark(GetImage((int)checkmarkEnum), isOn);
-            GetImage((int)inputImageEnum).SetVisual(GetImage((int)toggleImageEnum), GetScrollbar((int)scrollbarEnum), isOn);
+            bool isOn = GetToggle(toggleEnum).isOn;
+            UpdateCheckmark(GetImage(checkmarkEnum), isOn);
+            GetImage(inputImageEnum).SetVisual(GetImage(toggleImageEnum), GetScrollbar(scrollbarEnum), isOn);
         }, ViewEvent.LeftClick, this);
     }
 
     private void InitGraphicPanel()
     {
         InitResolution();
-        GetImage((int)Images.ResolutionArrowImage).BindStateAsArrow(_resolutionArrowButton, Define.Atlas.Common, this);
-        GetImage((int)Images.FullscreenArrowImage).BindStateAsArrow(_fullscreenArrowButton, Define.Atlas.Common, this);
-        GetImage((int)Images.QualityArrowImage).BindStateAsArrow(_qualityArrowButton, Define.Atlas.Common, this);
+        GetImage(Images.ResolutionArrowImage).BindStateAsArrow(_resolutionArrowButton, Define.Atlas.Common, this);
+        GetImage(Images.FullscreenArrowImage).BindStateAsArrow(_fullscreenArrowButton, Define.Atlas.Common, this);
+        GetImage(Images.QualityArrowImage).BindStateAsArrow(_qualityArrowButton, Define.Atlas.Common, this);
         BindArrowDropdownButton(Buttons.ResolutionButton, _resolutionArrowButton);
         BindArrowDropdownButton(Buttons.FullscreenButton, _fullscreenArrowButton);
         BindArrowDropdownButton(Buttons.QualityButton, _qualityArrowButton);
@@ -304,11 +304,11 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
     }
 
     private void BindArrowDropdownButton(Buttons button, ReactiveProperty<ButtonState> state) =>
-        GetButton((int)button).BindViewAsButton(_ => { }, ViewEvent.LeftClick, this, state);
+        GetButton(button).BindViewAsButton(_ => { }, ViewEvent.LeftClick, this, state);
 
     private void InitDropdownOptions(Dropdowns dropdown, Localization[] keys)
     {
-        var dd = GetDropdown((int)dropdown);
+        var dd = GetDropdown(dropdown);
         dd.ClearOptions();
         var options = keys.Select(k => Managers.Localization.Get(k)).ToList();
         dd.AddOptions(options);
@@ -316,19 +316,19 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
 
     private void BindGraphicToggle(Toggles toggle, Images checkmark, Images toggleImage)
     {
-        GetToggle((int)toggle).BindView(_ =>
+        GetToggle(toggle).BindView(_ =>
         {
-            bool isOn = GetToggle((int)toggle).isOn;
-            UpdateCheckmark(GetImage((int)checkmark), isOn);
-            GetImage((int)toggleImage).SetVisual(isEnabled: isOn);
+            bool isOn = GetToggle(toggle).isOn;
+            UpdateCheckmark(GetImage(checkmark), isOn);
+            GetImage(toggleImage).SetVisual(isEnabled: isOn);
         }, ViewEvent.LeftClick, this);
     }
 
     private void InitAccessPanel()
     {
-        GetImage((int)Images.LanguageArrowImage).BindStateAsArrow(_languageArrowButton, Define.Atlas.Common, this);
+        GetImage(Images.LanguageArrowImage).BindStateAsArrow(_languageArrowButton, Define.Atlas.Common, this);
         BindArrowDropdownButton(Buttons.LanguageButton, _languageArrowButton);
-        var languageDropdown = GetDropdown((int)Dropdowns.LanguageDropdown);
+        var languageDropdown = GetDropdown(Dropdowns.LanguageDropdown);
 
         if (languageDropdown != null)
         {
@@ -337,7 +337,7 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
             languageDropdown.AddOptions(displayOptions);
         }
 
-        var content = GetScrollRect((int)ScrollRects.KeybindScrollRect).content;
+        var content = GetScrollRect(ScrollRects.KeybindScrollRect).content;
         Func<bool> isRebindingCheck = () => _isRebinding;
         Action<bool> setRebindingLock = isBusy => _isRebinding = isBusy;
         var (dashSlot, _) = Managers.Pool.Pop<UIKeybindSlot>(content);
@@ -352,14 +352,14 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
             (duplicateActionName, duplicateKeyName) =>
             {
                 // DESC ::: 중복된 키 입력 시 토스트 출력
-                Managers.Feedback.ToastAsync(Managers.Localization.Get(Localization.UI_Option_Popup_Keybind_Duplicate, duplicateActionName, duplicateKeyName)).Forget();
+                Managers.Feedback.ToastAsync(Localization.UI_Option_Popup_Keybind_Duplicate, duplicateActionName, duplicateKeyName).Forget();
             });
         }
     }
 
     private void InitResolution()
     {
-        var resolutionDropdown = GetDropdown((int)Dropdowns.ResolutionDropdown);
+        var resolutionDropdown = GetDropdown(Dropdowns.ResolutionDropdown);
         resolutionDropdown.ClearOptions();
         _resolutions = Screen.resolutions
         .Select(r => new Resolution { width = r.width, height = r.height, refreshRateRatio = r.refreshRateRatio })
@@ -378,15 +378,108 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
     public override void Get()
     {
         base.Get();
-        _initialKeybindJson = Managers.Config.Option.Access.keybind;
+        Refresh();
         _initialModifierDash = Managers.Config.Option.Access.modifierDash;
+        _initialLanguage = Managers.Config.Option.Access.language;
+        _initialKeybindJson = Managers.Config.Option.Access.keybind;
 
         if (!string.IsNullOrEmpty(_initialKeybindJson))
             Managers.Control.LoadBindingFromJson(_initialKeybindJson);
 
         _initialBindingSnapshot = Managers.Control.CreateBindingSnapshot();
-        Switch(_state);
-        Refresh();
+        Switch(UI_OptionState.Sound);
+    }
+
+    public override void Refresh()
+    {
+        base.Refresh();
+        InitStaticTexts();
+        RefreshSoundPanel();
+        RefreshGraphicPanel();
+        RefreshAccessPanel();
+
+        foreach (var slot in _keybinds)
+            slot.Refresh();
+    }
+
+    private void RefreshSoundPanel()
+    {
+        var sound = Managers.Config.Option.Sound;
+        GetScrollbar(Scrollbars.MasterScrollbar).value = sound.vMaster;
+        GetScrollbar(Scrollbars.BGMScrollbar).value = sound.vBGM;
+        GetScrollbar(Scrollbars.AmbientScrollbar).value = sound.vAmbient;
+        GetScrollbar(Scrollbars.SFXScrollbar).value = sound.vSFX;
+        GetScrollbar(Scrollbars.UIScrollbar).value = sound.vUI;
+        UpdateVolume(GetInputField(InputFields.MasterInputField), sound.vMaster);
+        UpdateVolume(GetInputField(InputFields.BGMInputField), sound.vBGM);
+        UpdateVolume(GetInputField(InputFields.AmbientInputField), sound.vAmbient);
+        UpdateVolume(GetInputField(InputFields.SFXInputField), sound.vSFX);
+        UpdateVolume(GetInputField(InputFields.UIInputField), sound.vUI);
+        SetToggleAndVisual(Toggles.MasterToggle, Images.MasterInputImage, Images.MasterToggleImage, Images.MasterCheckmarkImage, sound.mMaster, Scrollbars.MasterScrollbar);
+        SetToggleAndVisual(Toggles.BGMToggle, Images.BGMInputImage, Images.BGMToggleImage, Images.BGMCheckmarkImage, sound.mBGM, Scrollbars.BGMScrollbar);
+        SetToggleAndVisual(Toggles.AmbientToggle, Images.AmbientInputImage, Images.AmbientToggleImage, Images.AmbientCheckmarkImage, sound.mAmbient, Scrollbars.AmbientScrollbar);
+        SetToggleAndVisual(Toggles.SFXToggle, Images.SFXInputImage, Images.SFXToggleImage, Images.SFXCheckmarkImage, sound.mSFX, Scrollbars.SFXScrollbar);
+        SetToggleAndVisual(Toggles.UIToggle, Images.UIInputImage, Images.UIToggleImage, Images.UICheckmarkImage, sound.mUI, Scrollbars.UIScrollbar);
+        GetToggle(Toggles.MuteToggle).isOn = sound.mute;
+        UpdateCheckmark(GetImage(Images.MuteCheckmarkImage), sound.mute);
+    }
+
+    private void SetToggleAndVisual(Toggles toggle, Images inputImage, Images toggleImage, Images checkmark, bool isOn, Scrollbars scrollbar)
+    {
+        GetToggle(toggle).isOn = isOn;
+        GetImage(inputImage).SetVisual(GetImage(toggleImage), GetScrollbar(scrollbar), isOn);
+        UpdateCheckmark(GetImage(checkmark), isOn);
+    }
+
+    private void RefreshGraphicPanel()
+    {
+        var graphic = Managers.Config.Option.Graphic;
+
+        for (int index = 0; index < _resolutions.Length; index++)
+        {
+            float currentHz = (float)_resolutions[index].refreshRateRatio.numerator / _resolutions[index].refreshRateRatio.denominator;
+
+            if (_resolutions[index].width != graphic.rWidth || _resolutions[index].height != graphic.rHeight || Mathf.Abs(currentHz - graphic.rRefreshRate) > 1f)
+                continue;
+
+            GetDropdown(Dropdowns.ResolutionDropdown).value = index;
+            break;
+        }
+
+        GetDropdown(Dropdowns.FullscreenDropdown).value = graphic.screenMode switch
+        {
+            FullScreenMode.FullScreenWindow => 0,
+            FullScreenMode.Windowed => 1,
+            FullScreenMode.ExclusiveFullScreen => 2,
+            _ => 0
+        };
+        GetDropdown(Dropdowns.QualityDropdown).value = (int)graphic.quality;
+        SetGraphicToggleAndVisual(Toggles.VsyncToggle, Images.VsyncToggleImage, Images.VsyncCheckmarkImage, graphic.vSync);
+        SetGraphicToggleAndVisual(Toggles.AntialiasingToggle, Images.AntialiasingToggleImage, Images.AntialiasingCheckmarkImage, graphic.antiAliasing);
+        SetGraphicToggleAndVisual(Toggles.BloomToggle, Images.BloomToggleImage, Images.BloomCheckmarkImage, graphic.bloom);
+        SetGraphicToggleAndVisual(Toggles.AOToggle, Images.AOCheckmarkImage, Images.AOCheckmarkImage, graphic.ambientOccusion);
+    }
+
+    private void SetGraphicToggleAndVisual(Toggles toggle, Images toggleImage, Images checkmark, bool isOn)
+    {
+        GetToggle(toggle).isOn = isOn;
+        GetImage(toggleImage).SetVisual(isEnabled: isOn);
+        UpdateCheckmark(GetImage(checkmark), isOn);
+    }
+
+    private void RefreshAccessPanel()
+    {
+        var languageLocales = Managers.Localization.GetLanguages();
+        string currentLocale = Managers.Config?.Option?.Access?.language ?? Literal.Languages.Korean;
+
+        for (int index = 0; index < languageLocales.Count; index++)
+        {
+            if (!languageLocales[index].Equals(currentLocale, StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            GetDropdown(Dropdowns.LanguageDropdown).value = index;
+            break;
+        }
     }
 
     public override void Close()
@@ -416,9 +509,9 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
     {
         CloseAllDropdowns();
         _state = state;
-        GetPanel((int)Panels.SoundPanel).SetActivePanel(_state == UI_OptionState.Sound);
-        GetPanel((int)Panels.GraphicPanel).SetActivePanel(_state == UI_OptionState.Graphic);
-        GetPanel((int)Panels.AccessPanel).SetActivePanel(_state == UI_OptionState.Access);
+        GetPanel(Panels.SoundPanel).SetActivePanel(_state == UI_OptionState.Sound);
+        GetPanel(Panels.GraphicPanel).SetActivePanel(_state == UI_OptionState.Graphic);
+        GetPanel(Panels.AccessPanel).SetActivePanel(_state == UI_OptionState.Access);
         UpdateTab();
     }
 
@@ -459,8 +552,8 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
 
     private void BindVolumeControl(Scrollbars scrollbarEnum, InputFields inputFieldEnum)
     {
-        var scrollbar = GetScrollbar((int)scrollbarEnum);
-        var inputField = GetInputField((int)inputFieldEnum);
+        var scrollbar = GetScrollbar(scrollbarEnum);
+        var inputField = GetInputField(inputFieldEnum);
 
         if (scrollbar == null || inputField == null)
             return;
@@ -513,96 +606,6 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
         }, this);
     }
 
-    private void Refresh()
-    {
-        RefreshSoundPanel();
-        RefreshGraphicPanel();
-        RefreshAccessPanel();
-
-        foreach (var slot in _keybinds)
-            slot.Refresh();
-    }
-
-    private void RefreshSoundPanel()
-    {
-        var sound = Managers.Config.Option.Sound;
-        GetScrollbar((int)Scrollbars.MasterScrollbar).value = sound.vMaster;
-        GetScrollbar((int)Scrollbars.BGMScrollbar).value = sound.vBGM;
-        GetScrollbar((int)Scrollbars.AmbientScrollbar).value = sound.vAmbient;
-        GetScrollbar((int)Scrollbars.SFXScrollbar).value = sound.vSFX;
-        GetScrollbar((int)Scrollbars.UIScrollbar).value = sound.vUI;
-        UpdateVolume(GetInputField((int)InputFields.MasterInputField), sound.vMaster);
-        UpdateVolume(GetInputField((int)InputFields.BGMInputField), sound.vBGM);
-        UpdateVolume(GetInputField((int)InputFields.AmbientInputField), sound.vAmbient);
-        UpdateVolume(GetInputField((int)InputFields.SFXInputField), sound.vSFX);
-        UpdateVolume(GetInputField((int)InputFields.UIInputField), sound.vUI);
-        SetToggleAndVisual(Toggles.MasterToggle, Images.MasterInputImage, Images.MasterToggleImage, Images.MasterCheckmarkImage, sound.mMaster, Scrollbars.MasterScrollbar);
-        SetToggleAndVisual(Toggles.BGMToggle, Images.BGMInputImage, Images.BGMToggleImage, Images.BGMCheckmarkImage, sound.mBGM, Scrollbars.BGMScrollbar);
-        SetToggleAndVisual(Toggles.AmbientToggle, Images.AmbientInputImage, Images.AmbientToggleImage, Images.AmbientCheckmarkImage, sound.mAmbient, Scrollbars.AmbientScrollbar);
-        SetToggleAndVisual(Toggles.SFXToggle, Images.SFXInputImage, Images.SFXToggleImage, Images.SFXCheckmarkImage, sound.mSFX, Scrollbars.SFXScrollbar);
-        SetToggleAndVisual(Toggles.UIToggle, Images.UIInputImage, Images.UIToggleImage, Images.UICheckmarkImage, sound.mUI, Scrollbars.UIScrollbar);
-        GetToggle((int)Toggles.MuteToggle).isOn = sound.mute;
-        UpdateCheckmark(GetImage((int)Images.MuteCheckmarkImage), sound.mute);
-    }
-
-    private void SetToggleAndVisual(Toggles toggle, Images inputImage, Images toggleImage, Images checkmark, bool isOn, Scrollbars scrollbar)
-    {
-        GetToggle((int)toggle).isOn = isOn;
-        GetImage((int)inputImage).SetVisual(GetImage((int)toggleImage), GetScrollbar((int)scrollbar), isOn);
-        UpdateCheckmark(GetImage((int)checkmark), isOn);
-    }
-
-    private void RefreshGraphicPanel()
-    {
-        var graphic = Managers.Config.Option.Graphic;
-
-        for (int index = 0; index < _resolutions.Length; index++)
-        {
-            float currentHz = (float)_resolutions[index].refreshRateRatio.numerator / _resolutions[index].refreshRateRatio.denominator;
-
-            if (_resolutions[index].width != graphic.rWidth || _resolutions[index].height != graphic.rHeight || Mathf.Abs(currentHz - graphic.rRefreshRate) > 1f)
-                continue;
-
-            GetDropdown((int)Dropdowns.ResolutionDropdown).value = index;
-            break;
-        }
-
-        GetDropdown((int)Dropdowns.FullscreenDropdown).value = graphic.screenMode switch
-        {
-            FullScreenMode.FullScreenWindow => 0,
-            FullScreenMode.Windowed => 1,
-            FullScreenMode.ExclusiveFullScreen => 2,
-            _ => 0
-        };
-        GetDropdown((int)Dropdowns.QualityDropdown).value = (int)graphic.quality;
-        SetGraphicToggleAndVisual(Toggles.VsyncToggle, Images.VsyncToggleImage, Images.VsyncCheckmarkImage, graphic.vSync);
-        SetGraphicToggleAndVisual(Toggles.AntialiasingToggle, Images.AntialiasingToggleImage, Images.AntialiasingCheckmarkImage, graphic.antiAliasing);
-        SetGraphicToggleAndVisual(Toggles.BloomToggle, Images.BloomToggleImage, Images.BloomCheckmarkImage, graphic.bloom);
-        SetGraphicToggleAndVisual(Toggles.AOToggle, Images.AOCheckmarkImage, Images.AOCheckmarkImage, graphic.ambientOccusion);
-    }
-
-    private void SetGraphicToggleAndVisual(Toggles toggle, Images toggleImage, Images checkmark, bool isOn)
-    {
-        GetToggle((int)toggle).isOn = isOn;
-        GetImage((int)toggleImage).SetVisual(isEnabled: isOn);
-        UpdateCheckmark(GetImage((int)checkmark), isOn);
-    }
-
-    private void RefreshAccessPanel()
-    {
-        var languageLocales = Managers.Localization.GetLanguages();
-        string currentLocale = Managers.Config?.Option?.Access?.language ?? Literal.Languages.Korean;
-
-        for (int index = 0; index < languageLocales.Count; index++)
-        {
-            if (!languageLocales[index].Equals(currentLocale, StringComparison.OrdinalIgnoreCase))
-                continue;
-
-            GetDropdown((int)Dropdowns.LanguageDropdown).value = index;
-            break;
-        }
-    }
-
     private void Sync()
     {
         SyncSoundPanel();
@@ -613,23 +616,23 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
     private void SyncSoundPanel()
     {
         var sound = Managers.Config.Option.Sound;
-        sound.vMaster = GetScrollbar((int)Scrollbars.MasterScrollbar).value;
-        sound.vBGM = GetScrollbar((int)Scrollbars.BGMScrollbar).value;
-        sound.vAmbient = GetScrollbar((int)Scrollbars.AmbientScrollbar).value;
-        sound.vSFX = GetScrollbar((int)Scrollbars.SFXScrollbar).value;
-        sound.vUI = GetScrollbar((int)Scrollbars.UIScrollbar).value;
-        sound.mMaster = GetToggle((int)Toggles.MasterToggle).isOn;
-        sound.mBGM = GetToggle((int)Toggles.BGMToggle).isOn;
-        sound.mAmbient = GetToggle((int)Toggles.AmbientToggle).isOn;
-        sound.mSFX = GetToggle((int)Toggles.SFXToggle).isOn;
-        sound.mUI = GetToggle((int)Toggles.UIToggle).isOn;
-        sound.mute = GetToggle((int)Toggles.MuteToggle).isOn;
+        sound.vMaster = GetScrollbar(Scrollbars.MasterScrollbar).value;
+        sound.vBGM = GetScrollbar(Scrollbars.BGMScrollbar).value;
+        sound.vAmbient = GetScrollbar(Scrollbars.AmbientScrollbar).value;
+        sound.vSFX = GetScrollbar(Scrollbars.SFXScrollbar).value;
+        sound.vUI = GetScrollbar(Scrollbars.UIScrollbar).value;
+        sound.mMaster = GetToggle(Toggles.MasterToggle).isOn;
+        sound.mBGM = GetToggle(Toggles.BGMToggle).isOn;
+        sound.mAmbient = GetToggle(Toggles.AmbientToggle).isOn;
+        sound.mSFX = GetToggle(Toggles.SFXToggle).isOn;
+        sound.mUI = GetToggle(Toggles.UIToggle).isOn;
+        sound.mute = GetToggle(Toggles.MuteToggle).isOn;
     }
 
     private void SyncGraphicPanel()
     {
         var graphic = Managers.Config.Option.Graphic;
-        int resIndex = GetDropdown((int)Dropdowns.ResolutionDropdown).value;
+        int resIndex = GetDropdown(Dropdowns.ResolutionDropdown).value;
 
         if (_resolutions != null && resIndex < _resolutions.Length)
         {
@@ -639,23 +642,23 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
             graphic.rRefreshRate = Mathf.RoundToInt((float)res.refreshRateRatio.numerator / res.refreshRateRatio.denominator);
         }
 
-        graphic.screenMode = GetDropdown((int)Dropdowns.FullscreenDropdown).value switch
+        graphic.screenMode = GetDropdown(Dropdowns.FullscreenDropdown).value switch
         {
             0 => FullScreenMode.FullScreenWindow,
             1 => FullScreenMode.Windowed,
             2 => FullScreenMode.ExclusiveFullScreen,
             _ => FullScreenMode.FullScreenWindow
         };
-        graphic.quality = (Quality)GetDropdown((int)Dropdowns.QualityDropdown).value;
-        graphic.vSync = GetToggle((int)Toggles.VsyncToggle).isOn;
-        graphic.antiAliasing = GetToggle((int)Toggles.AntialiasingToggle).isOn;
-        graphic.bloom = GetToggle((int)Toggles.BloomToggle).isOn;
-        graphic.ambientOccusion = GetToggle((int)Toggles.AOToggle).isOn;
+        graphic.quality = (Quality)GetDropdown(Dropdowns.QualityDropdown).value;
+        graphic.vSync = GetToggle(Toggles.VsyncToggle).isOn;
+        graphic.antiAliasing = GetToggle(Toggles.AntialiasingToggle).isOn;
+        graphic.bloom = GetToggle(Toggles.BloomToggle).isOn;
+        graphic.ambientOccusion = GetToggle(Toggles.AOToggle).isOn;
     }
 
     private void SyncAccessPanel()
     {
-        int langIndex = GetDropdown((int)Dropdowns.LanguageDropdown).value;
+        int langIndex = GetDropdown(Dropdowns.LanguageDropdown).value;
         var languageLocales = Managers.Localization.GetLanguages();
 
         if (languageLocales != null && langIndex < languageLocales.Count)
@@ -677,22 +680,35 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
 
     private void CloseAllDropdowns()
     {
-        GetDropdown((int)Dropdowns.ResolutionDropdown)?.Close();
-        GetDropdown((int)Dropdowns.FullscreenDropdown)?.Close();
-        GetDropdown((int)Dropdowns.QualityDropdown)?.Close();
-        GetDropdown((int)Dropdowns.LanguageDropdown)?.Close();
+        GetDropdown(Dropdowns.ResolutionDropdown)?.Close();
+        GetDropdown(Dropdowns.FullscreenDropdown)?.Close();
+        GetDropdown(Dropdowns.QualityDropdown)?.Close();
+        GetDropdown(Dropdowns.LanguageDropdown)?.Close();
     }
 
     private async UniTask OnClickApply(PointerEventData data)
     {
         try
         {
-            CancelAllRebinds();
-            Sync();
-            await Managers.Config.SaveAsync().Lock();
-            _initialKeybindJson = Managers.Config.Option.Access.keybind;
-            _initialModifierDash = Managers.Config.Option.Access.modifierDash;
-            _initialBindingSnapshot = Managers.Control.CreateBindingSnapshot();
+            await Managers.Feedback.LockAsync(async () =>
+            {
+                CancelAllRebinds();
+                Sync();
+                string newLanguage = Managers.Config.Option.Access.language;
+                bool isLanguageChanged = !string.Equals(_initialLanguage, newLanguage, StringComparison.OrdinalIgnoreCase);
+
+                if (isLanguageChanged)
+                    await Managers.Localization.ChangeLanguageAsync(newLanguage);
+
+                await Managers.Config.SaveAsync();
+                _initialKeybindJson = Managers.Config.Option.Access.keybind;
+                _initialModifierDash = Managers.Config.Option.Access.modifierDash;
+                _initialBindingSnapshot = Managers.Control.CreateBindingSnapshot();
+                _initialLanguage = newLanguage;
+
+                if (isLanguageChanged)
+                    Managers.UI.RefreshAll();
+            });
         }
         catch
         {
@@ -704,10 +720,22 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
     {
         try
         {
-            CancelAllRebinds();
-            Sync();
-            await Managers.Config.SaveAsync().Lock();
-            Close();
+            await Managers.Feedback.LockAsync(async () =>
+            {
+                CancelAllRebinds();
+                Sync();
+                string newLanguage = Managers.Config.Option.Access.language;
+                bool isLanguageChanged = !string.Equals(_initialLanguage, newLanguage, StringComparison.OrdinalIgnoreCase);
+
+                if (isLanguageChanged)
+                    await Managers.Localization.ChangeLanguageAsync(newLanguage);
+
+                await Managers.Config.SaveAsync();
+                Close();
+
+                if (isLanguageChanged)
+                    Managers.UI.RefreshAll();
+            });
         }
         catch
         {
@@ -715,7 +743,7 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
         }
     }
 
-    private void OnClickCancel(PointerEventData data)
+    private async UniTask OnClickCancel(PointerEventData data)
     {
         CancelAllRebinds();
 
@@ -727,6 +755,13 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
 
         Managers.Config.Option.Access.modifierDash = _initialModifierDash;
 
+        if (Managers.Config.Option.Access.language != _initialLanguage)
+        {
+            Managers.Config.Option.Access.language = _initialLanguage;
+            await Managers.Localization.ChangeLanguageAsync(_initialLanguage).Lock();
+            Managers.UI.RefreshAll();
+        }
+
         foreach (var slot in _keybinds)
             slot.Refresh();
 
@@ -737,21 +772,28 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
     {
         try
         {
-            bool isConfirmed = await Managers.Feedback.ConfirmAsync(this, Managers.Localization.Get(Localization.UI_Option_Popup_Default_Confirm_Title), Managers.Localization.Get(Localization.UI_Option_Popup_Default_Confirm_Message));
+            bool isConfirmed = await Managers.Feedback.ConfirmAsync(this, Localization.UI_Option_Popup_Default_Confirm_Title, Localization.UI_Option_Popup_Default_Confirm_Message);
 
             if (!isConfirmed)
                 return;
 
             CancelAllRebinds();
-            await Managers.Config.ResetAsync().Lock();
-            Managers.Control.Reset();
-            Managers.Config.Option.Access.modifierDash = AccessOption.Default.modifierDash;
-            Managers.Config.Option.Access.keybind = Managers.Control.Save();
-            await Managers.Config.SaveAsync().Lock();
-            _initialKeybindJson = Managers.Config.Option.Access.keybind;
-            _initialModifierDash = Managers.Config.Option.Access.modifierDash;
-            _initialBindingSnapshot = Managers.Control.CreateBindingSnapshot();
-            Refresh();
+            await Managers.Feedback.LockAsync(async () =>
+            {
+                await Managers.Config.ResetAsync();
+                Managers.Control.Reset();
+                Managers.Config.Option.Access.modifierDash = AccessOption.Default.modifierDash;
+                Managers.Config.Option.Access.keybind = Managers.Control.Save();
+                string defaultLang = Managers.Config.Option.Access.language;
+                await Managers.Localization.ChangeLanguageAsync(defaultLang);
+                await Managers.Config.SaveAsync();
+                _initialKeybindJson = Managers.Config.Option.Access.keybind;
+                _initialModifierDash = Managers.Config.Option.Access.modifierDash;
+                _initialBindingSnapshot = Managers.Control.CreateBindingSnapshot();
+                _initialLanguage = defaultLang;
+                Refresh();
+                Managers.UI.RefreshAll();
+            });
         }
         catch
         {
@@ -760,5 +802,5 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
     }
 
     private void SetText(Texts textEnum, Localization key) 
-        => GetText((int)textEnum).text = Managers.Localization.Get(key);
+        => GetText(textEnum).text = Managers.Localization.Get(key);
 }

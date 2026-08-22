@@ -2,20 +2,6 @@
 # Description: 게임 내 공통 현지화 데이터 관리 테이블,
 # Rule: 콤마 사용 불가. KEY는 고유 값이어야 하며 중복 불가. 언어별 텍스트에 포맷팅 파라미터({0} or {1} 등) 사용 가능,
 Key,Text
-# Index: Default,
-None,None
-Apply,적용
-Complete,완료
-Cancel,취소
-Default,기본값
-Language,언어
-Reset,초기화
-Switch,전환
-# Index: Console,
-Console_Input,> {0}
-Console_Help_Header,--- 사용 가능한 명령어 목록 ---
-Console_Help_Format,- {0}: {1}
-Console_Help_Detail,[{0}] {1}
 # Index: Action,
 Action_Right,이동(우)
 Action_Left,이동(좌)
@@ -32,3 +18,23 @@ Action_QuickSlot4,퀵슬롯4
 Action_Inventory,인벤토리
 Action_Active,액티브 스킬
 Action_DashCommand,대시 커맨드
+# Index: Console,
+Console_Input,> {0}
+Console_Help_Header,--- 사용 가능한 명령어 목록 ---
+Console_Help_Format,- {0}: {1}
+Console_Help_Detail,[{0}] {1}
+# Index: Default,
+None,None
+Apply,적용
+Complete,완료
+Cancel,취소
+Default,기본값
+Language,언어
+Reset,초기화
+Switch,전환
+Play,플레이
+#Index: Slot,
+Slot_Auto,Auto
+Slot_Day_Format,Day {0}
+Slot_DayTime_Format,{0}:{1}:{2}
+Slot_SaveTime_Format,{0}/{1}/{2}

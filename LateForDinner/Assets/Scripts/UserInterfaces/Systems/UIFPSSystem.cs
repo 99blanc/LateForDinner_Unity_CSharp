@@ -37,7 +37,7 @@ public class UIFPSSystem : UISystem
         .Subscribe(_ =>
         {
             int fps = Mathf.RoundToInt(1f / Time.unscaledDeltaTime);
-            GetText((int)Texts.FPSText).text = Managers.Localization.Get(Localization.UI_FPS_System_Indicator, fps);
+            GetText(Texts.FPSText).text = Managers.Localization.Get(Localization.UI_FPS_System_Indicator, fps);
         });
     }
 

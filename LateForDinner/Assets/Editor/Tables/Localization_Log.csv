@@ -57,6 +57,7 @@ Log_Save_SaveSuccess,[SaveManager] 슬롯 {0} 데이터 저장을 완료했습�
 Log_Save_SaveFailed,[SaveManager] 슬롯 {0} 데이터 저장 중 예외가 발생했습니다.
 Log_Save_MetaLoadFailed,[SaveManager] 메타데이터 로드 중 예외가 발생했습니다.
 Log_Save_MetaSaveFailed,[SaveManager] 메타데이터 저장 중 예외가 발생했습니다.
+Log_Save_ClearSuccess,[SaveManager] 슬롯 {0}을 삭제했습니다.
 Log_Save_NewGameStarted,[SaveManager] 슬롯 {0}에서 새 게임을 생성했습니다.
 # Index: UIManager,
 Log_UI_RootInitialized,[UIManager] UI 루트 및 레이어 구조가 성공적으로 초기화되었습니다.

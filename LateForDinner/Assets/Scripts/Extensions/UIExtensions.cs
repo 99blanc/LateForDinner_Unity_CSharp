@@ -28,6 +28,22 @@ public static class UIExtensions
         observable.Where(_ => Disable(prop)).Subscribe(action).AddTo(component);
     }
 
+    public static void BindViewForToggle(this UIBehaviour view, Action<PointerEventData> action, ViewEvent type, Component component)
+    {
+        Observable<PointerEventData> observable = type switch
+        {
+            ViewEvent.Enter => view.OnPointerEnterAsObservable(),
+            ViewEvent.Exit => view.OnPointerExitAsObservable(),
+            ViewEvent.Press => view.OnPointerDownAsObservable(),
+            ViewEvent.Release => view.OnPointerUpAsObservable(),
+            ViewEvent.LeftClick => view.OnPointerClickAsObservable().Where(data => data.button == PointerEventData.InputButton.Left),
+            ViewEvent.RightClick => view.OnPointerClickAsObservable().Where(data => data.button == PointerEventData.InputButton.Right),
+            ViewEvent.DoubleClick => view.OnPointerClickAsObservable().Chunk(TimeSpan.FromSeconds(0.25f), 2).Where(list => list.Length == 2).Select(list => list[1]),
+            _ => Return(type)
+        };
+        observable.Subscribe(action).AddTo(component);
+    }
+
     private static Observable<PointerEventData> Return(ViewEvent type)
         => Observable.Empty<PointerEventData>();
 
@@ -53,6 +69,34 @@ public static class UIExtensions
         view.BindView(_ => onReset(), ViewEvent.Release, component, prop);
         view.BindView(_ => onReset(), ViewEvent.Exit, component, prop);
         view.BindView(action, type, component, prop);
+    }
+
+    public static void BindViewAsToggle(this UIBehaviour view, Action<PointerEventData> action, ViewEvent type, Component component, ReactiveProperty<ButtonState> prop, Func<bool> stayCondition = null)
+    {
+        Action onReset = () =>
+        {
+            if (stayCondition != null && stayCondition())
+            {
+                prop.Value = ButtonState.Disable;
+                return;
+            }
+            prop.Value = ButtonState.Normal;
+        };
+        view.BindView(_ =>
+        {
+            if (stayCondition != null && stayCondition())
+                return;
+            prop.Value = ButtonState.Highlight;
+        }, ViewEvent.Enter, component, prop);
+        view.BindView(_ =>
+        {
+            if (stayCondition != null && stayCondition())
+                return;
+            prop.Value = ButtonState.Press;
+        }, ViewEvent.Press, component, prop);
+        view.BindView(_ => onReset(), ViewEvent.Release, component, prop);
+        view.BindView(_ => onReset(), ViewEvent.Exit, component, prop);
+        view.BindViewForToggle(action, type, component);
     }
 
     public static void BindState(this Image targetImage, ReadOnlyReactiveProperty<ButtonState> prop, string atlas, Component component)

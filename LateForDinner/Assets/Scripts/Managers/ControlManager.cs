@@ -52,7 +52,7 @@ public class ControlManager
     {
         return AsObservable(Literal.Hotkeys.Cancel).Subscribe(_ =>
         {
-            Managers.UI.CloseFocus();
+            Managers.UI.CloseFocusPopup();
         });
     }
 

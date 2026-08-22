@@ -8,10 +8,6 @@ UI_Console_System_AutoComplete_Candidates,자동 완성 후보: {0}
 UI_FPS_System_Indicator,FPS: {0}
 # Index: UITitleDisplay,
 UI_Title_Display_Text_Press_Any_Key,Press any key to start.
-# Index: UISaveSlot,
-UI_Save_Slot_Text_Slot,Day {0}
-UI_Save_Slot_Text_Day,{0}/{1}/{2}
-UI_Save_Slot_Text_Time,{0}:{1}:{2}
 # Index: UIOptionPopup,
 UI_Option_Popup_Text_Sound,사운드
 UI_Option_Popup_Text_Graphic,그래픽
@@ -42,3 +38,6 @@ UI_Option_Popup_Text_Modifier,대시키+방향키
 UI_Option_Popup_Text_Tap,방향키 더블탭
 UI_Option_Popup_Default_Confirm_Title,기본값 초기화
 UI_Option_Popup_Default_Confirm_Message,모든 설정을 기본값으로 되돌리시겠습니까?
+# Index: UISaveDetailPopup,
+UI_SaveDetail_Popup_Delete_Confirm_Title,세이브 삭제
+UI_SaveDetail_Popup_Delete_Confirm_Message,정말 이 세이브를 삭제하시겠습니까?

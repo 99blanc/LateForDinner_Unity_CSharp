@@ -223,4 +223,11 @@ public class LocalizationManager
             return text;
         }
     }
+
+    public async UniTask ChangeLanguageAsync(string language)
+    {
+        await SyncAsync();
+        RefreshAsync();
+        Log.Info(Localization.Log_Localization_LoadedSuccessfully);
+    }
 }
