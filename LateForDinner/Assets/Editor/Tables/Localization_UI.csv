@@ -40,3 +40,5 @@ UI_Option_Popup_Text_Keybind,키보드 조작 설정
 UI_Option_Popup_Text_Bind,>설정할 키 입력<
 UI_Option_Popup_Text_Modifier,대시키+방향키
 UI_Option_Popup_Text_Tap,방향키 더블탭
+UI_Option_Popup_Default_Confirm_Title,기본값 초기화
+UI_Option_Popup_Default_Confirm_Message,모든 설정을 기본값으로 되돌리시겠습니까?

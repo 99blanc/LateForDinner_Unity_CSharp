@@ -66,8 +66,11 @@ public class UITitleDisplay : UIDisplay
         }
     }
 
-    public override void Get() 
-        => Switch(_state);
+    public override void Get()
+    {
+        base.Get();
+        Switch(_state);
+    }
 
     private void OnClickOption(PointerEventData data) 
         => Managers.UI.OpenPopup<UIOptionPopup>();

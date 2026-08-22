@@ -377,6 +377,7 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
 
     public override void Get()
     {
+        base.Get();
         _initialKeybindJson = Managers.Config.Option.Access.keybind;
         _initialModifierDash = Managers.Config.Option.Access.modifierDash;
 
@@ -736,10 +737,20 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
     {
         try
         {
+            bool isConfirmed = await Managers.Feedback.ConfirmAsync(Managers.Localization.Get(Localization.UI_Option_Popup_Default_Confirm_Title), Managers.Localization.Get(Localization.UI_Option_Popup_Default_Confirm_Message), this);
+
+            if (!isConfirmed)
+                return;
+
             CancelAllRebinds();
-            await Managers.Config.ResetAsync().Lock();
+            await Managers.Config.ResetAsync();
             Managers.Control.Reset();
             Managers.Config.Option.Access.modifierDash = AccessOption.Default.modifierDash;
+            Managers.Config.Option.Access.keybind = Managers.Control.Save();
+            await Managers.Config.SaveAsync().Lock();
+            _initialKeybindJson = Managers.Config.Option.Access.keybind;
+            _initialModifierDash = Managers.Config.Option.Access.modifierDash;
+            _initialBindingSnapshot = Managers.Control.CreateBindingSnapshot();
             Refresh();
         }
         catch

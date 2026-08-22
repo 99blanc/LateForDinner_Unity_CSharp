@@ -149,4 +149,6 @@ public enum Localization
     UI_Option_Popup_Text_Bind,
     UI_Option_Popup_Text_Modifier,
     UI_Option_Popup_Text_Tap,
+    UI_Option_Popup_Default_Confirm_Title,
+    UI_Option_Popup_Default_Confirm_Message,
 }

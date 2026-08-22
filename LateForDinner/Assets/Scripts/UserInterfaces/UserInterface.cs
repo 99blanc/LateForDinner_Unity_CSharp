@@ -10,6 +10,7 @@ public class UserInterface : MonoBehaviour, IPoolable
 {
     private Dictionary<Type, UnityEngine.Object[]> _views = new Dictionary<Type, UnityEngine.Object[]>();
     private Dictionary<string, CancellationTokenSource> _tokens = new Dictionary<string, CancellationTokenSource>();
+    private Vector2 _initialAnchoredPosition;
     private RectTransform _rectTransform;
 
     public RectTransform RectTransform
@@ -23,10 +24,15 @@ public class UserInterface : MonoBehaviour, IPoolable
         }
     }
 
-    public virtual void Init() 
-        => _views.Clear();
+    public virtual void Init()
+    {
+        var _ = RectTransform;
+        _views.Clear();
+        _initialAnchoredPosition = RectTransform.anchoredPosition;
+    }
 
-    public virtual void Get() { }
+    public virtual void Get() 
+        => RectTransform.anchoredPosition = _initialAnchoredPosition;
 
     protected void Bind<T>(Type type) where T : UnityEngine.Object
     {

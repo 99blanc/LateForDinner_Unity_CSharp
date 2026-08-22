@@ -1,9 +1,8 @@
 using Cysharp.Threading.Tasks;
 using R3;
 using System;
-using UnityEngine.EventSystems;
 
-public class UIAlertPopup : UIPopup
+public class UIAlertPopup : UIPopup, IDraggable, IFocusable
 {
     private readonly ReactiveProperty<ButtonState> _confirmButtonState = new ReactiveProperty<ButtonState>(ButtonState.Normal);
 
@@ -40,6 +39,7 @@ public class UIAlertPopup : UIPopup
     public void Setup(string title, string message, Action onConfirm = null)
     {
         _onConfirm = onConfirm;
+        GetText((int)Texts.AlertText).text = title;
         GetText((int)Texts.MessageText).text = message;
     }
 

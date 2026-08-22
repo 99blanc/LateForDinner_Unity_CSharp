@@ -2,7 +2,7 @@ using Cysharp.Threading.Tasks;
 using System;
 using UnityEngine;
 
-public class UILock : UISystem, IAnimatable
+public class UILockSystem : UISystem, IAnimatable
 {
     private enum Images
     {

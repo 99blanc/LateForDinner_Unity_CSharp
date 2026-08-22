@@ -22,7 +22,10 @@ public class UISplashDisplay : UIDisplay, IAnimatable
     }
 
     public override void Get()
-        => Revert();
+    {
+        base.Get();
+        Revert();
+    }
 
     private void Revert()
     {

@@ -1,8 +1,13 @@
 public interface IPoolable
 {
-    virtual void Init() { }
+    bool IsPooled => this.IsPooled();
 
-    virtual void Get() { }
+    virtual void Init() 
+        => this.SetPooled(false);
 
-    virtual void Release() { }
+    virtual void Get() 
+        => this.SetPooled(false);
+
+    virtual void Release() 
+        => this.SetPooled(true);
 }

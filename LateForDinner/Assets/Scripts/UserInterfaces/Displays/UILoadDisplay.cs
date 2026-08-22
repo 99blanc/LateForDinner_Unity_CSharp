@@ -25,8 +25,11 @@ public class UILoadDisplay : UIDisplay, IAnimatable
         BindText(typeof(Texts));
     }
 
-    public override void Get() 
-        => _current = 0f;
+    public override void Get()
+    {
+        base.Get();
+        _current = 0f;
+    }
 
     public async UniTask LoadAsync(float targetProgress, string message)
     {

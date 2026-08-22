@@ -97,6 +97,12 @@ public class PoolManager
         if (gameObject == null)
             return;
 
+        if (gameObject.TryGetComponent<IPoolable>(out var poolable))
+        {
+            poolable.Release();
+            poolable.SetPooled(true);
+        }
+
         _parents[gameObject] = gameObject.transform.parent;
         string newKey = string.IsNullOrEmpty(key) ? gameObject.name : key;
 
@@ -121,12 +127,31 @@ public class PoolManager
         if (_registries.TryGetValue(key, out var queue) && queue.Count >= count)
             return;
 
-        for (int index = 0; index < count; index++)
-        {
-            var (instance, rentHandle) = await PopAsync<T>(parent);
+        int needed = count - (queue != null ? queue.Count : 0);
 
-            if (instance != null)
-                rentHandle.Dispose();
+        for (int index = 0; index < needed; index++)
+        {
+            Transform targetParent = parent == null ? GetFolder(key) : parent;
+            var instance = await Managers.Resource.InstantiateAsync(key, targetParent, false);
+
+            if (instance == null)
+                continue;
+
+            instance.name = key;
+            _parents[instance] = targetParent;
+
+            if (instance.TryGetComponent<IPoolable>(out var poolable))
+            {
+                poolable.Init();
+                poolable.SetPooled(true);
+            }
+
+            if (!_registries.ContainsKey(key))
+                _registries.Add(key, new Queue<GameObject>());
+
+            instance.SetActive(false);
+            instance.transform.SetParent(GetFolder(key), false);
+            _registries[key].Enqueue(instance);
         }
     }
 
@@ -191,10 +216,12 @@ public class PoolManager
         if (isNew)
         {
             poolable.Init();
+            poolable.SetPooled(false);
             return;
         }
 
         poolable.Get();
+        poolable.SetPooled(false);
     }
 
     private Transform GetFolder(string key)

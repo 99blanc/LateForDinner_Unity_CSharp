@@ -24,7 +24,6 @@ public class UIToastSlot : UISlot
     public override void Get()
     {
         base.Get();
-
         var canvasGroup = GetPanel((int)Panels.SlotPanel);
 
         if (canvasGroup != null)
