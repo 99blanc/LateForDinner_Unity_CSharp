@@ -68,9 +68,13 @@ public class UISaveDetailPopup : UIPopup, IFocusable
 
         if (meta.IsActive)
         {
+            string year = (meta.Year % 100).ToString("D2");
+            string month = meta.Month.ToString("D2");
+            string date = meta.Date.ToString("D2");
             SetText(Texts.DayText, Localization.Slot_Day_Format, meta.Day);
-            SetText(Texts.DayTimeText, Localization.Slot_DayTime_Format, meta.Year, meta.Month, meta.Date);
-            SetText(Texts.SaveTimeText, Localization.Slot_SaveTime_Format, meta.Hour, meta.Minute, meta.Second);
+            SetText(Texts.DayTimeText, Localization.Slot_DayTime_Format, meta.Hour, meta.Minute, meta.Second);
+            SetText(Texts.SaveTimeText, Localization.Slot_SaveTime_Format, year, month, date);
+            SetCharacterImageActive(true);
             SetMealImageActive(true);
             SetMealImageSprite(meta.Meal.ToSpriteAsMealTime());
             GetImage(Images.TrashImage).SetVisual(isEnabled: true);
@@ -82,6 +86,7 @@ public class UISaveDetailPopup : UIPopup, IFocusable
             SetText(Texts.DayText, Localization.Slot_Day_Format, Define.Day.Start);
             SetText(Texts.SaveTimeText, string.Empty);
             SetText(Texts.DayTimeText, string.Empty);
+            SetCharacterImageActive(false);
             SetMealImageActive(false);
             GetImage(Images.TrashImage).SetVisual(isEnabled: false);
             _trashButton.Value = ButtonState.Disable;
@@ -159,5 +164,13 @@ public class UISaveDetailPopup : UIPopup, IFocusable
 
         if (image != null) 
             image.sprite = Managers.Resource.GetSprite(Define.Atlas.Common, spriteName);
+    }
+
+    private void SetCharacterImageActive(bool isActive)
+    {
+        var image = GetImage(Images.CharacterImage);
+
+        if (image != null)
+            image.gameObject.SetActive(isActive);
     }
 }

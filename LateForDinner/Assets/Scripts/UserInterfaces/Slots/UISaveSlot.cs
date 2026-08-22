@@ -62,8 +62,11 @@ public class UISaveSlot : UISlot
 
         if (meta.IsActive)
         {
+            string year = (meta.Year % 100).ToString("D2");
+            string month = meta.Month.ToString("D2");
+            string date = meta.Date.ToString("D2");
             SetText(Texts.DayText, Localization.Slot_Day_Format, meta.Day);
-            SetText(Texts.SaveTimeText, Localization.Slot_SaveTime_Format, meta.Year, meta.Month, meta.Date);
+            SetText(Texts.SaveTimeText, Localization.Slot_SaveTime_Format, year, month, date);
             return;
         }
 

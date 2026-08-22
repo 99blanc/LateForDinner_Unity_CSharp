@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using MemoryPack;
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -154,12 +155,11 @@ public class SaveManager
         if (MetaData.Slots[_currentSlot] == null)
             MetaData.Slots[_currentSlot] = new SlotMeta();
 
+        DateTime now = DateTime.Now;
+        CurrentData.Year = now.Year;
+        CurrentData.Month = now.Month;
+        CurrentData.Date = now.Day;
         var meta = MetaData.Slots[_currentSlot];
-        meta.Day = CurrentData.Day;
-        meta.Hour = CurrentData.Hour;
-        meta.Minute = CurrentData.Minute;
-        meta.Second = CurrentData.Second;
-        meta.Meal = CurrentData.Meal;
         meta.Year = CurrentData.Year;
         meta.Month = CurrentData.Month;
         meta.Date = CurrentData.Date;
