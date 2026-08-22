@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class UIHeadUpDisplay
+public class UIHeadUpDisplay : UIDisplay
 {
     
 }
