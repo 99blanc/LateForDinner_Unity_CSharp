@@ -6,7 +6,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UserInterface : MonoBehaviour, IPoolable
+public abstract class UserInterface : MonoBehaviour, IPoolable
 {
     private Dictionary<Type, UnityEngine.Object[]> _views = new Dictionary<Type, UnityEngine.Object[]>();
     private Dictionary<string, CancellationTokenSource> _tokens = new Dictionary<string, CancellationTokenSource>();
@@ -33,6 +33,12 @@ public class UserInterface : MonoBehaviour, IPoolable
 
     public virtual void Get() 
         => RectTransform.anchoredPosition = _initialAnchoredPosition;
+
+    public virtual void Release()
+        => CancelAll();
+
+    public virtual void Close() 
+        => Managers.UI.Close(this);
 
     protected void Bind<T>(Type type) where T : UnityEngine.Object
     {
@@ -135,7 +141,4 @@ public class UserInterface : MonoBehaviour, IPoolable
 
         _tokens.Clear();
     }
-
-    public virtual void Release() =>
-        CancelAll();
 }

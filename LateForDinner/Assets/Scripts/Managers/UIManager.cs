@@ -262,7 +262,7 @@ public class UIManager
         Refresh();
     }
 
-    public bool CloseTop()
+    public bool CloseFocus()
     {
         if (_popups.Count <= 0)
             return false;

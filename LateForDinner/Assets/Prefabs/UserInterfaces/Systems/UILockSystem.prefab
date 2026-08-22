@@ -87,7 +87,7 @@ GameObject:
   - component: {fileID: 207313729728860881}
   - component: {fileID: 6489569394129763243}
   m_Layer: 5
-  m_Name: UILock
+  m_Name: UILockSystem
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

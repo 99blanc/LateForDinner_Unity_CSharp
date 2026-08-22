@@ -16,6 +16,7 @@ public class ControlManager
     {
         SetupCursor();
         SetupConsoleToggle();
+        SetupCancelHandler();
     }
 
     private void SetupCursor()
@@ -44,6 +45,14 @@ public class ControlManager
                 Managers.UI.Close(console);
             else
                 Managers.UI.OpenSystem<UIConsoleSystem>();
+        });
+    }
+
+    public IDisposable SetupCancelHandler()
+    {
+        return AsObservable(Literal.Hotkeys.Cancel).Subscribe(_ =>
+        {
+            Managers.UI.CloseFocus();
         });
     }
 

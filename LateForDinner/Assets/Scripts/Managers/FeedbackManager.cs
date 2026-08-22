@@ -9,19 +9,12 @@ public class FeedbackManager
     public async UniTask LockAsync(Func<UniTask> task)
     {
         var timer = UniTask.Delay(TimeSpan.FromSeconds(0.2f), ignoreTimeScale: true);
-        var locker = await Managers.UI.OpenSystemAsync<UILockSystem>(Layer.Lock);
-
-        if (locker == null)
-        {
-            await task();
-            return;
-        }
-
-        locker.PlayAsync().Forget();
         await _semaphore.WaitAsync();
+        var locker = await Managers.UI.OpenSystemAsync<UILockSystem>(Layer.Lock);
 
         try
         {
+            locker.PlayAsync().Forget();
             await task();
         }
         finally
@@ -45,7 +38,7 @@ public class FeedbackManager
         await toastSystem.PushToastAsync(message);
     }
 
-    public async UniTask AlertAsync(string title, string message, UserInterface owner)
+    public async UniTask AlertAsync(UserInterface owner, string title, string message)
     {
         var popup = await Managers.UI.OpenPopupAsync<UIAlertPopup>();
 
@@ -57,7 +50,7 @@ public class FeedbackManager
 
         try
         {
-            await UniTask.WaitUntil(() => isClosed || popup.IsPooled() || owner.IsPooled());
+            await UniTask.WaitUntil(() => isClosed || owner.IsPooled());
         }
         catch (OperationCanceledException)
         {
@@ -68,7 +61,7 @@ public class FeedbackManager
             Managers.UI.Close(popup);
     }
 
-    public async UniTask<bool> ConfirmAsync(string title, string message, UserInterface owner)
+    public async UniTask<bool> ConfirmAsync(UserInterface owner, string title, string message)
     {
         var popup = await Managers.UI.OpenPopupAsync<UIConfirmPopup>();
 
@@ -81,7 +74,7 @@ public class FeedbackManager
 
         try
         {
-            await UniTask.WaitUntil(() => isClosed || popup.IsPooled() || owner.IsPooled());
+            await UniTask.WaitUntil(() => isClosed || owner.IsPooled());
         }
         catch (OperationCanceledException)
         {

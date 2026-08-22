@@ -44,8 +44,5 @@ public class UIAlertPopup : UIPopup, IDraggable, IFocusable
     }
 
     private void OnClickConfirm()
-    {
-        _onConfirm?.Invoke();
-        Managers.UI.Close(this);
-    }
+        => _onConfirm?.Invoke();
 }

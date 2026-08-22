@@ -54,7 +54,7 @@ public class UIToastSystem : UISystem
             slot.Setup(message, () =>
             {
                 _activeSlots.Remove(slot);
-                slot.Release();
+                slot.Close();
             });
             await UniTask.Delay(TimeSpan.FromSeconds(Define.Toast.Delay), ignoreTimeScale: true);
         }

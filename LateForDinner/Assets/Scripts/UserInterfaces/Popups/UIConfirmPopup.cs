@@ -52,14 +52,8 @@ public class UIConfirmPopup : UIPopup, IDraggable, IFocusable
     }
 
     private void OnClickConfirm()
-    {
-        Managers.UI.Close(this);
-        _onConfirm?.Invoke();
-    }
+        => _onConfirm?.Invoke();
 
     private void OnClickCancel()
-    {
-        Managers.UI.Close(this);
-        _onCancel?.Invoke();
-    }
+        => _onCancel?.Invoke();
 }

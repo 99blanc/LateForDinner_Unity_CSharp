@@ -389,9 +389,9 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
         Refresh();
     }
 
-    public override void Release()
+    public override void Close()
     {
-        base.Release();
+        base.Close();
         CloseAllDropdowns();
     }
 
@@ -707,7 +707,7 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
             CancelAllRebinds();
             Sync();
             await Managers.Config.SaveAsync().Lock();
-            Release();
+            Close();
         }
         catch
         {
@@ -730,20 +730,20 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
         foreach (var slot in _keybinds)
             slot.Refresh();
 
-        Release();
+        Close();
     }
 
     private async UniTask OnClickDefault(PointerEventData data)
     {
         try
         {
-            bool isConfirmed = await Managers.Feedback.ConfirmAsync(Managers.Localization.Get(Localization.UI_Option_Popup_Default_Confirm_Title), Managers.Localization.Get(Localization.UI_Option_Popup_Default_Confirm_Message), this);
+            bool isConfirmed = await Managers.Feedback.ConfirmAsync(this, Managers.Localization.Get(Localization.UI_Option_Popup_Default_Confirm_Title), Managers.Localization.Get(Localization.UI_Option_Popup_Default_Confirm_Message));
 
             if (!isConfirmed)
                 return;
 
             CancelAllRebinds();
-            await Managers.Config.ResetAsync();
+            await Managers.Config.ResetAsync().Lock();
             Managers.Control.Reset();
             Managers.Config.Option.Access.modifierDash = AccessOption.Default.modifierDash;
             Managers.Config.Option.Access.keybind = Managers.Control.Save();

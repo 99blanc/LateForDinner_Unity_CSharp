@@ -54,9 +54,9 @@ public class UIConsoleSystem : UISystem
 
     public override void Release()
     {
+        base.Release();
         _logSubscription?.Dispose();
         _logSubscription = null;
-        base.Release();
     }
 
     private void RefreshLogUI()
