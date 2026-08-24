@@ -10,7 +10,7 @@ public class FeedbackManager
     {
         var timer = UniTask.Delay(TimeSpan.FromSeconds(0.2f), ignoreTimeScale: true);
         await _semaphore.WaitAsync();
-        var locker = await Managers.UI.OpenSystemAsync<UILockSystem>(Layer.Lock);
+        var locker = await Managers.UI.OpenSystemAsync<UILockSystem>(LayerType.Lock);
 
         try
         {
@@ -28,37 +28,37 @@ public class FeedbackManager
     public async UniTask LockAsync(UniTask task)
         => await LockAsync(async () => await task);
 
-    public async UniTask ToastAsync(Localization key)
+    public async UniTask ToastAsync(LocalizationKey key)
     {
-        var toastSystem = await Managers.UI.OpenSystemAsync<UIToastSystem>(Layer.System);
+        var toastSystem = await Managers.UI.OpenSystemAsync<UIToastSystem>(LayerType.System);
         await toastSystem.PushToastAsync(key);
     }
 
-    public async UniTask ToastAsync<T1>(Localization key, T1 arg1)
+    public async UniTask ToastAsync<T1>(LocalizationKey key, T1 arg1)
     {
-        var toastSystem = await Managers.UI.OpenSystemAsync<UIToastSystem>(Layer.System);
+        var toastSystem = await Managers.UI.OpenSystemAsync<UIToastSystem>(LayerType.System);
         await toastSystem.PushToastAsync(key, arg1);
     }
 
-    public async UniTask ToastAsync<T1, T2>(Localization key, T1 arg1, T2 arg2)
+    public async UniTask ToastAsync<T1, T2>(LocalizationKey key, T1 arg1, T2 arg2)
     {
-        var toastSystem = await Managers.UI.OpenSystemAsync<UIToastSystem>(Layer.System);
+        var toastSystem = await Managers.UI.OpenSystemAsync<UIToastSystem>(LayerType.System);
         await toastSystem.PushToastAsync(key, arg1, arg2);
     }
 
-    public async UniTask ToastAsync<T1, T2, T3>(Localization key, T1 arg1, T2 arg2, T3 arg3)
+    public async UniTask ToastAsync<T1, T2, T3>(LocalizationKey key, T1 arg1, T2 arg2, T3 arg3)
     {
-        var toastSystem = await Managers.UI.OpenSystemAsync<UIToastSystem>(Layer.System);
+        var toastSystem = await Managers.UI.OpenSystemAsync<UIToastSystem>(LayerType.System);
         await toastSystem.PushToastAsync(key, arg1, arg2, arg3);
     }
 
-    public async UniTask ToastAsync(Localization key, params object[] args)
+    public async UniTask ToastAsync(LocalizationKey key, params object[] args)
     {
-        var toastSystem = await Managers.UI.OpenSystemAsync<UIToastSystem>(Layer.System);
+        var toastSystem = await Managers.UI.OpenSystemAsync<UIToastSystem>(LayerType.System);
         await toastSystem.PushToastAsync(key, args);
     }
 
-    private async UniTask AlertInternalAsync(UserInterface owner, Localization titleKey, Localization messageKey, params object[] messageArgs)
+    private async UniTask AlertInternalAsync(UserInterface owner, LocalizationKey titleKey, LocalizationKey messageKey, params object[] messageArgs)
     {
         var popup = await Managers.UI.OpenPopupAsync<UIAlertPopup>();
 
@@ -74,25 +74,25 @@ public class FeedbackManager
         }
         catch (OperationCanceledException)
         {
-            Log.System(Localization.Log_Feedback_AlertPopup_Cancelled);
+            Log.System(LocalizationKey.Log_Feedback_AlertPopup_Cancelled);
         }
 
         if (!popup.IsPooled())
             Managers.UI.Close(popup);
     }
 
-    public async UniTask AlertAsync(UserInterface owner, Localization titleKey, Localization messageKey)
+    public async UniTask AlertAsync(UserInterface owner, LocalizationKey titleKey, LocalizationKey messageKey)
         => await AlertInternalAsync(owner, titleKey, messageKey);
-    public async UniTask AlertAsync<T1>(UserInterface owner, Localization titleKey, Localization messageKey, T1 arg1)
+    public async UniTask AlertAsync<T1>(UserInterface owner, LocalizationKey titleKey, LocalizationKey messageKey, T1 arg1)
         => await AlertInternalAsync(owner, titleKey, messageKey, arg1);
-    public async UniTask AlertAsync<T1, T2>(UserInterface owner, Localization titleKey, Localization messageKey, T1 arg1, T2 arg2)
+    public async UniTask AlertAsync<T1, T2>(UserInterface owner, LocalizationKey titleKey, LocalizationKey messageKey, T1 arg1, T2 arg2)
         => await AlertInternalAsync(owner, titleKey, messageKey, arg1, arg2);
-    public async UniTask AlertAsync<T1, T2, T3>(UserInterface owner, Localization titleKey, Localization messageKey, T1 arg1, T2 arg2, T3 arg3)
+    public async UniTask AlertAsync<T1, T2, T3>(UserInterface owner, LocalizationKey titleKey, LocalizationKey messageKey, T1 arg1, T2 arg2, T3 arg3)
         => await AlertInternalAsync(owner, titleKey, messageKey, arg1, arg2, arg3);
-    public async UniTask AlertAsync(UserInterface owner, Localization titleKey, Localization messageKey, params object[] messageArgs)
+    public async UniTask AlertAsync(UserInterface owner, LocalizationKey titleKey, LocalizationKey messageKey, params object[] messageArgs)
         => await AlertInternalAsync(owner, titleKey, messageKey, messageArgs);
 
-    private async UniTask<bool> ConfirmInternalAsync(UserInterface owner, Localization titleKey, Localization messageKey, params object[] messageArgs)
+    private async UniTask<bool> ConfirmInternalAsync(UserInterface owner, LocalizationKey titleKey, LocalizationKey messageKey, params object[] messageArgs)
     {
         var popup = await Managers.UI.OpenPopupAsync<UIConfirmPopup>();
 
@@ -109,7 +109,7 @@ public class FeedbackManager
         }
         catch (OperationCanceledException)
         {
-            Log.System(Localization.Log_Feedback_ConfirmPopup_Cancelled);
+            Log.System(LocalizationKey.Log_Feedback_ConfirmPopup_Cancelled);
         }
 
         if (!popup.IsPooled())
@@ -118,14 +118,14 @@ public class FeedbackManager
         return result;
     }
 
-    public async UniTask<bool> ConfirmAsync(UserInterface owner, Localization titleKey, Localization messageKey)
+    public async UniTask<bool> ConfirmAsync(UserInterface owner, LocalizationKey titleKey, LocalizationKey messageKey)
         => await ConfirmInternalAsync(owner, titleKey, messageKey);
-    public async UniTask<bool> ConfirmAsync<T1>(UserInterface owner, Localization titleKey, Localization messageKey, T1 arg1)
+    public async UniTask<bool> ConfirmAsync<T1>(UserInterface owner, LocalizationKey titleKey, LocalizationKey messageKey, T1 arg1)
         => await ConfirmInternalAsync(owner, titleKey, messageKey, arg1);
-    public async UniTask<bool> ConfirmAsync<T1, T2>(UserInterface owner, Localization titleKey, Localization messageKey, T1 arg1, T2 arg2)
+    public async UniTask<bool> ConfirmAsync<T1, T2>(UserInterface owner, LocalizationKey titleKey, LocalizationKey messageKey, T1 arg1, T2 arg2)
         => await ConfirmInternalAsync(owner, titleKey, messageKey, arg1, arg2);
-    public async UniTask<bool> ConfirmAsync<T1, T2, T3>(UserInterface owner, Localization titleKey, Localization messageKey, T1 arg1, T2 arg2, T3 arg3)
+    public async UniTask<bool> ConfirmAsync<T1, T2, T3>(UserInterface owner, LocalizationKey titleKey, LocalizationKey messageKey, T1 arg1, T2 arg2, T3 arg3)
         => await ConfirmInternalAsync(owner, titleKey, messageKey, arg1, arg2, arg3);
-    public async UniTask<bool> ConfirmAsync(UserInterface owner, Localization titleKey, Localization messageKey, params object[] messageArgs)
+    public async UniTask<bool> ConfirmAsync(UserInterface owner, LocalizationKey titleKey, LocalizationKey messageKey, params object[] messageArgs)
         => await ConfirmInternalAsync(owner, titleKey, messageKey, messageArgs);
 }

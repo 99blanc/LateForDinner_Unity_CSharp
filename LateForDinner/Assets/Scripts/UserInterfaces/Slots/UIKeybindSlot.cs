@@ -35,7 +35,7 @@ public class UIKeybindSlot : UISlot
     private SlotMode _slotMode;
     private InputAction _targetAction;
     private string _cachedActionLocalizationKey;
-    private Localization _cachedResetLocalizationKey;
+    private LocalizationKey _cachedResetLocalizationKey;
     private string _previousPath;
     private Action<string, string> _onDuplicated;
     private InputActionRebindingExtensions.RebindingOperation _currentOperation;
@@ -63,7 +63,7 @@ public class UIKeybindSlot : UISlot
         if (_slotMode == SlotMode.DashCommandToggle)
         {
             bool isModifier = Managers.Config.Option.Access.modifierDash;
-            SetKeybindText(isModifier ? Localization.UI_Option_Popup_Text_Modifier : Localization.UI_Option_Popup_Text_Tap);
+            SetKeybindText(isModifier ? LocalizationKey.UI_Option_Popup_Text_Modifier : LocalizationKey.UI_Option_Popup_Text_Tap);
         }
         else
         {
@@ -85,7 +85,7 @@ public class UIKeybindSlot : UISlot
         _setLock = lockAction;
         _onDuplicated = onDuplicated;
         _cachedActionLocalizationKey = ZString.Concat(Literal.Localizations.Action, action);
-        _cachedResetLocalizationKey = Localization.Reset;
+        _cachedResetLocalizationKey = LocalizationKey.Reset;
 
         Refresh();
     }
@@ -96,8 +96,8 @@ public class UIKeybindSlot : UISlot
         _targetAction = null;
         _isLocked = locked;
         _setLock = lockAction;
-        _cachedActionLocalizationKey = Managers.Localization.Get(Localization.Action_DashCommand);
-        _cachedResetLocalizationKey = Localization.Switch;
+        _cachedActionLocalizationKey = Managers.Localization.Get(LocalizationKey.Action_DashCommand);
+        _cachedResetLocalizationKey = LocalizationKey.Switch;
 
         Refresh();
     }
@@ -168,7 +168,7 @@ public class UIKeybindSlot : UISlot
         _isWaitingForInput = true;
         _setLock?.Invoke(true);
         _targetAction.Disable();
-        SetKeybindText(Localization.UI_Option_Popup_Text_Bind);
+        SetKeybindText(LocalizationKey.UI_Option_Popup_Text_Bind);
         BeginOperation(index);
     }
 
@@ -194,7 +194,7 @@ public class UIKeybindSlot : UISlot
         }
         catch
         {
-            Log.Error(Localization.UI_Keybind_Slot_RebindFailed, _cachedActionLocalizationKey);
+            Log.Error(LocalizationKey.Log_Keybind_Slot_RebindFailed, _cachedActionLocalizationKey);
             EndRebind(_currentOperation);
         }
     }
@@ -276,10 +276,10 @@ public class UIKeybindSlot : UISlot
         Refresh();
     }
 
-    private void SetResetText(Localization localizationKey)
+    private void SetResetText(LocalizationKey localizationKey)
         => GetText(Texts.ResetText).text = Managers.Localization.Get(localizationKey);
 
-    private void SetKeybindText(Localization localizationKey)
+    private void SetKeybindText(LocalizationKey localizationKey)
         => GetText(Texts.KeybindButtonText).text = Managers.Localization.Get(localizationKey);
 
     private void SetRawKeybindText(string displayText)

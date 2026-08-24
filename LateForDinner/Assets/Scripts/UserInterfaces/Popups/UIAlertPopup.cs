@@ -24,7 +24,7 @@ public class UIAlertPopup : UIPopup, IDraggable, IFocusable
     }
 
     private Action _onConfirm;
-    private Localization _cachedTitleKey;
+    private LocalizationKey _cachedTitleKey;
     private Func<string> _messageProvider;
 
     public override void Init()
@@ -35,7 +35,7 @@ public class UIAlertPopup : UIPopup, IDraggable, IFocusable
         BindButton(typeof(Buttons));
         GetImage(Images.ConfirmButtonImage).BindState(_confirmButtonState, Define.Atlas.Common, this);
         GetButton(Buttons.ConfirmButton).BindViewAsButton(_ => OnClickConfirm(), ViewEvent.LeftClick, this, _confirmButtonState);
-        Managers.Control.Subscribe(Literal.Hotkeys.Submit, OnClickConfirm).AddTo(this);
+        Managers.Control.Subscribe(Literal.Hotkeys.Submit, OnClickConfirm).AddToPool(this);
     }
 
     public override void Refresh()
@@ -45,7 +45,7 @@ public class UIAlertPopup : UIPopup, IDraggable, IFocusable
         GetText(Texts.MessageText).text = _messageProvider();
     }
 
-    public void Setup(Localization titleKey, Localization messageKey, Action onConfirm = null)
+    public void Setup(LocalizationKey titleKey, LocalizationKey messageKey, Action onConfirm = null)
     {
         _onConfirm = onConfirm;
         _cachedTitleKey = titleKey;
@@ -53,7 +53,7 @@ public class UIAlertPopup : UIPopup, IDraggable, IFocusable
         Refresh();
     }
 
-    public void Setup<T1>(Localization titleKey, Localization messageKey, Action onConfirm, T1 arg1)
+    public void Setup<T1>(LocalizationKey titleKey, LocalizationKey messageKey, Action onConfirm, T1 arg1)
     {
         _onConfirm = onConfirm;
         _cachedTitleKey = titleKey;
@@ -61,7 +61,7 @@ public class UIAlertPopup : UIPopup, IDraggable, IFocusable
         Refresh();
     }
 
-    public void Setup<T1, T2>(Localization titleKey, Localization messageKey, Action onConfirm, T1 arg1, T2 arg2)
+    public void Setup<T1, T2>(LocalizationKey titleKey, LocalizationKey messageKey, Action onConfirm, T1 arg1, T2 arg2)
     {
         _onConfirm = onConfirm;
         _cachedTitleKey = titleKey;
@@ -69,7 +69,7 @@ public class UIAlertPopup : UIPopup, IDraggable, IFocusable
         Refresh();
     }
 
-    public void Setup<T1, T2, T3>(Localization titleKey, Localization messageKey, Action onConfirm, T1 arg1, T2 arg2, T3 arg3)
+    public void Setup<T1, T2, T3>(LocalizationKey titleKey, LocalizationKey messageKey, Action onConfirm, T1 arg1, T2 arg2, T3 arg3)
     {
         _onConfirm = onConfirm;
         _cachedTitleKey = titleKey;
@@ -77,7 +77,7 @@ public class UIAlertPopup : UIPopup, IDraggable, IFocusable
         Refresh();
     }
 
-    public void Setup(Localization titleKey, Localization messageKey, Action onConfirm, params object[] args)
+    public void Setup(LocalizationKey titleKey, LocalizationKey messageKey, Action onConfirm, params object[] args)
     {
         _onConfirm = onConfirm;
         _cachedTitleKey = titleKey;

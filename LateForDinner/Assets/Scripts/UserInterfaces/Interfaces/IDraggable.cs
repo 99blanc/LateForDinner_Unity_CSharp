@@ -5,7 +5,7 @@ public interface IDraggable : IDragHandler, IEndDragHandler
 {
     void IDragHandler.OnDrag(PointerEventData data)
     {
-        if (!(this is UIPopup popup) || popup.RectTransform == null)
+        if (this is not UIPopup popup || popup.RectTransform == null)
             return;
 
         float scaleFactor = Managers.UI.ScaleFactor;

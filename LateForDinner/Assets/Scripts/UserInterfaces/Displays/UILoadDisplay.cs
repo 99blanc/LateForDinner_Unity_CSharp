@@ -64,7 +64,7 @@ public class UILoadDisplay : UIDisplay, IAnimatable
         }
         catch (Exception)
         {
-            Log.Error(Localization.UI_Load_Display_AnimationFailed);
+            Log.Error(LocalizationKey.Log_Load_Display_AnimationFailed);
         }
     }
 
@@ -87,7 +87,7 @@ public class UILoadDisplay : UIDisplay, IAnimatable
         }
         catch (Exception)
         {
-            Log.Error(Localization.UI_Load_Display_RotateFailed);
+            Log.Error(LocalizationKey.Log_Load_Display_RotateFailed);
         }
     }
 

@@ -1,6 +1,6 @@
 # Table Type: Localization,
 # Description: 게임 내 콘솔 및 명령어 현지화 데이터 관리 테이블,
-# Rule: 콤마 사용 불가. KEY는 고유 값이어야 하며 중복 불가. 언어별 텍스트에 포맷팅 파라미터({0} or {1} 등) 사용 가능,
+# Rule: 콤마 사용 불가. Key는 고유 값이어야 하며 중복 불가. 각 Key별 Text에 포맷팅 파라미터({0} or {1} 등) 사용 가능,
 Key,Text
 # Index: CommandRegistry,
 Command_Desc_Help,[CommandRegistry] 사용 가능한 명령어 목록을 표시하거나 명령어의 상세 설명을 확인합니다.

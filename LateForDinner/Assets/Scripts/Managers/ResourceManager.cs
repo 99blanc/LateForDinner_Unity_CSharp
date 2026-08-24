@@ -48,13 +48,13 @@ public class ResourceManager
                 return asset;
 
             _handles.Remove(path);
-            Log.Error(Localization.Log_Resource_LoadFailed_Null, path);
+            Log.Error(LocalizationKey.Log_Resource_LoadFailed_Null, path);
             return null;
         }
         catch
         {
             _handles.Remove(path);
-            Log.Error(Localization.Log_Resource_LoadFailed_Exception, path);
+            Log.Error(LocalizationKey.Log_Resource_LoadFailed_Exception, path);
             return null;
         }
     }

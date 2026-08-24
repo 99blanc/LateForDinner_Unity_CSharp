@@ -38,18 +38,18 @@ public class UIConsoleSystem : UISystem
         BindScrollRect(typeof(ScrollRects));
         _inputField = GetInputField(InputFields.CommandInputField);
         _inputField.BindInputSubmit(OnPressSubmit, this);
-        Managers.Control.Subscribe(Literal.Hotkeys.Up, OnPressUp).AddTo(this);
-        Managers.Control.Subscribe(Literal.Hotkeys.Down, OnPressDown).AddTo(this);
-        Managers.Control.Subscribe(Literal.Hotkeys.Tab, OnPressTab).AddTo(this);
+        Managers.Control.Subscribe(Literal.Hotkeys.Up, OnPressUp).AddToPool(this);
+        Managers.Control.Subscribe(Literal.Hotkeys.Down, OnPressDown).AddToPool(this);
+        Managers.Control.Subscribe(Literal.Hotkeys.Tab, OnPressTab).AddToPool(this);
     }
 
     public override void Get()
     {
         base.Get();
         _logSubscription?.Dispose();
-        _logSubscription = Managers.Log.OnLogAdded.Subscribe(_ => RefreshLogUI());
+        _logSubscription = Managers.Log.OnLogAdded.Subscribe(_ => Refresh());
         ResetInputField();
-        RefreshLogUI();
+        Refresh();
     }
 
     public override void Release()
@@ -59,7 +59,7 @@ public class UIConsoleSystem : UISystem
         _logSubscription = null;
     }
 
-    private void RefreshLogUI()
+    public override void Refresh()
     {
         var contentText = GetText(Texts.LogContentText);
         var scrollRect = GetScrollRect(ScrollRects.LogScrollRect);
@@ -97,7 +97,7 @@ public class UIConsoleSystem : UISystem
     public void ClearLogs()
     {
         _clearThresholdIndex = Managers.Log.Logs.Count;
-        RefreshLogUI();
+        Refresh();
     }
 
     public void SetFilter(bool info, bool warning, bool error, bool system)
@@ -106,13 +106,13 @@ public class UIConsoleSystem : UISystem
         _showWarning = warning;
         _showError = error;
         _showSystem = system;
-        RefreshLogUI();
+        Refresh();
     }
 
     public void SetSearchKeyword(string keyword)
     {
         _searchKeyword = keyword?.Trim() ?? string.Empty;
-        RefreshLogUI();
+        Refresh();
     }
 
     private void OnPressSubmit(string input)
@@ -126,7 +126,7 @@ public class UIConsoleSystem : UISystem
         }
         catch
         {
-            Log.Error(Localization.UI_Console_System_ProcessFailed, input);
+            Log.Error(LocalizationKey.Log_Console_System_ProcessFailed, input);
         }
     }
 
@@ -157,7 +157,7 @@ public class UIConsoleSystem : UISystem
         if (candidates.Count == 1)
             SetTextAndMoveEnd(candidates[0]);
         if (candidates.Count > 1)
-            Log.Info(Localization.UI_Console_System_AutoComplete_Candidates, string.Join(", ", candidates));
+            Log.Info(LocalizationKey.UI_Console_System_AutoComplete_Candidates, string.Join(", ", candidates));
     }
 
     private void ResetInputField()
@@ -186,24 +186,24 @@ public class UIConsoleSystem : UISystem
     public void SetFilterInfo(bool value)
     {
         _showInfo = value;
-        RefreshLogUI();
+        Refresh();
     }
 
     public void SetFilterWarning(bool value)
     {
         _showWarning = value;
-        RefreshLogUI();
+        Refresh();
     }
 
     public void SetFilterError(bool value)
     {
         _showError = value;
-        RefreshLogUI();
+        Refresh();
     }
 
     public void SetFilterSystem(bool value)
     {
         _showSystem = value;
-        RefreshLogUI();
+        Refresh();
     }
 }

@@ -22,7 +22,7 @@ public class ConfigManager
         {
             Option = new Option();
             await SaveAsync();
-            Log.System(Localization.Log_Config_CreatedNew);
+            Log.System(LocalizationKey.Log_Config_CreatedNew);
         }
         else
         {
@@ -30,11 +30,11 @@ public class ConfigManager
             {
                 byte[] bytes = await File.ReadAllBytesAsync(SavePath);
                 Option = MemoryPackSerializer.Deserialize<Option>(bytes) ?? new Option();
-                Log.Info(Localization.Log_Config_LoadedSuccessfully);
+                Log.Info(LocalizationKey.Log_Config_LoadedSuccessfully);
             }
             catch
             {
-                Log.Warning(Localization.Log_Config_LoadFailed);
+                Log.Warning(LocalizationKey.Log_Config_LoadFailed);
                 Option = new Option();
             }
         }
@@ -57,7 +57,7 @@ public class ConfigManager
         }
         catch
         {
-            Log.Error(Localization.Log_Config_SaveFailed);
+            Log.Error(LocalizationKey.Log_Config_SaveFailed);
         }
 
         ApplyToEngine();
@@ -68,7 +68,7 @@ public class ConfigManager
         Option = new Option();
         Managers.Control?.Reset();
         await SaveAsync();
-        Log.System(Localization.Log_Config_Reset);
+        Log.System(LocalizationKey.Log_Config_Reset);
     }
 
     public async UniTask SaveKeybindAsync()
@@ -92,12 +92,12 @@ public class ConfigManager
             if (arg.Equals(Define.Execute.Console, StringComparison.OrdinalIgnoreCase))
             {
                 Option.Debug.enableConsole = true;
-                Log.System(Localization.Log_Config_ConsoleEnabled);
+                Log.System(LocalizationKey.Log_Config_ConsoleEnabled);
             }
             if (arg.Equals(Define.Execute.Debug, StringComparison.OrdinalIgnoreCase))
             {
                 Option.Debug.isDebugMode = true;
-                Log.System(Localization.Log_Config_DebugEnabled);
+                Log.System(LocalizationKey.Log_Config_DebugEnabled);
             }
         }
     }

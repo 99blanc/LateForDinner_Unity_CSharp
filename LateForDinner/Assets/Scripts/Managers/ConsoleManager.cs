@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ZLinq;
 
 public class ConsoleManager
 {
@@ -13,13 +14,13 @@ public class ConsoleManager
     private const int _size = 50;
 
     public void Setup()
-        => _registry.RegisterDefaultCommands(this);
+        => _registry.RegisterCommands(this);
 
     public void RegisterCommand(string command, Action<string[]> callback, string description = null)
     {
         string key = command.ToLower();
         _commands[key] = callback;
-        _commandDescriptions[key] = string.IsNullOrEmpty(description) ? Managers.Localization.Get(Localization.Log_Console_NoDescription) : description;
+        _commandDescriptions[key] = string.IsNullOrEmpty(description) ? Managers.Localization.Get(LocalizationKey.Log_Console_NoDescription) : description;
     }
 
     public void UnregisterCommand(string command)
@@ -57,7 +58,7 @@ public class ConsoleManager
         if (string.IsNullOrWhiteSpace(inputCommand))
             return;
 
-        Log.Info(Localization.Console_Input, inputCommand);
+        Log.Info(LocalizationKey.Console_Input, inputCommand);
         PushHistory(inputCommand);
 
         var parts = inputCommand.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
@@ -76,11 +77,11 @@ public class ConsoleManager
             }
             catch (Exception ex)
             {
-                Log.Error(Localization.Log_Console_Error, $"{cmdName} - {ex.Message}");
+                Log.Error(LocalizationKey.Log_Console_Error, $"{cmdName} - {ex.Message}");
             }
         }
         else
-            Log.Warning(Localization.Log_Console_UnknownCommand, cmdName);
+            Log.Warning(LocalizationKey.Log_Console_UnknownCommand, cmdName);
     }
 
     public string GetPreviousCommand()

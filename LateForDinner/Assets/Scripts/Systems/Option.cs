@@ -51,7 +51,7 @@ public partial class GraphicOption
     public FullScreenMode screenMode;
     public bool vSync;
     public bool antiAliasing;
-    public Quality quality;
+    public TextureQuality quality;
     public bool bloom;
     public bool ambientOccusion;
 
@@ -87,7 +87,7 @@ public partial class GraphicOption
                 screenMode = FullScreenMode.FullScreenWindow,
                 vSync = true,
                 antiAliasing = false,
-                quality = Quality.High,
+                quality = TextureQuality.High,
                 bloom = true,
                 ambientOccusion = true
             };

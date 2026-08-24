@@ -24,7 +24,7 @@ public class UIManager
     public float ScaleFactor
         => _canvas != null ? _canvas.scaleFactor : 1f;
 
-    private readonly Dictionary<Layer, Transform> _layer = new Dictionary<Layer, Transform>();
+    private readonly Dictionary<LayerType, Transform> _layer = new Dictionary<LayerType, Transform>();
     private readonly List<UIPopup> _popups = new List<UIPopup>();
     private readonly Dictionary<UserInterface, IDisposable> _handles = new Dictionary<UserInterface, IDisposable>();
     private UIDisplay _display;
@@ -33,11 +33,11 @@ public class UIManager
     {
         _root = new GameObject { name = Literal.Roots.UserInterfaces };
         _root.transform.SetParent(Managers.Instance.transform, false);
-        CreateLayer(Layer.Display);
-        CreateLayer(Layer.Popup);
-        CreateLayer(Layer.System);
-        CreateLayer(Layer.Lock);
-        Log.System(Localization.Log_UI_RootInitialized);
+        CreateLayer(LayerType.Display);
+        CreateLayer(LayerType.Popup);
+        CreateLayer(LayerType.System);
+        CreateLayer(LayerType.Lock);
+        Log.System(LocalizationKey.Log_UI_RootInitialized);
     }
 
     private GameObject CreateCanvas(string name, Transform parent, int sortingOrder, out Canvas canvasOut)
@@ -57,12 +57,12 @@ public class UIManager
         return gameObject;
     }
 
-    private void CreateLayer(Layer layer)
+    private void CreateLayer(LayerType layer)
     {
         string name = ZString.Concat(Literal.Roots.Layers, $"{layer}");
         var gameObject = CreateCanvas(name, _root.transform, (int)layer, out var canvas);
 
-        if (layer == Layer.Display)
+        if (layer == LayerType.Display)
             _canvas = canvas;
 
         _layer[layer] = gameObject.transform;
@@ -83,11 +83,11 @@ public class UIManager
             Close(_display);
 
         var _ = Root;
-        var (instance, rentHandle) = await Managers.Pool.PopAsync<T>(_layer[Layer.Display]);
+        var (instance, rentHandle) = await Managers.Pool.PopAsync<T>(_layer[LayerType.Display]);
 
         if (instance == null)
         {
-            Log.Error(Localization.Log_UI_OpenDisplayFailed, typeof(T).Name);
+            Log.Error(LocalizationKey.Log_UI_OpenDisplayFailed, typeof(T).Name);
             return null;
         }
 
@@ -105,11 +105,11 @@ public class UIManager
             Close(_display);
 
         var _ = Root;
-        var (instance, rentHandle) = Managers.Pool.Pop<T>(_layer[Layer.Display]);
+        var (instance, rentHandle) = Managers.Pool.Pop<T>(_layer[LayerType.Display]);
 
         if (instance == null)
         {
-            Log.Error(Localization.Log_UI_OpenDisplayFailed, typeof(T).Name);
+            Log.Error(LocalizationKey.Log_UI_OpenDisplayFailed, typeof(T).Name);
             return null;
         }
 
@@ -127,11 +127,11 @@ public class UIManager
         }
 
         var _ = Root;
-        var (instance, rentHandle) = await Managers.Pool.PopAsync<T>(_layer[Layer.Popup]);
+        var (instance, rentHandle) = await Managers.Pool.PopAsync<T>(_layer[LayerType.Popup]);
 
         if (instance == null)
         {
-            Log.Error(Localization.Log_UI_OpenPopupFailed, typeof(T).Name);
+            Log.Error(LocalizationKey.Log_UI_OpenPopupFailed, typeof(T).Name);
             return null;
         }
 
@@ -150,11 +150,11 @@ public class UIManager
         }
 
         var _ = Root;
-        var (instance, rentHandle) = Managers.Pool.Pop<T>(_layer[Layer.Popup]);
+        var (instance, rentHandle) = Managers.Pool.Pop<T>(_layer[LayerType.Popup]);
 
         if (instance == null)
         {
-            Log.Error(Localization.Log_UI_OpenPopupFailed, typeof(T).Name);
+            Log.Error(LocalizationKey.Log_UI_OpenPopupFailed, typeof(T).Name);
             return null;
         }
 
@@ -164,7 +164,7 @@ public class UIManager
         return instance;
     }
 
-    public async UniTask<T> OpenSystemAsync<T>(Layer layer = Layer.System) where T : UISystem
+    public async UniTask<T> OpenSystemAsync<T>(LayerType layer = LayerType.System) where T : UISystem
     {
         var existingSystem = GetSystem<T>();
 
@@ -176,7 +176,7 @@ public class UIManager
 
         if (instance == null)
         {
-            Log.Error(Localization.Log_UI_OpenSystemFailed, typeof(T).Name);
+            Log.Error(LocalizationKey.Log_UI_OpenSystemFailed, typeof(T).Name);
             return null;
         }
 
@@ -184,7 +184,7 @@ public class UIManager
         return instance;
     }
 
-    public T OpenSystem<T>(Layer layer = Layer.System) where T : UISystem
+    public T OpenSystem<T>(LayerType layer = LayerType.System) where T : UISystem
     {
         var existingSystem = GetSystem<T>();
 
@@ -196,7 +196,7 @@ public class UIManager
 
         if (instance == null)
         {
-            Log.Error(Localization.Log_UI_OpenSystemFailed, typeof(T).Name);
+            Log.Error(LocalizationKey.Log_UI_OpenSystemFailed, typeof(T).Name);
             return null;
         }
 

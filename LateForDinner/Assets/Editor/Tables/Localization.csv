@@ -1,6 +1,6 @@
 # Table Type: Localization,
 # Description: 게임 내 공통 현지화 데이터 관리 테이블,
-# Rule: 콤마 사용 불가. KEY는 고유 값이어야 하며 중복 불가. 언어별 텍스트에 포맷팅 파라미터({0} or {1} 등) 사용 가능,
+# Rule: 콤마 사용 불가. Key는 고유 값이어야 하며 중복 불가. 각 Key별 Text에 포맷팅 파라미터({0} or {1} 등) 사용 가능,
 Key,Text
 # Index: Action,
 Action_Right,이동(우)

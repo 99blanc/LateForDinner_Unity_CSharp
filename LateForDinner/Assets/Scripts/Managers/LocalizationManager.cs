@@ -14,7 +14,7 @@ public class LocalizationManager
     {
         await SyncAsync();
         RefreshAsync();
-        Log.Info(Localization.Log_Localization_LoadedSuccessfully);
+        Log.Info(LocalizationKey.Log_Localization_LoadedSuccessfully);
     }
 
     private async UniTask SyncAsync()
@@ -41,7 +41,7 @@ public class LocalizationManager
             }
             catch
             {
-                Log.Warning(Localization.Log_Localization_FileReadFailed, Path.GetFileName(file));
+                Log.Warning(LocalizationKey.Log_Localization_FileReadFailed, Path.GetFileName(file));
             }
         }
 
@@ -99,7 +99,7 @@ public class LocalizationManager
                     file.Locate = language;
                     file.Translations = _overrides;
                     await SaveAsync(path, file);
-                    Log.System(Localization.Log_Localization_Synced, changeCount);
+                    Log.System(LocalizationKey.Log_Localization_Synced, changeCount);
                 }
             }
 
@@ -107,7 +107,7 @@ public class LocalizationManager
         }
         catch
         {
-            Log.Error(Localization.Log_Localization_SyncFailed);
+            Log.Error(LocalizationKey.Log_Localization_SyncFailed);
         }
     }
 
@@ -120,7 +120,7 @@ public class LocalizationManager
         }
         catch
         {
-            Log.Error(Localization.Log_Localization_SaveFailed, Path.GetFileName(path));
+            Log.Error(LocalizationKey.Log_Localization_SaveFailed, Path.GetFileName(path));
         }
     }
 
@@ -166,7 +166,7 @@ public class LocalizationManager
             }
             catch
             {
-                Log.Warning(Localization.Log_Localization_LanguageFileParseFailed, Path.GetFileName(file));
+                Log.Warning(LocalizationKey.Log_Localization_LanguageFileParseFailed, Path.GetFileName(file));
             }
         }
 
@@ -184,16 +184,16 @@ public class LocalizationManager
         return id;
     }
 
-    public string Get(Localization id) 
+    public string Get(LocalizationKey id) 
         => Get(id.ToString());
-    public string Get<T1>(Localization id, T1 arg1) 
+    public string Get<T1>(LocalizationKey id, T1 arg1) 
         => FormatText(id, text => ZString.Format(text, arg1));
-    public string Get<T1, T2>(Localization id, T1 arg1, T2 arg2) 
+    public string Get<T1, T2>(LocalizationKey id, T1 arg1, T2 arg2) 
         => FormatText(id, text => ZString.Format(text, arg1, arg2));
-    public string Get<T1, T2, T3>(Localization id, T1 arg1, T2 arg2, T3 arg3) 
+    public string Get<T1, T2, T3>(LocalizationKey id, T1 arg1, T2 arg2, T3 arg3) 
         => FormatText(id, text => ZString.Format(text, arg1, arg2, arg3));
 
-    public string Get(Localization id, params object[] args)
+    public string Get(LocalizationKey id, params object[] args)
     {
         string text = Get(id);
 
@@ -210,7 +210,7 @@ public class LocalizationManager
         }
     }
 
-    private string FormatText(Localization id, Func<string, string> formatAction)
+    private string FormatText(LocalizationKey id, Func<string, string> formatAction)
     {
         string text = Get(id);
 
@@ -228,6 +228,6 @@ public class LocalizationManager
     {
         await SyncAsync();
         RefreshAsync();
-        Log.Info(Localization.Log_Localization_LoadedSuccessfully);
+        Log.Info(LocalizationKey.Log_Localization_LoadedSuccessfully);
     }
 }

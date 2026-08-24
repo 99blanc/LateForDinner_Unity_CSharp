@@ -1,3 +1,4 @@
+using System;
 using System.Runtime.CompilerServices;
 
 public static class PoolableExtensions
@@ -16,5 +17,11 @@ public static class PoolableExtensions
     {
         var box = _pooledStates.GetOrCreateValue(poolable);
         box.Value = value;
+    }
+
+    public static T AddToPool<T>(this T disposable, IPoolable owner) where T : IDisposable
+    {
+        PoolDisposableRegistry.Register(owner, disposable);
+        return disposable;
     }
 }

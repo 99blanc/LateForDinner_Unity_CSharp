@@ -65,12 +65,12 @@ public class UISaveSlot : UISlot
             string year = (meta.Year % 100).ToString("D2");
             string month = meta.Month.ToString("D2");
             string date = meta.Date.ToString("D2");
-            SetText(Texts.DayText, Localization.Slot_Day_Format, meta.Day);
-            SetText(Texts.SaveTimeText, Localization.Slot_SaveTime_Format, year, month, date);
+            SetText(Texts.DayText, LocalizationKey.Slot_Day_Format, meta.Day);
+            SetText(Texts.SaveTimeText, LocalizationKey.Slot_SaveTime_Format, year, month, date);
             return;
         }
 
-        SetText(Texts.DayText, Localization.None);
+        SetText(Texts.DayText, LocalizationKey.None);
         SetText(Texts.SaveTimeText, string.Empty);
     }
 
@@ -87,7 +87,7 @@ public class UISaveSlot : UISlot
     public void RefreshTag()
     {
         if (_index == 0)
-            SetText(Texts.TagText, Localization.Slot_Auto);
+            SetText(Texts.TagText, LocalizationKey.Slot_Auto);
         else
             SetText(Texts.TagText, _index.ToString());
     }
@@ -118,7 +118,7 @@ public class UISaveSlot : UISlot
         }
         catch
         {
-            Log.Error(Localization.UI_Save_Slot_MoveUpFailed, _index);
+            Log.Error(LocalizationKey.Log_Save_Slot_MoveUpFailed, _index);
         }
     }
 
@@ -138,7 +138,7 @@ public class UISaveSlot : UISlot
         }
         catch
         {
-            Log.Error(Localization.UI_Save_Slot_MoveDownFailed, _index);
+            Log.Error(LocalizationKey.Log_Save_Slot_MoveDownFailed, _index);
         }
     }
 
@@ -148,13 +148,13 @@ public class UISaveSlot : UISlot
     public void SetDisplay(UITitleDisplay display) 
         => _display = display;
 
-    private void SetText(Texts textEnum, Localization key) 
+    private void SetText(Texts textEnum, LocalizationKey key) 
         => GetText(textEnum).text = Managers.Localization.Get(key);
 
-    private void SetText<T1>(Texts textEnum, Localization key, T1 arg1) 
+    private void SetText<T1>(Texts textEnum, LocalizationKey key, T1 arg1) 
         => GetText(textEnum).text = Managers.Localization.Get(key, arg1);
 
-    private void SetText<T1, T2, T3>(Texts textEnum, Localization key, T1 arg1, T2 arg2, T3 arg3) 
+    private void SetText<T1, T2, T3>(Texts textEnum, LocalizationKey key, T1 arg1, T2 arg2, T3 arg3) 
         => GetText(textEnum).text = Managers.Localization.Get(key, arg1, arg2, arg3);
 
     private void SetText(Texts textEnum, string text) 

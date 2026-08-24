@@ -37,7 +37,7 @@ public class UIToastSlot : UISlot
             GetText(Texts.MessageText).text = _messageProvider();
     }
 
-    public void Setup(Localization messageKey, Action onExpire)
+    public void Setup(LocalizationKey messageKey, Action onExpire)
     {
         _messageProvider = () => Managers.Localization.Get(messageKey);
         Refresh();
@@ -45,7 +45,7 @@ public class UIToastSlot : UISlot
         FadeAndExpireAsync(3f, onExpire, token).Forget();
     }
 
-    public void Setup<T1>(Localization messageKey, Action onExpire, T1 arg1)
+    public void Setup<T1>(LocalizationKey messageKey, Action onExpire, T1 arg1)
     {
         _messageProvider = () => Managers.Localization.Get(messageKey, arg1);
         Refresh();
@@ -53,7 +53,7 @@ public class UIToastSlot : UISlot
         FadeAndExpireAsync(3f, onExpire, token).Forget();
     }
 
-    public void Setup<T1, T2>(Localization messageKey, Action onExpire, T1 arg1, T2 arg2)
+    public void Setup<T1, T2>(LocalizationKey messageKey, Action onExpire, T1 arg1, T2 arg2)
     {
         _messageProvider = () => Managers.Localization.Get(messageKey, arg1, arg2);
         Refresh();
@@ -61,7 +61,7 @@ public class UIToastSlot : UISlot
         FadeAndExpireAsync(3f, onExpire, token).Forget();
     }
 
-    public void Setup<T1, T2, T3>(Localization messageKey, Action onExpire, T1 arg1, T2 arg2, T3 arg3)
+    public void Setup<T1, T2, T3>(LocalizationKey messageKey, Action onExpire, T1 arg1, T2 arg2, T3 arg3)
     {
         _messageProvider = () => Managers.Localization.Get(messageKey, arg1, arg2, arg3);
         Refresh();
@@ -69,7 +69,7 @@ public class UIToastSlot : UISlot
         FadeAndExpireAsync(3f, onExpire, token).Forget();
     }
 
-    public void Setup(Localization messageKey, Action onExpire, params object[] args)
+    public void Setup(LocalizationKey messageKey, Action onExpire, params object[] args)
     {
         _messageProvider = () => (args != null && args.Length > 0) ? Managers.Localization.Get(messageKey, args) : Managers.Localization.Get(messageKey);
         Refresh();

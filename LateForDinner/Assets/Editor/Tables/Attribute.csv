@@ -1,0 +1,43 @@
+# Table Type: Attribute,
+# Description: 캐릭터 및 객체 속성 정의 테이블,
+# Rule: 콤마 사용 불가. Key는 고유 값이어야 하며 중복 불가. DataType은 CSharp 공용 타입 시스템이 표준 규격,
+Key,DataType
+# Index: AttributeRegistry,
+# Property: 체력,
+Health,short
+# Property: 체력,
+TemporaryHealth,short
+# Property: 이동속도,
+MoveSpeed,float
+# Property: 가속도. Priority: MoveSpeed,
+Acceleration,float
+# Property: 감속도. Priority: MoveSpeed,
+Deceleration,float
+# Property: 방향 전환 감속. Priority: MoveSpeed,
+TurnDeceleration,float
+# Property: 공격력,
+Damage,short
+# Property: 공격속도. Priority: Damage,
+AttackSpeed,float
+# Property: 공격범위. Priority: Damage,
+AttackRange,float
+# Property: 공격간격. Priority: Damage,
+AttackInterval,float
+# Property: 차지배율. Priority: Damage,
+ChargeMultiplier,float
+# Property: 관통계수. Priority: Damage,
+PierceCount,short
+# Property: 대시횟수,
+DashCount,short
+# Property: 대시쿨타임. Priority: DashCount,
+DashCooldown,float
+# Property: 대시거리. Priority: DashCount,
+DashDistance,float
+# Property: 점프횟수,
+JumpCount,short
+# Property: 점프력. Priority: JumpCount,
+JumpForce,float
+# Property: 중력저항,
+GravityReduction,float
+# Property: 무적시간,
+InvulnerabilityDuration,float

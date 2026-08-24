@@ -8,6 +8,9 @@ public interface IPoolable
     virtual void Get() 
         => this.SetPooled(false);
 
-    virtual void Release() 
-        => this.SetPooled(true);
+    virtual void Release()
+    {
+        this.SetPooled(true);
+        PoolDisposableRegistry.Clear(this);
+    }
 }

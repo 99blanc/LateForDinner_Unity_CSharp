@@ -1,0 +1,7 @@
+# Table Type: PlayableCharacter,,
+# Description: 플레이어블 캐릭터 및 객체 속성 정의 테이블,,
+# Rule: 콤마 사용 불가. ID는 고유 값이어야 하며 중복 불가. Name은 리터럴 표기 문자로 실제 게임에는 미반영,,
+# Foreign Key: PlayableCharacterTemplate.csv,,
+ID,Name,PlayableCharacterTemplateID
+# Index: PlayableCharacter,,
+1,Protagonist,1

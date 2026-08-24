@@ -29,7 +29,7 @@ public class UIConfirmPopup : UIPopup, IDraggable, IFocusable
 
     private Action _onConfirm;
     private Action _onCancel;
-    private Localization _cachedTitleKey;
+    private LocalizationKey _cachedTitleKey;
     private Func<string> _messageProvider;
 
     public override void Init()
@@ -42,7 +42,7 @@ public class UIConfirmPopup : UIPopup, IDraggable, IFocusable
         GetImage(Images.CancelButtonImage).BindState(_cancelButtonState, Define.Atlas.Common, this);
         GetButton(Buttons.ConfirmButton).BindViewAsButton(_ => OnClickConfirm(), ViewEvent.LeftClick, this, _confirmButtonState);
         GetButton(Buttons.CancelButton).BindViewAsButton(_ => OnClickCancel(), ViewEvent.LeftClick, this, _cancelButtonState);
-        Managers.Control.Subscribe(Literal.Hotkeys.Cancel, OnClickCancel).AddTo(this);
+        Managers.Control.Subscribe(Literal.Hotkeys.Cancel, OnClickCancel).AddToPool(this);
     }
 
     public override void Refresh()
@@ -52,7 +52,7 @@ public class UIConfirmPopup : UIPopup, IDraggable, IFocusable
         GetText(Texts.MessageText).text = _messageProvider();
     }
 
-    public void Setup(Localization titleKey, Localization messageKey, Action onConfirm, Action onCancel = null)
+    public void Setup(LocalizationKey titleKey, LocalizationKey messageKey, Action onConfirm, Action onCancel = null)
     {
         _onConfirm = onConfirm;
         _onCancel = onCancel;
@@ -61,7 +61,7 @@ public class UIConfirmPopup : UIPopup, IDraggable, IFocusable
         Refresh();
     }
 
-    public void Setup<T1>(Localization titleKey, Localization messageKey, Action onConfirm, Action onCancel, T1 arg1)
+    public void Setup<T1>(LocalizationKey titleKey, LocalizationKey messageKey, Action onConfirm, Action onCancel, T1 arg1)
     {
         _onConfirm = onConfirm;
         _onCancel = onCancel;
@@ -70,7 +70,7 @@ public class UIConfirmPopup : UIPopup, IDraggable, IFocusable
         Refresh();
     }
 
-    public void Setup<T1, T2>(Localization titleKey, Localization messageKey, Action onConfirm, Action onCancel, T1 arg1, T2 arg2)
+    public void Setup<T1, T2>(LocalizationKey titleKey, LocalizationKey messageKey, Action onConfirm, Action onCancel, T1 arg1, T2 arg2)
     {
         _onConfirm = onConfirm;
         _onCancel = onCancel;
@@ -79,7 +79,7 @@ public class UIConfirmPopup : UIPopup, IDraggable, IFocusable
         Refresh();
     }
 
-    public void Setup<T1, T2, T3>(Localization titleKey, Localization messageKey, Action onConfirm, Action onCancel, T1 arg1, T2 arg2, T3 arg3)
+    public void Setup<T1, T2, T3>(LocalizationKey titleKey, LocalizationKey messageKey, Action onConfirm, Action onCancel, T1 arg1, T2 arg2, T3 arg3)
     {
         _onConfirm = onConfirm;
         _onCancel = onCancel;
@@ -88,7 +88,7 @@ public class UIConfirmPopup : UIPopup, IDraggable, IFocusable
         Refresh();
     }
 
-    public void Setup(Localization titleKey, Localization messageKey, Action onConfirm, Action onCancel = null, params object[] args)
+    public void Setup(LocalizationKey titleKey, LocalizationKey messageKey, Action onConfirm, Action onCancel = null, params object[] args)
     {
         _onConfirm = onConfirm;
         _onCancel = onCancel;

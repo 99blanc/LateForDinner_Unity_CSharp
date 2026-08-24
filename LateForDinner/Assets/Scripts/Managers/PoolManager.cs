@@ -169,7 +169,7 @@ public class PoolManager
 
         if (newInstance == null)
         {
-            Log.Error(Localization.Log_Pool_InstantiateFailed, key);
+            Log.Error(LocalizationKey.Log_Pool_InstantiateFailed, key);
             return (null, false);
         }
 
@@ -192,7 +192,7 @@ public class PoolManager
 
         if (newInstance == null)
         {
-            Log.Error(Localization.Log_Pool_InstantiateFailed, key);
+            Log.Error(LocalizationKey.Log_Pool_InstantiateFailed, key);
             return (null, false);
         }
 
@@ -258,6 +258,6 @@ public class PoolManager
 
         _registries.Clear();
         _parents.Clear();
-        Log.System(Localization.Log_Pool_Cleared, totalDestroyed);
+        Log.System(LocalizationKey.Log_Pool_Cleared, totalDestroyed);
     }
 }

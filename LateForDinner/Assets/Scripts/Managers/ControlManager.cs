@@ -62,7 +62,7 @@ public class ControlManager
         
         if (original == null)
         {
-            Log.Error(Localization.Log_Control_AssetLoadFailed, Literal.Assets.InputActionAsset);
+            Log.Error(LocalizationKey.Log_Control_AssetLoadFailed, Literal.Assets.InputActionAsset);
             return;
         }
 
@@ -74,7 +74,7 @@ public class ControlManager
         CacheActions();
         EnableMap(Literal.Maps.User);
         EnableMap(Literal.Maps.UI);
-        Log.Info(Localization.Log_Control_LoadedSuccessfully);
+        Log.Info(LocalizationKey.Log_Control_LoadedSuccessfully);
     }
 
     private void CacheActions()
@@ -127,7 +127,7 @@ public class ControlManager
 
         if (map == null)
         {
-            Log.Warning(Localization.Log_Control_MapNotFound, mapName);
+            Log.Warning(LocalizationKey.Log_Control_MapNotFound, mapName);
             return;
         }
 
@@ -145,14 +145,6 @@ public class ControlManager
 
     public bool IsTriggered(string actionName) 
         => _caches.TryGetValue(actionName, out var action) && action.triggered;
-
-    public Vector2 GetVector2(string actionName)
-    {
-        if (_caches.TryGetValue(actionName, out var action))
-            return action.ReadValue<Vector2>();
-
-        return Vector2.zero;
-    }
 
     public Observable<Unit> AsObservable(string action)
     {

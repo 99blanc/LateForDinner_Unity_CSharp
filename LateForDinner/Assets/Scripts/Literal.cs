@@ -130,6 +130,24 @@ public class Literal
 
     public class Tables
     {
+        public const string Attribute = "Attribute";
+        public const string Character = "Character";
         public const string Localization = "Localization";
+        public const string PlayableCharacter = "PlayableCharacter";
+        public const string PlayableCharacterTemplate = "PlayableCharacterTemplate";
+    }
+
+    public class Types
+    {
+        public const string Double = "double";
+        public const string Error = "error";
+        public const string Float = "float";
+        public const string Int = "int";
+        public const string Info = "info";
+        public const string Long = "long";
+        public const string Short = "short";
+        public const string System = "system";
+        public const string Warn = "warn";
+        public const string Warning = "warning";
     }
 }

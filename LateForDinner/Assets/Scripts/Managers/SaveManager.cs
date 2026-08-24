@@ -22,7 +22,7 @@ public class SaveManager
         if (!File.Exists(path) && File.Exists(backupPath))
         {
             File.Copy(backupPath, path, true);
-            Log.Warning(Localization.Log_Save_RestoredFromBackup, index);
+            Log.Warning(LocalizationKey.Log_Save_RestoredFromBackup, index);
         }
 
         try
@@ -36,11 +36,11 @@ public class SaveManager
             byte[] bytes = await File.ReadAllBytesAsync(path);
             CurrentData = MemoryPackSerializer.Deserialize<Save>(bytes) ?? new Save();
             _currentSlot = index;
-            Log.System(Localization.Log_Save_LoadSuccess, index);
+            Log.System(LocalizationKey.Log_Save_LoadSuccess, index);
         }
         catch
         {
-            Log.Error(Localization.Log_Save_LoadFailed, index);
+            Log.Error(LocalizationKey.Log_Save_LoadFailed, index);
             NewGame(index);
         }
     }
@@ -67,11 +67,11 @@ public class SaveManager
 
             await File.WriteAllBytesAsync(path, bytes);
             await SaveMetaAsync();
-            Log.System(Localization.Log_Save_SaveSuccess, _currentSlot);
+            Log.System(LocalizationKey.Log_Save_SaveSuccess, _currentSlot);
         }
         catch
         {
-            Log.Error(Localization.Log_Save_SaveFailed, _currentSlot);
+            Log.Error(LocalizationKey.Log_Save_SaveFailed, _currentSlot);
         }
     }
 
@@ -97,7 +97,7 @@ public class SaveManager
         }
         catch
         {
-            Log.Error(Localization.Log_Save_MetaLoadFailed);
+            Log.Error(LocalizationKey.Log_Save_MetaLoadFailed);
             MetaData = new SaveMeta();
         }
 
@@ -186,7 +186,7 @@ public class SaveManager
         }
         catch
         {
-            Log.Error(Localization.Log_Save_MetaSaveFailed);
+            Log.Error(LocalizationKey.Log_Save_MetaSaveFailed);
         }
     }
 
@@ -205,7 +205,7 @@ public class SaveManager
         if (File.Exists(path))
             File.Delete(path);
 
-        Log.System(Localization.Log_Save_ClearSuccess, index);
+        Log.System(LocalizationKey.Log_Save_ClearSuccess, index);
     }
 
     public void NewGame(int slotIndex)
@@ -213,7 +213,7 @@ public class SaveManager
         _currentSlot = slotIndex;
         CurrentData = new Save();
         SyncMeta();
-        Log.System(Localization.Log_Save_NewGameStarted, slotIndex);
+        Log.System(LocalizationKey.Log_Save_NewGameStarted, slotIndex);
     }
 
     private string GetPath(int slot)

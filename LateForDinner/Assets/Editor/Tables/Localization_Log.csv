@@ -1,7 +1,9 @@
 # Table Type: Localization,
 # Description: 게임 내 로그 및 시스템 메시지 현지화 데이터 관리 테이블,
-# Rule: 콤마 사용 불가. KEY는 고유 값이어야 하며 중복 불가. 언어별 텍스트에 포맷팅 파라미터({0} or {1} 등) 사용 가능,
+# Rule: 콤마 사용 불가. Key는 고유 값이어야 하며 중복 불가. 각 Key별 Text에 포맷팅 파라미터({0} or {1} 등) 사용 가능,
 Key,Text
+# Index: AttributeRegistry,
+Log_Attribute_Registry_Unsupported,[AttributeRegistry] 지원하지 않는 데이터 타입입니다: {0}('{1}')
 # Index: ConfigManager,
 Log_Config_CreatedNew,[ConfigManager] 새로운 설정 파일을 생성했습니다.
 Log_Config_LoadedSuccessfully,[ConfigManager] 설정 파일을 성공적으로 불러왔습니다.
@@ -65,20 +67,20 @@ Log_UI_OpenDisplayFailed,[UIManager] 디스플레이 UI({0})를 생성(Pop)하�
 Log_UI_OpenPopupFailed,[UIManager] 팝업 UI({0})를 생성(Pop)하는 데 실패했습니다.
 Log_UI_OpenSystemFailed,[UIManager] 시스템 UI({0})를 생성(Pop)하는 데 실패했습니다.
 # Index: UIConsoleSystem,
-UI_Console_System_ProcessFailed,[UIConsoleSystem] 명령어('{0}') 처리 중 예외가 발생했습니다.
+Log_Console_System_ProcessFailed,[UIConsoleSystem] 명령어('{0}') 처리 중 예외가 발생했습니다.
 # Index: UIKeybindSlot,
-UI_Keybind_Slot_RebindFailed,[UIKeybindSlot] 액션('{0}') 키 리바인딩 시작 중 예외가 발생했습니다.
+Log_Keybind_Slot_RebindFailed,[UIKeybindSlot] 액션('{0}') 키 리바인딩 시작 중 예외가 발생했습니다.
 # Index: UISaveSlot,
-UI_Save_Slot_SlotClickFailed,[UISaveSlot] 슬롯({0}) 클릭 처리 중 예외가 발생했습니다.
-UI_Save_Slot_MoveUpFailed,[UISaveSlot] 슬롯({0}) 위로 이동 중 예외가 발생했습니다.
-UI_Save_Slot_MoveDownFailed,[UISaveSlot] 슬롯({0}) 아래로 이동 중 예외가 발생했습니다.
+Log_Save_Slot_SlotClickFailed,[UISaveSlot] 슬롯({0}) 클릭 처리 중 예외가 발생했습니다.
+Log_Save_Slot_MoveUpFailed,[UISaveSlot] 슬롯({0}) 위로 이동 중 예외가 발생했습니다.
+Log_Save_Slot_MoveDownFailed,[UISaveSlot] 슬롯({0}) 아래로 이동 중 예외가 발생했습니다.
 # Index: UIOptionPopup,
-UI_Option_Popup_ApplyFailed,[UIOptionPopup] 옵션 적용 중 예외가 발생했습니다.
-UI_Option_Popup_CompleteFailed,[UIOptionPopup] 옵션 완료 저장 중 예외가 발생했습니다.
-UI_Option_Popup_DefaultFailed,[UIOptionPopup] 옵션 초기화 중 예외가 발생했습니다.
-UI_Option_Popup_Keybind_Duplicate,[UIOptionPopup] 이미 '{0}'에 '{1}'키가 지정되어 있습니다.
+Log_Option_Popup_ApplyFailed,[UIOptionPopup] 옵션 적용 중 예외가 발생했습니다.
+Log_Option_Popup_CompleteFailed,[UIOptionPopup] 옵션 완료 저장 중 예외가 발생했습니다.
+Log_Option_Popup_DefaultFailed,[UIOptionPopup] 옵션 초기화 중 예외가 발생했습니다.
+Log_Option_Popup_Keybind_Duplicate,[UIOptionPopup] 이미 '{0}'에 '{1}'키가 지정되어 있습니다.
 # Index: UILoadDisplay,
-UI_Load_Display_AnimationFailed,[UILoadDisplay] 로딩 애니메이션 진행 중 예외가 발생했습니다.
-UI_Load_Display_RotateFailed,[UILoadDisplay] 로딩 회전 애니메이션 중 예외가 발생했습니다.
+Log_Load_Display_AnimationFailed,[UILoadDisplay] 로딩 애니메이션 진행 중 예외가 발생했습니다.
+Log_Load_Display_RotateFailed,[UILoadDisplay] 로딩 회전 애니메이션 중 예외가 발생했습니다.
 # Index: UISplashDisplay,
-UI_Splash_Display_Skip,[UISplashScreen] 스플래시 이미지를 건너뛰었습니다.
+Log_Splash_Display_Skip,[UISplashScreen] 스플래시 이미지를 건너뛰었습니다.

@@ -6,13 +6,26 @@ using UnityEngine;
 
 public class DataManager
 {
+    public Dictionary<AttributeType, AttributeData> Attributes { get; private set; } = new Dictionary<AttributeType, AttributeData>();
     public Dictionary<string, LocalizationData> Localization { get; private set; } = new Dictionary<string, LocalizationData>();
+    public Dictionary<int, CharacterData> Characters { get; private set; } = new();
+    public Dictionary<int, PlayableCharacterData> PlayableCharacters { get; private set; } = new();
+    public Dictionary<int, Dictionary<string, string>> PlayableCharacterTemplates { get; private set; } = new();
 
     public async UniTask InitAsync()
     {
-        // TODO ::: 데이터 테이블 추가 입력
         Localization = await LoadDictionaryAsync<string, LocalizationData>(Literal.Tables.Localization, data => data.Key);
-        Log.Info(global::Localization.Log_Data_LoadedSuccessfully, Literal.Tables.Localization);
+        Log.Info(global::LocalizationKey.Log_Data_LoadedSuccessfully, Literal.Tables.Localization);
+        var attributes = await LoadListAsync<AttributeData>(Literal.Tables.Attribute);
+        attributes.BindTypes();
+        Log.Info(global::LocalizationKey.Log_Data_LoadedSuccessfully, Literal.Tables.Attribute);
+        Characters = await LoadDictionaryAsync<int, CharacterData>(Literal.Tables.Character, data => data.ID);
+        Log.Info(global::LocalizationKey.Log_Data_LoadedSuccessfully, Literal.Tables.Character);
+        PlayableCharacters = await LoadDictionaryAsync<int, PlayableCharacterData>(Literal.Tables.PlayableCharacter, data => data.ID);
+        Log.Info(global::LocalizationKey.Log_Data_LoadedSuccessfully, Literal.Tables.PlayableCharacter);
+        var playableCharacterTemplates = await LoadListAsync<PlayableCharacterTemplateData>(Literal.Tables.PlayableCharacterTemplate);
+        PlayableCharacterTemplates = playableCharacterTemplates.ToNestedDictionary(x => x.PlayableCharacterID, x => x.AttributeKey, x => x.Value);
+        Log.Info(global::LocalizationKey.Log_Data_LoadedSuccessfully, Literal.Tables.PlayableCharacterTemplate);
     }
 
     private async UniTask<List<T>> LoadListAsync<T>(string name)
@@ -23,7 +36,7 @@ public class DataManager
 
             if (asset == null)
             {
-                Log.Error(global::Localization.Log_Data_AssetNotFound, name);
+                Log.Error(global::LocalizationKey.Log_Data_AssetNotFound, name);
                 return new List<T>();
             }
 
@@ -32,7 +45,7 @@ public class DataManager
         }
         catch
         {
-            Log.Warning(global::Localization.Log_Data_DeserializeFailed, name);
+            Log.Warning(global::LocalizationKey.Log_Data_DeserializeFailed, name);
             return new List<T>();
         }
     }
@@ -60,7 +73,7 @@ public class DataManager
 
             if (dictionary.ContainsKey(key))
             {
-                Log.Warning(global::Localization.Log_Data_DuplicateKey, name, key.ToString());
+                Log.Warning(global::LocalizationKey.Log_Data_DuplicateKey, name, key.ToString());
                 continue;
             }
 

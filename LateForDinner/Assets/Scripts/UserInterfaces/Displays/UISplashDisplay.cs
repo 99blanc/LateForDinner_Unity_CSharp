@@ -18,7 +18,7 @@ public class UISplashDisplay : UIDisplay, IAnimatable
         base.Init();
         BindImage(typeof(Images));
         Revert();
-        Managers.Control.Subscribe(Literal.Hotkeys.Any, () => CancelToken("SplashTask")).AddTo(this);
+        Managers.Control.Subscribe(Literal.Hotkeys.Any, () => CancelToken("SplashTask")).AddToPool(this);
     }
 
     public override void Get()
@@ -67,7 +67,7 @@ public class UISplashDisplay : UIDisplay, IAnimatable
         }
         catch (OperationCanceledException)
         {
-            Log.System(Localization.UI_Splash_Display_Skip);
+            Log.System(LocalizationKey.Log_Splash_Display_Skip);
         }
     }
 }

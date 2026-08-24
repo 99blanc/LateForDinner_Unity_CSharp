@@ -7,31 +7,126 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using ZLinq;
 using UnityEditor;
+using UnityEditor.U2D.Animation;
 using UnityEngine;
+using ZLinq;
 
 public static class Table
 {
-    private static void GenerateLocalizationKey(List<LocalizationData> records)
+    private static void GenerateAttributeType(List<AttributeData> records)
     {
-        string filePath = Path.Combine(Application.dataPath, "Scripts/Enums/Localization.cs");
+        string filePath = Path.Combine(Application.dataPath, "Scripts/Enums/AttributeType.cs");
         string dir = Path.GetDirectoryName(filePath);
 
         if (!Directory.Exists(dir))
             Directory.CreateDirectory(dir);
 
-        var uniqueKeys = records
+        var validRecords = records
         .Where(data => !string.IsNullOrWhiteSpace(data.Key))
-        .Select(data => data.Key.Trim())
-        .Distinct()
         .ToList();
+        var uniqueRecords = validRecords
+        .GroupBy(data => data.Key.Trim())
+        .Select(group => group.First())
+        .ToList();
+        int maxKeyLength = 0;
+
+        foreach (var data in uniqueRecords)
+        {
+            string key = data.Key.Trim();
+            if (key.Length > maxKeyLength)
+                maxKeyLength = key.Length;
+        }
+
         using var writer = new StreamWriter(filePath);
-        writer.WriteLine("public enum Localization");
+        writer.WriteLine("public enum AttributeType");
         writer.WriteLine("{");
 
-        for (int i = 0; i < uniqueKeys.Count; i++)
-            writer.WriteLine($"    {uniqueKeys[i]},");
+        foreach (var data in uniqueRecords)
+        {
+            string key = data.Key.Trim();
+            string paddedKey = key.PadRight(maxKeyLength);
+            writer.WriteLine($"    {paddedKey}, // {data.DataType}");
+        }
+
+        writer.WriteLine("}");
+    }
+
+    private static void GenerateCharacterID(List<CharacterData> records)
+    {
+        string filePath = Path.Combine(Application.dataPath, "Scripts/Enums/CharacterID.cs");
+        string dir = Path.GetDirectoryName(filePath);
+
+        if (!Directory.Exists(dir))
+            Directory.CreateDirectory(dir);
+
+        var validRecords = records
+            .Where(data => !string.IsNullOrWhiteSpace(data.Name))
+            .ToList();
+
+        var uniqueRecords = validRecords
+            .GroupBy(data => data.Name.Trim())
+            .Select(group => group.First())
+            .ToList();
+
+        int maxKeyLength = 0;
+
+        foreach (var data in uniqueRecords)
+        {
+            string key = data.Name.Trim();
+            if (key.Length > maxKeyLength)
+                maxKeyLength = key.Length;
+        }
+
+        using var writer = new StreamWriter(filePath);
+        writer.WriteLine("public enum CharacterID");
+        writer.WriteLine("{");
+
+        foreach (var data in uniqueRecords)
+        {
+            string key = data.Name.Trim();
+            string paddedKey = key.PadRight(maxKeyLength);
+            writer.WriteLine($"    {paddedKey} = {data.ID},");
+        }
+
+        writer.WriteLine("}");
+    }
+
+    private static void GenerateLocalizationKey(List<LocalizationData> records)
+    {
+        string filePath = Path.Combine(Application.dataPath, "Scripts/Enums/LocalizationKey.cs");
+        string dir = Path.GetDirectoryName(filePath);
+
+        if (!Directory.Exists(dir))
+            Directory.CreateDirectory(dir);
+
+        var validRecords = records
+        .Where(data => !string.IsNullOrWhiteSpace(data.Key))
+        .ToList();
+        var uniqueRecords = validRecords
+        .GroupBy(data => data.Key.Trim())
+        .Select(group => group.First())
+        .ToList();
+        int maxKeyLength = 0;
+
+        foreach (var data in uniqueRecords)
+        {
+            string key = data.Key.Trim();
+            if (key.Length > maxKeyLength)
+                maxKeyLength = key.Length;
+        }
+
+        using var writer = new StreamWriter(filePath);
+        writer.WriteLine("public enum LocalizationKey");
+        writer.WriteLine("{");
+
+        foreach (var data in uniqueRecords)
+        {
+            string key = data.Key.Trim();
+            string paddedKey = key.PadRight(maxKeyLength);
+            string textComment = !string.IsNullOrWhiteSpace(data.Text) ? $" // {data.Text.Replace("\n", " ")}" : string.Empty;
+            writer.WriteLine($"    {paddedKey},{textComment}");
+        }
 
         writer.WriteLine("}");
     }
@@ -67,6 +162,58 @@ public static class Table
             using var reader = new StreamReader(csvPath);
             using var csv = new CsvReader(reader, config);
             var records = csv.GetRecords<T>().ToList();
+            Bake(name, records);
+        }
+        catch
+        {
+            EditorUtility.DisplayDialog("Conversion Error", $"An error occurred while converting {name}", "OK");
+        }
+    }
+
+    public static void ConvertAttribute(string name)
+    {
+        string csvPath = Path.Combine(Application.dataPath, Literal.Paths.Tables, $"{name}.csv");
+
+        if (!File.Exists(csvPath))
+        {
+            EditorUtility.DisplayDialog("Conversion Failed", $"File does not exist:\n{csvPath}", "OK");
+            return;
+        }
+
+        var config = CreateCsvConfiguration();
+
+        try
+        {
+            using var reader = new StreamReader(csvPath);
+            using var csv = new CsvReader(reader, config);
+            var records = csv.GetRecords<AttributeData>().ToList();
+            GenerateAttributeType(records);
+            Bake(name, records);
+        }
+        catch
+        {
+            EditorUtility.DisplayDialog("Conversion Error", $"An error occurred while converting {name}", "OK");
+        }
+    }
+
+    public static void ConvertCharacter(string name)
+    {
+        string csvPath = Path.Combine(Application.dataPath, Literal.Paths.Tables, $"{name}.csv");
+
+        if (!File.Exists(csvPath))
+        {
+            EditorUtility.DisplayDialog("Conversion Failed", $"File does not exist:\n{csvPath}", "OK");
+            return;
+        }
+
+        var config = CreateCsvConfiguration();
+
+        try
+        {
+            using var reader = new StreamReader(csvPath);
+            using var csv = new CsvReader(reader, config);
+            var records = csv.GetRecords<CharacterData>().ToList();
+            GenerateCharacterID(records);
             Bake(name, records);
         }
         catch

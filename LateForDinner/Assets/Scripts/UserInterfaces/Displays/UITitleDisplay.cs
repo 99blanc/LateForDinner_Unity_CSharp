@@ -41,8 +41,8 @@ public class UITitleDisplay : UIDisplay
         BindPanel(typeof(Panels));
         InitButtons();
         InitSaveSlots();
-        Managers.Control.Subscribe(Literal.Hotkeys.Cancel, Application.Quit).AddTo(this);
-        Managers.Control.Subscribe(Literal.Hotkeys.Any, OnAnyPressed).AddTo(this);
+        Managers.Control.Subscribe(Literal.Hotkeys.Cancel, Application.Quit).AddToPool(this);
+        Managers.Control.Subscribe(Literal.Hotkeys.Any, OnAnyPressed).AddToPool(this);
         Switch(UI_TitleState.Main);
     }
 
@@ -74,7 +74,7 @@ public class UITitleDisplay : UIDisplay
     public override void Refresh()
     {
         base.Refresh();
-        SetText(Texts.PressAnyKeyText, Localization.UI_Title_Display_Text_Press_Any_Key);
+        SetText(Texts.PressAnyKeyText, LocalizationKey.UI_Title_Display_Text_Press_Any_Key);
 
         if (_slots == null || _slots.Length == 0)
             return;
@@ -160,6 +160,6 @@ public class UITitleDisplay : UIDisplay
             CloseDetailPopup();
     }
 
-    private void SetText(Texts textEnum, Localization key) 
+    private void SetText(Texts textEnum, LocalizationKey key) 
         => GetText(textEnum).text = Managers.Localization.Get(key);
 }

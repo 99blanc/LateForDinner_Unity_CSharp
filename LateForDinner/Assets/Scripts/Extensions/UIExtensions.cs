@@ -9,10 +9,10 @@ using TMPro;
 
 public static class UIExtensions
 {
-    public static void BindModel<T>(this ReactiveProperty<T> model, Action<T> action, Component component)
-        => model.Subscribe(action).AddTo(component);
+    public static void BindModel<T>(this ReactiveProperty<T> model, Action<T> action, IPoolable component)
+        => model.Subscribe(action).AddToPool(component);
 
-    public static void BindView(this UIBehaviour view, Action<PointerEventData> action, ViewEvent type, Component component, ReactiveProperty<ButtonState> prop = null)
+    public static void BindView(this UIBehaviour view, Action<PointerEventData> action, ViewEvent type, IPoolable component, ReactiveProperty<ButtonState> prop = null)
     {
         Observable<PointerEventData> observable = type switch
         {
@@ -25,10 +25,10 @@ public static class UIExtensions
             ViewEvent.DoubleClick => view.OnPointerClickAsObservable().Chunk(TimeSpan.FromSeconds(0.25f), 2).Where(list => list.Length == 2).Select(list => list[1]),
             _ => Return(type)
         };
-        observable.Where(_ => Disable(prop)).Subscribe(action).AddTo(component);
+        observable.Where(_ => Disable(prop)).Subscribe(action).AddToPool(component);
     }
 
-    public static void BindViewForToggle(this UIBehaviour view, Action<PointerEventData> action, ViewEvent type, Component component)
+    public static void BindViewForToggle(this UIBehaviour view, Action<PointerEventData> action, ViewEvent type, IPoolable component)
     {
         Observable<PointerEventData> observable = type switch
         {
@@ -41,7 +41,7 @@ public static class UIExtensions
             ViewEvent.DoubleClick => view.OnPointerClickAsObservable().Chunk(TimeSpan.FromSeconds(0.25f), 2).Where(list => list.Length == 2).Select(list => list[1]),
             _ => Return(type)
         };
-        observable.Subscribe(action).AddTo(component);
+        observable.Subscribe(action).AddToPool(component);
     }
 
     private static Observable<PointerEventData> Return(ViewEvent type)
@@ -55,7 +55,7 @@ public static class UIExtensions
         return prop.Value != ButtonState.Disable;
     }
 
-    public static void BindViewAsButton(this UIBehaviour view, Action<PointerEventData> action, ViewEvent type, Component component, ReactiveProperty<ButtonState> prop, Func<bool> stayCondition = null)
+    public static void BindViewAsButton(this UIBehaviour view, Action<PointerEventData> action, ViewEvent type, IPoolable component, ReactiveProperty<ButtonState> prop, Func<bool> stayCondition = null)
     {
         Action onReset = () =>
         {
@@ -71,7 +71,7 @@ public static class UIExtensions
         view.BindView(action, type, component, prop);
     }
 
-    public static void BindViewAsToggle(this UIBehaviour view, Action<PointerEventData> action, ViewEvent type, Component component, ReactiveProperty<ButtonState> prop, Func<bool> stayCondition = null)
+    public static void BindViewAsToggle(this UIBehaviour view, Action<PointerEventData> action, ViewEvent type, IPoolable component, ReactiveProperty<ButtonState> prop, Func<bool> stayCondition = null)
     {
         Action onReset = () =>
         {
@@ -99,7 +99,7 @@ public static class UIExtensions
         view.BindViewForToggle(action, type, component);
     }
 
-    public static void BindState(this Image targetImage, ReadOnlyReactiveProperty<ButtonState> prop, string atlas, Component component)
+    public static void BindState(this Image targetImage, ReadOnlyReactiveProperty<ButtonState> prop, string atlas, IPoolable component)
     {
         if (targetImage == null)
             return;
@@ -108,6 +108,7 @@ public static class UIExtensions
         {
             string name = state switch
             {
+                ButtonState.Normal => Define.Sprite.Button_Normal,
                 ButtonState.New => Define.Sprite.Button_New,
                 ButtonState.Highlight => Define.Sprite.Button_Highlight,
                 ButtonState.Press => Define.Sprite.Button_Press,
@@ -115,10 +116,10 @@ public static class UIExtensions
                 _ => Define.Sprite.Button_Normal
             };
             targetImage.sprite = Managers.Resource.GetSprite(atlas, name);
-        }).AddTo(component);
+        }).AddToPool(component);
     }
 
-    public static void BindStateAsArrow(this Image targetImage, ReadOnlyReactiveProperty<ButtonState> prop, string atlas, Component component)
+    public static void BindStateAsArrow(this Image targetImage, ReadOnlyReactiveProperty<ButtonState> prop, string atlas, IPoolable component)
     {
         if (targetImage == null)
             return;
@@ -127,6 +128,7 @@ public static class UIExtensions
         {
             string name = state switch
             {
+                ButtonState.Normal => Define.Sprite.Button_Arrow_Normal,
                 ButtonState.Highlight => Define.Sprite.Button_Arrow_Highlight,
                 ButtonState.Press => Define.Sprite.Button_Arrow_Press,
                 ButtonState.Disable => Define.Sprite.Button_Arrow_Disable,
@@ -134,41 +136,41 @@ public static class UIExtensions
             };
 
             targetImage.sprite = Managers.Resource.GetSprite(atlas, name);
-        }).AddTo(component);
+        }).AddToPool(component);
     }
 
-    public static void BindScrollbar(this Scrollbar scrollbar, Action<float> action, Component component)
+    public static void BindScrollbar(this Scrollbar scrollbar, Action<float> action, IPoolable component)
     {
         if (scrollbar == null)
             return;
 
         action(scrollbar.value);
-        scrollbar.OnValueChangedAsObservable().Subscribe(action).AddTo(component);
+        scrollbar.OnValueChangedAsObservable().Subscribe(action).AddToPool(component);
     }
 
-    public static void BindInputField(this TMP_InputField inputField, Action<string> action, Component component)
+    public static void BindInputField(this TMP_InputField inputField, Action<string> action, IPoolable component)
     {
         if (inputField == null)
             return;
 
         action(inputField.text);
-        inputField.OnValueChangedAsObservable().Subscribe(action).AddTo(component);
+        inputField.OnValueChangedAsObservable().Subscribe(action).AddToPool(component);
     }
 
-    public static void BindInputEndEdit(this TMP_InputField inputField, Action<string> action, Component component)
+    public static void BindInputEndEdit(this TMP_InputField inputField, Action<string> action, IPoolable component)
     {
         if (inputField == null)
             return;
 
-        inputField.OnEndEditAsObservable().Subscribe(action).AddTo(component);
+        inputField.OnEndEditAsObservable().Subscribe(action).AddToPool(component);
     }
 
-    public static void BindInputSubmit(this TMP_InputField inputField, Action<string> action, Component component)
+    public static void BindInputSubmit(this TMP_InputField inputField, Action<string> action, IPoolable component)
     {
         if (inputField is InputField customInput)
         {
             customInput.OnSubmitAction = action;
-            Disposable.Create(() => customInput.OnSubmitAction = null).AddTo(component);
+            Disposable.Create(() => customInput.OnSubmitAction = null).AddToPool(component);
         }
     }
 

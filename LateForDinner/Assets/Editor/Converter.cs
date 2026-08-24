@@ -66,7 +66,14 @@ public class Converter
 
     private static bool ConvertTable(string name)
     {
-        Type dataType = FindType(name);
+        if (name.Equals("Attribute", StringComparison.OrdinalIgnoreCase))
+            return ConvertAttributeTable(name);
+
+        if (name.Equals("Character", StringComparison.OrdinalIgnoreCase))
+            return ConvertCharacterTable(name);
+
+        string className = name + "Data";
+        Type dataType = FindType(className);
 
         if (dataType == null)
         {
@@ -82,6 +89,28 @@ public class Converter
 
         MethodInfo genericMethod = method.MakeGenericMethod(dataType);
         genericMethod.Invoke(null, new object[] { name });
+        return true;
+    }
+
+    private static bool ConvertAttributeTable(string name)
+    {
+        MethodInfo method = typeof(Table).GetMethod("ConvertAttribute", BindingFlags.Public | BindingFlags.Static);
+
+        if (method == null)
+            return false;
+
+        method.Invoke(null, new object[] { name });
+        return true;
+    }
+
+    private static bool ConvertCharacterTable(string name)
+    {
+        MethodInfo method = typeof(Table).GetMethod("ConvertCharacter", BindingFlags.Public | BindingFlags.Static);
+
+        if (method == null)
+            return false;
+
+        method.Invoke(null, new object[] { name });
         return true;
     }
 
@@ -107,8 +136,16 @@ public class Converter
             for (int sub = 0; sub < types.Length; sub++)
             {
                 var type = types[sub];
+
                 if (type.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
+                {
+                    string ns = type.Namespace ?? string.Empty;
+
+                    if (ns.StartsWith("System") || ns.StartsWith("UnityEngine") || ns.StartsWith("UnityEditor"))
+                        continue;
+
                     return type;
+                }
             }
         }
 

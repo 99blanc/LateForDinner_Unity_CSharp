@@ -22,7 +22,7 @@ public class LogManager
         while (_pendingLogs.Count > 0)
             _pendingLogs.Dequeue()?.Invoke();
 
-        Write(Localization.Log_Log_SetupCompleted, LogType.System);
+        Write(LocalizationKey.Log_Log_SetupCompleted, LogType.System);
     }
 
     private void ProcessLog(Action logAction)
@@ -40,6 +40,7 @@ public class LogManager
     {
         Action<string> logAction = type switch
         {
+            LogType.Info => Debug.Log,
             LogType.Warning => Debug.LogWarning,
             LogType.Error => Debug.LogError,
             _ => Debug.Log
@@ -64,19 +65,19 @@ public class LogManager
         });
     }
 
-    public void Write(Localization key, LogType type) 
+    public void Write(LocalizationKey key, LogType type) 
         => Write(GetMessage(key), type);
 
-    public void Write<T1>(Localization key, LogType type, T1 arg1) 
+    public void Write<T1>(LocalizationKey key, LogType type, T1 arg1) 
         => WriteFormatted(key, type, message => ZString.Format(message, arg1));
 
-    public void Write<T1, T2>(Localization key, LogType type, T1 arg1, T2 arg2) 
+    public void Write<T1, T2>(LocalizationKey key, LogType type, T1 arg1, T2 arg2) 
         => WriteFormatted(key, type, message => ZString.Format(message, arg1, arg2));
 
-    public void Write<T1, T2, T3>(Localization key, LogType type, T1 arg1, T2 arg2, T3 arg3) 
+    public void Write<T1, T2, T3>(LocalizationKey key, LogType type, T1 arg1, T2 arg2, T3 arg3) 
         => WriteFormatted(key, type, message => ZString.Format(message, arg1, arg2, arg3));
 
-    public void Write(Localization key, LogType type, params object[] args)
+    public void Write(LocalizationKey key, LogType type, params object[] args)
     {
         ProcessLog(() =>
         {
@@ -86,7 +87,7 @@ public class LogManager
         });
     }
 
-    private void WriteFormatted(Localization key, LogType type, Func<string, string> formatAction)
+    private void WriteFormatted(LocalizationKey key, LogType type, Func<string, string> formatAction)
     {
         ProcessLog(() =>
         {
@@ -100,6 +101,7 @@ public class LogManager
     {
         return type switch
         {
+            LogType.Info => Literal.Logs.Info,
             LogType.Warning => Literal.Logs.Warning,
             LogType.Error => Literal.Logs.Error,
             LogType.System => Literal.Logs.System,
@@ -107,7 +109,7 @@ public class LogManager
         };
     }
 
-    private string GetMessage(Localization key)
+    private string GetMessage(LocalizationKey key)
     {
         string newKey = key.ToString();
         string raw = Managers.Localization == null ? newKey : Managers.Localization.Get(newKey);

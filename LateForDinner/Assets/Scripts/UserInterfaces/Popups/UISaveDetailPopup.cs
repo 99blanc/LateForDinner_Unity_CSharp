@@ -45,7 +45,7 @@ public class UISaveDetailPopup : UIPopup, IFocusable
     public override void Refresh()
     {
         base.Refresh();
-        SetText(Texts.PlayButtonText, Localization.Play);
+        SetText(Texts.PlayButtonText, LocalizationKey.Play);
     }
 
     private void BindButtonStates()
@@ -71,9 +71,9 @@ public class UISaveDetailPopup : UIPopup, IFocusable
             string year = (meta.Year % 100).ToString("D2");
             string month = meta.Month.ToString("D2");
             string date = meta.Date.ToString("D2");
-            SetText(Texts.DayText, Localization.Slot_Day_Format, meta.Day);
-            SetText(Texts.DayTimeText, Localization.Slot_DayTime_Format, meta.Hour, meta.Minute, meta.Second);
-            SetText(Texts.SaveTimeText, Localization.Slot_SaveTime_Format, year, month, date);
+            SetText(Texts.DayText, LocalizationKey.Slot_Day_Format, meta.Day);
+            SetText(Texts.DayTimeText, LocalizationKey.Slot_DayTime_Format, meta.Hour, meta.Minute, meta.Second);
+            SetText(Texts.SaveTimeText, LocalizationKey.Slot_SaveTime_Format, year, month, date);
             SetCharacterImageActive(true);
             SetMealImageActive(true);
             SetMealImageSprite(meta.Meal.ToSpriteAsMealTime());
@@ -83,7 +83,7 @@ public class UISaveDetailPopup : UIPopup, IFocusable
         }
         else
         {
-            SetText(Texts.DayText, Localization.Slot_Day_Format, Define.Day.Start);
+            SetText(Texts.DayText, LocalizationKey.Slot_Day_Format, Define.Day.Start);
             SetText(Texts.SaveTimeText, string.Empty);
             SetText(Texts.DayTimeText, string.Empty);
             SetCharacterImageActive(false);
@@ -116,7 +116,7 @@ public class UISaveDetailPopup : UIPopup, IFocusable
         }
         catch
         {
-            Log.Error(Localization.UI_Save_Slot_SlotClickFailed, _selectedSlotIndex.Value);
+            Log.Error(LocalizationKey.Log_Save_Slot_SlotClickFailed, _selectedSlotIndex.Value);
         }
     }
 
@@ -131,7 +131,7 @@ public class UISaveDetailPopup : UIPopup, IFocusable
         if (!meta.IsActive) 
             return;
 
-        bool isConfirmed = await Managers.Feedback.ConfirmAsync(this, Localization.UI_SaveDetail_Popup_Delete_Confirm_Title, Localization.UI_SaveDetail_Popup_Delete_Confirm_Message);
+        bool isConfirmed = await Managers.Feedback.ConfirmAsync(this, LocalizationKey.UI_SaveDetail_Popup_Delete_Confirm_Title, LocalizationKey.UI_SaveDetail_Popup_Delete_Confirm_Message);
         
         if (!isConfirmed) 
             return;
@@ -143,11 +143,11 @@ public class UISaveDetailPopup : UIPopup, IFocusable
 
     private void SetText(Texts textEnum, string text)
         => GetText(textEnum).text = text;
-    private void SetText(Texts textEnum, Localization key)
+    private void SetText(Texts textEnum, LocalizationKey key)
         => GetText(textEnum).text = Managers.Localization.Get(key);
-    private void SetText<T1>(Texts textEnum, Localization key, T1 arg1)
+    private void SetText<T1>(Texts textEnum, LocalizationKey key, T1 arg1)
         => GetText(textEnum).text = Managers.Localization.Get(key, arg1);
-    private void SetText<T1, T2, T3>(Texts textEnum, Localization key, T1 arg1, T2 arg2, T3 arg3)
+    private void SetText<T1, T2, T3>(Texts textEnum, LocalizationKey key, T1 arg1, T2 arg2, T3 arg3)
         => GetText(textEnum).text = Managers.Localization.Get(key, arg1, arg2, arg3);
 
     private void SetMealImageActive(bool isActive)

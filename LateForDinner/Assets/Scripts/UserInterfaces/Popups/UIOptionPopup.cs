@@ -224,13 +224,13 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
 
     private void InitStaticTexts()
     {
-        SetText(Texts.SoundButtonText, Localization.UI_Option_Popup_Text_Sound);
-        SetText(Texts.GraphicButtonText, Localization.UI_Option_Popup_Text_Graphic);
-        SetText(Texts.AccessButtonText, Localization.UI_Option_Popup_Text_Access);
-        SetText(Texts.ApplyButtonText, Localization.Apply);
-        SetText(Texts.CompleteButtonText, Localization.Complete);
-        SetText(Texts.CancelButtonText, Localization.Cancel);
-        SetText(Texts.DefaultButtonText, Localization.Default);
+        SetText(Texts.SoundButtonText, LocalizationKey.UI_Option_Popup_Text_Sound);
+        SetText(Texts.GraphicButtonText, LocalizationKey.UI_Option_Popup_Text_Graphic);
+        SetText(Texts.AccessButtonText, LocalizationKey.UI_Option_Popup_Text_Access);
+        SetText(Texts.ApplyButtonText, LocalizationKey.Apply);
+        SetText(Texts.CompleteButtonText, LocalizationKey.Complete);
+        SetText(Texts.CancelButtonText, LocalizationKey.Cancel);
+        SetText(Texts.DefaultButtonText, LocalizationKey.Default);
     }
 
     private void InitSoundPanel()
@@ -251,12 +251,12 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
         BindVolumeControl(Scrollbars.AmbientScrollbar, InputFields.AmbientInputField);
         BindVolumeControl(Scrollbars.SFXScrollbar, InputFields.SFXInputField);
         BindVolumeControl(Scrollbars.UIScrollbar, InputFields.UIInputField);
-        SetText(Texts.MasterText, Localization.UI_Option_Popup_Text_Master);
-        SetText(Texts.BGMText, Localization.UI_Option_Popup_Text_BGM);
-        SetText(Texts.AmbientText, Localization.UI_Option_Popup_Text_Ambient);
-        SetText(Texts.SFXText, Localization.UI_Option_Popup_Text_SFX);
-        SetText(Texts.UIText, Localization.UI_Option_Popup_Text_UI);
-        SetText(Texts.MuteText, Localization.UI_Option_Popup_Text_Mute);
+        SetText(Texts.MasterText, LocalizationKey.UI_Option_Popup_Text_Master);
+        SetText(Texts.BGMText, LocalizationKey.UI_Option_Popup_Text_BGM);
+        SetText(Texts.AmbientText, LocalizationKey.UI_Option_Popup_Text_Ambient);
+        SetText(Texts.SFXText, LocalizationKey.UI_Option_Popup_Text_SFX);
+        SetText(Texts.UIText, LocalizationKey.UI_Option_Popup_Text_UI);
+        SetText(Texts.MuteText, LocalizationKey.UI_Option_Popup_Text_Mute);
     }
 
     private void BindToggleAction(Toggles toggleEnum, Images checkmarkEnum, Images inputImageEnum, Toggles toggleImageEnum, Scrollbars scrollbarEnum)
@@ -280,33 +280,33 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
         BindArrowDropdownButton(Buttons.QualityButton, _qualityArrowButton);
         InitDropdownOptions(Dropdowns.FullscreenDropdown, new[]
         {
-            Localization.UI_Option_Popup_Text_Fullscreen_FullscreenWindow,
-            Localization.UI_Option_Popup_Text_Fullscreen_Windowed,
-            Localization.UI_Option_Popup_Text_Fullscreen_ExclusiveFullscreen
+            LocalizationKey.UI_Option_Popup_Text_Fullscreen_FullscreenWindow,
+            LocalizationKey.UI_Option_Popup_Text_Fullscreen_Windowed,
+            LocalizationKey.UI_Option_Popup_Text_Fullscreen_ExclusiveFullscreen
         });
         InitDropdownOptions(Dropdowns.QualityDropdown, new[]
         {
-            Localization.UI_Option_Popup_Text_Quality_Low,
-            Localization.UI_Option_Popup_Text_Quality_Medium,
-            Localization.UI_Option_Popup_Text_Quality_High
+            LocalizationKey.UI_Option_Popup_Text_Quality_Low,
+            LocalizationKey.UI_Option_Popup_Text_Quality_Medium,
+            LocalizationKey.UI_Option_Popup_Text_Quality_High
         });
         BindGraphicToggle(Toggles.VsyncToggle, Images.VsyncCheckmarkImage, Images.VsyncToggleImage);
         BindGraphicToggle(Toggles.AntialiasingToggle, Images.AntialiasingCheckmarkImage, Images.AntialiasingToggleImage);
         BindGraphicToggle(Toggles.BloomToggle, Images.BloomCheckmarkImage, Images.BloomToggleImage);
         BindGraphicToggle(Toggles.AOToggle, Images.AOCheckmarkImage, Images.AOToggleImage);
-        SetText(Texts.ResolutionText, Localization.UI_Option_Popup_Text_Resolution);
-        SetText(Texts.FullscreenText, Localization.UI_Option_Popup_Text_Fullscreen);
-        SetText(Texts.QualityText, Localization.UI_Option_Popup_Text_Quality);
-        SetText(Texts.VsyncText, Localization.UI_Option_Popup_Text_Vsync);
-        SetText(Texts.AntialiasingText, Localization.UI_Option_Popup_Text_Antialiasing);
-        SetText(Texts.BloomText, Localization.UI_Option_Popup_Text_Bloom);
-        SetText(Texts.AOText, Localization.UI_Option_Popup_Text_AO);
+        SetText(Texts.ResolutionText, LocalizationKey.UI_Option_Popup_Text_Resolution);
+        SetText(Texts.FullscreenText, LocalizationKey.UI_Option_Popup_Text_Fullscreen);
+        SetText(Texts.QualityText, LocalizationKey.UI_Option_Popup_Text_Quality);
+        SetText(Texts.VsyncText, LocalizationKey.UI_Option_Popup_Text_Vsync);
+        SetText(Texts.AntialiasingText, LocalizationKey.UI_Option_Popup_Text_Antialiasing);
+        SetText(Texts.BloomText, LocalizationKey.UI_Option_Popup_Text_Bloom);
+        SetText(Texts.AOText, LocalizationKey.UI_Option_Popup_Text_AO);
     }
 
     private void BindArrowDropdownButton(Buttons button, ReactiveProperty<ButtonState> state) =>
         GetButton(button).BindViewAsButton(_ => { }, ViewEvent.LeftClick, this, state);
 
-    private void InitDropdownOptions(Dropdowns dropdown, Localization[] keys)
+    private void InitDropdownOptions(Dropdowns dropdown, LocalizationKey[] keys)
     {
         var dd = GetDropdown(dropdown);
         dd.ClearOptions();
@@ -352,7 +352,7 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
             (duplicateActionName, duplicateKeyName) =>
             {
                 // DESC ::: 중복된 키 입력 시 토스트 출력
-                Managers.Feedback.ToastAsync(Localization.UI_Option_Popup_Keybind_Duplicate, duplicateActionName, duplicateKeyName).Forget();
+                Managers.Feedback.ToastAsync(LocalizationKey.Log_Option_Popup_Keybind_Duplicate, duplicateActionName, duplicateKeyName).Forget();
             });
         }
     }
@@ -370,7 +370,7 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
         .ThenBy(r => (double)r.refreshRateRatio.numerator / r.refreshRateRatio.denominator)
         .ToArray();
         var resolutionOptions = _resolutions
-        .Select(res => Managers.Localization.Get(Localization.UI_Option_Popup_Text_Resolution_Dropdown, res.width, res.height, Mathf.RoundToInt((float)res.refreshRateRatio.numerator / res.refreshRateRatio.denominator)))
+        .Select(res => Managers.Localization.Get(LocalizationKey.UI_Option_Popup_Text_Resolution_Dropdown, res.width, res.height, Mathf.RoundToInt((float)res.refreshRateRatio.numerator / res.refreshRateRatio.denominator)))
         .ToList();
         resolutionDropdown.AddOptions(resolutionOptions);
     }
@@ -649,7 +649,7 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
             2 => FullScreenMode.ExclusiveFullScreen,
             _ => FullScreenMode.FullScreenWindow
         };
-        graphic.quality = (Quality)GetDropdown(Dropdowns.QualityDropdown).value;
+        graphic.quality = (TextureQuality)GetDropdown(Dropdowns.QualityDropdown).value;
         graphic.vSync = GetToggle(Toggles.VsyncToggle).isOn;
         graphic.antiAliasing = GetToggle(Toggles.AntialiasingToggle).isOn;
         graphic.bloom = GetToggle(Toggles.BloomToggle).isOn;
@@ -712,7 +712,7 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
         }
         catch
         {
-            Log.Error(Localization.UI_Option_Popup_ApplyFailed);
+            Log.Error(LocalizationKey.Log_Option_Popup_ApplyFailed);
         }
     }
 
@@ -739,7 +739,7 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
         }
         catch
         {
-            Log.Error(Localization.UI_Option_Popup_CompleteFailed);
+            Log.Error(LocalizationKey.Log_Option_Popup_CompleteFailed);
         }
     }
 
@@ -772,7 +772,7 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
     {
         try
         {
-            bool isConfirmed = await Managers.Feedback.ConfirmAsync(this, Localization.UI_Option_Popup_Default_Confirm_Title, Localization.UI_Option_Popup_Default_Confirm_Message);
+            bool isConfirmed = await Managers.Feedback.ConfirmAsync(this, LocalizationKey.UI_Option_Popup_Default_Confirm_Title, LocalizationKey.UI_Option_Popup_Default_Confirm_Message);
 
             if (!isConfirmed)
                 return;
@@ -797,10 +797,10 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
         }
         catch
         {
-            Log.Error(Localization.UI_Option_Popup_DefaultFailed);
+            Log.Error(LocalizationKey.Log_Option_Popup_DefaultFailed);
         }
     }
 
-    private void SetText(Texts textEnum, Localization key) 
+    private void SetText(Texts textEnum, LocalizationKey key) 
         => GetText(textEnum).text = Managers.Localization.Get(key);
 }

@@ -58,15 +58,15 @@ public class UIToastSystem : UISystem
         _isProcessingQueue = false;
     }
 
-    public async UniTask PushToastAsync(Localization key)
+    public async UniTask PushToastAsync(LocalizationKey key)
         => await EnqueueToastAsync(slot => slot.Setup(key, () => ReleaseSlot(slot)));
-    public async UniTask PushToastAsync<T1>(Localization key, T1 arg1)
+    public async UniTask PushToastAsync<T1>(LocalizationKey key, T1 arg1)
         => await EnqueueToastAsync(slot => slot.Setup(key, () => ReleaseSlot(slot), arg1));
-    public async UniTask PushToastAsync<T1, T2>(Localization key, T1 arg1, T2 arg2)
+    public async UniTask PushToastAsync<T1, T2>(LocalizationKey key, T1 arg1, T2 arg2)
         => await EnqueueToastAsync(slot => slot.Setup(key, () => ReleaseSlot(slot), arg1, arg2));
-    public async UniTask PushToastAsync<T1, T2, T3>(Localization key, T1 arg1, T2 arg2, T3 arg3)
+    public async UniTask PushToastAsync<T1, T2, T3>(LocalizationKey key, T1 arg1, T2 arg2, T3 arg3)
         => await EnqueueToastAsync(slot => slot.Setup(key, () => ReleaseSlot(slot), arg1, arg2, arg3));
-    public async UniTask PushToastAsync(Localization key, params object[] args)
+    public async UniTask PushToastAsync(LocalizationKey key, params object[] args)
         => await EnqueueToastAsync(slot => slot.Setup(key, () => ReleaseSlot(slot), args));
 
     private void ReleaseSlot(UIToastSlot slot)

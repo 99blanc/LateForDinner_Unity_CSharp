@@ -1,0 +1,12 @@
+# Table Type: PlayableCharacterTemplate,,
+# Description: 플레이어블 캐릭터 및 객체 속성 정의 테이블,,
+# Rule: 콤마 사용 불가. ID는 PlayableCharacter 문서 내 캐릭터 ID와 연결. AttributeKey는 Attribute 문서 내 정의된 Key와 연결,,
+# ID: PlayableCharacter.csv,,
+# AttributeKey: Attribute.csv,,
+PlayableCharacterID,AttributeKey,Value
+# Index: PlayableCharacterTemplate,,
+1,Health,3
+1,TemporaryHealth,1
+1,MoveSpeed,5
+1,Acceleration,15
+1,Deceleration,20
