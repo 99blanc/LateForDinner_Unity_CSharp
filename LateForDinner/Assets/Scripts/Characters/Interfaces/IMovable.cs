@@ -2,14 +2,16 @@ using UnityEngine;
 
 public interface IMovable
 {
+    SpriteRenderer Renderer { get; }
     Rigidbody2D Rigidbody { get; }
     AttributeRegistry Attributes { get; }
 
     public void Move(float directionX)
     {
-        if (this is not Character || Rigidbody == null || Attributes == null)
+        if (this is not Character || Rigidbody == null || Attributes == null || Renderer == null)
             return;
 
+        Renderer.FlipX(directionX);
         float maxMoveSpeed = Attributes.Get<float>(AttributeType.MoveSpeed).Value;
         float acceleration = Attributes.Get<float>(AttributeType.Acceleration).Value;
         float deceleration = Attributes.Get<float>(AttributeType.Deceleration).Value;

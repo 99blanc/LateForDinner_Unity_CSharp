@@ -7,12 +7,12 @@ using UnityEngine;
 
 public class LogManager
 {
-    private readonly Subject<LogData> _logSubject = new Subject<LogData>();
+    private readonly Subject<LogFormat> _logSubject = new Subject<LogFormat>();
     private readonly ReactiveProperty<bool> _isReady = new ReactiveProperty<bool>(false);
     private readonly Queue<Action> _pendingLogs = new Queue<Action>();
-    private readonly List<LogData> _logs = new List<LogData>();
-    public IReadOnlyList<LogData> Logs => _logs;
-    public Observable<LogData> OnLogAdded 
+    private readonly List<LogFormat> _logs = new List<LogFormat>();
+    public IReadOnlyList<LogFormat> Logs => _logs;
+    public Observable<LogFormat> OnLogAdded 
         => _logSubject;
 
     public void Setup()
@@ -54,7 +54,7 @@ public class LogManager
         {
             string prefix = GetLogPrefix(type);
             string log = ZString.Format(Literal.Messages.Format, DateTime.Now, prefix, message);
-            var logData = new LogData { Message = log, Type = type };
+            var logData = new LogFormat { Message = log, Type = type };
             _logs.Add(logData);
 
             if (_logs.Count > Define.Log.Storage)

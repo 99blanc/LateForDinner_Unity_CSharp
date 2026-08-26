@@ -10,7 +10,7 @@ public class FeedbackManager
     {
         var timer = UniTask.Delay(TimeSpan.FromSeconds(0.2f), ignoreTimeScale: true);
         await _semaphore.WaitAsync();
-        var locker = await Managers.UI.OpenSystemAsync<UILockSystem>(LayerType.Lock);
+        var locker = Managers.UI.OpenSystem<UILockSystem>(LayerType.Lock);
 
         try
         {
@@ -60,7 +60,7 @@ public class FeedbackManager
 
     private async UniTask AlertInternalAsync(UserInterface owner, LocalizationKey titleKey, LocalizationKey messageKey, params object[] messageArgs)
     {
-        var popup = await Managers.UI.OpenPopupAsync<UIAlertPopup>();
+        var popup = Managers.UI.OpenPopup<UIAlertPopup>();
 
         if (popup == null)
             return;
@@ -94,7 +94,7 @@ public class FeedbackManager
 
     private async UniTask<bool> ConfirmInternalAsync(UserInterface owner, LocalizationKey titleKey, LocalizationKey messageKey, params object[] messageArgs)
     {
-        var popup = await Managers.UI.OpenPopupAsync<UIConfirmPopup>();
+        var popup = Managers.UI.OpenPopup<UIConfirmPopup>();
 
         if (popup == null)
             return false;

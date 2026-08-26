@@ -18,8 +18,10 @@ public class Addressable
         int systemsCount = RegisterFolderToGroup(settings, "Assets/" + Literal.Paths.Systems, Literal.Groups.Systems);
         int systemPrefabsCount = RegisterFolderToGroup(settings, "Assets/" + Literal.Paths.SystemPrefabs, Literal.Groups.Systems);
         int uiCount = RegisterFolderToGroup(settings, "Assets/" + Literal.Paths.UIPrefabs, Literal.Groups.UserInterfaces);
+        int atlasCount = RegisterFolderToGroup(settings, "Assets/" + Literal.Paths.Atlases, Literal.Groups.Atlases);
+        int animatorsCount = RegisterFolderToGroup(settings, "Assets/" + Literal.Paths.Animators, Literal.Groups.Animators);
         AssetDatabase.SaveAssets();
-        EditorUtility.DisplayDialog("Addressables Setup", $"Binaries: {binariesCount}\nSystems: {systemsCount + systemPrefabsCount}\nUserInterfaces: {uiCount}\nTotal processed", "OK");
+        EditorUtility.DisplayDialog("Addressables Setup", $"Animators: {animatorsCount}\nAtlases: {atlasCount}\nBinaries: {binariesCount}\nSystems: {systemsCount + systemPrefabsCount}\nUserInterfaces: {uiCount}\nTotal processed", "OK");
     }
 
     [MenuItem("Tools/Addressables/Auto Setup Binaries and Systems")]
@@ -61,6 +63,19 @@ public class Addressable
         int atlasCount = RegisterFolderToGroup(settings, "Assets/" + Literal.Paths.Atlases, Literal.Groups.Atlases);
         AssetDatabase.SaveAssets();
         EditorUtility.DisplayDialog("Addressables Atlas Setup", $"Atlases: {atlasCount} assets processed", "OK");
+    }
+
+    [MenuItem("Tools/Addressables/Auto Setup Animators")]
+    public static void SetupAnimators()
+    {
+        AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.Settings;
+
+        if (settings == null)
+            return;
+
+        int animatorsCount = RegisterFolderToGroup(settings, "Assets/" + Literal.Paths.Animators, Literal.Groups.Animators);
+        AssetDatabase.SaveAssets();
+        EditorUtility.DisplayDialog("Addressables Animators Setup", $"Animators: {animatorsCount} assets processed", "OK");
     }
 
     private static int RegisterFolderToGroup(AddressableAssetSettings settings, string path, string name)

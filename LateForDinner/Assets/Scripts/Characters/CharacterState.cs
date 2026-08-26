@@ -1,23 +1,20 @@
 using System;
 using UnityHFSM;
 
-public abstract class CharacterStateBase : StateBase<CharacterState>
+public abstract class CharacterState : StateBase<CharacterStateType>
 {
     protected readonly Character Owner;
 
-    protected CharacterStateBase(Character owner, bool exitTime = false) : base(exitTime)
+    protected CharacterState(Character owner, bool hasExitTime = false) : base(hasExitTime)
         => Owner = owner;
 }
 
-public class IdleState : CharacterStateBase
+public class IdleState : CharacterState
 {
     public IdleState(Character owner) : base(owner) { }
 
     public override void OnEnter()
-    {
-        base.OnEnter();
-        Owner?.Animator?.SetBool("IsMoving", false);
-    }
+        => base.OnEnter();
 
     public override void OnLogic()
     {
@@ -28,7 +25,7 @@ public class IdleState : CharacterStateBase
     }
 }
 
-public class MoveState : CharacterStateBase
+public class MoveState : CharacterState
 {
     private readonly Func<float> _inputProvider;
 
@@ -36,10 +33,7 @@ public class MoveState : CharacterStateBase
         => _inputProvider = inputProvider;
 
     public override void OnEnter()
-    {
-        base.OnEnter();
-        Owner?.Animator?.SetBool("IsMoving", true);
-    }
+        => base.OnEnter();
 
     public override void OnLogic()
     {

@@ -14,7 +14,6 @@ public class PreloadManager
             await load.LoadAsync(0.2f, Managers.Localization.Get(LocalizationKey.Log_Preload_Boot_Data));
             await Managers.Config.LoadAsync();
             await Managers.Control.LoadAsync();
-            await UniTask.Delay(200);
             await load.LoadAsync(0.4f, Managers.Localization.Get(LocalizationKey.Log_Preload_Boot_Asset));
             await Managers.Resource.LoadAssetAsync<SpriteAtlas>(Define.Atlas.Common);
             await load.LoadAsync(0.6f, Managers.Localization.Get(LocalizationKey.Log_Preload_Boot_Object));
@@ -24,7 +23,7 @@ public class PreloadManager
             await Managers.Pool.PrewarmAsync<UIAlertPopup>(1);
             await Managers.Pool.PrewarmAsync<UIConfirmPopup>(1);
             await Managers.Pool.PrewarmAsync<UIToastSlot>(Define.Toast.Count);
-            await Managers.Pool.PrewarmAsync<UIKeybindSlot>(Managers.Control.GetBindableActions().Count + 1);
+            await Managers.Pool.PrewarmAsync<UIKeybindSlot>(Managers.Control.GetBindableActions().Count + 1 /* DESC ::: 대시 조합키 추가를 위한 1 덧셈 */);
             await Managers.Pool.PrewarmAsync<UISaveDetailPopup>(1);
             await Managers.Pool.PrewarmAsync<UISaveSlot>(Define.Save.Amount);
             await Managers.Pool.PrewarmAsync<UIToastSystem>(1);

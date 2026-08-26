@@ -70,23 +70,12 @@ public class ResourceManager
     }
     public async UniTask<GameObject> LoadPrefabAsync(string path) 
         => await LoadAsync<GameObject>(path);
-
     public async UniTask<TextAsset> LoadTextAssetAsync(string path) 
         => await LoadAsync<TextAsset>(path);
-
-    public async UniTask<GameObject> InstantiateAsync(string path, Transform parent = null, bool hasWorldPosition = false)
-    {
-        GameObject prefab = await LoadPrefabAsync(path);
-        return Instantiate(prefab, parent, hasWorldPosition);
-    }
-
-    public GameObject Instantiate(GameObject prefab, Transform parent = null, bool hasWorldPosition = false)
-    {
-        if (prefab == null)
-            return null;
-
-        return Object.Instantiate(prefab, parent, hasWorldPosition);
-    }
+    public async UniTask<RuntimeAnimatorController> LoadAnimatorControllerAsync(string path)
+        => await LoadAssetAsync<RuntimeAnimatorController>(path);
+    public async UniTask<AnimatorOverrideController> LoadAnimatorOverrideControllerAsync(string path)
+        => await LoadAssetAsync<AnimatorOverrideController>(path);
 
     public GameObject Instantiate(string path, Transform parent = null, bool hasWorldPosition = false)
     {
@@ -111,6 +100,10 @@ public class ResourceManager
         => Get<GameObject>(path);
     public TextAsset GetTextAsset(string path) 
         => Get<TextAsset>(path);
+    public RuntimeAnimatorController GetAnimatorController(string path)
+        => Get<RuntimeAnimatorController>(path);
+    public AnimatorOverrideController GetAnimatorOverrideController(string path)
+        => Get<AnimatorOverrideController>(path);
 
     public Texture2D GetTextureFromSprite(Sprite sprite)
     {
@@ -124,6 +117,20 @@ public class ResourceManager
         result.SetPixels(pixels);
         result.Apply();
         return result;
+    }
+
+    public async UniTask<GameObject> InstantiateAsync(string path, Transform parent = null, bool hasWorldPosition = false)
+    {
+        GameObject prefab = await LoadPrefabAsync(path);
+        return Instantiate(prefab, parent, hasWorldPosition);
+    }
+
+    public GameObject Instantiate(GameObject prefab, Transform parent = null, bool hasWorldPosition = false)
+    {
+        if (prefab == null)
+            return null;
+
+        return Object.Instantiate(prefab, parent, hasWorldPosition);
     }
 
     public void Unload(string path)

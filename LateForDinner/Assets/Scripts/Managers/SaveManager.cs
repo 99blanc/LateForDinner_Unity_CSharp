@@ -9,7 +9,7 @@ public class SaveManager
     private int _currentSlot = -1;
     public int CurrentSlot => _currentSlot;
     public SaveMeta MetaData { get; private set; } = new SaveMeta();
-    public Save CurrentData { get; private set; } = new Save();
+    public SaveData CurrentData { get; private set; } = new SaveData();
 
     public async UniTask InitAsync() 
         => await MetaAsync();
@@ -34,7 +34,7 @@ public class SaveManager
             }
 
             byte[] bytes = await File.ReadAllBytesAsync(path);
-            CurrentData = MemoryPackSerializer.Deserialize<Save>(bytes) ?? new Save();
+            CurrentData = MemoryPackSerializer.Deserialize<SaveData>(bytes) ?? new SaveData();
             _currentSlot = index;
             Log.System(LocalizationKey.Log_Save_LoadSuccess, index);
         }
@@ -197,7 +197,7 @@ public class SaveManager
     {
         EnsureSlot(index + 1);
         MetaData.Slots[index] = new SlotMeta();
-        CurrentData = new Save();
+        CurrentData = new SaveData();
         _currentSlot = index;
         await SaveMetaAsync();
         string path = GetPath(index);
@@ -211,7 +211,7 @@ public class SaveManager
     public void NewGame(int slotIndex)
     {
         _currentSlot = slotIndex;
-        CurrentData = new Save();
+        CurrentData = new SaveData();
         SyncMeta();
         Log.System(LocalizationKey.Log_Save_NewGameStarted, slotIndex);
     }

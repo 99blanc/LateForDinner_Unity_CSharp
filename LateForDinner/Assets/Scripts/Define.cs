@@ -2,6 +2,12 @@ using UnityEngine;
 
 public class Define
 {
+    public class Animation
+    {
+        public static readonly int Idle = Animator.StringToHash("Idle");
+        public static readonly int Move = Animator.StringToHash("Move");
+    }
+
     public class Atlas
     {
         public const string Common = "common_atlas";

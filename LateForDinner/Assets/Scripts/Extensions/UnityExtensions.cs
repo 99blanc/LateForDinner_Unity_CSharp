@@ -3,6 +3,38 @@ using UnityEngine;
 
 public static class UnityExtensions
 {
+    public static T FindChild<T>(this Component component, string name = null, bool recursive = false) where T : Object
+    {
+        if (!component)
+            return null;
+
+        return component.gameObject.FindChild<T>(name, recursive);
+    }
+
+    public static GameObject FindChild(this Component component, string name = null, bool recursive = false)
+    {
+        if (!component)
+            return null;
+
+        return component.gameObject.FindChild(name, recursive);
+    }
+
+    public static T FindChildAssert<T>(this Component component, string name = null, bool recursive = false) where T : Object
+    {
+        if (!component)
+            return null;
+
+        return component.gameObject.FindChildAssert<T>(name, recursive);
+    }
+
+    public static GameObject FindChildAssert(this Component component, string name = null, bool recursive = false)
+    {
+        if (!component)
+            return null;
+
+        return component.gameObject.FindChildAssert(name, recursive);
+    }
+
     public static T FindChild<T>(this GameObject gameObject, string name = null, bool recursive = false) where T : Object
     {
         if (!gameObject)
@@ -53,7 +85,7 @@ public static class UnityExtensions
         return transform != null ? transform.gameObject : null;
     }
 
-    public static T FindChildAssert<T>(this GameObject gameObject, string name = null, bool recursive = false) where T : Object 
+    public static T FindChildAssert<T>(this GameObject gameObject, string name = null, bool recursive = false) where T : Object
         => FindChild<T>(gameObject, name, recursive);
 
     public static GameObject FindChildAssert(this GameObject gameObject, string name = null, bool recursive = false)
@@ -62,9 +94,9 @@ public static class UnityExtensions
         return target != null ? target.gameObject : null;
     }
 
-    public static T GetComponentAssert<T>(this Component component) where T : Component 
+    public static T GetComponentAssert<T>(this Component component) where T : Component
         => component.GetComponent<T>();
 
-    public static T GetComponentAssert<T>(this GameObject gameObject) where T : Component 
+    public static T GetComponentAssert<T>(this GameObject gameObject) where T : Component
         => gameObject.GetComponent<T>();
 }

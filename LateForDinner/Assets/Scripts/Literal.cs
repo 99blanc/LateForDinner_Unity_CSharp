@@ -33,6 +33,7 @@ public class Literal
 
     public class Groups
     {
+        public const string Animators = "Animators";
         public const string Atlases = "Atlases";
         public const string Binaries = "Binaries";
         public const string Systems = "Systems";
@@ -103,8 +104,16 @@ public class Literal
         public const string Format = "[{0:HH:mm:ss}][{1}] {2}";
     }
 
+    public class Objects
+    {
+        public const string BackTransform = "BackTransform";
+        public const string FrontTransform = "FrontTransform";
+        public const string HitboxTransform = "HitboxTransform";
+    }
+
     public class Paths
     {
+        public const string Animators = "Animators/";
         public const string Atlases = "Atlases/";
         public const string Binaries = "Binaries/";
         public const string SystemPrefabs = "Prefabs/Systems/";
