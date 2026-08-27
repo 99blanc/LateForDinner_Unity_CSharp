@@ -9,10 +9,10 @@ using TMPro;
 
 public static class UIExtensions
 {
-    public static void BindModel<T>(this ReactiveProperty<T> model, Action<T> action, IPoolable component)
+    public static void BindModel<T>(this ReactiveProperty<T> model, Action<T> action, IPoolablePrefab component)
         => model.Subscribe(action).AddToPool(component);
 
-    public static void BindView(this UIBehaviour view, Action<PointerEventData> action, ViewEvent type, IPoolable component, ReactiveProperty<ButtonState> prop = null)
+    public static void BindView(this UIBehaviour view, Action<PointerEventData> action, ViewEvent type, IPoolablePrefab component, ReactiveProperty<ButtonState> prop = null)
     {
         Observable<PointerEventData> observable = type switch
         {
@@ -28,7 +28,7 @@ public static class UIExtensions
         observable.Where(_ => Disable(prop)).Subscribe(action).AddToPool(component);
     }
 
-    public static void BindViewForToggle(this UIBehaviour view, Action<PointerEventData> action, ViewEvent type, IPoolable component)
+    public static void BindViewForToggle(this UIBehaviour view, Action<PointerEventData> action, ViewEvent type, IPoolablePrefab component)
     {
         Observable<PointerEventData> observable = type switch
         {
@@ -55,7 +55,7 @@ public static class UIExtensions
         return prop.Value != ButtonState.Disable;
     }
 
-    public static void BindViewAsButton(this UIBehaviour view, Action<PointerEventData> action, ViewEvent type, IPoolable component, ReactiveProperty<ButtonState> prop, Func<bool> stayCondition = null)
+    public static void BindViewAsButton(this UIBehaviour view, Action<PointerEventData> action, ViewEvent type, IPoolablePrefab component, ReactiveProperty<ButtonState> prop, Func<bool> stayCondition = null)
     {
         Action onReset = () =>
         {
@@ -71,7 +71,7 @@ public static class UIExtensions
         view.BindView(action, type, component, prop);
     }
 
-    public static void BindViewAsToggle(this UIBehaviour view, Action<PointerEventData> action, ViewEvent type, IPoolable component, ReactiveProperty<ButtonState> prop, Func<bool> stayCondition = null)
+    public static void BindViewAsToggle(this UIBehaviour view, Action<PointerEventData> action, ViewEvent type, IPoolablePrefab component, ReactiveProperty<ButtonState> prop, Func<bool> stayCondition = null)
     {
         Action onReset = () =>
         {
@@ -99,7 +99,7 @@ public static class UIExtensions
         view.BindViewForToggle(action, type, component);
     }
 
-    public static void BindState(this Image targetImage, ReadOnlyReactiveProperty<ButtonState> prop, string atlas, IPoolable component)
+    public static void BindState(this Image targetImage, ReadOnlyReactiveProperty<ButtonState> prop, string atlas, IPoolablePrefab component)
     {
         if (targetImage == null)
             return;
@@ -119,7 +119,7 @@ public static class UIExtensions
         }).AddToPool(component);
     }
 
-    public static void BindStateAsArrow(this Image targetImage, ReadOnlyReactiveProperty<ButtonState> prop, string atlas, IPoolable component)
+    public static void BindStateAsArrow(this Image targetImage, ReadOnlyReactiveProperty<ButtonState> prop, string atlas, IPoolablePrefab component)
     {
         if (targetImage == null)
             return;
@@ -139,7 +139,7 @@ public static class UIExtensions
         }).AddToPool(component);
     }
 
-    public static void BindScrollbar(this Scrollbar scrollbar, Action<float> action, IPoolable component)
+    public static void BindScrollbar(this Scrollbar scrollbar, Action<float> action, IPoolablePrefab component)
     {
         if (scrollbar == null)
             return;
@@ -148,7 +148,7 @@ public static class UIExtensions
         scrollbar.OnValueChangedAsObservable().Subscribe(action).AddToPool(component);
     }
 
-    public static void BindInputField(this TMP_InputField inputField, Action<string> action, IPoolable component)
+    public static void BindInputField(this TMP_InputField inputField, Action<string> action, IPoolablePrefab component)
     {
         if (inputField == null)
             return;
@@ -157,7 +157,7 @@ public static class UIExtensions
         inputField.OnValueChangedAsObservable().Subscribe(action).AddToPool(component);
     }
 
-    public static void BindInputEndEdit(this TMP_InputField inputField, Action<string> action, IPoolable component)
+    public static void BindInputEndEdit(this TMP_InputField inputField, Action<string> action, IPoolablePrefab component)
     {
         if (inputField == null)
             return;
@@ -165,7 +165,7 @@ public static class UIExtensions
         inputField.OnEndEditAsObservable().Subscribe(action).AddToPool(component);
     }
 
-    public static void BindInputSubmit(this TMP_InputField inputField, Action<string> action, IPoolable component)
+    public static void BindInputSubmit(this TMP_InputField inputField, Action<string> action, IPoolablePrefab component)
     {
         if (inputField is InputField customInput)
         {

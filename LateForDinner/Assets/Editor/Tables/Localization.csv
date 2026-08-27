@@ -1,6 +1,6 @@
 # Table Type: Localization,
 # Description: 게임 내 공통 현지화 데이터 관리 테이블,
-# Rule: 콤마 사용 불가. Key는 고유 값이어야 하며 중복 불가. 각 Key별 Text에 포맷팅 파라미터({0} or {1} 등) 사용 가능,
+# Rule: 콤마 사용 불가. Key는 고유 값이어야 하며 중복 불가. 각 Key별 Text에 포맷팅 파라미터({0}/{1} 등) 사용 가능,
 Key,Text
 # Index: Action,
 Action_Right,이동(우)
@@ -33,6 +33,24 @@ Language,언어
 Reset,초기화
 Switch,전환
 Play,플레이
+#Index: Scene,
+Scene_Bootstrap,진입점
+Scene_Hospital1,병원 입구 1
+Scene_Hospital2,병원 입구 2
+Scene_Hospital3,병원 입구 3
+Scene_Counter,카운터
+Scene_ConvenienceStore,매점
+Scene_ElevatorHallway,엘리베이터 복도
+Scene_Lobby,로비
+Scene_Corridor,복도
+Scene_Kitchen,주방
+Scene_Terrace,테라스
+Scene_GroceryStorage,식료품 창고
+Scene_EmployeeBreakroom,직원 휴게실
+Scene_Cafeteria,구내 식당
+Scene_Office,사무실
+Scene_PretreatmentRoom,전처리실
+Scene_HumanStorage,인간 창고
 #Index: Slot,
 Slot_Auto,Auto
 Slot_Day_Format,Day {0}

@@ -2,12 +2,12 @@ using R3;
 using UnityEngine;
 using UnityHFSM;
 
-public abstract class Character : MonoBehaviour, IPoolable
+public abstract class Character : MonoBehaviour, IPoolablePrefab
 {
-    public AttributeRegistry Attributes { get; protected set; } = new();
+    public AttributeRegistry Attributes { get; protected set; } = new AttributeRegistry();
     public SpriteRenderer Renderer { get; private set; }
     public Animator Animator { get; private set; }
-    protected abstract CharacterAnimator CharacterAnimator { get; }
+    public abstract CharacterAnimator CharacterAnimator { get; }
     protected abstract CharacterID CharacterID { get; }
     protected StateMachine<CharacterStateType> StateMachine;
 
@@ -24,7 +24,7 @@ public abstract class Character : MonoBehaviour, IPoolable
         RegisterTransitions(StateMachine);
         StateMachine.SetStartState(CharacterStateType.Idle);
         StateMachine.Init();
-        Observable.EveryUpdate()
+        Observable.EveryUpdate(UnityFrameProvider.FixedUpdate)
         .Subscribe(_ => StateMachine.OnLogic())
         .AddToPool(this);
     }
@@ -45,7 +45,7 @@ public abstract class Character : MonoBehaviour, IPoolable
     protected virtual void CacheComponents()
     {
         Renderer = this.FindChildAssert<SpriteRenderer>(recursive: true);
-        Animator = this.FindChildAssert<Animator>(recursive: true);
+        Animator = Renderer?.GetComponentAssert<Animator>();
         CharacterAnimator?.SetAnimator(Animator);
     }
 }

@@ -2,7 +2,7 @@ using Cysharp.Threading.Tasks;
 using R3;
 using System;
 
-public class UIConfirmPopup : UIPopup, IDraggable, IFocusable
+public class UIConfirmPopup : UIPopup, IDraggablePopup, IFocusablePopup
 {
     private readonly ReactiveProperty<ButtonState> _confirmButtonState = new ReactiveProperty<ButtonState>(ButtonState.Normal);
     private readonly ReactiveProperty<ButtonState> _cancelButtonState = new ReactiveProperty<ButtonState>(ButtonState.Normal);

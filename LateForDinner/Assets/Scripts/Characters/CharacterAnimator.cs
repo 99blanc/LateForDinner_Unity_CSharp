@@ -4,10 +4,16 @@ public abstract class CharacterAnimator : MonoBehaviour
 {
     public Animator Animator { get; set; }
 
-    public virtual void SetAnimator(Animator animator)
+    public void SetAnimator(Animator animator)
     {
         if (animator != null)
             Animator = animator;
+    }
+
+    public void SetOverrideController(RuntimeAnimatorController overrideController)
+    {
+        if (Animator != null && overrideController != null)
+            Animator.runtimeAnimatorController = overrideController;
     }
 
     protected void Play(int hash) 

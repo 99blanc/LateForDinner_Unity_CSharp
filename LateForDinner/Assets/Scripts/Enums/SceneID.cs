@@ -1,0 +1,20 @@
+public enum SceneID
+{
+    Bootstrap         = 1,
+    Hospital1         = 2,
+    Hospital2         = 3,
+    Hospital3         = 4,
+    Counter           = 5,
+    ConvenienceStore  = 6,
+    ElevatorHallway   = 7,
+    Lobby             = 8,
+    Corridor          = 9,
+    Kitchen           = 10,
+    Terrace           = 11,
+    GroceryStorage    = 12,
+    EmployeeBreakroom = 13,
+    Cafeteria         = 14,
+    Office            = 15,
+    PretreatmentRoom  = 16,
+    HumanStorage      = 17,
+}

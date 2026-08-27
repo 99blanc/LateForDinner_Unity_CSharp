@@ -1,8 +1,9 @@
 using Cysharp.Threading.Tasks;
 using R3;
 using UnityEngine.EventSystems;
+using LateForDinner.Data;
 
-public class UISaveDetailPopup : UIPopup, IFocusable
+public class UISaveDetailPopup : UIPopup, IFocusablePopup
 {
     private readonly ReactiveProperty<ButtonState> _playButton = new ReactiveProperty<ButtonState>(ButtonState.Normal);
     private readonly ReactiveProperty<ButtonState> _trashButton = new ReactiveProperty<ButtonState>(ButtonState.Normal);
@@ -105,11 +106,12 @@ public class UISaveDetailPopup : UIPopup, IFocusable
             SlotMeta meta = Managers.Save.MetaData.Slots[index];
 
             if (meta.IsActive)
-                await Managers.Save.LoadAsync(index).Lock();
+            {
+                await Managers.Game.OldgameAsync(index);
+            }
             else
             {
-                Managers.Save.NewGame(index);
-                await Managers.Save.SaveAsync().Lock();
+                await Managers.Game.NewgameAsync(index);
                 Setup(index);
                 Managers.UI.GetScreen<UITitleDisplay>()?.Refresh();
             }

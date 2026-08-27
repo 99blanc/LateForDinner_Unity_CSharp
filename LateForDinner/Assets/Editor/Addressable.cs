@@ -11,7 +11,7 @@ public class Addressable
     {
         AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.Settings;
 
-        if (settings == null) 
+        if (settings == null)
             return;
 
         int binariesCount = RegisterFolderToGroup(settings, "Assets/" + Literal.Paths.Binaries, Literal.Groups.Binaries);
@@ -20,8 +20,62 @@ public class Addressable
         int uiCount = RegisterFolderToGroup(settings, "Assets/" + Literal.Paths.UIPrefabs, Literal.Groups.UserInterfaces);
         int atlasCount = RegisterFolderToGroup(settings, "Assets/" + Literal.Paths.Atlases, Literal.Groups.Atlases);
         int animatorsCount = RegisterFolderToGroup(settings, "Assets/" + Literal.Paths.Animators, Literal.Groups.Animators);
+        int clipsCount = RegisterFolderToGroup(settings, "Assets/" + Literal.Paths.Clips, Literal.Groups.Clips);
+        int prefabsCount = RegisterFolderToGroup(settings, "Assets/" + Literal.Paths.Prefabs, Literal.Groups.Prefabs, Literal.Paths.UIPrefabs, Literal.Paths.SystemPrefabs);
         AssetDatabase.SaveAssets();
-        EditorUtility.DisplayDialog("Addressables Setup", $"Animators: {animatorsCount}\nAtlases: {atlasCount}\nBinaries: {binariesCount}\nSystems: {systemsCount + systemPrefabsCount}\nUserInterfaces: {uiCount}\nTotal processed", "OK");
+        EditorUtility.DisplayDialog("Addressables Setup", $"Animators: {animatorsCount}\nClips: {clipsCount}\nAtlases: {atlasCount}\nBinaries: {binariesCount}\nSystems: {systemsCount + systemPrefabsCount}\nUserInterfaces: {uiCount}\nPrefabs: {prefabsCount}\nTotal processed", "OK");
+    }
+
+    [MenuItem("Tools/Addressables/Auto Setup Atlases")]
+    public static void SetupAtlases()
+    {
+        AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.Settings;
+
+        if (settings == null)
+            return;
+
+        int atlasCount = RegisterFolderToGroup(settings, "Assets/" + Literal.Paths.Atlases, Literal.Groups.Atlases);
+        AssetDatabase.SaveAssets();
+        EditorUtility.DisplayDialog("Addressables Atlas Setup", $"Atlases: {atlasCount} assets processed", "OK");
+    }
+
+    [MenuItem("Tools/Addressables/Auto Setup Animators")]
+    public static void SetupAnimators()
+    {
+        AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.Settings;
+
+        if (settings == null)
+            return;
+
+        int animatorsCount = RegisterFolderToGroup(settings, "Assets/" + Literal.Paths.Animators, Literal.Groups.Animators);
+        AssetDatabase.SaveAssets();
+        EditorUtility.DisplayDialog("Addressables Animators Setup", $"Animators: {animatorsCount} assets processed", "OK");
+    }
+
+    [MenuItem("Tools/Addressables/Auto Setup Clips")]
+    public static void SetupClips()
+    {
+        AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.Settings;
+
+        if (settings == null)
+            return;
+
+        int clipsCount = RegisterFolderToGroup(settings, "Assets/" + Literal.Paths.Clips, Literal.Groups.Clips);
+        AssetDatabase.SaveAssets();
+        EditorUtility.DisplayDialog("Addressables Clips Setup", $"Clips: {clipsCount} assets processed", "OK");
+    }
+
+    [MenuItem("Tools/Addressables/Auto Setup Prefabs")]
+    public static void SetupPrefabs()
+    {
+        AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.Settings;
+
+        if (settings == null)
+            return;
+
+        int prefabsCount = RegisterFolderToGroup(settings, "Assets/" + Literal.Paths.Prefabs, Literal.Groups.Prefabs);
+        AssetDatabase.SaveAssets();
+        EditorUtility.DisplayDialog("Addressables Prefabs Setup", $"Prefabs: {prefabsCount} assets processed", "OK");
     }
 
     [MenuItem("Tools/Addressables/Auto Setup Binaries and Systems")]
@@ -52,33 +106,7 @@ public class Addressable
         EditorUtility.DisplayDialog("Addressables UI Setup", $"UserInterfaces: {uiCount} assets processed", "OK");
     }
 
-    [MenuItem("Tools/Addressables/Auto Setup Atlases")]
-    public static void SetupAtlases()
-    {
-        AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.Settings;
-
-        if (settings == null) 
-            return;
-
-        int atlasCount = RegisterFolderToGroup(settings, "Assets/" + Literal.Paths.Atlases, Literal.Groups.Atlases);
-        AssetDatabase.SaveAssets();
-        EditorUtility.DisplayDialog("Addressables Atlas Setup", $"Atlases: {atlasCount} assets processed", "OK");
-    }
-
-    [MenuItem("Tools/Addressables/Auto Setup Animators")]
-    public static void SetupAnimators()
-    {
-        AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.Settings;
-
-        if (settings == null)
-            return;
-
-        int animatorsCount = RegisterFolderToGroup(settings, "Assets/" + Literal.Paths.Animators, Literal.Groups.Animators);
-        AssetDatabase.SaveAssets();
-        EditorUtility.DisplayDialog("Addressables Animators Setup", $"Animators: {animatorsCount} assets processed", "OK");
-    }
-
-    private static int RegisterFolderToGroup(AddressableAssetSettings settings, string path, string name)
+    private static int RegisterFolderToGroup(AddressableAssetSettings settings, string path, string name, params string[] excludePaths)
     {
         if (!Directory.Exists(path))
             return 0;
@@ -96,6 +124,23 @@ public class Addressable
             string assetPath = AssetDatabase.GUIDToAssetPath(guid);
 
             if (Directory.Exists(assetPath))
+                continue;
+
+            bool shouldExclude = false;
+
+            if (excludePaths != null)
+            {
+                foreach (var exclude in excludePaths)
+                {
+                    if (!string.IsNullOrEmpty(exclude) && assetPath.Contains(exclude))
+                    {
+                        shouldExclude = true;
+                        break;
+                    }
+                }
+            }
+
+            if (shouldExclude)
                 continue;
 
             AddressableAssetEntry entry = settings.CreateOrMoveEntry(guid, group);

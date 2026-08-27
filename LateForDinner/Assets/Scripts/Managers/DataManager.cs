@@ -3,14 +3,17 @@ using MemoryPack;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using LateForDinner.Data;
 
 public class DataManager
 {
     public Dictionary<AttributeType, AttributeData> Attributes { get; private set; } = new Dictionary<AttributeType, AttributeData>();
     public Dictionary<string, LocalizationData> Localization { get; private set; } = new Dictionary<string, LocalizationData>();
-    public Dictionary<int, CharacterData> Characters { get; private set; } = new();
-    public Dictionary<int, PlayableCharacterData> PlayableCharacters { get; private set; } = new();
-    public Dictionary<int, Dictionary<string, string>> PlayableCharacterTemplates { get; private set; } = new();
+    public Dictionary<int, CharacterData> Characters { get; private set; } = new Dictionary<int, CharacterData>();
+    public Dictionary<int, SceneData> Scenes { get; private set; } = new Dictionary<int, SceneData>();
+    public Dictionary<int, SceneTransitionData> SceneTransitions { get; private set; } = new Dictionary<int, SceneTransitionData>();
+    public Dictionary<int, PlayableCharacterData> PlayableCharacters { get; private set; } = new Dictionary<int, PlayableCharacterData>();
+    public Dictionary<int, Dictionary<string, string>> PlayableCharacterTemplates { get; private set; } = new Dictionary<int, Dictionary<string, string>>();
 
     public async UniTask InitAsync()
     {
@@ -21,6 +24,10 @@ public class DataManager
         Log.Info(global::LocalizationKey.Log_Data_LoadedSuccessfully, Literal.Tables.Attribute);
         Characters = await LoadDictionaryAsync<int, CharacterData>(Literal.Tables.Character, data => data.ID);
         Log.Info(global::LocalizationKey.Log_Data_LoadedSuccessfully, Literal.Tables.Character);
+        Scenes = await LoadDictionaryAsync<int, SceneData>(Literal.Tables.Scene, data => data.ID);
+        Log.Info(global::LocalizationKey.Log_Data_LoadedSuccessfully, Literal.Tables.Scene);
+        SceneTransitions = await LoadDictionaryAsync<int, SceneTransitionData>(Literal.Tables.SceneTransition, data => data.ID);
+        Log.Info(global::LocalizationKey.Log_Data_LoadedSuccessfully, Literal.Tables.SceneTransition);
         PlayableCharacters = await LoadDictionaryAsync<int, PlayableCharacterData>(Literal.Tables.PlayableCharacter, data => data.ID);
         Log.Info(global::LocalizationKey.Log_Data_LoadedSuccessfully, Literal.Tables.PlayableCharacter);
         var playableCharacterTemplates = await LoadListAsync<PlayableCharacterTemplateData>(Literal.Tables.PlayableCharacterTemplate);

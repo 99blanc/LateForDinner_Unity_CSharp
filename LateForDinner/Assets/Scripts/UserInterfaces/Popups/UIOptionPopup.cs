@@ -9,7 +9,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using ZLinq;
 
-public class UIOptionPopup : UIPopup, IDraggable, IFocusable
+public class UIOptionPopup : UIPopup, IDraggablePopup, IFocusablePopup
 {
     private readonly ReactiveProperty<ButtonState> _soundButton = new ReactiveProperty<ButtonState>(ButtonState.Normal);
     private readonly ReactiveProperty<ButtonState> _graphicButton = new ReactiveProperty<ButtonState>(ButtonState.Normal);
@@ -690,7 +690,7 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
     {
         try
         {
-            await Managers.Feedback.LockAsync(async () =>
+            await ((Func<UniTask>)(async () =>
             {
                 CancelAllRebinds();
                 Sync();
@@ -708,7 +708,7 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
 
                 if (isLanguageChanged)
                     Managers.UI.RefreshAll();
-            });
+            })).Lock();
         }
         catch
         {
@@ -720,7 +720,7 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
     {
         try
         {
-            await Managers.Feedback.LockAsync(async () =>
+            await ((Func<UniTask>)(async () =>
             {
                 CancelAllRebinds();
                 Sync();
@@ -735,7 +735,7 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
 
                 if (isLanguageChanged)
                     Managers.UI.RefreshAll();
-            });
+            })).Lock();
         }
         catch
         {
@@ -778,7 +778,7 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
                 return;
 
             CancelAllRebinds();
-            await Managers.Feedback.LockAsync(async () =>
+            await ((Func<UniTask>)(async () =>
             {
                 await Managers.Config.ResetAsync();
                 Managers.Control.Reset();
@@ -793,7 +793,7 @@ public class UIOptionPopup : UIPopup, IDraggable, IFocusable
                 _initialLanguage = defaultLang;
                 Refresh();
                 Managers.UI.RefreshAll();
-            });
+            })).Lock();
         }
         catch
         {

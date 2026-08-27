@@ -1,8 +1,11 @@
 using MemoryPack;
 
-[MemoryPackable]
-public partial class LocalizationData
+namespace LateForDinner.Data
 {
-    public string Key { get; set; }
-    public string Text { get; set; }
+    [MemoryPackable]
+    public partial class LocalizationData
+    {
+        public string Key { get; set; }
+        public string Text { get; set; }
+    }
 }

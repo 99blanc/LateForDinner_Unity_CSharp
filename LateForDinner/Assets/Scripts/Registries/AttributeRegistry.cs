@@ -1,10 +1,11 @@
 using R3;
 using System;
 using System.Collections.Generic;
+using LateForDinner.Data;
 
 public class AttributeRegistry
 {
-    private readonly Dictionary<AttributeType, IAttributeView> _attributes = new();
+    private readonly Dictionary<AttributeType, IAttributeView> _attributes = new Dictionary<AttributeType, IAttributeView>();
 
     public void InitAttribute(List<AttributeData> attributes)
     {

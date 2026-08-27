@@ -8,144 +8,34 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using UnityEditor;
-using UnityEditor.U2D.Animation;
 using UnityEngine;
-using ZLinq;
+using LateForDinner.Data;
 
 public static class Table
 {
-    private static void GenerateAttributeType(List<AttributeData> records)
+    public static bool ConvertTableByName(string name)
     {
-        string filePath = Path.Combine(Application.dataPath, "Scripts/Enums/AttributeType.cs");
-        string dir = Path.GetDirectoryName(filePath);
-
-        if (!Directory.Exists(dir))
-            Directory.CreateDirectory(dir);
-
-        var validRecords = records
-        .Where(data => !string.IsNullOrWhiteSpace(data.Key))
-        .ToList();
-        var uniqueRecords = validRecords
-        .GroupBy(data => data.Key.Trim())
-        .Select(group => group.First())
-        .ToList();
-        int maxKeyLength = 0;
-
-        foreach (var data in uniqueRecords)
+        switch (name)
         {
-            string key = data.Key.Trim();
-            if (key.Length > maxKeyLength)
-                maxKeyLength = key.Length;
+            case "Attribute":
+                ConvertGeneric<AttributeData>(name, GenerateAttributeType);
+                break;
+            case "Character":
+                ConvertGeneric<CharacterData>(name, GenerateCharacterID);
+                break;
+            case "Scene":
+                ConvertGeneric<SceneData>(name, GenerateSceneID);
+                break;
+            case "SceneTransition":
+                ConvertGeneric<SceneTransitionData>(name, GenerateSceneTransitionID);
+                break;
+            default:
+                return false;
         }
-
-        using var writer = new StreamWriter(filePath);
-        writer.WriteLine("public enum AttributeType");
-        writer.WriteLine("{");
-
-        foreach (var data in uniqueRecords)
-        {
-            string key = data.Key.Trim();
-            string paddedKey = key.PadRight(maxKeyLength);
-            writer.WriteLine($"    {paddedKey}, // {data.DataType}");
-        }
-
-        writer.WriteLine("}");
+        return true;
     }
 
-    private static void GenerateCharacterID(List<CharacterData> records)
-    {
-        string filePath = Path.Combine(Application.dataPath, "Scripts/Enums/CharacterID.cs");
-        string dir = Path.GetDirectoryName(filePath);
-
-        if (!Directory.Exists(dir))
-            Directory.CreateDirectory(dir);
-
-        var validRecords = records
-            .Where(data => !string.IsNullOrWhiteSpace(data.Name))
-            .ToList();
-
-        var uniqueRecords = validRecords
-            .GroupBy(data => data.Name.Trim())
-            .Select(group => group.First())
-            .ToList();
-
-        int maxKeyLength = 0;
-
-        foreach (var data in uniqueRecords)
-        {
-            string key = data.Name.Trim();
-            if (key.Length > maxKeyLength)
-                maxKeyLength = key.Length;
-        }
-
-        using var writer = new StreamWriter(filePath);
-        writer.WriteLine("public enum CharacterID");
-        writer.WriteLine("{");
-
-        foreach (var data in uniqueRecords)
-        {
-            string key = data.Name.Trim();
-            string paddedKey = key.PadRight(maxKeyLength);
-            writer.WriteLine($"    {paddedKey} = {data.ID},");
-        }
-
-        writer.WriteLine("}");
-    }
-
-    private static void GenerateLocalizationKey(List<LocalizationData> records)
-    {
-        string filePath = Path.Combine(Application.dataPath, "Scripts/Enums/LocalizationKey.cs");
-        string dir = Path.GetDirectoryName(filePath);
-
-        if (!Directory.Exists(dir))
-            Directory.CreateDirectory(dir);
-
-        var validRecords = records
-        .Where(data => !string.IsNullOrWhiteSpace(data.Key))
-        .ToList();
-        var uniqueRecords = validRecords
-        .GroupBy(data => data.Key.Trim())
-        .Select(group => group.First())
-        .ToList();
-        int maxKeyLength = 0;
-
-        foreach (var data in uniqueRecords)
-        {
-            string key = data.Key.Trim();
-            if (key.Length > maxKeyLength)
-                maxKeyLength = key.Length;
-        }
-
-        using var writer = new StreamWriter(filePath);
-        writer.WriteLine("public enum LocalizationKey");
-        writer.WriteLine("{");
-
-        foreach (var data in uniqueRecords)
-        {
-            string key = data.Key.Trim();
-            string paddedKey = key.PadRight(maxKeyLength);
-            string textComment = !string.IsNullOrWhiteSpace(data.Text) ? $" // {data.Text.Replace("\n", " ")}" : string.Empty;
-            writer.WriteLine($"    {paddedKey},{textComment}");
-        }
-
-        writer.WriteLine("}");
-    }
-
-    public static void Bake<T>(string name, List<T> data)
-    {
-        byte[] bytes = MemoryPackSerializer.Serialize(data);
-
-        for (int index = 0; index < bytes.Length; index++)
-            bytes[index] ^= Key.Values[index % Key.Values.Length];
-
-        string folderPath = Path.Combine(Application.dataPath, Literal.Paths.Binaries);
-        Directory.CreateDirectory(folderPath);
-        string filePath = Path.Combine(folderPath, $"{name}.bytes");
-        File.WriteAllBytes(filePath, bytes);
-        AssetDatabase.Refresh();
-    }
-
-    public static void Convert<T>(string name)
+    public static void ConvertGeneric<T>(string name, Action<List<T>> generateEnumAction = null)
     {
         string csvPath = Path.Combine(Application.dataPath, Literal.Paths.Tables, $"{name}.csv");
 
@@ -162,64 +52,102 @@ public static class Table
             using var reader = new StreamReader(csvPath);
             using var csv = new CsvReader(reader, config);
             var records = csv.GetRecords<T>().ToList();
+            generateEnumAction?.Invoke(records);
             Bake(name, records);
         }
-        catch
+        catch (Exception ex)
         {
+            Debug.LogError($"[Conversion Error] Table: {name}, Exception: {ex}");
             EditorUtility.DisplayDialog("Conversion Error", $"An error occurred while converting {name}", "OK");
         }
     }
 
-    public static void ConvertAttribute(string name)
+    public static void GenerateAttributeType(List<AttributeData> records)
     {
-        string csvPath = Path.Combine(Application.dataPath, Literal.Paths.Tables, $"{name}.csv");
-
-        if (!File.Exists(csvPath))
-        {
-            EditorUtility.DisplayDialog("Conversion Failed", $"File does not exist:\n{csvPath}", "OK");
-            return;
-        }
-
-        var config = CreateCsvConfiguration();
-
-        try
-        {
-            using var reader = new StreamReader(csvPath);
-            using var csv = new CsvReader(reader, config);
-            var records = csv.GetRecords<AttributeData>().ToList();
-            GenerateAttributeType(records);
-            Bake(name, records);
-        }
-        catch
-        {
-            EditorUtility.DisplayDialog("Conversion Error", $"An error occurred while converting {name}", "OK");
-        }
+        string filePath = Path.Combine(Application.dataPath, "Scripts/Enums/AttributeType.cs");
+        WriteEnumFile(filePath, "AttributeType", records, data => data.Key, data => $"    {data.Key.Trim().PadRight(GetMaxKeyLength(records, d => d.Key))}, // {data.DataType}");
     }
 
-    public static void ConvertCharacter(string name)
+    public static void GenerateCharacterID(List<CharacterData> records)
     {
-        string csvPath = Path.Combine(Application.dataPath, Literal.Paths.Tables, $"{name}.csv");
+        string filePath = Path.Combine(Application.dataPath, "Scripts/Enums/CharacterID.cs");
+        WriteEnumFile(filePath, "CharacterID", records, data => data.Name, data => $"    {data.Name.Trim().PadRight(GetMaxKeyLength(records, d => d.Name))} = {data.ID},");
+    }
 
-        if (!File.Exists(csvPath))
+    public static void GenerateSceneID(List<SceneData> records)
+    {
+        string filePath = Path.Combine(Application.dataPath, "Scripts/Enums/SceneID.cs");
+        WriteEnumFile(filePath, "SceneID", records, data => data.Tag, data => $"    {data.Tag.Trim().PadRight(GetMaxKeyLength(records, d => d.Tag))} = {data.ID},");
+    }
+
+    public static void GenerateSceneTransitionID(List<SceneTransitionData> records)
+    {
+        string filePath = Path.Combine(Application.dataPath, "Scripts/Enums/SceneTransitionType.cs");
+        WriteEnumFile(filePath, "SceneTransitionType", records, data => data.Type, data => $"    {data.Type.Trim().PadRight(GetMaxKeyLength(records, d => d.Type))} = {data.ID},");
+    }
+
+    private static void GenerateLocalizationKey(List<LocalizationData> records)
+    {
+        string filePath = Path.Combine(Application.dataPath, "Scripts/Enums/LocalizationKey.cs");
+        WriteEnumFile(filePath, "LocalizationKey", records, data => data.Key, data =>
         {
-            EditorUtility.DisplayDialog("Conversion Failed", $"File does not exist:\n{csvPath}", "OK");
-            return;
+            string key = data.Key.Trim();
+            string textComment = !string.IsNullOrWhiteSpace(data.Text) ? $" // {data.Text.Replace("\n", " ")}" : string.Empty;
+            return $"    {key.PadRight(GetMaxKeyLength(records, d => d.Key))},{textComment}";
+        });
+    }
+
+    private static void WriteEnumFile<T>(string filePath, string enumName, List<T> records, Func<T, string> keySelector, Func<T, string> lineFormatter)
+    {
+        string dir = Path.GetDirectoryName(filePath);
+
+        if (!Directory.Exists(dir))
+            Directory.CreateDirectory(dir);
+
+        var validRecords = records.Where(data => !string.IsNullOrWhiteSpace(keySelector(data))).ToList();
+        var uniqueRecords = validRecords.GroupBy(data => keySelector(data).Trim()).Select(group => group.First()).ToList();
+        using var writer = new StreamWriter(filePath);
+        writer.WriteLine($"public enum {enumName}");
+        writer.WriteLine("{");
+
+        foreach (var data in uniqueRecords)
+            writer.WriteLine(lineFormatter(data));
+
+        writer.WriteLine("}");
+    }
+
+    private static int GetMaxKeyLength<T>(List<T> records, Func<T, string> keySelector)
+    {
+        int maxLength = 0;
+
+        foreach (var data in records)
+        {
+            string key = keySelector(data);
+
+            if (!string.IsNullOrEmpty(key))
+            {
+                int len = key.Trim().Length;
+
+                if (len > maxLength)
+                    maxLength = len;
+            }
         }
 
-        var config = CreateCsvConfiguration();
+        return maxLength;
+    }
 
-        try
-        {
-            using var reader = new StreamReader(csvPath);
-            using var csv = new CsvReader(reader, config);
-            var records = csv.GetRecords<CharacterData>().ToList();
-            GenerateCharacterID(records);
-            Bake(name, records);
-        }
-        catch
-        {
-            EditorUtility.DisplayDialog("Conversion Error", $"An error occurred while converting {name}", "OK");
-        }
+    public static void Bake<T>(string name, List<T> data)
+    {
+        byte[] bytes = MemoryPackSerializer.Serialize(data);
+
+        for (int index = 0; index < bytes.Length; index++)
+            bytes[index] ^= Key.Values[index % Key.Values.Length];
+
+        string folderPath = Path.Combine(Application.dataPath, Literal.Paths.Binaries);
+        Directory.CreateDirectory(folderPath);
+        string filePath = Path.Combine(folderPath, $"{name}.bytes");
+        File.WriteAllBytes(filePath, bytes);
+        AssetDatabase.Refresh();
     }
 
     public static void ConvertAndMergeLocalization(List<string> filePaths)

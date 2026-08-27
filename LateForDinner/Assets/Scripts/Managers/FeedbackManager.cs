@@ -28,6 +28,28 @@ public class FeedbackManager
     public async UniTask LockAsync(UniTask task)
         => await LockAsync(async () => await task);
 
+    public async UniTask LoadAsync(Func<UILoadDisplay, UniTask> task)
+    {
+        Managers.UI.CloseAll();
+        var load = await Managers.UI.OpenDisplayAsync<UILoadDisplay>();
+        load?.PlayAsync().Forget();
+
+        try
+        {
+            await task(load);
+        }
+        finally
+        {
+            load?.Release();
+        }
+    }
+
+    public async UniTask LoadAsync(Func<UniTask> task)
+        => await LoadAsync(async load => await task());
+
+    public async UniTask LoadAsync(UniTask task)
+        => await LoadAsync(async () => await task);
+
     public async UniTask ToastAsync(LocalizationKey key)
     {
         var toastSystem = await Managers.UI.OpenSystemAsync<UIToastSystem>(LayerType.System);

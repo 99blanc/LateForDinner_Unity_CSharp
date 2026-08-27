@@ -1,0 +1,23 @@
+# Table Type: Scene,,
+# Description: 맵(Scene)의 고유 번호. 유니티 씬 태그. 현지화 키 정의 테이블,,
+# Rule: 콤마 사용 불가. ID는 고유 값이어야 하며 중복 불가. Tag는 맵 지칭 고유 명사,,
+# Foreign Key: Localization.csv,,
+ID,Tag,LocalizationKey
+# Index: Scene,,
+1,Bootstrap,Scene_Bootstrap
+2,Hospital1,Scene_Hospital1
+3,Hospital2,Scene_Hospital2
+4,Hospital3,Scene_Hospital3
+5,Counter,Scene_Counter
+6,ConvenienceStore,Scene_ConvenienceStore
+7,ElevatorHallway,Scene_ElevatorHallway
+8,Lobby,Scene_Lobby
+9,Corridor,Scene_Corridor
+10,Kitchen,Scene_Kitchen
+11,Terrace,Scene_Terrace
+12,GroceryStorage,Scene_GroceryStorage
+13,EmployeeBreakroom,Scene_EmployeeBreakroom
+14,Cafeteria,Scene_Cafeteria
+15,Office,Scene_Office
+16,PretreatmentRoom,Scene_PretreatmentRoom
+17,HumanStorage,Scene_HumanStorage

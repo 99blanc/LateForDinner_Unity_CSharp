@@ -1,14 +1,13 @@
 using Cysharp.Threading.Tasks;
+using System;
 using UnityEngine.U2D;
 
 public class PreloadManager
 {
-    private readonly LoadDriver _driver = new LoadDriver();
-
     public async UniTask Release_BootAsync()
     {
         Log.System(LocalizationKey.Log_Preload_BootStarted);
-        await _driver.RunAsync(async load =>
+        await ((Func<UILoadDisplay, UniTask>)(async load =>
         {
             // DESC ::: 부트 시 필요한 게임 내 리소스 생성
             await load.LoadAsync(0.2f, Managers.Localization.Get(LocalizationKey.Log_Preload_Boot_Data));
@@ -34,7 +33,7 @@ public class PreloadManager
             await UniTask.Delay(200);
             await load.LoadAsync(1.0f, Managers.Localization.Get(LocalizationKey.Log_Preload_Boot_Complete));
             await UniTask.Delay(100);
-        });
+        })).Load();
         Log.System(LocalizationKey.Log_Preload_BootFinished);
     }
 }

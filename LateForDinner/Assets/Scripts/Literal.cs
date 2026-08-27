@@ -2,8 +2,11 @@ public class Literal
 {
     public class Assets
     {
+        public const string Animator = "Animator";
         public const string EventSystem = "EventSystem";
         public const string InputActionAsset = "InputSystem_Actions";
+        public const string PlayableCharacterObject = "PlayableCharacterObject";
+        public const string Object = "Object";
     }
 
     public class Extensions
@@ -36,6 +39,8 @@ public class Literal
         public const string Animators = "Animators";
         public const string Atlases = "Atlases";
         public const string Binaries = "Binaries";
+        public const string Clips = "Clips";
+        public const string Prefabs = "Prefabs";
         public const string Systems = "Systems";
         public const string UserInterfaces = "UserInterfaces";
     }
@@ -116,6 +121,8 @@ public class Literal
         public const string Animators = "Animators/";
         public const string Atlases = "Atlases/";
         public const string Binaries = "Binaries/";
+        public const string Clips = "Clips/";
+        public const string Prefabs = "Prefabs/";
         public const string SystemPrefabs = "Prefabs/Systems/";
         public const string Systems = "Systems/";
         public const string Tables = "Editor/Tables/";
@@ -142,6 +149,8 @@ public class Literal
         public const string Attribute = "Attribute";
         public const string Character = "Character";
         public const string Localization = "Localization";
+        public const string Scene = "Scene";
+        public const string SceneTransition = "SceneTransition";
         public const string PlayableCharacter = "PlayableCharacter";
         public const string PlayableCharacterTemplate = "PlayableCharacterTemplate";
     }

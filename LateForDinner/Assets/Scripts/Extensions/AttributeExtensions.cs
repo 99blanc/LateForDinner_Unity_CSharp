@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
+using LateForDinner.Data;
 
 public static class AttributeExtensions
 {
-    private static readonly Dictionary<AttributeType, Type> _attributes = new();
+    private static readonly Dictionary<AttributeType, Type> _attributes = new Dictionary<AttributeType, Type>();
 
     public static void BindTypes(this List<AttributeData> attributes)
     {

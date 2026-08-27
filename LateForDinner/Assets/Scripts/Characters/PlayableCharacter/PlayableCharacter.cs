@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using UnityHFSM;
 
-public abstract class PlayableCharacter : Character, IIdleable, IMovable
+public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovableCharacter
 {
     public Rigidbody2D Rigidbody { get; private set; }
     public Transform BackTransform { get; private set; }
@@ -52,6 +52,7 @@ public abstract class PlayableCharacter : Character, IIdleable, IMovable
 
     protected override void CacheComponents()
     {
+        base.CacheComponents();
         Rigidbody = this.FindChildAssert<Rigidbody2D>(recursive: true);
         BackTransform = this.FindChildAssert<Transform>(Literal.Objects.BackTransform, recursive: true);
         FrontTransform = this.FindChildAssert<Transform>(Literal.Objects.FrontTransform, recursive: true);

@@ -1,6 +1,6 @@
 # Table Type: Attribute,
 # Description: 캐릭터 및 객체 속성 정의 테이블,
-# Rule: 콤마 사용 불가. Key는 고유 값이어야 하며 중복 불가. DataType은 CSharp 공용 타입 시스템이 표준 규격,
+# Rule: 콤마 사용 불가. Key는 고유 값이어야 하며 중복 불가. DataType은 CSharp 공용 타입 시스템 표준,
 Key,DataType
 # Index: AttributeRegistry,
 # Property: 체력,

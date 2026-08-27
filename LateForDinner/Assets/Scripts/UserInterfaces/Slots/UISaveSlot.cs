@@ -2,6 +2,7 @@ using Cysharp.Threading.Tasks;
 using R3;
 using System;
 using UnityEngine.EventSystems;
+using LateForDinner.Data;
 
 public class UISaveSlot : UISlot
 {

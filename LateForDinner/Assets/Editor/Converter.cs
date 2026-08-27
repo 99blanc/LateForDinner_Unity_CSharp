@@ -14,14 +14,27 @@ public class Converter
         string path = Path.Combine(Application.dataPath, Literal.Paths.Tables);
 
         if (!Directory.Exists(path))
+        {
+            EditorUtility.DisplayDialog("Path Error", $"Tables folder does not exist at:\n{path}", "OK");
             return;
+        }
 
         string[] csvFiles = Directory.GetFiles(path, "*.csv");
+
+        if (csvFiles.Length == 0)
+        {
+            EditorUtility.DisplayDialog("Path Error", "No CSV files found in the tables folder.", "OK");
+            return;
+        }
+
+        CleanupObsoleteBinaries(csvFiles);
         var localizationFiles = new List<string>();
         var otherFiles = new List<string>();
         CategorizeFiles(csvFiles, localizationFiles, otherFiles);
-        int total = otherFiles.Count + (localizationFiles.Count > 0 ? 1 : 0);
-        int success = 0;
+        int localizationUnitCount = localizationFiles.Count > 0 ? 1 : 0;
+        int total = otherFiles.Count + localizationUnitCount;
+        int successGeneral = 0;
+        bool successLocalization = false;
         int currentProgress = 0;
 
         for (int index = 0; index < otherFiles.Count; index++)
@@ -31,7 +44,7 @@ public class Converter
             EditorUtility.DisplayProgressBar("Converting Tables...", $"Processing: {name}", (float)currentProgress / total);
 
             if (ConvertTable(name))
-                success++;
+                successGeneral++;
 
             currentProgress++;
         }
@@ -41,13 +54,55 @@ public class Converter
             EditorUtility.DisplayProgressBar("Converting Tables...", "Processing Localization Tables...", (float)currentProgress / total);
 
             if (ConvertAndEncryptionMergeLocalization(localizationFiles))
-                success += localizationFiles.Count;
+                successLocalization = true;
 
             currentProgress++;
         }
 
         EditorUtility.ClearProgressBar();
-        EditorUtility.DisplayDialog("Table Bake", $"Conversion Complete: {success} converted", "OK");
+        string locStatus = localizationFiles.Count > 0 ? (successLocalization ? $"Merged ({localizationFiles.Count} files)" : "Failed") : "None";
+        string resultMessage = "Table Conversion Complete!\n\n" + $"• General Tables: {successGeneral} / {otherFiles.Count} processed\n" + $"• Localization: {locStatus}";
+        EditorUtility.DisplayDialog("Table Bake Result", resultMessage, "OK");
+    }
+
+    private static void CleanupObsoleteBinaries(string[] csvFiles)
+    {
+        string binariesPath = Path.Combine(Application.dataPath, Literal.Paths.Binaries);
+
+        if (!Directory.Exists(binariesPath)) 
+            return;
+
+        var validNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var file in csvFiles)
+        {
+            string name = Path.GetFileNameWithoutExtension(file);
+
+            if (name.StartsWith("Localization", StringComparison.OrdinalIgnoreCase))
+                validNames.Add("Localization");
+            else
+                validNames.Add(name);
+        }
+
+        string[] existingBytesFiles = Directory.GetFiles(binariesPath, "*.bytes");
+
+        foreach (var bytesFile in existingBytesFiles)
+        {
+            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(bytesFile);
+
+            if (!validNames.Contains(fileNameWithoutExt))
+            {
+                File.Delete(bytesFile);
+                string metaFile = bytesFile + ".meta";
+
+                if (File.Exists(metaFile))
+                    File.Delete(metaFile);
+
+                Debug.Log($"[Converter] Removed obsolete binary file: {fileNameWithoutExt}.bytes");
+            }
+        }
+
+        AssetDatabase.Refresh();
     }
 
     private static void CategorizeFiles(string[] csvFiles, List<string> localizationFiles, List<string> otherFiles)
@@ -66,58 +121,40 @@ public class Converter
 
     private static bool ConvertTable(string name)
     {
-        if (name.Equals("Attribute", StringComparison.OrdinalIgnoreCase))
-            return ConvertAttributeTable(name);
+        MethodInfo method = typeof(Table).GetMethod("ConvertTableByName", BindingFlags.Public | BindingFlags.Static);
 
-        if (name.Equals("Character", StringComparison.OrdinalIgnoreCase))
-            return ConvertCharacterTable(name);
+        if (method != null)
+        {
+            var result = method.Invoke(null, new object[] { name });
+            if (result is bool handled && handled)
+                return true;
+        }
 
         string className = name + "Data";
         Type dataType = FindType(className);
 
         if (dataType == null)
         {
-            EditorUtility.ClearProgressBar();
-            EditorUtility.DisplayDialog("Table Conversion Warning", $"Matching data type not found for table:\n'{name}'", "OK");
+            Debug.LogError($"[Converter] Matching data type not found for table: '{name}' (Looking for class: '{className}')");
             return false;
         }
 
-        MethodInfo method = typeof(Table).GetMethod("Convert", BindingFlags.Public | BindingFlags.Static);
-        
-        if (method == null)
+        MethodInfo genericMethod = typeof(Table).GetMethod("ConvertGeneric", BindingFlags.Public | BindingFlags.Static)?.MakeGenericMethod(dataType);
+
+        if (genericMethod == null)
+        {
+            Debug.LogError("[Converter] ConvertGeneric method not found in Table class.");
             return false;
+        }
 
-        MethodInfo genericMethod = method.MakeGenericMethod(dataType);
-        genericMethod.Invoke(null, new object[] { name });
-        return true;
-    }
-
-    private static bool ConvertAttributeTable(string name)
-    {
-        MethodInfo method = typeof(Table).GetMethod("ConvertAttribute", BindingFlags.Public | BindingFlags.Static);
-
-        if (method == null)
-            return false;
-
-        method.Invoke(null, new object[] { name });
-        return true;
-    }
-
-    private static bool ConvertCharacterTable(string name)
-    {
-        MethodInfo method = typeof(Table).GetMethod("ConvertCharacter", BindingFlags.Public | BindingFlags.Static);
-
-        if (method == null)
-            return false;
-
-        method.Invoke(null, new object[] { name });
+        genericMethod.Invoke(null, new object[] { name, null });
         return true;
     }
 
     private static bool ConvertAndEncryptionMergeLocalization(List<string> files)
     {
         MethodInfo method = typeof(Table).GetMethod("ConvertAndMergeLocalization", BindingFlags.Public | BindingFlags.Static);
-        
+
         if (method == null)
             return false;
 
@@ -127,6 +164,11 @@ public class Converter
 
     private static Type FindType(string name)
     {
+        Type targetType = Type.GetType($"LateForDinner.Data.{name}, Assembly-CSharp");
+
+        if (targetType != null)
+            return targetType;
+
         var assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
         for (int index = 0; index < assemblies.Length; index++)
@@ -141,7 +183,10 @@ public class Converter
                 {
                     string ns = type.Namespace ?? string.Empty;
 
-                    if (ns.StartsWith("System") || ns.StartsWith("UnityEngine") || ns.StartsWith("UnityEditor"))
+                    if (ns.Equals("LateForDinner.Data", StringComparison.Ordinal))
+                        return type;
+
+                    if (ns.StartsWith("System") || ns.StartsWith("UnityEngine") || ns.StartsWith("UnityEditor") || ns.StartsWith("Unity.UI"))
                         continue;
 
                     return type;

@@ -3,6 +3,7 @@ using MemoryPack;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using LateForDinner.Data;
 
 public class SaveManager
 {
@@ -29,19 +30,19 @@ public class SaveManager
         {
             if (!File.Exists(path))
             {
-                NewGame(index);
+                Newgame(index);
                 return;
             }
 
             byte[] bytes = await File.ReadAllBytesAsync(path);
-            CurrentData = MemoryPackSerializer.Deserialize<SaveData>(bytes) ?? new SaveData();
+            CurrentData = MemoryPackSerializer.Deserialize<SaveData>(bytes) ?? SaveData.Default;
             _currentSlot = index;
             Log.System(LocalizationKey.Log_Save_LoadSuccess, index);
         }
         catch
         {
             Log.Error(LocalizationKey.Log_Save_LoadFailed, index);
-            NewGame(index);
+            Newgame(index);
         }
     }
 
@@ -50,6 +51,7 @@ public class SaveManager
         if (_currentSlot < 0)
             return;
 
+        Sync();
         string path = GetPath(_currentSlot);
         string backupPath = GetBackupPath(_currentSlot);
 
@@ -87,18 +89,18 @@ public class SaveManager
         {
             if (!File.Exists(path))
             {
-                MetaData = new SaveMeta();
+                MetaData = SaveMeta.Default;
                 ValidateMeta();
                 return;
             }
 
             byte[] bytes = await File.ReadAllBytesAsync(path);
-            MetaData = MemoryPackSerializer.Deserialize<SaveMeta>(bytes) ?? new SaveMeta();
+            MetaData = MemoryPackSerializer.Deserialize<SaveMeta>(bytes) ?? SaveMeta.Default;
         }
         catch
         {
             Log.Error(LocalizationKey.Log_Save_MetaLoadFailed);
-            MetaData = new SaveMeta();
+            MetaData = SaveMeta.Default;
         }
 
         ValidateMeta();
@@ -109,7 +111,7 @@ public class SaveManager
         InitMetaCollectionsIfNeeded();
 
         while (MetaData.Slots.Count < count)
-            MetaData.Slots.Add(new SlotMeta());
+            MetaData.Slots.Add(SlotMeta.Default);
 
         if (MetaData.SlotOrder.Count == MetaData.Slots.Count)
             return;
@@ -135,7 +137,7 @@ public class SaveManager
         for (int index = 0; index < MetaData.Slots.Count; index++)
         {
             if (MetaData.Slots[index] == null)
-                MetaData.Slots[index] = new SlotMeta();
+                MetaData.Slots[index] = SlotMeta.Default;
         }
     }
 
@@ -153,7 +155,7 @@ public class SaveManager
         InitMetaCollectionsIfNeeded();
 
         if (MetaData.Slots[_currentSlot] == null)
-            MetaData.Slots[_currentSlot] = new SlotMeta();
+            MetaData.Slots[_currentSlot] = SlotMeta.Default;
 
         DateTime now = DateTime.Now;
         CurrentData.Year = now.Year;
@@ -196,8 +198,8 @@ public class SaveManager
     public async UniTask ClearAsync(int index)
     {
         EnsureSlot(index + 1);
-        MetaData.Slots[index] = new SlotMeta();
-        CurrentData = new SaveData();
+        MetaData.Slots[index] = SlotMeta.Default;
+        CurrentData = SaveData.Default;
         _currentSlot = index;
         await SaveMetaAsync();
         string path = GetPath(index);
@@ -208,12 +210,21 @@ public class SaveManager
         Log.System(LocalizationKey.Log_Save_ClearSuccess, index);
     }
 
-    public void NewGame(int slotIndex)
+    public void Newgame(int slotIndex)
     {
         _currentSlot = slotIndex;
-        CurrentData = new SaveData();
+        CurrentData = SaveData.Default;
         SyncMeta();
         Log.System(LocalizationKey.Log_Save_NewGameStarted, slotIndex);
+    }
+
+    private void Sync()
+    {
+        if (CurrentData == null)
+            CurrentData = SaveData.Default;
+
+        if (Managers.Scene.CurrentSceneID != SceneID.Bootstrap)
+            CurrentData.CurrentSceneID = Managers.Scene.CurrentSceneID;
     }
 
     private string GetPath(int slot)

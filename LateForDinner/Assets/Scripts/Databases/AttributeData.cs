@@ -1,8 +1,11 @@
 using MemoryPack;
 
-[MemoryPackable]
-public partial class AttributeData
+namespace LateForDinner.Data
 {
-    public string Key { get; set; }
-    public string DataType { get; set; }
+    [MemoryPackable]
+    public partial class AttributeData
+    {
+        public string Key { get; set; }
+        public string DataType { get; set; }
+    }
 }

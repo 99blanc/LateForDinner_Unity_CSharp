@@ -14,13 +14,16 @@ public class IdleState : CharacterState
     public IdleState(Character owner) : base(owner) { }
 
     public override void OnEnter()
-        => base.OnEnter();
+    {
+        base.OnEnter();
+        Owner?.CharacterAnimator?.PlayIdle();
+    }
 
     public override void OnLogic()
     {
         base.OnLogic();
 
-        if (Owner is IIdleable idleable)
+        if (Owner is IIdleableCharacter idleable)
             idleable.Idle();
     }
 }
@@ -33,7 +36,10 @@ public class MoveState : CharacterState
         => _inputProvider = inputProvider;
 
     public override void OnEnter()
-        => base.OnEnter();
+    {
+        base.OnEnter();
+        Owner?.CharacterAnimator?.PlayMove();
+    }
 
     public override void OnLogic()
     {
@@ -44,7 +50,7 @@ public class MoveState : CharacterState
 
         float moveInput = _inputProvider.Invoke();
 
-        if (Owner is IMovable movable)
+        if (Owner is IMovableCharacter movable)
             movable.Move(moveInput);
     }
 }

@@ -1,9 +1,12 @@
 using MemoryPack;
 
-[MemoryPackable]
-public partial class PlayableCharacterTemplateData
+namespace LateForDinner.Data
 {
-    public int PlayableCharacterID { get; set; }
-    public string AttributeKey { get; set; }
-    public string Value { get; set; }
+    [MemoryPackable]
+    public partial class PlayableCharacterTemplateData
+    {
+        public int PlayableCharacterID { get; set; }
+        public string AttributeKey { get; set; }
+        public string Value { get; set; }
+    }
 }

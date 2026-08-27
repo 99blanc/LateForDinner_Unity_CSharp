@@ -75,12 +75,13 @@ public class ResourceManager
     public async UniTask<RuntimeAnimatorController> LoadAnimatorControllerAsync(string path)
         => await LoadAssetAsync<RuntimeAnimatorController>(path);
     public async UniTask<AnimatorOverrideController> LoadAnimatorOverrideControllerAsync(string path)
-        => await LoadAssetAsync<AnimatorOverrideController>(path);
-
-    public GameObject Instantiate(string path, Transform parent = null, bool hasWorldPosition = false)
     {
-        var prefab = Get<GameObject>(path);
-        return Instantiate(prefab, parent, hasWorldPosition);
+        RuntimeAnimatorController controller = await LoadAssetAsync<RuntimeAnimatorController>(path);
+
+        if (controller is AnimatorOverrideController overrideController)
+            return overrideController;
+
+        return null;
     }
 
     public T Get<T>(string path) where T : Object
@@ -131,6 +132,12 @@ public class ResourceManager
             return null;
 
         return Object.Instantiate(prefab, parent, hasWorldPosition);
+    }
+
+    public GameObject Instantiate(string path, Transform parent = null, bool hasWorldPosition = false)
+    {
+        var prefab = Get<GameObject>(path);
+        return Instantiate(prefab, parent, hasWorldPosition);
     }
 
     public void Unload(string path)

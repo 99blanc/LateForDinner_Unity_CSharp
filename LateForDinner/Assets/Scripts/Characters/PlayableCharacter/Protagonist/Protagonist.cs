@@ -1,7 +1,7 @@
 public class Protagonist : PlayableCharacter
 {
+    public override CharacterAnimator CharacterAnimator => _protagonistAnimator;
     protected override CharacterID CharacterID => CharacterID.Protagonist;
-    protected override CharacterAnimator CharacterAnimator => _protagonistAnimator;
     private ProtagonistAnimator _protagonistAnimator;
 
     protected override void CacheComponents()
