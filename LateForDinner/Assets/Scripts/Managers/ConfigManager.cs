@@ -20,7 +20,7 @@ public class ConfigManager
     {
         if (!File.Exists(SavePath))
         {
-            Option = new Option();
+            Option = Option.Default;
             await SaveAsync();
             Log.System(LocalizationKey.Log_Config_CreatedNew);
         }
@@ -29,13 +29,13 @@ public class ConfigManager
             try
             {
                 byte[] bytes = await File.ReadAllBytesAsync(SavePath);
-                Option = MemoryPackSerializer.Deserialize<Option>(bytes) ?? new Option();
+                Option = MemoryPackSerializer.Deserialize<Option>(bytes) ?? Option.Default;
                 Log.Info(LocalizationKey.Log_Config_LoadedSuccessfully);
             }
             catch
             {
                 Log.Warning(LocalizationKey.Log_Config_LoadFailed);
-                Option = new Option();
+                Option = Option.Default;
             }
         }
 
@@ -65,7 +65,7 @@ public class ConfigManager
 
     public async UniTask ResetAsync()
     {
-        Option = new Option();
+        Option = Option.Default;
         Managers.Control?.Reset();
         await SaveAsync();
         Log.System(LocalizationKey.Log_Config_Reset);

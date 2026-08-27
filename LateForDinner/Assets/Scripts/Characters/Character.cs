@@ -7,9 +7,10 @@ public abstract class Character : MonoBehaviour, IPoolablePrefab
     public AttributeRegistry Attributes { get; protected set; } = new AttributeRegistry();
     public SpriteRenderer Renderer { get; private set; }
     public Animator Animator { get; private set; }
+    public Collider2D Collider { get; private set; }
+    public StateMachine<CharacterStateType> StateMachine;
     public abstract CharacterAnimator CharacterAnimator { get; }
     protected abstract CharacterID CharacterID { get; }
-    protected StateMachine<CharacterStateType> StateMachine;
 
     public virtual void Init()
     {
@@ -25,7 +26,11 @@ public abstract class Character : MonoBehaviour, IPoolablePrefab
         StateMachine.SetStartState(CharacterStateType.Idle);
         StateMachine.Init();
         Observable.EveryUpdate(UnityFrameProvider.FixedUpdate)
-        .Subscribe(_ => StateMachine.OnLogic())
+        .Subscribe(_ => 
+        {
+            StateMachine.OnLogic();
+            this.IsGrounded();
+        })
         .AddToPool(this);
     }
 
@@ -46,6 +51,7 @@ public abstract class Character : MonoBehaviour, IPoolablePrefab
     {
         Renderer = this.FindChildAssert<SpriteRenderer>(recursive: true);
         Animator = Renderer?.GetComponentAssert<Animator>();
+        Collider = this.GetComponentAssert<Collider2D>();
         CharacterAnimator?.SetAnimator(Animator);
     }
 }

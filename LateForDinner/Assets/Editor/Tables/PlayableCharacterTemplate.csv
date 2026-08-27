@@ -11,3 +11,5 @@ PlayableCharacterID,AttributeKey,Value
 1,Acceleration,15
 1,Deceleration,20
 1,TurnDeceleration,35
+1,JumpCount,3
+1,JumpForce,10

@@ -7,6 +7,20 @@ public static class CharacterExtensions
 {
     private static readonly Dictionary<CharacterID, (Type characterType, Type animatorType)> _caches = new Dictionary<CharacterID, (Type characterType, Type animatorType)>();
 
+    public static bool IsGrounded(this Character character, Vector2? boxSize = null, LayerMask? groundLayer = null)
+    {
+        if (character == null)
+            return false;
+
+        Vector2 size = boxSize ?? new Vector2(0.6f, 0.1f);
+        LayerMask layer = groundLayer ?? LayerMask.GetMask(Literal.Layers.Ground);
+        Vector2 position = new Vector2(character.transform.position.x, character.Collider.bounds.min.y - (size.y * 0.5f));
+        Collider2D collider = Physics2D.OverlapBox(position, size, 0f, layer);
+        Color color = collider != null ? Color.green : Color.red;
+        character.DrawDebugBoxLines(position, size, color, DebugExtensions.IsDebugDrawEnabled);
+        return collider != null;
+    }
+
     public static string GetAnimatorOverrideControllerPath(this CharacterID characterID)
         => ZString.Concat(characterID.ToString(), Literal.Assets.Animator);
 

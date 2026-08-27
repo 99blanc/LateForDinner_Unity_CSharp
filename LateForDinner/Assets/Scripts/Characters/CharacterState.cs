@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 using UnityHFSM;
 
 public abstract class CharacterState : StateBase<CharacterStateType>
@@ -16,7 +17,9 @@ public class IdleState : CharacterState
     public override void OnEnter()
     {
         base.OnEnter();
-        Owner?.CharacterAnimator?.PlayIdle();
+
+        if (Owner is IIdleableCharacter)
+            Owner.CharacterAnimator?.PlayIdle();
     }
 
     public override void OnLogic()
@@ -30,7 +33,7 @@ public class IdleState : CharacterState
 
 public class MoveState : CharacterState
 {
-    private readonly Func<float> _inputProvider;
+    protected readonly Func<float> _inputProvider;
 
     public MoveState(Character owner, Func<float> inputProvider) : base(owner)
         => _inputProvider = inputProvider;
@@ -38,7 +41,9 @@ public class MoveState : CharacterState
     public override void OnEnter()
     {
         base.OnEnter();
-        Owner?.CharacterAnimator?.PlayMove();
+
+        if (Owner is IMovableCharacter)
+            Owner.CharacterAnimator?.PlayMove();
     }
 
     public override void OnLogic()
@@ -52,5 +57,41 @@ public class MoveState : CharacterState
 
         if (Owner is IMovableCharacter movable)
             movable.Move(moveInput);
+    }
+}
+
+public class JumpState : CharacterState
+{
+    protected readonly Func<float> _inputProvider;
+
+    public JumpState(Character owner, Func<float> inputProvider) : base(owner)
+        => _inputProvider = inputProvider;
+
+    public override void OnEnter()
+    {
+        base.OnEnter();
+
+        if (Owner is IJumpableCharacter jumpable)
+        {
+            if (jumpable.RemainingJumpCount < 0)
+                jumpable.RemainingJumpCount = jumpable.MaxJumpCount;
+
+            Owner.CharacterAnimator?.PlayJump();
+            float directionX = _inputProvider?.Invoke() ?? 0f;
+            jumpable.Jump(directionX);
+        }
+    }
+
+    public override void OnLogic()
+    {
+        base.OnLogic();
+
+        if (Owner is not IJumpableCharacter jumpable)
+            return;
+
+        float directionX = _inputProvider?.Invoke() ?? 0f;
+
+        if (Owner is IMovableCharacter movable)
+            movable.Move(directionX);
     }
 }

@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using UnityHFSM;
 
-public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovableCharacter
+public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovableCharacter, IJumpableCharacter
 {
     public Rigidbody2D Rigidbody { get; private set; }
     public Transform BackTransform { get; private set; }
@@ -38,7 +38,8 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
 
     protected override void RegisterTransitions(StateMachine<CharacterStateType> fsm)
     {
-        fsm.AddTransition(new Transition<CharacterStateType>(
+        fsm
+        .AddTransition(new Transition<CharacterStateType>(
             from: CharacterStateType.Idle,
             to: CharacterStateType.Move,
             condition: _ => IsPlayerTryingToMove()
@@ -47,6 +48,31 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
             from: CharacterStateType.Move,
             to: CharacterStateType.Idle,
             condition: _ => HasPlayerStoppedMoving()
+        ));
+        fsm.AddTransition(new Transition<CharacterStateType>(
+            from: CharacterStateType.Idle,
+            to: CharacterStateType.Jump,
+            condition: _ => IsPlayerTryingToJump()
+        ));
+        fsm.AddTransition(new Transition<CharacterStateType>(
+            from: CharacterStateType.Move,
+            to: CharacterStateType.Jump,
+            condition: _ => IsPlayerTryingToJump()
+        ));
+        fsm.AddTransition(new Transition<CharacterStateType>(
+            from: CharacterStateType.Jump,
+            to: CharacterStateType.Jump,
+            condition: _ => IsPlayerTryingToJump() && (this as IJumpableCharacter).RemainingJumpCount > 0
+        ));
+        fsm.AddTransition(new Transition<CharacterStateType>(
+            from: CharacterStateType.Jump, 
+            to: CharacterStateType.Idle,
+            condition: _ => CheckLandingAndResetJump(out bool isStationary) && isStationary
+        ));
+        fsm.AddTransition(new Transition<CharacterStateType>(
+            from: CharacterStateType.Jump, 
+            to: CharacterStateType.Move,
+            condition: _ => CheckLandingAndResetJump(out bool isStationary) && !isStationary
         ));
     }
 
@@ -59,7 +85,7 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
         HitboxTransform = this.FindChildAssert<Transform>(Literal.Objects.HitboxTransform, recursive: true);
     }
 
-    private float GetPlayerMoveInput()
+    protected float GetPlayerMoveInput()
     {
         if (Managers.Control.IsPressed(Literal.Hotkeys.Right)) 
             return 1f;
@@ -72,6 +98,8 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
 
     private bool IsPlayerTryingToMove()
         => Mathf.Abs(GetPlayerMoveInput()) > 0.01f;
+    private bool IsPlayerTryingToJump()
+        => Managers.Control.IsTriggered(Literal.Hotkeys.Jump);
 
     private bool HasPlayerStoppedMoving()
     {
@@ -79,4 +107,22 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
         bool hasNoVelocity = Mathf.Abs(Rigidbody.linearVelocity.x) < 0.1f;
         return hasNoInput && hasNoVelocity;
     }
+
+    private bool CheckLandingAndResetJump(out bool isStationary)
+    {
+        isStationary = Mathf.Abs(GetPlayerMoveInput()) <= 0.01f;
+
+        if (this.IsGrounded())
+        {
+            if (this is IJumpableCharacter jumpable)
+                jumpable.RemainingJumpCount = jumpable.MaxJumpCount;
+
+            return true;
+        }
+
+        return false;
+    }
+
+    public bool IsJumpKeyTriggered()
+        => Managers.Control.IsTriggered(Literal.Hotkeys.Jump);
 }

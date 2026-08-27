@@ -13,11 +13,27 @@ public class CommandRegistry
         _console.RegisterCommand("debug", OnCommandToggleDebug, Managers.Localization.Get(LocalizationKey.Command_Desc_Debug));
         _console.RegisterCommand("clear", OnCommandClear, Managers.Localization.Get(LocalizationKey.Command_Desc_Clear));
         _console.RegisterCommand("fps", OnCommandToggleFPS, Managers.Localization.Get(LocalizationKey.Command_Desc_FPS));
-        _console.RegisterCommand("time", OnCommandTimeScale, Managers.Localization.Get(LocalizationKey.Command_Desc_Time));
-        _console.RegisterCommand("set", OnCommandSetVariable, Managers.Localization.Get(LocalizationKey.Command_Desc_Set));
-        _console.RegisterCommand("get", OnCommandGetVariable, Managers.Localization.Get(LocalizationKey.Command_Desc_Get));
         _console.RegisterCommand("log_search", OnCommandLogSearch, Managers.Localization.Get(LocalizationKey.Command_Desc_LogSearch));
         _console.RegisterCommand("log_filter", OnCommandLogFilter, Managers.Localization.Get(LocalizationKey.Command_Desc_LogFilter));
+        UpdateDebugCommands(CheckIsDebugMode());
+    }
+
+    private void UpdateDebugCommands(bool isDebugMode)
+    {
+        if (isDebugMode)
+        {
+            _console.RegisterCommand("set", OnCommandSetVariable, Managers.Localization.Get(LocalizationKey.Command_Desc_Set));
+            _console.RegisterCommand("get", OnCommandGetVariable, Managers.Localization.Get(LocalizationKey.Command_Desc_Get));
+            _console.RegisterCommand("time_debug", OnCommandTimeScale, Managers.Localization.Get(LocalizationKey.Command_Desc_Time));
+            _console.RegisterCommand("ground_debug", OnCommandToggleGroundDebug, Managers.Localization.Get(LocalizationKey.Command_Desc_Ground));
+        }
+        else
+        {
+            _console.UnregisterCommand("set");
+            _console.UnregisterCommand("get");
+            _console.UnregisterCommand("time_debug");
+            _console.UnregisterCommand("ground_debug");
+        }
     }
 
     private void OnCommandHelp(string[] args)
@@ -49,6 +65,7 @@ public class CommandRegistry
         var debug = Managers.Config.Option.Debug;
         debug.isDebugMode = !debug.isDebugMode;
         Managers.Config.SaveAsync().Forget();
+        UpdateDebugCommands(debug.isDebugMode);
         Log.Info(LocalizationKey.Command_Debug_Toggle, debug.isDebugMode.ToString());
     }
 
@@ -79,45 +96,6 @@ public class CommandRegistry
             Managers.UI.OpenSystem<UIFPSSystem>();
             Log.Info(LocalizationKey.Command_FPS_Enabled);
         }
-    }
-
-    private void OnCommandTimeScale(string[] args)
-    {
-        if (args.Length > 0 && float.TryParse(args[0], out float scale))
-        {
-            Time.timeScale = scale;
-            Log.Info(LocalizationKey.Command_Time_Set, scale);
-        }
-        else
-            Log.Info(LocalizationKey.Command_Time_Current, Time.timeScale);
-    }
-
-    private void OnCommandSetVariable(string[] args)
-    {
-        if (args.Length < 2)
-        {
-            Log.Warning(LocalizationKey.Command_Set_Usage);
-            return;
-        }
-
-        _console.SetVariable(args[0], args[1]);
-        Log.Info(LocalizationKey.Command_Set_Success, args[0], args[1]);
-    }
-
-    private void OnCommandGetVariable(string[] args)
-    {
-        if (args.Length < 1)
-        {
-            Log.Warning(LocalizationKey.Command_Get_Usage);
-            return;
-        }
-
-        string val = _console.GetVariable(args[0]);
-
-        if (val != null)
-            Log.Info(LocalizationKey.Command_Get_Success, args[0], val);
-        else
-            Log.Warning(LocalizationKey.Command_Get_NotFound, args[0]);
     }
 
     private void OnCommandLogSearch(string[] args)
@@ -182,5 +160,70 @@ public class CommandRegistry
         }
 
         Log.Info(LocalizationKey.Command_LogFilter_Success, target, value);
+    }
+
+    private void OnCommandTimeScale(string[] args)
+    {
+        if (!CheckIsDebugMode())
+            return;
+
+        if (args.Length > 0 && float.TryParse(args[0], out float scale))
+        {
+            Time.timeScale = scale;
+            Log.Info(LocalizationKey.Command_Time_Set, scale);
+        }
+        else
+            Log.Info(LocalizationKey.Command_Time_Current, Time.timeScale);
+    }
+
+    private void OnCommandSetVariable(string[] args)
+    {
+        if (!CheckIsDebugMode())
+            return;
+
+        if (args.Length < 2)
+        {
+            Log.Warning(LocalizationKey.Command_Set_Usage);
+            return;
+        }
+
+        _console.SetVariable(args[0], args[1]);
+        Log.Info(LocalizationKey.Command_Set_Success, args[0], args[1]);
+    }
+
+    private void OnCommandGetVariable(string[] args)
+    {
+        if (!CheckIsDebugMode())
+            return;
+
+        if (args.Length < 1)
+        {
+            Log.Warning(LocalizationKey.Command_Get_Usage);
+            return;
+        }
+
+        string val = _console.GetVariable(args[0]);
+
+        if (val != null)
+            Log.Info(LocalizationKey.Command_Get_Success, args[0], val);
+        else
+            Log.Warning(LocalizationKey.Command_Get_NotFound, args[0]);
+    }
+
+    private void OnCommandToggleGroundDebug(string[] args)
+    {
+        if (!CheckIsDebugMode())
+            return;
+
+        bool currentState = DebugExtensions.ToggleDebugView();
+        Log.Info(LocalizationKey.Command_Ground_Toggle, currentState.ToString());
+    }
+
+    private bool CheckIsDebugMode()
+    {
+        if (Managers.Config == null || Managers.Config.Option == null || Managers.Config.Option.Debug == null)
+            return false;
+
+        return Managers.Config.Option.Debug.isDebugMode;
     }
 }

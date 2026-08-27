@@ -25,6 +25,7 @@ public abstract class CharacterAnimator : MonoBehaviour
         {
             CharacterStateType.Idle => Define.Animation.Idle,
             CharacterStateType.Move => Define.Animation.Move,
+            CharacterStateType.Jump => Define.Animation.Jump,
             _ => Define.Animation.Idle
         };
     }
@@ -36,4 +37,6 @@ public abstract class CharacterAnimator : MonoBehaviour
         => Play(Define.Animation.Idle);
     public virtual void PlayMove() 
         => Play(Define.Animation.Move);
+    public virtual void PlayJump()
+        => Play(Define.Animation.Jump);
 }

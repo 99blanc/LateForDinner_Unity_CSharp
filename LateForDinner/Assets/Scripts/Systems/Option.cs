@@ -4,10 +4,19 @@ using UnityEngine;
 [MemoryPackable]
 public partial class Option
 {
-    public SoundOption Sound { get; set; } = SoundOption.Default;
-    public GraphicOption Graphic { get; set; } = GraphicOption.Default;
-    public AccessOption Access { get; set; } = AccessOption.Default;
-    public DebugOption Debug { get; set; } = DebugOption.Default;
+    public SoundOption Sound { get; set; }
+    public GraphicOption Graphic { get; set; }
+    public AccessOption Access { get; set; }
+    public DebugOption Debug { get; set; }
+
+    [MemoryPackIgnore]
+    public static Option Default => new Option()
+    {
+        Sound = SoundOption.Default,
+        Graphic = GraphicOption.Default,
+        Access = AccessOption.Default,
+        Debug = DebugOption.Default
+    };
 }
 
 [MemoryPackable]

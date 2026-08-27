@@ -85,6 +85,11 @@ public class Literal
         public const string Korean = "ko-KR";
     }
 
+    public class Layers
+    {
+        public const string Ground = "Ground";
+    }
+
     public class Localizations
     {
         public const string Action = "Action_";
