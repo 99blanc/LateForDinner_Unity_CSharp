@@ -1,19 +1,19 @@
+using Cysharp.Threading.Tasks;
 using System;
 using UnityEngine;
 using UnityHFSM;
 
-public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovableCharacter, IJumpableCharacter
+public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovableCharacter, IFallableCharacter, IJumpableCharacter
 {
     public Rigidbody2D Rigidbody { get; private set; }
     public Transform BackTransform { get; private set; }
     public Transform FrontTransform { get; private set; }
     public Transform HitboxTransform { get; private set; }
 
-    public override void Init()
+    public override async UniTask InitAsync()
     {
-        base.Init();
+        await base.InitAsync();
         InitAttributes();
-        CacheComponents();
     }
 
     private void InitAttributes()
@@ -32,12 +32,14 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
 
     protected override void RegisterStates(StateMachine<CharacterStateType> fsm)
     {
-        fsm.AddState(CharacterStateType.Idle, new IdleState(this));
+        base.RegisterStates(fsm);
         fsm.AddState(CharacterStateType.Move, new MoveState(this, GetPlayerMoveInput));
+        fsm.AddState(CharacterStateType.Fall, new FallState(this, GetPlayerMoveInput));
     }
 
     protected override void RegisterTransitions(StateMachine<CharacterStateType> fsm)
     {
+        base.RegisterTransitions(fsm);
         fsm
         .AddTransition(new Transition<CharacterStateType>(
             from: CharacterStateType.Idle,
@@ -48,6 +50,31 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
             from: CharacterStateType.Move,
             to: CharacterStateType.Idle,
             condition: _ => HasPlayerStoppedMoving()
+        ));
+        fsm.AddTransition(new Transition<CharacterStateType>(
+            from: CharacterStateType.Idle,
+            to: CharacterStateType.Fall,
+            condition: _ => !this.IsGrounded() && Rigidbody.linearVelocity.y < -0.1f
+        ));
+        fsm.AddTransition(new Transition<CharacterStateType>(
+            from: CharacterStateType.Move,
+            to: CharacterStateType.Fall,
+            condition: _ => !this.IsGrounded() && Rigidbody.linearVelocity.y < -0.1f
+        ));
+        fsm.AddTransition(new Transition<CharacterStateType>(
+            from: CharacterStateType.Fall,
+            to: CharacterStateType.Idle,
+            condition: _ => CheckLandingAndResetJump(out bool isStationary) && isStationary
+        ));
+        fsm.AddTransition(new Transition<CharacterStateType>(
+            from: CharacterStateType.Fall,
+            to: CharacterStateType.Move,
+            condition: _ => CheckLandingAndResetJump(out bool isStationary) && !isStationary
+        ));
+        fsm.AddTransition(new Transition<CharacterStateType>(
+            from: CharacterStateType.Fall,
+            to: CharacterStateType.Jump,
+            condition: _ => IsPlayerTryingToJump() && (this as IJumpableCharacter).RemainingJumpCount > 0
         ));
         fsm.AddTransition(new Transition<CharacterStateType>(
             from: CharacterStateType.Idle,
@@ -73,6 +100,11 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
             from: CharacterStateType.Jump, 
             to: CharacterStateType.Move,
             condition: _ => CheckLandingAndResetJump(out bool isStationary) && !isStationary
+        ));
+        fsm.AddTransition(new Transition<CharacterStateType>(
+            from: CharacterStateType.Jump,
+            to: CharacterStateType.Fall,
+            condition: _ => Rigidbody.linearVelocity.y < -0.1f && !this.IsGrounded()
         ));
     }
 

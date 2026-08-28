@@ -205,7 +205,18 @@ public class UIManager
     }
 
     public T GetScreen<T>() where T : UIDisplay
-    => _display as T;
+        => _display as T;
+
+    public T GetPopup<T>() where T : UIPopup
+    {
+        foreach (var popup in _popups)
+        {
+            if (popup is T targetPopup)
+                return targetPopup;
+        }
+
+        return null;
+    }
 
     public T GetSystem<T>() where T : UISystem
     {

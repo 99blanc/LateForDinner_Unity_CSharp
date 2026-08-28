@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public interface IFallable
+public class CameraManager
 {
     
 }

@@ -2,7 +2,7 @@ public interface IPoolablePrefab
 {
     bool IsPooled => this.IsPooled();
 
-    virtual void Init() 
+    virtual void Init()
         => this.SetPooled(false);
 
     virtual void Get() 
@@ -13,4 +13,7 @@ public interface IPoolablePrefab
         this.SetPooled(true);
         PoolDisposableRegistry.Clear(this);
     }
+
+    virtual void OnDestroy()
+        => PoolDisposableRegistry.Clear(this);
 }

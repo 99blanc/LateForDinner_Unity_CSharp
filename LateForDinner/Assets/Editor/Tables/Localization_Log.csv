@@ -80,6 +80,7 @@ Log_UI_RootInitialized,[UIManager] UI 루트 및 레이어 구조가 성공적�
 Log_UI_OpenDisplayFailed,[UIManager] 디스플레이 UI({0})를 생성(Pop)하는 데 실패했습니다.
 Log_UI_OpenPopupFailed,[UIManager] 팝업 UI({0})를 생성(Pop)하는 데 실패했습니다.
 Log_UI_OpenSystemFailed,[UIManager] 시스템 UI({0})를 생성(Pop)하는 데 실패했습니다.
+Log_UI_NotFoundControlManager,[UIManager] 컨트롤 매니저를 참조할 수 없습니다.
 # Index: UIConsoleSystem,
 Log_Console_System_ProcessFailed,[UIConsoleSystem] 명령어('{0}') 처리 중 예외가 발생했습니다.
 # Index: UIKeybindSlot,

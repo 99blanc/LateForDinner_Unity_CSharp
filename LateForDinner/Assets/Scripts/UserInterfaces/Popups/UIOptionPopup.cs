@@ -664,7 +664,7 @@ public class UIOptionPopup : UIPopup, IDraggablePopup, IFocusablePopup
         if (languageLocales != null && langIndex < languageLocales.Count)
             Managers.Config.Option.Access.language = languageLocales[langIndex];
 
-        Managers.Config.Option.Access.keybind = Managers.Control.Save();
+        Managers.Config.Option.Access.keybind = Managers.Control.SaveBindingsToJson();
     }
 
     private void CancelAllRebinds()
@@ -781,9 +781,9 @@ public class UIOptionPopup : UIPopup, IDraggablePopup, IFocusablePopup
             await ((Func<UniTask>)(async () =>
             {
                 await Managers.Config.ResetAsync();
-                Managers.Control.Reset();
+                Managers.Control.ResetBindings();
                 Managers.Config.Option.Access.modifierDash = AccessOption.Default.modifierDash;
-                Managers.Config.Option.Access.keybind = Managers.Control.Save();
+                Managers.Config.Option.Access.keybind = Managers.Control.SaveBindingsToJson();
                 string defaultLang = Managers.Config.Option.Access.language;
                 await Managers.Localization.ChangeLanguageAsync(defaultLang);
                 await Managers.Config.SaveAsync();

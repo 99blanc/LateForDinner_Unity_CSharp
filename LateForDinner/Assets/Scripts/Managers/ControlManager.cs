@@ -7,123 +7,195 @@ using UnityEngine.InputSystem;
 
 public class ControlManager
 {
-    private readonly Dictionary<string, InputAction> _caches = new Dictionary<string, InputAction>();
-    private InputActionAsset _action;
-    private readonly Vector2 _hotspot = Define.Cursor.Hotspot;
-    private IDisposable _handle;
+    private readonly Dictionary<string, InputAction> _actionCaches = new Dictionary<string, InputAction>();
+    private readonly HashSet<string> _triggeredCaches = new HashSet<string>();
+    private readonly HashSet<string> _pressedCaches = new HashSet<string>();
+    private InputActionAsset _actionAsset;
+    private readonly Vector2 _cursorHotspot = Define.Cursor.Hotspot;
+    private Texture2D _normalCursorTexture;
+    private Texture2D _pressCursorTexture;
 
     public void Setup()
     {
-        SetupCursor();
-        SetupConsoleToggle();
-        SetupCancelHandler();
+        CacheCursorTextures();
+        StartUnifiedUpdateLoop();
+        RegisterShortcutHandlers();
     }
 
-    private void SetupCursor()
+    private void CacheCursorTextures()
     {
-        var normal = Managers.Resource.GetSprite(Define.Atlas.Common, Define.Sprite.Cursor_Normal);
-        var press = Managers.Resource.GetSprite(Define.Atlas.Common, Define.Sprite.Cursor_Press);
+        var normalSprite = Managers.Resource.GetSprite(Define.Atlas.Common, Define.Sprite.Cursor_Normal);
+        var pressSprite = Managers.Resource.GetSprite(Define.Atlas.Common, Define.Sprite.Cursor_Press);
 
-        if (normal == null || press == null)
+        if (normalSprite == null || pressSprite == null) 
             return;
 
-        Texture2D first = Managers.Resource.GetTextureFromSprite(normal);
-        Texture2D last = Managers.Resource.GetTextureFromSprite(press);
-        _handle?.Dispose();
-        _handle = Observable.EveryUpdate()
-        .Where(_ => Mouse.current != null)
-        .Subscribe(_ => UpdateCursorState(first, last));
+        _normalCursorTexture = Managers.Resource.GetTextureFromSprite(normalSprite);
+        _pressCursorTexture = Managers.Resource.GetTextureFromSprite(pressSprite);
     }
 
-    public IDisposable SetupConsoleToggle()
+    private void StartUnifiedUpdateLoop()
     {
-        return AsObservable(Literal.Hotkeys.Console).Subscribe(_ =>
+        Observable.EveryUpdate()
+        .Subscribe(_ =>
         {
-            var console = Managers.UI.GetSystem<UIConsoleSystem>();
+            CachePressedStates();
+            UpdateCursorState();
+        });
+    }
 
-            if (console != null)
-                Managers.UI.Close(console);
+    private void CachePressedStates()
+    {
+        _pressedCaches.Clear();
+
+        foreach (var (actionName, action) in _actionCaches)
+        {
+            if (action != null && action.IsPressed())
+                _pressedCaches.Add(actionName);
+        }
+    }
+
+    private void UpdateCursorState()
+    {
+        if (!CanUpdateCursorVisual())
+            return;
+
+        Vector2 mousePosition = Mouse.current?.position.ReadValue() ?? Vector2.negativeInfinity;
+
+        if (Mouse.current == null || IsCursorOutOfBounds(mousePosition))
+        {
+            SetDefaultCursor();
+            return;
+        }
+
+        SetCursorVisual(Mouse.current.leftButton.isPressed);
+    }
+
+    private bool CanUpdateCursorVisual()
+    {
+        if (Application.isFocused == false)
+            return false;
+
+        if (_normalCursorTexture == null || _pressCursorTexture == null)
+            return false;
+
+        return true;
+    }
+
+    private bool IsCursorOutOfBounds(Vector2 position)
+        => position.x < 0 || position.x > Screen.width || position.y < 0 || position.y > Screen.height;
+
+    private void SetDefaultCursor()
+        => Cursor.SetCursor(null, Vector2.zero, CursorMode.ForceSoftware);
+
+    private void SetCursorVisual(bool isPressed)
+    {
+        var targetTexture = isPressed ? _pressCursorTexture : _normalCursorTexture;
+        Cursor.SetCursor(targetTexture, _cursorHotspot, CursorMode.ForceSoftware);
+    }
+
+    private void RegisterShortcutHandlers()
+    {
+        BindSystemUIToggleAction<UIConsoleSystem>(Literal.Hotkeys.Console);
+        BindAction(Literal.Hotkeys.Cancel, () => Managers.UI.CloseFocusPopup());
+    }
+
+    private void BindSystemUIToggleAction<T>(string hotkeyName) where T : UISystem
+    {
+        BindAction(hotkeyName, () =>
+        {
+            var targetUI = Managers.UI.GetSystem<T>();
+
+            if (targetUI != null)
+                Managers.UI.Close(targetUI);
             else
-                Managers.UI.OpenSystem<UIConsoleSystem>();
+                Managers.UI.OpenSystem<T>();
         });
     }
 
-    public IDisposable SetupCancelHandler()
+    private void BindPopupUIToggleAction<T>(string hotkeyName) where T : UIPopup
     {
-        return AsObservable(Literal.Hotkeys.Cancel).Subscribe(_ =>
+        BindAction(hotkeyName, () =>
         {
-            Managers.UI.CloseFocusPopup();
+            var targetUI = Managers.UI.GetPopup<T>();
+
+            if (targetUI != null)
+                Managers.UI.Close(targetUI);
+            else
+                Managers.UI.OpenPopup<T>();
         });
     }
+
+    private void BindAction(string actionName, Action onPerformed)
+        => AsObservable(actionName).Subscribe(_ => onPerformed());
 
     public async UniTask LoadAsync()
     {
-        var original = await Managers.Resource.LoadAssetAsync<InputActionAsset>(Literal.Assets.InputActionAsset);
-        
-        if (original == null)
+        var originalAsset = await Managers.Resource.LoadAssetAsync<InputActionAsset>(Literal.Assets.InputActionAsset);
+
+        if (originalAsset == null)
         {
             Log.Error(LocalizationKey.Log_Control_AssetLoadFailed, Literal.Assets.InputActionAsset);
             return;
         }
 
-        _action = UnityEngine.Object.Instantiate(original);
-
-        if (Managers.Config?.Option != null && !string.IsNullOrEmpty(Managers.Config.Option.Access.keybind))
-            _action.LoadBindingOverridesFromJson(Managers.Config.Option.Access.keybind);
-
-        CacheActions();
-        EnableMap(Literal.Maps.User);
-        EnableMap(Literal.Maps.UI);
+        _actionAsset = UnityEngine.Object.Instantiate(originalAsset);
+        ApplySavedKeyBindings();
+        CacheAllActions();
+        EnableActionMap(Literal.Maps.User);
+        EnableActionMap(Literal.Maps.UI);
         Log.Info(LocalizationKey.Log_Control_LoadedSuccessfully);
     }
 
-    private void CacheActions()
+    private void ApplySavedKeyBindings()
     {
-        if (_action == null)
+        var savedKeybindJson = Managers.Config?.Option?.Access?.keybind;
+
+        if (!string.IsNullOrEmpty(savedKeybindJson))
+            _actionAsset.LoadBindingOverridesFromJson(savedKeybindJson);
+    }
+
+    private void CacheAllActions()
+    {
+        if (_actionAsset == null) 
             return;
 
-        _caches.Clear();
-        var actionMaps = _action.actionMaps;
+        _actionCaches.Clear();
 
-        for (int index = 0; index < actionMaps.Count; index++)
+        foreach (var map in _actionAsset.actionMaps)
         {
-            var map = actionMaps[index];
-            var actions = map.actions;
-
-            for (int sub = 0; sub < actions.Count; sub++)
+            foreach (var action in map.actions)
             {
-                var action = actions[sub];
-                _caches[action.name] = action;
+                _actionCaches[action.name] = action;
+                RegisterActionEvents(action.name, action);
             }
         }
     }
 
-    private void UpdateCursorState(Texture2D normalCursor, Texture2D pressCursor)
+    private void RegisterActionEvents(string actionName, InputAction action)
     {
-        if (!Application.isFocused)
-        {
-            Cursor.SetCursor(null, Vector2.zero, CursorMode.ForceSoftware);
-            return;
-        }
-
-        var mouse = Mouse.current;
-        Vector2 mousePos = mouse.position.ReadValue();
-
-        if (mousePos.x < 0 || mousePos.x > Screen.width || mousePos.y < 0 || mousePos.y > Screen.height)
-        {
-            Cursor.SetCursor(null, Vector2.zero, CursorMode.ForceSoftware);
-            return;
-        }
-
-        if (mouse.leftButton.isPressed)
-            Cursor.SetCursor(pressCursor, _hotspot, CursorMode.ForceSoftware);
-        else
-            Cursor.SetCursor(normalCursor, _hotspot, CursorMode.ForceSoftware);
+        action.performed -= OnActionPerformed;
+        action.performed += OnActionPerformed;
     }
 
-    public void EnableMap(string mapName)
+    private void OnActionPerformed(InputAction.CallbackContext context)
     {
-        var map = _action?.FindActionMap(mapName);
+        foreach (var (actionName, action) in _actionCaches)
+        {
+            if (action == context.action)
+            {
+                _triggeredCaches.Add(actionName);
+                break;
+            }
+        }
+    }
+
+    public void EnableActionMap(string mapName)
+    {
+        if (_actionAsset == null)
+            return;
+
+        var map = _actionAsset?.FindActionMap(mapName);
 
         if (map == null)
         {
@@ -134,75 +206,93 @@ public class ControlManager
         map.Enable();
     }
 
-    public void DisableMap(string mapName)
+    public void DisableActionMap(string mapName)
     {
-        var map = _action?.FindActionMap(mapName);
-        map?.Disable();
+        if (_actionAsset == null)
+            return;
+
+        _actionAsset?.FindActionMap(mapName)?.Disable();
     }
 
-    public bool IsPressed(string actionName) 
-        => _caches.TryGetValue(actionName, out var action) && action.IsPressed();
+    public bool IsPressed(string actionName)
+        => _pressedCaches.Contains(actionName);
 
-    public bool IsTriggered(string actionName) 
-        => _caches.TryGetValue(actionName, out var action) && action.triggered;
-
-    public Observable<Unit> AsObservable(string action)
+    public bool IsTriggered(string actionName)
     {
-        if (!_caches.TryGetValue(action, out var output) || output == null)
+        if (_triggeredCaches.Contains(actionName))
+        {
+            _triggeredCaches.Remove(actionName);
+            return true;
+        }
+
+        return false;
+    }
+
+    public Observable<Unit> AsObservable(string actionName)
+    {
+        if (!_actionCaches.TryGetValue(actionName, out var action) || action == null)
             return Observable.Empty<Unit>();
 
-        return Observable.FromEvent<InputAction.CallbackContext>(h => output.performed += h, h => output.performed -= h)
-        .Select(_ => Unit.Default);
+        return Observable.FromEvent<InputAction.CallbackContext>(h => action.performed += h, h => action.performed -= h).Select(_ => Unit.Default);
     }
 
-    public IDisposable Subscribe(string actionName, Action onPerformed) 
+    public IDisposable Subscribe(string actionName, Action onPerformed)
         => AsObservable(actionName).Subscribe(_ => onPerformed());
 
-    public IEnumerable<KeyValuePair<string, InputAction>> GetActions() 
-        => _caches;
+    public IEnumerable<KeyValuePair<string, InputAction>> GetActions()
+        => _actionCaches;
+
+    public void ClearInputStates()
+    {
+        _triggeredCaches.Clear();
+        _pressedCaches.Clear();
+
+        if (_actionAsset == null)
+            return;
+
+        foreach (var map in _actionAsset.actionMaps)
+        {
+            map.Disable();
+            map.Enable();
+        }
+    }
 
     public void LoadBindingFromJson(string json)
     {
-        if (_action == null)
+        if (_actionAsset == null) 
             return;
 
         if (string.IsNullOrEmpty(json))
-            _action.RemoveAllBindingOverrides();
+            _actionAsset.RemoveAllBindingOverrides();
         else
-            _action.LoadBindingOverridesFromJson(json);
+            _actionAsset.LoadBindingOverridesFromJson(json);
 
-        CacheActions();
+        CacheAllActions();
     }
 
     public List<InputAction> GetBindableActions()
     {
-        var list = new List<InputAction>();
+        var bindableActions = new List<InputAction>();
+        var userMap = _actionAsset?.FindActionMap(Literal.Maps.User);
 
-        if (_action == null)
-            return list;
+        if (userMap == null) 
+            return bindableActions;
 
-        var userMap = _action.FindActionMap(Literal.Maps.User);
+        foreach (var action in userMap.actions)
+            bindableActions.Add(action);
 
-        if (userMap == null)
-            return list;
-
-        var actions = userMap.actions;
-
-        for (int index = 0; index < actions.Count; index++)
-            list.Add(actions[index]);
-
-        return list;
+        return bindableActions;
     }
 
-    public string CreateBindingSnapshot() 
-        => Save();
+    public string CreateBindingSnapshot()
+        => SaveBindingsToJson();
 
     public void RestoreBindingSnapshot(string snapshotJson)
         => LoadBindingFromJson(snapshotJson);
 
-    public string Save() 
-        => _action?.SaveBindingOverridesAsJson() ?? string.Empty;
+    public string SaveBindingsToJson()
+        => _actionAsset?.SaveBindingOverridesAsJson() ?? string.Empty;
 
-    public void Reset() 
-        => _action?.RemoveAllBindingOverrides();
+    public void ResetBindings()
+        => _actionAsset?.RemoveAllBindingOverrides();
 }

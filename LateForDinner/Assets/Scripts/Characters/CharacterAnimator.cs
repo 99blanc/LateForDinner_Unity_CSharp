@@ -5,10 +5,7 @@ public abstract class CharacterAnimator : MonoBehaviour
     public Animator Animator { get; set; }
 
     public void SetAnimator(Animator animator)
-    {
-        if (animator != null)
-            Animator = animator;
-    }
+        => Animator = animator;
 
     public void SetOverrideController(RuntimeAnimatorController overrideController)
     {
@@ -16,7 +13,7 @@ public abstract class CharacterAnimator : MonoBehaviour
             Animator.runtimeAnimatorController = overrideController;
     }
 
-    protected void Play(int hash) 
+    protected void Play(int hash)
         => Animator?.Play(hash);
 
     protected virtual int GetStateHash(CharacterStateType state)
@@ -37,6 +34,8 @@ public abstract class CharacterAnimator : MonoBehaviour
         => Play(Define.Animation.Idle);
     public virtual void PlayMove() 
         => Play(Define.Animation.Move);
+    public virtual void PlayFall()
+        => Play(Define.Animation.Fall);
     public virtual void PlayJump()
         => Play(Define.Animation.Jump);
 }

@@ -66,14 +66,14 @@ public class ConfigManager
     public async UniTask ResetAsync()
     {
         Option = Option.Default;
-        Managers.Control?.Reset();
+        Managers.Control?.ResetBindings();
         await SaveAsync();
         Log.System(LocalizationKey.Log_Config_Reset);
     }
 
     public async UniTask SaveKeybindAsync()
     {
-        Option.Access.keybind = Managers.Control?.Save() ?? string.Empty;
+        Option.Access.keybind = Managers.Control?.SaveBindingsToJson() ?? string.Empty;
         await SaveAsync();
     }
 

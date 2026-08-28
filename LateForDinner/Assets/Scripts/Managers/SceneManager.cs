@@ -61,12 +61,8 @@ public class SceneManager
 
         if (_spawnpoints.TryGetValue(_previousID, out var targetSpawn) && targetSpawn != null)
         {
-            Vector3 spawnPosition = targetSpawn.transform.position;
-            var collider = Managers.Game.Character.GetComponentAssert<CapsuleCollider2D>();
-            spawnPosition.y -= collider.offset.y;
-            Managers.Game.Character.transform.position = spawnPosition;
-            Managers.Game.Character.transform.rotation = targetSpawn.transform.rotation;
-            Log.System(LocalizationKey.Log_Scene_NormalizedSpawn, spawnPosition.ToString());
+            Managers.Game.Character.RelocateTo(targetSpawn);
+            Log.System(LocalizationKey.Log_Scene_NormalizedSpawn, targetSpawn.transform.position.ToString());
         }
         else
             Log.Warning(LocalizationKey.Log_Scene_NotFoundSpawnpoint, _previousID.ToString());
@@ -89,6 +85,7 @@ public class SceneManager
         _previousID = CurrentSceneID;
         _spawnpoints.Clear();
         CurrentSceneID = targetSceneID;
+        Managers.Control.ClearInputStates();
     }
 
     private async UniTask ExecuteUnitySceneLoadAsync(string sceneTag)

@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using R3;
 using UnityEngine;
 using UnityHFSM;
@@ -12,10 +13,21 @@ public abstract class Character : MonoBehaviour, IPoolablePrefab
     public abstract CharacterAnimator CharacterAnimator { get; }
     protected abstract CharacterID CharacterID { get; }
 
-    public virtual void Init()
+    public virtual async UniTask InitAsync()
     {
-        InitStateMachine();
         CacheComponents();
+        CharacterAnimator.SetAnimator(Animator);
+        await GetAnimatorControllerAsync();
+        InitStateMachine();
+    }
+
+    private async UniTask GetAnimatorControllerAsync()
+    {
+        string overrideControllerPath = CharacterID.GetAnimatorOverrideControllerPath();
+        AnimatorOverrideController overrideController = await Managers.Resource.LoadAnimatorOverrideControllerAsync(overrideControllerPath);
+
+        if (overrideController != null && CharacterAnimator != null)
+            CharacterAnimator.SetOverrideController(overrideController);
     }
 
     protected virtual void InitStateMachine()
@@ -26,6 +38,7 @@ public abstract class Character : MonoBehaviour, IPoolablePrefab
         StateMachine.SetStartState(CharacterStateType.Idle);
         StateMachine.Init();
         Observable.EveryUpdate(UnityFrameProvider.FixedUpdate)
+        .Where(_  => this != null)
         .Subscribe(_ => 
         {
             StateMachine.OnLogic();
@@ -34,17 +47,13 @@ public abstract class Character : MonoBehaviour, IPoolablePrefab
         .AddToPool(this);
     }
 
-    public virtual void Get()
-    {
+    public virtual void Get() { }
 
-    }
+    public virtual void Release() { }
 
-    public virtual void Release()
-    {
+    protected virtual void RegisterStates(StateMachine<CharacterStateType> fsm) 
+        => fsm.AddState(CharacterStateType.Idle, new IdleState(this));
 
-    }
-
-    protected virtual void RegisterStates(StateMachine<CharacterStateType> fsm) { }
     protected virtual void RegisterTransitions(StateMachine<CharacterStateType> fsm) { }
 
     protected virtual void CacheComponents()
@@ -52,6 +61,16 @@ public abstract class Character : MonoBehaviour, IPoolablePrefab
         Renderer = this.FindChildAssert<SpriteRenderer>(recursive: true);
         Animator = Renderer?.GetComponentAssert<Animator>();
         Collider = this.GetComponentAssert<Collider2D>();
-        CharacterAnimator?.SetAnimator(Animator);
+    }
+
+    public virtual void RelocateTo(Spawnpoint targetSpawn)
+    {
+        if (targetSpawn == null || Collider == null) 
+            return;
+
+        Vector3 spawnPosition = targetSpawn.transform.position;
+        spawnPosition.y -= Collider.offset.y;
+        transform.position = spawnPosition;
+        transform.rotation = targetSpawn.transform.rotation;
     }
 }

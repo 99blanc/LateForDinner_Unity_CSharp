@@ -59,8 +59,10 @@ public class GameManager
             return null;
         }
 
-        FinalizePlayerSpawn(playerComponent, playerPrefab, characterID);
-        await ApplyAnimatorOverrideControllerAsync(characterAnimator, characterID);
+        Character = playerComponent;
+        await Character.InitAsync();
+        UnityEngine.Object.DontDestroyOnLoad(playerPrefab);
+        Log.System(LocalizationKey.Log_Game_PlayerSpawnSuccess, characterID.ToString());
         return Character;
     }
 
@@ -100,25 +102,6 @@ public class GameManager
         }
 
         return true;
-    }
-
-    private async UniTask ApplyAnimatorOverrideControllerAsync(CharacterAnimator characterAnimator, CharacterID characterID)
-    {
-        string overrideControllerPath = characterID.GetAnimatorOverrideControllerPath();
-        AnimatorOverrideController overrideController = await Managers.Resource.LoadAnimatorOverrideControllerAsync(overrideControllerPath);
-
-        if (overrideController != null)
-            characterAnimator.SetOverrideController(overrideController);
-        else
-            Log.Error(LocalizationKey.Log_Resource_LoadFailed_Null, overrideControllerPath);
-    }
-
-    private void FinalizePlayerSpawn(PlayableCharacter playerComponent, GameObject playerPrefab, CharacterID characterID)
-    {
-        Character = playerComponent;
-        Character.Init();
-        UnityEngine.Object.DontDestroyOnLoad(playerPrefab);
-        Log.System(LocalizationKey.Log_Game_PlayerSpawnSuccess, characterID.ToString());
     }
 
     private void DespawnExistingPlayer()

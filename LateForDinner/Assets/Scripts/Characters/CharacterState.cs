@@ -1,5 +1,5 @@
 using System;
-using UnityEngine;
+using System.Data.SqlTypes;
 using UnityHFSM;
 
 public abstract class CharacterState : StateBase<CharacterStateType>
@@ -56,6 +56,37 @@ public class MoveState : CharacterState
         float moveInput = _inputProvider.Invoke();
 
         if (Owner is IMovableCharacter movable)
+            movable.Move(moveInput);
+    }
+}
+
+public class FallState : CharacterState
+{
+    protected readonly Func<float> _inputProvider;
+
+    public FallState(Character owner, Func<float> inputProvider) : base(owner)
+        => _inputProvider = inputProvider;
+
+    public override void OnEnter()
+    {
+        base.OnEnter();
+
+        if (Owner is IFallableCharacter)
+            Owner.CharacterAnimator?.PlayFall();
+    }
+
+    public override void OnLogic()
+    {
+        base.OnLogic();
+
+        if (_inputProvider == null)
+            return;
+
+        float moveInput = _inputProvider.Invoke();
+
+        if (Owner is IFallableCharacter fallable)
+            fallable.Fall(moveInput);
+        else if (Owner is IMovableCharacter movable)
             movable.Move(moveInput);
     }
 }
