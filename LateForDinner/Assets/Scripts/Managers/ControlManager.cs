@@ -17,12 +17,16 @@ public class ControlManager
     private Texture2D _normalCursorTexture;
     private Texture2D _pressCursorTexture;
     private string _pendingDoubleActionName;
+    private Vector2 _lastMousePosition = Vector2.negativeInfinity;
+    private float _lastMouseMovedTime;
+    private bool _isCursorVisible = true;
 
     public void Setup()
     {
         CacheCursorTextures();
         StartUnifiedUpdateLoop();
         RegisterShortcutHandlers();
+        _lastMouseMovedTime = Time.unscaledTime;
     }
 
     private void CacheCursorTextures()
@@ -77,7 +81,42 @@ public class ControlManager
             return;
         }
 
+        HandleCursorVisibility(mousePosition);
+
+        if (!_isCursorVisible)
+            return;
+
         SetCursorVisual(IsLeftMouseButtonPressed());
+    }
+
+    private void HandleCursorVisibility(Vector2 currentMousePosition)
+    {
+        if (_lastMousePosition == Vector2.negativeInfinity)
+        {
+            _lastMousePosition = currentMousePosition;
+            _lastMouseMovedTime = Time.unscaledTime;
+            return;
+        }
+
+        if (currentMousePosition != _lastMousePosition)
+        {
+            _lastMousePosition = currentMousePosition;
+            _lastMouseMovedTime = Time.unscaledTime;
+
+            if (!_isCursorVisible)
+            {
+                _isCursorVisible = true;
+                Cursor.visible = true;
+            }
+        }
+        else
+        {
+            if (_isCursorVisible && (Time.unscaledTime - _lastMouseMovedTime) >= Define.Cursor.Duration)
+            {
+                _isCursorVisible = false;
+                Cursor.visible = false;
+            }
+        }
     }
 
     private bool CanUpdateCursorVisual()
