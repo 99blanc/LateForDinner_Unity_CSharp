@@ -82,7 +82,7 @@ public class FeedbackManager
 
     private async UniTask AlertInternalAsync(UserInterface owner, LocalizationKey titleKey, LocalizationKey messageKey, params object[] messageArgs)
     {
-        var popup = Managers.UI.OpenPopup<UIAlertPopup>();
+        var popup = await Managers.UI.OpenPopupAsync<UIAlertPopup>(true);
 
         if (popup == null)
             return;
@@ -116,7 +116,7 @@ public class FeedbackManager
 
     private async UniTask<bool> ConfirmInternalAsync(UserInterface owner, LocalizationKey titleKey, LocalizationKey messageKey, params object[] messageArgs)
     {
-        var popup = Managers.UI.OpenPopup<UIConfirmPopup>();
+        var popup = await Managers.UI.OpenPopupAsync<UIConfirmPopup>(true);
 
         if (popup == null)
             return false;

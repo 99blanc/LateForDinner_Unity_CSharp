@@ -118,12 +118,15 @@ public class UIManager
         return instance;
     }
 
-    public async UniTask<T> OpenPopupAsync<T>() where T : UIPopup
+    public async UniTask<T> OpenPopupAsync<T>(bool allowMultiple = false) where T : UIPopup
     {
-        foreach (var popup in _popups)
+        if (!allowMultiple)
         {
-            if (popup is T targetPopup)
-                return targetPopup;
+            foreach (var popup in _popups)
+            {
+                if (popup is T targetPopup)
+                    return targetPopup;
+            }
         }
 
         var _ = Root;
