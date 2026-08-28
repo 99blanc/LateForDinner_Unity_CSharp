@@ -1,23 +1,44 @@
 using System;
 using UnityEngine;
 
-public class ProtagonistJumpState : JumpState
+public class ProtagonistCrouchState : CharacterState
 {
-    private Protagonist _protagonist;
+    private readonly Protagonist _protagonist;
 
-    public ProtagonistJumpState(Character owner, Func<float> inputProvider) : base(owner, inputProvider) { }
+    public ProtagonistCrouchState(Character owner) : base(owner)
+        => _protagonist = owner as Protagonist;
 
     public override void OnEnter()
     {
         base.OnEnter();
-        _protagonist ??= Owner as Protagonist;
-        PlayJumpAnimation();
+
+        if (_protagonist is not ICrouchableCharacter crouchable)
+            return;
+
+        crouchable.Crouch();
+        PlayCrouchAnimation();
     }
 
-    public override void OnLogic()
+    private void PlayCrouchAnimation()
     {
-        base.OnLogic();
-        _protagonist ??= Owner as Protagonist;
+        if (_protagonist?.CharacterAnimator is not ProtagonistAnimator protagonistAnimator)
+            return;
+
+        protagonistAnimator.PlayCrouch();
+    }
+}
+
+public class ProtagonistJumpState : JumpState
+{
+    private readonly Protagonist _protagonist;
+
+    public ProtagonistJumpState(Character owner, Func<float> inputProvider) : base(owner, inputProvider)
+        => _protagonist = Owner as Protagonist;
+
+    public override void OnEnter()
+    {
+        base.OnEnter();
+        PlayJumpAnimation();
     }
 
     private void PlayJumpAnimation()
@@ -37,33 +58,32 @@ public class ProtagonistJumpState : JumpState
 
 public class ProtagonistRollState : CharacterState
 {
+    private readonly Protagonist _protagonist;
     protected readonly Func<float> _inputProvider;
-    private Protagonist _protagonist;
 
     public ProtagonistRollState(Character owner, Func<float> inputProvider) : base(owner)
-        => _inputProvider = inputProvider;
+    {
+        _inputProvider = inputProvider;
+        _protagonist = Owner as Protagonist;
+    }
 
     public override void OnEnter()
     {
         base.OnEnter();
-        _protagonist ??= Owner as Protagonist;
 
-        if (_protagonist?.CharacterAnimator is not ProtagonistAnimator protagonistAnimator)
-            return;
-
-        if (Owner is not IRollableCharacter rollable)
+        if (_protagonist is not IRollableCharacter rollable)
             return;
 
         float directionX = _inputProvider?.Invoke() ?? 0f;
         rollable.Roll(directionX);
-        protagonistAnimator.PlayRoll();
+        PlayRollAnimation();
     }
 
     public override void OnLogic()
     {
         base.OnLogic();
 
-        if (Owner is not IRollableCharacter rollable)
+        if (_protagonist is not IRollableCharacter rollable)
             return;
 
         if (_inputProvider == null)
@@ -74,30 +94,31 @@ public class ProtagonistRollState : CharacterState
         if (Mathf.Abs(moveInput) > 0.01f)
             rollable.Roll(moveInput);
     }
+
+    private void PlayRollAnimation()
+    {
+        if (_protagonist?.CharacterAnimator is not ProtagonistAnimator protagonistAnimator)
+            return;
+
+        protagonistAnimator.PlayRoll();
+    }
 }
 
 public class ProtagonistDashState : DashState
 {
     private Protagonist _protagonist;
 
-    public ProtagonistDashState(Character owner, Func<Vector2> inputProvider) : base(owner, inputProvider) { }
+    public ProtagonistDashState(Character owner, Func<Vector2> inputProvider) : base(owner, inputProvider) 
+        => _protagonist = Owner as Protagonist;
 
     public override void OnEnter()
     {
         base.OnEnter();
-        _protagonist ??= Owner as Protagonist;
 
         if (_protagonist is not IDashableCharacter dashable)
             return;
 
-        dashable.Rigidbody.gravityScale = 0f;
         PlayDashAnimation();
-    }
-
-    public override void OnLogic()
-    {
-        base.OnLogic();
-        _protagonist ??= Owner as Protagonist;
     }
 
     public override void OnExit()
@@ -109,8 +130,6 @@ public class ProtagonistDashState : DashState
 
         if (_protagonist.IsGrounded() && _protagonist is IJumpableCharacter jumpable)
             jumpable.RemainingJumpCount = jumpable.MaxJumpCount;
-
-        dashable.Rigidbody.gravityScale = 1f;
     }
 
     private void PlayDashAnimation()

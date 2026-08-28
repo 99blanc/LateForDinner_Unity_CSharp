@@ -12,7 +12,7 @@ PlayableCharacterID,AttributeKey,Value
 1,Deceleration,20
 1,TurnDeceleration,35
 1,JumpCount,2
-1,JumpForce,10
+1,JumpForce,6
 1,DashCount,2
-1,DashDistance,6
+1,DashDistance,4
 1,DashCooldown,3

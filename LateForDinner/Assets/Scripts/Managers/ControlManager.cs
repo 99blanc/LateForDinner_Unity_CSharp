@@ -115,7 +115,6 @@ public class ControlManager
     private void RegisterShortcutHandlers()
     {
         BindSystemUIToggleAction<UIConsoleSystem>(Literal.Hotkeys.Console);
-        BindPopupUIToggleAction<UIOptionPopup>(Literal.Hotkeys.Option);
         BindAction(Literal.Hotkeys.Cancel, () => Managers.UI.CloseFocusPopup());
     }
 

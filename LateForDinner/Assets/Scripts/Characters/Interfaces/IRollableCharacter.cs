@@ -11,7 +11,6 @@ public interface IRollableCharacter
         if (this is not Character || Rigidbody == null || Attributes == null)
             return;
 
-        if (directionX != 0)
-            Renderer.FlipX(directionX);
+        Renderer.FlipX(directionX);
     }
 }

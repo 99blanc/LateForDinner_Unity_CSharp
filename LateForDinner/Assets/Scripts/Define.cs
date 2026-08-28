@@ -7,6 +7,7 @@ public class Define
         public static readonly int Idle = Animator.StringToHash("Idle");
         public static readonly int Move = Animator.StringToHash("Move");
         public static readonly int Fall = Animator.StringToHash("Fall");
+        public static readonly int Crouch = Animator.StringToHash("Crouch");
         public static readonly int Jump = Animator.StringToHash("Jump");
         public static readonly int DoubleJump = Animator.StringToHash("DoubleJump");
         public static readonly int Roll = Animator.StringToHash("Roll");

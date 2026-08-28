@@ -61,7 +61,7 @@ public class Converter
 
         EditorUtility.ClearProgressBar();
         string locStatus = localizationFiles.Count > 0 ? (successLocalization ? $"Merged ({localizationFiles.Count} files)" : "Failed") : "None";
-        string resultMessage = "Table Conversion Complete!\n\n" + $"• General Tables: {successGeneral} / {otherFiles.Count} processed\n" + $"• Localization: {locStatus}";
+        string resultMessage = "Table Conversion Complete!\n\n" + $"General Tables: {successGeneral} / {otherFiles.Count} processed\n" + $"Localization: {locStatus}";
         EditorUtility.DisplayDialog("Table Bake Result", resultMessage, "OK");
     }
 

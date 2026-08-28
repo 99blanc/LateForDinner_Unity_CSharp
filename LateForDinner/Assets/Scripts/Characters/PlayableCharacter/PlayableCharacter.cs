@@ -3,7 +3,7 @@ using System;
 using UnityEngine;
 using UnityHFSM;
 
-public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovableCharacter, IFallableCharacter, IJumpableCharacter, IRollableCharacter, IDashableCharacter
+public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovableCharacter, IFallableCharacter, ICrouchableCharacter, IJumpableCharacter, IRollableCharacter, IDashableCharacter
 {
     public Rigidbody2D Rigidbody { get; private set; }
     public Transform CameraTransform { get; private set; }
@@ -36,9 +36,8 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
         base.RegisterStates(fsm);
         fsm.AddState(CharacterStateType.Move, new MoveState(this, GetPlayerMoveInput));
         fsm.AddState(CharacterStateType.Fall, new FallState(this, GetPlayerMoveInput));
-        fsm.AddState(CharacterStateType.Jump, new ProtagonistJumpState(this, GetPlayerMoveInput));
-        fsm.AddState(CharacterStateType.Roll, new ProtagonistRollState(this, GetPlayerMoveInput));
-        fsm.AddState(CharacterStateType.Dash, new ProtagonistDashState(this, GetPlayerDashInput));
+        fsm.AddState(CharacterStateType.Jump, new JumpState(this, GetPlayerMoveInput));
+        fsm.AddState(CharacterStateType.Dash, new DashState(this, GetPlayerDashInput));
     }
 
     protected override void RegisterTransitions(StateMachine<CharacterStateType> fsm)
@@ -54,6 +53,11 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
             from: CharacterStateType.Idle,
             to: CharacterStateType.Fall,
             condition: _ => fsm.ActiveStateName != CharacterStateType.Dash && !this.IsGrounded() && Rigidbody.linearVelocity.y < -0.1f
+        ));
+        fsm.AddTransition(new Transition<CharacterStateType>(
+            from: CharacterStateType.Idle,
+            to: CharacterStateType.Crouch,
+            condition: _ => IsPlayerTryingToCrouch()
         ));
         fsm.AddTransition(new Transition<CharacterStateType>(
             from: CharacterStateType.Idle,
@@ -75,6 +79,11 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
             from: CharacterStateType.Move,
             to: CharacterStateType.Fall,
             condition: _ => !this.IsGrounded() && Rigidbody.linearVelocity.y < -0.1f
+        ));
+        fsm.AddTransition(new Transition<CharacterStateType>(
+            from: CharacterStateType.Move,
+            to: CharacterStateType.Crouch,
+            condition: _ => IsPlayerTryingToCrouch()
         ));
         fsm.AddTransition(new Transition<CharacterStateType>(
             from: CharacterStateType.Move,
@@ -106,6 +115,22 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
             from: CharacterStateType.Fall,
             to: CharacterStateType.Dash,
             condition: _ => IsPlayerTryingToDash()
+        ));
+        // DESC ::: Crouch 상태에서의 전환 조건
+        fsm.AddTransition(new Transition<CharacterStateType>(
+            from: CharacterStateType.Crouch,
+            to: CharacterStateType.Idle,
+            condition: _ => !Managers.Control.IsPressed(Literal.Hotkeys.DownUtility) && Mathf.Abs(GetPlayerMoveInput()) <= 0.01f
+        ));
+        fsm.AddTransition(new Transition<CharacterStateType>(
+            from: CharacterStateType.Crouch,
+            to: CharacterStateType.Move,
+            condition: _ => !Managers.Control.IsPressed(Literal.Hotkeys.DownUtility) && Mathf.Abs(GetPlayerMoveInput()) > 0.01f
+        ));
+        fsm.AddTransition(new Transition<CharacterStateType>(
+            from: CharacterStateType.Crouch,
+            to: CharacterStateType.Fall,
+            condition: _ => !this.IsGrounded() && Rigidbody.linearVelocity.y < -0.1f
         ));
         // DESC ::: Jump 상태에서의 전환 조건
         fsm.AddTransition(new Transition<CharacterStateType>(
@@ -204,6 +229,8 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
 
     private bool IsPlayerTryingToMove()
         => Mathf.Abs(GetPlayerMoveInput()) > 0.01f;
+    private bool IsPlayerTryingToCrouch()
+        => this.IsGrounded() && Managers.Control.IsPressed(Literal.Hotkeys.DownUtility);
     private bool IsPlayerTryingToJump()
     {
         bool isKeyTriggered = Managers.Control.IsTriggered(Literal.Hotkeys.Jump);
@@ -216,24 +243,12 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
         {
             var cooldownable = (ICooldownable)dashable;
 
-            if (cooldownable.IsOnCooldown || dashable.RemainingDashCount <= 0)
+            if (cooldownable.IsOnCooldown)
                 return false;
         }
 
         bool isModifierDash = Managers.Config.Option.Access.modifierDash;
-
-        if (isModifierDash)
-        {
-            return Managers.Control.IsModifierTriggered(Literal.Hotkeys.Dash, Literal.Hotkeys.Left) ||
-                   Managers.Control.IsModifierTriggered(Literal.Hotkeys.Dash, Literal.Hotkeys.Right) ||
-                   Managers.Control.IsModifierTriggered(Literal.Hotkeys.Dash, Literal.Hotkeys.DownUtility);
-        }
-        else
-        {
-            return Managers.Control.IsDoubleTriggered(Literal.Hotkeys.Left) ||
-                   Managers.Control.IsDoubleTriggered(Literal.Hotkeys.Right) ||
-                   Managers.Control.IsDoubleTriggered(Literal.Hotkeys.DownUtility);
-        }
+        return this.IsGrounded() ? CheckDashInput(isModifierDash, allowDownUtility: false) : CheckDashInput(isModifierDash, allowDownUtility: true);
     }
     private bool IsPlayerReadyToRoll()
     {
@@ -262,6 +277,28 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
         }
 
         return false;
+    }
+
+    private bool CheckDashInput(bool isModifierDash, bool allowDownUtility)
+    {
+        if (isModifierDash)
+        {
+            bool triggered = Managers.Control.IsModifierTriggered(Literal.Hotkeys.Dash, Literal.Hotkeys.Left) || Managers.Control.IsModifierTriggered(Literal.Hotkeys.Dash, Literal.Hotkeys.Right);
+
+            if (allowDownUtility)
+                triggered |= Managers.Control.IsModifierTriggered(Literal.Hotkeys.Dash, Literal.Hotkeys.DownUtility);
+
+            return triggered;
+        }
+        else
+        {
+            bool triggered = Managers.Control.IsDoubleTriggered(Literal.Hotkeys.Left) || Managers.Control.IsDoubleTriggered(Literal.Hotkeys.Right);
+
+            if (allowDownUtility)
+                triggered |= Managers.Control.IsDoubleTriggered(Literal.Hotkeys.DownUtility);
+
+            return triggered;
+        }
     }
 
     public bool IsJumpKeyTriggered()

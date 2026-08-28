@@ -7,6 +7,7 @@ public class ProtagonistAnimator : CharacterAnimator
             CharacterStateType.Idle => Define.Animation.Idle,
             CharacterStateType.Move => Define.Animation.Move,
             CharacterStateType.Fall => Define.Animation.Fall,
+            CharacterStateType.Crouch => Define.Animation.Crouch,
             CharacterStateType.Jump => Define.Animation.Jump,
             CharacterStateType.DoubleJump => Define.Animation.DoubleJump,
             CharacterStateType.Roll => Define.Animation.Roll,
@@ -16,6 +17,8 @@ public class ProtagonistAnimator : CharacterAnimator
         };
     }
 
+    public void PlayCrouch()
+        => Play(Define.Animation.Crouch);
     public void PlayDoubleJump() 
         => Play(Define.Animation.DoubleJump);
     public void PlayRoll()
