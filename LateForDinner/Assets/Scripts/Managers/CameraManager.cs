@@ -27,7 +27,7 @@ public class CameraManager
         _mainCamera = root.AddComponent<Camera>();
         _mainCamera.tag = Literal.Tags.Camera;
         _mainCamera.clearFlags = CameraClearFlags.SolidColor;
-        _mainCamera.backgroundColor = Color.black;
+        _mainCamera.backgroundColor = Color.lightGray;
         _mainCamera.orthographic = true;
         root.AddComponent<CinemachineBrain>();
         GameObject vcam = new GameObject { name = Literal.Roots.Virtual };

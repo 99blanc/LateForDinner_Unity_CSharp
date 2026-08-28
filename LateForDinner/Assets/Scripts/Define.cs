@@ -62,7 +62,7 @@ public class Define
 
     public class Scaler
     {
-        public const float Threshold = 0.25f;
+        public const float Threshold = 0.2f;
         public const float Duration = 0.15f;
         public const float Margin = 0.975f;
         public const float PixelsPerUnit = 200f;
