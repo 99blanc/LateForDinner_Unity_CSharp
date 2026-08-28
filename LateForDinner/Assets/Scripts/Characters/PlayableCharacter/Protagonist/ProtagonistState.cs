@@ -35,22 +35,44 @@ public class ProtagonistJumpState : JumpState
     }
 }
 
-public class ProtagonistRollState : RollState
+public class ProtagonistRollState : CharacterState
 {
+    protected readonly Func<float> _inputProvider;
     private Protagonist _protagonist;
 
-    public ProtagonistRollState(Character owner, Func<float> inputProvider) : base(owner, inputProvider) { }
+    public ProtagonistRollState(Character owner, Func<float> inputProvider) : base(owner)
+        => _inputProvider = inputProvider;
 
     public override void OnEnter()
     {
         base.OnEnter();
         _protagonist ??= Owner as Protagonist;
+
+        if (_protagonist?.CharacterAnimator is not ProtagonistAnimator protagonistAnimator)
+            return;
+
+        if (Owner is not IRollableCharacter rollable)
+            return;
+
+        float directionX = _inputProvider?.Invoke() ?? 0f;
+        rollable.Roll(directionX);
+        protagonistAnimator.PlayRoll();
     }
 
     public override void OnLogic()
     {
         base.OnLogic();
-        _protagonist ??= Owner as Protagonist;
+
+        if (Owner is not IRollableCharacter rollable)
+            return;
+
+        if (_inputProvider == null)
+            return;
+
+        float moveInput = _inputProvider.Invoke();
+
+        if (Mathf.Abs(moveInput) > 0.01f)
+            rollable.Roll(moveInput);
     }
 }
 

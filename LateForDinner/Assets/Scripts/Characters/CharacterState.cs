@@ -141,43 +141,6 @@ public class JumpState : CharacterState
     }
 }
 
-public class RollState : CharacterState
-{
-    protected readonly Func<float> _inputProvider;
-
-    public RollState(Character owner, Func<float> inputProvider) : base(owner)
-        => _inputProvider = inputProvider;
-
-    public override void OnEnter()
-    {
-        base.OnEnter();
-
-        if (Owner is not IRollableCharacter rollable)
-            return;
-
-        float directionX = _inputProvider?.Invoke() ?? 0f;
-        rollable.Roll(directionX);
-
-        Owner.CharacterAnimator?.PlayRoll();
-    }
-
-    public override void OnLogic()
-    {
-        base.OnLogic();
-
-        if (Owner is not IRollableCharacter rollable)
-            return;
-
-        if (_inputProvider == null)
-            return;
-
-        float moveInput = _inputProvider.Invoke();
-
-        if (Mathf.Abs(moveInput) > 0.01f)
-            rollable.Roll(moveInput);
-    }
-}
-
 public class DashState : CharacterState
 {
     protected readonly Func<Vector2> _inputProvider;
