@@ -1,4 +1,5 @@
 using Cysharp.Threading.Tasks;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Managers : MonoBehaviour
@@ -19,16 +20,18 @@ public class Managers : MonoBehaviour
     public static ResourceManager Resource { get; private set; }
     public static DataManager Data { get; private set; }
     public static LocalizationManager Localization { get; private set; }
-    public static SceneManager Scene { get; private set; }
-    public static ConfigManager Config { get; private set; }
-    public static ControlManager Control { get; private set; }
     public static PoolManager Pool { get; private set; }
     public static UIManager UI { get; private set; }
+    public static ConfigManager Config { get; private set; }
+    public static ControlManager Control { get; private set; }
+    public static SceneManager Scene { get; private set; }
     public static FeedbackManager Feedback { get; private set; }
     public static ConsoleManager Console { get; private set; }
     public static SaveManager Save { get; private set; }
     public static PreloadManager Preload { get; private set; }
     public static GameManager Game { get; private set; }
+    public static CooldownManager Cooldown { get; private set; }
+    public static CameraManager Camera { get; private set; }
 
     public async UniTask LoadAsync()
     {
@@ -49,16 +52,18 @@ public class Managers : MonoBehaviour
         Resource = new ResourceManager();
         Data = new DataManager();
         Localization = new LocalizationManager();
-        Scene = new SceneManager();
-        Config = new ConfigManager();
-        Control = new ControlManager();
         Pool = new PoolManager();
         UI = new UIManager();
+        Config = new ConfigManager();
+        Control = new ControlManager();
+        Scene = new SceneManager();
         Feedback = new FeedbackManager();
         Console = new ConsoleManager();
         Save = new SaveManager();
         Preload = new PreloadManager();
         Game = new GameManager();
+        Cooldown = new CooldownManager();
+        Camera = new CameraManager();
     }
 
     private async UniTask InitializeManagersAsync()

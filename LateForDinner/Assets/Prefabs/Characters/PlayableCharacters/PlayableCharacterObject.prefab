@@ -62,6 +62,37 @@ Transform:
   m_Children: []
   m_Father: {fileID: 2646724992682120002}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &7012440045773259156
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4635381678975819418}
+  m_Layer: 6
+  m_Name: CameraTransform
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4635381678975819418
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7012440045773259156}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 1.55, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 778250825985672984}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8041637297685475649
 GameObject:
   m_ObjectHideFlags: 0
@@ -164,6 +195,9 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 1392531019725913171, guid: a0b312019afb2fd43bbb0de7c26125c5, type: 3}
+      insertIndex: 0
+      addedObject: {fileID: 4635381678975819418}
     - targetCorrespondingSourceObject: {fileID: 4405834139405199369, guid: a0b312019afb2fd43bbb0de7c26125c5, type: 3}
       insertIndex: 0
       addedObject: {fileID: 5704664092652805511}
@@ -181,6 +215,11 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 2708067516294457931}
   m_SourcePrefab: {fileID: 100100000, guid: a0b312019afb2fd43bbb0de7c26125c5, type: 3}
+--- !u!4 &778250825985672984 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1392531019725913171, guid: a0b312019afb2fd43bbb0de7c26125c5, type: 3}
+  m_PrefabInstance: {fileID: 1846375332580326219}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1816891047004181672 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 47639996026056675, guid: a0b312019afb2fd43bbb0de7c26125c5, type: 3}

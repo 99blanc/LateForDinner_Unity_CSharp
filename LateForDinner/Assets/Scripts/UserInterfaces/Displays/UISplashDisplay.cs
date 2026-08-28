@@ -18,7 +18,7 @@ public class UISplashDisplay : UIDisplay, IAnimatable
         base.Init();
         BindImage(typeof(Images));
         Revert();
-        Managers.Control.Subscribe(Literal.Hotkeys.Any, () => CancelToken("SplashTask")).AddToPool(this);
+        Managers.Control.Subscribe(Literal.Hotkeys.Any, () => CancelToken("SplashTask")).RegisterToPool(this);
     }
 
     public override void Get()

@@ -12,9 +12,11 @@ public class Bootstrapper
         await Managers.Instance.LoadAsync();
         Managers.Log.Setup();
         Managers.Console.Setup();
+        Managers.Camera.Setup();
         await Managers.Preload.Release_BootAsync();
         Managers.UI.Setup();
         Managers.Control.Setup();
+        Managers.Cooldown.Setup();
         await Managers.UI.OpenDisplayAsync<UISplashDisplay>().PlayAsync().Release();
         Managers.UI.OpenDisplay<UITitleDisplay>();
     }

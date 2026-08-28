@@ -13,6 +13,15 @@ public abstract class CharacterAnimator : MonoBehaviour
             Animator.runtimeAnimatorController = overrideController;
     }
 
+    public virtual float GetCurrentAnimatorNormalizedTime()
+    {
+        if (Animator == null)
+            return 0f;
+
+        AnimatorStateInfo stateInfo = Animator.GetCurrentAnimatorStateInfo(0);
+        return stateInfo.normalizedTime;
+    }
+
     protected void Play(int hash)
         => Animator?.Play(hash);
 
@@ -22,7 +31,10 @@ public abstract class CharacterAnimator : MonoBehaviour
         {
             CharacterStateType.Idle => Define.Animation.Idle,
             CharacterStateType.Move => Define.Animation.Move,
+            CharacterStateType.Fall => Define.Animation.Fall,
             CharacterStateType.Jump => Define.Animation.Jump,
+            CharacterStateType.Roll => Define.Animation.Roll,
+            CharacterStateType.Dash => Define.Animation.Dash,
             _ => Define.Animation.Idle
         };
     }
@@ -38,4 +50,8 @@ public abstract class CharacterAnimator : MonoBehaviour
         => Play(Define.Animation.Fall);
     public virtual void PlayJump()
         => Play(Define.Animation.Jump);
+    public virtual void PlayRoll()
+        => Play(Define.Animation.Roll);
+    public virtual void PlayDash()
+        => Play(Define.Animation.Dash);
 }

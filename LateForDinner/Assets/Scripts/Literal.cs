@@ -6,7 +6,6 @@ public class Literal
         public const string EventSystem = "EventSystem";
         public const string InputActionAsset = "InputSystem_Actions";
         public const string PlayableCharacterObject = "PlayableCharacterObject";
-        public const string Object = "Object";
     }
 
     public class Extensions
@@ -62,6 +61,7 @@ public class Literal
         public const string Left = "Left";
         public const string LeftClick = "LeftClick";
         public const string Look = "Look";
+        public const string Option = "Option";
         public const string Point = "Point";
         public const string QuickSlot1 = "QuickSlot1";
         public const string QuickSlot2 = "QuickSlot2";
@@ -116,6 +116,7 @@ public class Literal
 
     public class Objects
     {
+        public const string CameraTransform = "CameraTransform";
         public const string BackTransform = "BackTransform";
         public const string FrontTransform = "FrontTransform";
         public const string HitboxTransform = "HitboxTransform";
@@ -136,11 +137,13 @@ public class Literal
 
     public class Roots
     {
-        public const string Events = "Events";
+        public const string Camera = "-Camera";
+        public const string Events = "-Event";
         public const string Layers = "Layer: ";
         public const string Managers = "@Managers";
         public const string Pools = "Pools";
         public const string UserInterfaces = "UserInterfaces";
+        public const string Virtual = "-Virtual";
     }
 
     public class Schemes
@@ -158,6 +161,11 @@ public class Literal
         public const string SceneTransition = "SceneTransition";
         public const string PlayableCharacter = "PlayableCharacter";
         public const string PlayableCharacterTemplate = "PlayableCharacterTemplate";
+    }
+
+    public class Tags
+    {
+        public const string Camera = "MainCamera";
     }
 
     public class Types

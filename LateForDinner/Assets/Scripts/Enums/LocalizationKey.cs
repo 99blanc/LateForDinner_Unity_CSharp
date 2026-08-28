@@ -80,6 +80,8 @@ public enum LocalizationKey
     Command_Desc_Ground                                , // [CommandRegistry] 땅 감지 박스 디버그 표시를 토글합니다.
     Command_Ground_Toggle                              , // [CommandRegistry] 땅 감지 디버그 박스 표시: {0}
     Log_Attribute_Registry_Unsupported                 , // [AttributeRegistry] 지원하지 않는 데이터 타입입니다: {0}('{1}')
+    Log_Camera_LoadSuccess                             , // [CameraManager] 카메라 로드에 성공했습니다.
+    Log_Camera_LoadFailed                              , // [CameraManager] 카메라 로드에 실패했습니다.
     Log_Config_CreatedNew                              , // [ConfigManager] 새로운 설정 파일을 생성했습니다.
     Log_Config_LoadedSuccessfully                      , // [ConfigManager] 설정 파일을 성공적으로 불러왔습니다.
     Log_Config_LoadFailed                              , // [ConfigManager] 설정 파일을 불러오는 중 오류가 발생했습니다.

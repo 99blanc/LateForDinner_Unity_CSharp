@@ -10,6 +10,9 @@ public class Define
         public static readonly int Jump = Animator.StringToHash("Jump");
         public static readonly int DoubleJump = Animator.StringToHash("DoubleJump");
         public static readonly int Roll = Animator.StringToHash("Roll");
+        public static readonly int Dash = Animator.StringToHash("Dash");
+        public static readonly int DownDash = Animator.StringToHash("DownDash");
+        public const float NormalizedTime = 0.95f;
     }
 
     public class Atlas
@@ -57,6 +60,8 @@ public class Define
 
     public class Scaler
     {
+        public const float Threshold = 0.25f;
+        public const float Duration = 0.15f;
         public const float Margin = 0.975f;
         public const float PixelsPerUnit = 200f;
         public static readonly Vector2 Resolution = new Vector2(3840f, 2160f);

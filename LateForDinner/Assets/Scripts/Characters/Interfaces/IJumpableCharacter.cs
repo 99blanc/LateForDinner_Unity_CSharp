@@ -18,7 +18,7 @@ public interface IJumpableCharacter
         {
             var val = _jumpValue.GetOrCreateValue(this);
 
-            if (val.RemainingJumpCount < 0 || (this is Character character && character.IsGrounded()))
+            if (val.RemainingJumpCount < 0)
                 val.RemainingJumpCount = MaxJumpCount;
 
             return val.RemainingJumpCount;

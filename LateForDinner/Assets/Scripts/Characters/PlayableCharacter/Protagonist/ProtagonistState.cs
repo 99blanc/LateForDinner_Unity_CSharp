@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 
 public class ProtagonistJumpState : JumpState
 {
@@ -9,25 +10,14 @@ public class ProtagonistJumpState : JumpState
     public override void OnEnter()
     {
         base.OnEnter();
-
-        if (_protagonist == null)
-            _protagonist = Owner as Protagonist;
-
+        _protagonist ??= Owner as Protagonist;
         PlayJumpAnimation();
-
-        if (_protagonist is IJumpableCharacter jumpable && jumpable.RemainingJumpCount < jumpable.MaxJumpCount - 1)
-        {
-            if (_protagonist.CharacterAnimator is ProtagonistAnimator protagonistAnimator)
-                protagonistAnimator.PlayRoll();
-        }
     }
 
     public override void OnLogic()
     {
         base.OnLogic();
-
-        if (_protagonist == null)
-            _protagonist = Owner as Protagonist;
+        _protagonist ??= Owner as Protagonist;
     }
 
     private void PlayJumpAnimation()
@@ -38,11 +28,78 @@ public class ProtagonistJumpState : JumpState
         if (_protagonist is not IJumpableCharacter jumpable)
             return;
 
-        int maxJumps = jumpable.MaxJumpCount;
-
-        if (jumpable.RemainingJumpCount == maxJumps - 1)
+        if (jumpable.RemainingJumpCount >= jumpable.MaxJumpCount - 1)
             protagonistAnimator.PlayJump();
         else
             protagonistAnimator.PlayDoubleJump();
+    }
+}
+
+public class ProtagonistRollState : RollState
+{
+    private Protagonist _protagonist;
+
+    public ProtagonistRollState(Character owner, Func<float> inputProvider) : base(owner, inputProvider) { }
+
+    public override void OnEnter()
+    {
+        base.OnEnter();
+        _protagonist ??= Owner as Protagonist;
+    }
+
+    public override void OnLogic()
+    {
+        base.OnLogic();
+        _protagonist ??= Owner as Protagonist;
+    }
+}
+
+public class ProtagonistDashState : DashState
+{
+    private Protagonist _protagonist;
+
+    public ProtagonistDashState(Character owner, Func<Vector2> inputProvider) : base(owner, inputProvider) { }
+
+    public override void OnEnter()
+    {
+        base.OnEnter();
+        _protagonist ??= Owner as Protagonist;
+
+        if (_protagonist is not IDashableCharacter dashable)
+            return;
+
+        dashable.Rigidbody.gravityScale = 0f;
+        PlayDashAnimation();
+    }
+
+    public override void OnLogic()
+    {
+        base.OnLogic();
+        _protagonist ??= Owner as Protagonist;
+    }
+
+    public override void OnExit()
+    {
+        base.OnExit();
+
+        if (_protagonist is not IDashableCharacter dashable)
+            return;
+
+        if (_protagonist.IsGrounded() && _protagonist is IJumpableCharacter jumpable)
+            jumpable.RemainingJumpCount = jumpable.MaxJumpCount;
+
+        dashable.Rigidbody.gravityScale = 1f;
+    }
+
+    private void PlayDashAnimation()
+    {
+        if (_protagonist?.CharacterAnimator is not ProtagonistAnimator protagonistAnimator)
+            return;
+
+        if (_protagonist is not IDashableCharacter dashable)
+            return;
+
+        Action playAnimation = (_dashDirection == Vector2.down || _dashDirection.y < -0.5f) ? protagonistAnimator.PlayDownDash : protagonistAnimator.PlayDash;
+        playAnimation?.Invoke();
     }
 }

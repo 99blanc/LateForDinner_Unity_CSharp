@@ -3,7 +3,7 @@ using R3;
 using UnityEngine;
 using UnityHFSM;
 
-public abstract class Character : MonoBehaviour, IPoolablePrefab
+public abstract class Character : MonoBehaviour, IPoolable
 {
     public AttributeRegistry Attributes { get; protected set; } = new AttributeRegistry();
     public SpriteRenderer Renderer { get; private set; }
@@ -43,8 +43,7 @@ public abstract class Character : MonoBehaviour, IPoolablePrefab
         {
             StateMachine.OnLogic();
             this.IsGrounded();
-        })
-        .AddToPool(this);
+        }).RegisterToPool(this);
     }
 
     public virtual void Get() { }

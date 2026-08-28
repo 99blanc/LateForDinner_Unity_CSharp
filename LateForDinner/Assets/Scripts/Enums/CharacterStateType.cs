@@ -5,5 +5,7 @@ public enum CharacterStateType
     Fall,
     Jump,
     DoubleJump,
-    Roll
+    Roll,
+    Dash,
+    DownDash
 }

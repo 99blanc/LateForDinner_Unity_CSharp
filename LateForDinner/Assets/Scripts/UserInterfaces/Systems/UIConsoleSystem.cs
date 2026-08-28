@@ -38,9 +38,9 @@ public class UIConsoleSystem : UISystem
         BindScrollRect(typeof(ScrollRects));
         _inputField = GetInputField(InputFields.CommandInputField);
         _inputField.BindInputSubmit(OnPressSubmit, this);
-        Managers.Control.Subscribe(Literal.Hotkeys.Up, OnPressUp).AddToPool(this);
-        Managers.Control.Subscribe(Literal.Hotkeys.Down, OnPressDown).AddToPool(this);
-        Managers.Control.Subscribe(Literal.Hotkeys.Tab, OnPressTab).AddToPool(this);
+        Managers.Control.Subscribe(Literal.Hotkeys.Up, OnPressUp).RegisterToPool(this);
+        Managers.Control.Subscribe(Literal.Hotkeys.Down, OnPressDown).RegisterToPool(this);
+        Managers.Control.Subscribe(Literal.Hotkeys.Tab, OnPressTab).RegisterToPool(this);
     }
 
     public override void Get()

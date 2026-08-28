@@ -41,8 +41,8 @@ public class UITitleDisplay : UIDisplay
         BindPanel(typeof(Panels));
         InitButtons();
         InitSaveSlots();
-        Managers.Control.Subscribe(Literal.Hotkeys.Cancel, Application.Quit).AddToPool(this);
-        Managers.Control.Subscribe(Literal.Hotkeys.Any, OnAnyPressed).AddToPool(this);
+        Managers.Control.Subscribe(Literal.Hotkeys.Cancel, Application.Quit).RegisterToPool(this);
+        Managers.Control.Subscribe(Literal.Hotkeys.Any, OnAnyPressed).RegisterToPool(this);
         Switch(UI_TitleState.Main);
     }
 

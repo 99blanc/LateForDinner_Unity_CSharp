@@ -3,9 +3,10 @@ using System;
 using UnityEngine;
 using UnityHFSM;
 
-public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovableCharacter, IFallableCharacter, IJumpableCharacter
+public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovableCharacter, IFallableCharacter, IJumpableCharacter, IRollableCharacter, IDashableCharacter
 {
     public Rigidbody2D Rigidbody { get; private set; }
+    public Transform CameraTransform { get; private set; }
     public Transform BackTransform { get; private set; }
     public Transform FrontTransform { get; private set; }
     public Transform HitboxTransform { get; private set; }
@@ -35,32 +36,57 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
         base.RegisterStates(fsm);
         fsm.AddState(CharacterStateType.Move, new MoveState(this, GetPlayerMoveInput));
         fsm.AddState(CharacterStateType.Fall, new FallState(this, GetPlayerMoveInput));
+        fsm.AddState(CharacterStateType.Jump, new ProtagonistJumpState(this, GetPlayerMoveInput));
+        fsm.AddState(CharacterStateType.Roll, new ProtagonistRollState(this, GetPlayerMoveInput));
+        fsm.AddState(CharacterStateType.Dash, new ProtagonistDashState(this, GetPlayerDashInput));
     }
 
     protected override void RegisterTransitions(StateMachine<CharacterStateType> fsm)
     {
         base.RegisterTransitions(fsm);
-        fsm
-        .AddTransition(new Transition<CharacterStateType>(
+        // DESC ::: Idle 상태에서의 전환 조건
+        fsm.AddTransition(new Transition<CharacterStateType>(
             from: CharacterStateType.Idle,
             to: CharacterStateType.Move,
             condition: _ => IsPlayerTryingToMove()
         ));
+        fsm.AddTransition(new Transition<CharacterStateType>(
+            from: CharacterStateType.Idle,
+            to: CharacterStateType.Fall,
+            condition: _ => fsm.ActiveStateName != CharacterStateType.Dash && !this.IsGrounded() && Rigidbody.linearVelocity.y < -0.1f
+        ));
+        fsm.AddTransition(new Transition<CharacterStateType>(
+            from: CharacterStateType.Idle,
+            to: CharacterStateType.Jump,
+            condition: _ => IsPlayerTryingToJump()
+        ));
+        fsm.AddTransition(new Transition<CharacterStateType>(
+            from: CharacterStateType.Idle,
+            to: CharacterStateType.Dash,
+            condition: _ => IsPlayerTryingToDash()
+        ));
+        // DESC ::: Move 상태에서의 전환 조건
         fsm.AddTransition(new Transition<CharacterStateType>(
             from: CharacterStateType.Move,
             to: CharacterStateType.Idle,
             condition: _ => HasPlayerStoppedMoving()
         ));
         fsm.AddTransition(new Transition<CharacterStateType>(
-            from: CharacterStateType.Idle,
+            from: CharacterStateType.Move,
             to: CharacterStateType.Fall,
             condition: _ => !this.IsGrounded() && Rigidbody.linearVelocity.y < -0.1f
         ));
         fsm.AddTransition(new Transition<CharacterStateType>(
             from: CharacterStateType.Move,
-            to: CharacterStateType.Fall,
-            condition: _ => !this.IsGrounded() && Rigidbody.linearVelocity.y < -0.1f
+            to: CharacterStateType.Jump,
+            condition: _ => IsPlayerTryingToJump()
         ));
+        fsm.AddTransition(new Transition<CharacterStateType>(
+            from: CharacterStateType.Move,
+            to: CharacterStateType.Dash,
+            condition: _ => IsPlayerTryingToDash()
+        ));
+        // DESC ::: Fall 상태에서의 전환 조건
         fsm.AddTransition(new Transition<CharacterStateType>(
             from: CharacterStateType.Fall,
             to: CharacterStateType.Idle,
@@ -74,30 +100,26 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
         fsm.AddTransition(new Transition<CharacterStateType>(
             from: CharacterStateType.Fall,
             to: CharacterStateType.Jump,
-            condition: _ => IsPlayerTryingToJump() && (this as IJumpableCharacter).RemainingJumpCount > 0
-        ));
-        fsm.AddTransition(new Transition<CharacterStateType>(
-            from: CharacterStateType.Idle,
-            to: CharacterStateType.Jump,
             condition: _ => IsPlayerTryingToJump()
         ));
         fsm.AddTransition(new Transition<CharacterStateType>(
-            from: CharacterStateType.Move,
+            from: CharacterStateType.Fall,
+            to: CharacterStateType.Dash,
+            condition: _ => IsPlayerTryingToDash()
+        ));
+        // DESC ::: Jump 상태에서의 전환 조건
+        fsm.AddTransition(new Transition<CharacterStateType>(
+            from: CharacterStateType.Jump,
             to: CharacterStateType.Jump,
             condition: _ => IsPlayerTryingToJump()
         ));
         fsm.AddTransition(new Transition<CharacterStateType>(
             from: CharacterStateType.Jump,
-            to: CharacterStateType.Jump,
-            condition: _ => IsPlayerTryingToJump() && (this as IJumpableCharacter).RemainingJumpCount > 0
-        ));
-        fsm.AddTransition(new Transition<CharacterStateType>(
-            from: CharacterStateType.Jump, 
             to: CharacterStateType.Idle,
             condition: _ => CheckLandingAndResetJump(out bool isStationary) && isStationary
         ));
         fsm.AddTransition(new Transition<CharacterStateType>(
-            from: CharacterStateType.Jump, 
+            from: CharacterStateType.Jump,
             to: CharacterStateType.Move,
             condition: _ => CheckLandingAndResetJump(out bool isStationary) && !isStationary
         ));
@@ -106,12 +128,50 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
             to: CharacterStateType.Fall,
             condition: _ => Rigidbody.linearVelocity.y < -0.1f && !this.IsGrounded()
         ));
+        fsm.AddTransition(new Transition<CharacterStateType>(
+            from: CharacterStateType.Jump,
+            to: CharacterStateType.Roll,
+            condition: _ => IsPlayerReadyToRoll()
+        ));
+        fsm.AddTransition(new Transition<CharacterStateType>(
+            from: CharacterStateType.Jump,
+            to: CharacterStateType.Dash,
+            condition: _ => IsPlayerTryingToDash()
+        ));
+        // DESC ::: Roll 상태에서의 전환 조건
+        fsm.AddTransition(new Transition<CharacterStateType>(
+            from: CharacterStateType.Roll,
+            to: CharacterStateType.Idle,
+            condition: _ => CharacterAnimator.GetCurrentAnimatorNormalizedTime() >= 1f && this.IsGrounded() && Mathf.Abs(GetPlayerMoveInput()) <= 0.01f
+        ));
+        fsm.AddTransition(new Transition<CharacterStateType>(
+            from: CharacterStateType.Roll,
+            to: CharacterStateType.Move,
+            condition: _ => CharacterAnimator.GetCurrentAnimatorNormalizedTime() >= 1f && this.IsGrounded() && Mathf.Abs(GetPlayerMoveInput()) > 0.01f
+        ));
+        fsm.AddTransition(new Transition<CharacterStateType>(
+            from: CharacterStateType.Roll,
+            to: CharacterStateType.Fall,
+            condition: _ => CharacterAnimator.GetCurrentAnimatorNormalizedTime() >= 1f && !this.IsGrounded()
+        ));
+        // DESC ::: Dash 상태에서의 전환 조건
+        fsm.AddTransition(new Transition<CharacterStateType>(
+            from: CharacterStateType.Dash,
+            to: CharacterStateType.Idle,
+            condition: _ => (fsm.GetState(CharacterStateType.Dash) as DashState)?.IsDurationEnded == true && this.IsGrounded()
+        ));
+        fsm.AddTransition(new Transition<CharacterStateType>(
+            from: CharacterStateType.Dash,
+            to: CharacterStateType.Fall,
+            condition: _ => (fsm.GetState(CharacterStateType.Dash) as DashState)?.IsDurationEnded == true && !this.IsGrounded()
+        ));
     }
 
     protected override void CacheComponents()
     {
         base.CacheComponents();
         Rigidbody = this.FindChildAssert<Rigidbody2D>(recursive: true);
+        CameraTransform = this.FindChildAssert<Transform>(Literal.Objects.CameraTransform, recursive: true);
         BackTransform = this.FindChildAssert<Transform>(Literal.Objects.BackTransform, recursive: true);
         FrontTransform = this.FindChildAssert<Transform>(Literal.Objects.FrontTransform, recursive: true);
         HitboxTransform = this.FindChildAssert<Transform>(Literal.Objects.HitboxTransform, recursive: true);
@@ -128,10 +188,59 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
         return 0f;
     }
 
+    protected Vector2 GetPlayerDashInput()
+    {
+        Vector2 input = Vector2.zero;
+
+        if (Managers.Control.IsPressed(Literal.Hotkeys.Right))
+            input.x += 1f;
+        if (Managers.Control.IsPressed(Literal.Hotkeys.Left))
+            input.x -= 1f;
+        if (Managers.Control.IsPressed(Literal.Hotkeys.DownUtility))
+            input.y -= 1f;
+
+        return input;
+    }
+
     private bool IsPlayerTryingToMove()
         => Mathf.Abs(GetPlayerMoveInput()) > 0.01f;
     private bool IsPlayerTryingToJump()
-        => Managers.Control.IsTriggered(Literal.Hotkeys.Jump);
+    {
+        bool isKeyTriggered = Managers.Control.IsTriggered(Literal.Hotkeys.Jump);
+        bool hasJumpCount = (this as IJumpableCharacter).RemainingJumpCount > 0;
+        return isKeyTriggered && hasJumpCount;
+    }
+    private bool IsPlayerTryingToDash()
+    {
+        if (this is IDashableCharacter dashable)
+        {
+            var cooldownable = (ICooldownable)dashable;
+
+            if (cooldownable.IsOnCooldown || dashable.RemainingDashCount <= 0)
+                return false;
+        }
+
+        bool isModifierDash = Managers.Config.Option.Access.modifierDash;
+
+        if (isModifierDash)
+        {
+            return Managers.Control.IsModifierTriggered(Literal.Hotkeys.Dash, Literal.Hotkeys.Left) ||
+                   Managers.Control.IsModifierTriggered(Literal.Hotkeys.Dash, Literal.Hotkeys.Right) ||
+                   Managers.Control.IsModifierTriggered(Literal.Hotkeys.Dash, Literal.Hotkeys.DownUtility);
+        }
+        else
+        {
+            return Managers.Control.IsDoubleTriggered(Literal.Hotkeys.Left) ||
+                   Managers.Control.IsDoubleTriggered(Literal.Hotkeys.Right) ||
+                   Managers.Control.IsDoubleTriggered(Literal.Hotkeys.DownUtility);
+        }
+    }
+    private bool IsPlayerReadyToRoll()
+    {
+        bool isLastJump = this is IJumpableCharacter jumpable && jumpable.RemainingJumpCount == 0;
+        bool isAnimationReady = CharacterAnimator is ProtagonistAnimator protagonistAnimator && protagonistAnimator.GetCurrentAnimatorNormalizedTime() >= Define.Animation.NormalizedTime;
+        return isLastJump && isAnimationReady;
+    }
 
     private bool HasPlayerStoppedMoving()
     {

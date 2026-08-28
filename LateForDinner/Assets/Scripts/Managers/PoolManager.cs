@@ -97,7 +97,7 @@ public class PoolManager
         if (gameObject == null)
             return;
 
-        if (gameObject.TryGetComponent<IPoolablePrefab>(out var poolable))
+        if (gameObject.TryGetComponent<IPoolable>(out var poolable))
         {
             poolable.Release();
             poolable.SetPooled(true);
@@ -140,7 +140,7 @@ public class PoolManager
             instance.name = key;
             _parents[instance] = targetParent;
 
-            if (instance.TryGetComponent<IPoolablePrefab>(out var poolable))
+            if (instance.TryGetComponent<IPoolable>(out var poolable))
             {
                 poolable.Init();
                 poolable.SetPooled(true);
@@ -210,7 +210,7 @@ public class PoolManager
 
     private void InitializePoolable(GameObject instance, bool isNew)
     {
-        if (!instance.TryGetComponent<IPoolablePrefab>(out var poolable))
+        if (!instance.TryGetComponent<IPoolable>(out var poolable))
             return;
 
         if (isNew)

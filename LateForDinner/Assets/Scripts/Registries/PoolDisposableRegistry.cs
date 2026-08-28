@@ -4,9 +4,9 @@ using System.Collections.Generic;
 
 internal static class PoolDisposableRegistry
 {
-    private static readonly Dictionary<IPoolablePrefab, DisposableBag> _bags = new Dictionary<IPoolablePrefab, DisposableBag>();
+    private static readonly Dictionary<IPoolable, DisposableBag> _bags = new Dictionary<IPoolable, DisposableBag>();
 
-    public static void Register(IPoolablePrefab owner, IDisposable disposable)
+    public static void Register(IPoolable owner, IDisposable disposable)
     {
         if (!_bags.TryGetValue(owner, out var bag))
         {
@@ -17,7 +17,7 @@ internal static class PoolDisposableRegistry
         bag.Add(disposable);
     }
 
-    public static void Clear(IPoolablePrefab owner)
+    public static void Clear(IPoolable owner)
     {
         if (_bags.TryGetValue(owner, out var bag))
         {

@@ -8,12 +8,15 @@ using UnityEngine.InputSystem;
 public class ControlManager
 {
     private readonly Dictionary<string, InputAction> _actionCaches = new Dictionary<string, InputAction>();
+    private readonly Dictionary<string, float> _lastFirstTapTimes = new Dictionary<string, float>();
     private readonly HashSet<string> _triggeredCaches = new HashSet<string>();
     private readonly HashSet<string> _pressedCaches = new HashSet<string>();
-    private InputActionAsset _actionAsset;
+    private readonly Dictionary<string, float> _doubleTriggeredCaches = new Dictionary<string, float>();
     private readonly Vector2 _cursorHotspot = Define.Cursor.Hotspot;
+    private InputActionAsset _actionAsset;
     private Texture2D _normalCursorTexture;
     private Texture2D _pressCursorTexture;
+    private string _pendingDoubleActionName;
 
     public void Setup()
     {
@@ -27,12 +30,15 @@ public class ControlManager
         var normalSprite = Managers.Resource.GetSprite(Define.Atlas.Common, Define.Sprite.Cursor_Normal);
         var pressSprite = Managers.Resource.GetSprite(Define.Atlas.Common, Define.Sprite.Cursor_Press);
 
-        if (normalSprite == null || pressSprite == null) 
+        if (AreCursorSpritesMissing(normalSprite, pressSprite))
             return;
 
         _normalCursorTexture = Managers.Resource.GetTextureFromSprite(normalSprite);
         _pressCursorTexture = Managers.Resource.GetTextureFromSprite(pressSprite);
     }
+
+    private bool AreCursorSpritesMissing(Sprite normal, Sprite press)
+        => normal == null || press == null;
 
     private void StartUnifiedUpdateLoop()
     {
@@ -50,25 +56,28 @@ public class ControlManager
 
         foreach (var (actionName, action) in _actionCaches)
         {
-            if (action != null && action.IsPressed())
+            if (IsActionValidAndPressed(action))
                 _pressedCaches.Add(actionName);
         }
     }
+
+    private bool IsActionValidAndPressed(InputAction action)
+        => action != null && action.IsPressed();
 
     private void UpdateCursorState()
     {
         if (!CanUpdateCursorVisual())
             return;
 
-        Vector2 mousePosition = Mouse.current?.position.ReadValue() ?? Vector2.negativeInfinity;
+        Vector2 mousePosition = GetCurrentMousePosition();
 
-        if (Mouse.current == null || IsCursorOutOfBounds(mousePosition))
+        if (IsMouseUnavailableOrOutOfBounds(mousePosition))
         {
             SetDefaultCursor();
             return;
         }
 
-        SetCursorVisual(Mouse.current.leftButton.isPressed);
+        SetCursorVisual(IsLeftMouseButtonPressed());
     }
 
     private bool CanUpdateCursorVisual()
@@ -82,8 +91,17 @@ public class ControlManager
         return true;
     }
 
+    private Vector2 GetCurrentMousePosition()
+        => Mouse.current?.position.ReadValue() ?? Vector2.negativeInfinity;
+
+    private bool IsMouseUnavailableOrOutOfBounds(Vector2 position)
+        => Mouse.current == null || IsCursorOutOfBounds(position);
+
     private bool IsCursorOutOfBounds(Vector2 position)
         => position.x < 0 || position.x > Screen.width || position.y < 0 || position.y > Screen.height;
+
+    private bool IsLeftMouseButtonPressed()
+        => Mouse.current.leftButton.isPressed;
 
     private void SetDefaultCursor()
         => Cursor.SetCursor(null, Vector2.zero, CursorMode.ForceSoftware);
@@ -97,6 +115,7 @@ public class ControlManager
     private void RegisterShortcutHandlers()
     {
         BindSystemUIToggleAction<UIConsoleSystem>(Literal.Hotkeys.Console);
+        BindPopupUIToggleAction<UIOptionPopup>(Literal.Hotkeys.Option);
         BindAction(Literal.Hotkeys.Cancel, () => Managers.UI.CloseFocusPopup());
     }
 
@@ -157,18 +176,28 @@ public class ControlManager
 
     private void CacheAllActions()
     {
-        if (_actionAsset == null) 
+        if (_actionAsset == null)
             return;
 
         _actionCaches.Clear();
+        CacheActionMap(Literal.Maps.User);
+        CacheActionMap(Literal.Maps.UI);
+    }
 
-        foreach (var map in _actionAsset.actionMaps)
+    private void CacheActionMap(string mapName)
+    {
+        var map = _actionAsset.FindActionMap(mapName);
+
+        if (map == null)
+            return;
+
+        foreach (var action in map.actions)
         {
-            foreach (var action in map.actions)
-            {
-                _actionCaches[action.name] = action;
-                RegisterActionEvents(action.name, action);
-            }
+            if (action.name == Literal.Hotkeys.Point || action.name == Literal.Hotkeys.Look || action.type == InputActionType.PassThrough)
+                continue;
+
+            _actionCaches[action.name] = action;
+            RegisterActionEvents(action.name, action);
         }
     }
 
@@ -180,14 +209,78 @@ public class ControlManager
 
     private void OnActionPerformed(InputAction.CallbackContext context)
     {
+        if (!context.performed)
+            return;
+
         foreach (var (actionName, action) in _actionCaches)
         {
             if (action == context.action)
             {
-                _triggeredCaches.Add(actionName);
+                ProcessActionPerformed(actionName);
                 break;
             }
         }
+    }
+
+    private void ProcessActionPerformed(string actionName)
+    {
+        float currentTime = Time.unscaledTime;
+        _triggeredCaches.Add(actionName);
+
+        if (!IsUserAction(actionName))
+            return;
+
+        ResetPendingDoubleTapIfDifferentKey(actionName);
+
+        if (TryEvaluateDoubleTap(actionName, currentTime))
+            RegisterSuccessfulDoubleTap(actionName);
+        else
+            RegisterFirstTap(actionName, currentTime);
+    }
+
+    private bool IsUserAction(string actionName)
+    {
+        var userMap = _actionAsset?.FindActionMap(Literal.Maps.User);
+        return userMap != null && userMap.FindAction(actionName) != null;
+    }
+
+    private void ResetPendingDoubleTapIfDifferentKey(string currentActionName)
+    {
+        if (HasPendingDifferentDoubleTap(currentActionName))
+            _pendingDoubleActionName = null;
+    }
+
+    private bool HasPendingDifferentDoubleTap(string currentActionName)
+        => !string.IsNullOrEmpty(_pendingDoubleActionName) && _pendingDoubleActionName != currentActionName;
+
+    private bool TryEvaluateDoubleTap(string actionName, float currentTime)
+    {
+        if (_pendingDoubleActionName != actionName)
+            return false;
+
+        if (_lastFirstTapTimes.TryGetValue(actionName, out float firstTime))
+            return IsWithinDoubleTapThreshold(currentTime, firstTime);
+
+        return false;
+    }
+
+    private bool IsWithinDoubleTapThreshold(float currentTime, float firstTime)
+    {
+        float threshold = Define.Scaler.Threshold;
+        return (currentTime - firstTime) <= threshold;
+    }
+
+    private void RegisterSuccessfulDoubleTap(string actionName)
+    {
+        _doubleTriggeredCaches[actionName] = Time.unscaledTime;
+        _pendingDoubleActionName = null;
+        _lastFirstTapTimes.Remove(actionName);
+    }
+
+    private void RegisterFirstTap(string actionName, float currentTime)
+    {
+        _pendingDoubleActionName = actionName;
+        _lastFirstTapTimes[actionName] = currentTime;
     }
 
     public void EnableActionMap(string mapName)
@@ -228,6 +321,52 @@ public class ControlManager
         return false;
     }
 
+    public bool IsDoubleTriggered(string actionName, float threshold = Define.Scaler.Threshold)
+    {
+        if (ConsumeDoubleTriggerCache(actionName))
+            return true;
+
+        CheckDoubleTapTimeout(actionName, threshold);
+        return false;
+    }
+
+    private bool ConsumeDoubleTriggerCache(string actionName)
+    {
+        if (_doubleTriggeredCaches.TryGetValue(actionName, out float timestamp))
+        {
+            _doubleTriggeredCaches.Remove(actionName);
+
+            if (Time.unscaledTime - timestamp <= Define.Scaler.Threshold)
+                return true;
+        }
+
+        return false;
+    }
+
+    private void CheckDoubleTapTimeout(string actionName, float threshold)
+    {
+        if (_pendingDoubleActionName != actionName)
+            return;
+
+        if (_lastFirstTapTimes.TryGetValue(actionName, out float firstTime))
+        {
+            if (HasDoubleTapTimedOut(firstTime, threshold))
+                ClearPendingDoubleTap(actionName);
+        }
+    }
+
+    private bool HasDoubleTapTimedOut(float firstTime, float threshold)
+        => Time.unscaledTime - firstTime > threshold;
+
+    private void ClearPendingDoubleTap(string actionName)
+    {
+        _pendingDoubleActionName = null;
+        _lastFirstTapTimes.Remove(actionName);
+    }
+
+    public bool IsModifierTriggered(string modifierActionName, string mainActionName)
+        => IsPressed(modifierActionName) && IsTriggered(mainActionName);
+
     public Observable<Unit> AsObservable(string actionName)
     {
         if (!_actionCaches.TryGetValue(actionName, out var action) || action == null)
@@ -246,6 +385,9 @@ public class ControlManager
     {
         _triggeredCaches.Clear();
         _pressedCaches.Clear();
+        _doubleTriggeredCaches.Clear();
+        _lastFirstTapTimes.Clear();
+        _pendingDoubleActionName = null;
 
         if (_actionAsset == null)
             return;
@@ -259,7 +401,7 @@ public class ControlManager
 
     public void LoadBindingFromJson(string json)
     {
-        if (_actionAsset == null) 
+        if (_actionAsset == null)
             return;
 
         if (string.IsNullOrEmpty(json))
@@ -275,7 +417,7 @@ public class ControlManager
         var bindableActions = new List<InputAction>();
         var userMap = _actionAsset?.FindActionMap(Literal.Maps.User);
 
-        if (userMap == null) 
+        if (userMap == null)
             return bindableActions;
 
         foreach (var action in userMap.actions)

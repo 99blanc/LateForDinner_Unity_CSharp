@@ -4,6 +4,9 @@
 Key,Text
 # Index: AttributeRegistry,
 Log_Attribute_Registry_Unsupported,[AttributeRegistry] 지원하지 않는 데이터 타입입니다: {0}('{1}')
+# Index: CameraManager,
+Log_Camera_LoadSuccess,[CameraManager] 카메라 로드에 성공했습니다.
+Log_Camera_LoadFailed,[CameraManager] 카메라 로드에 실패했습니다.
 # Index: ConfigManager,
 Log_Config_CreatedNew,[ConfigManager] 새로운 설정 파일을 생성했습니다.
 Log_Config_LoadedSuccessfully,[ConfigManager] 설정 파일을 성공적으로 불러왔습니다.

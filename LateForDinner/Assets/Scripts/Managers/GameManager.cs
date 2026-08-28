@@ -62,6 +62,7 @@ public class GameManager
         Character = playerComponent;
         await Character.InitAsync();
         UnityEngine.Object.DontDestroyOnLoad(playerPrefab);
+        Managers.Camera.SetTarget(Character);
         Log.System(LocalizationKey.Log_Game_PlayerSpawnSuccess, characterID.ToString());
         return Character;
     }

@@ -358,6 +358,15 @@
                     "initialStateCheck": true
                 },
                 {
+                    "name": "Option",
+                    "type": "Button",
+                    "id": "c9980185-8536-41e0-b570-be3ce64245f7",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
                     "name": "Tab",
                     "type": "Button",
                     "id": "b53173a5-cb2d-4b05-82a5-d9b21bd3d05d",
@@ -520,6 +529,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "Console",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a351d094-4b5d-4533-a0d2-d7d75cbeff07",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Option",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

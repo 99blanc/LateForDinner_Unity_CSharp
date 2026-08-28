@@ -1,4 +1,4 @@
-public interface IPoolablePrefab
+public interface IPoolable
 {
     bool IsPooled => this.IsPooled();
 
