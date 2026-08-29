@@ -19,6 +19,16 @@ public class ProtagonistCrouchState : CharacterState
         PlayCrouchAnimation();
     }
 
+    public override void OnExit()
+    {
+        base.OnExit();
+
+        if (_protagonist is not ICrouchableCharacter crouchable)
+            return;
+
+        crouchable.StandUp();
+    }
+
     private void PlayCrouchAnimation()
     {
         if (_protagonist?.CharacterAnimator is not ProtagonistAnimator protagonistAnimator)
