@@ -38,7 +38,7 @@ public class CameraManager
 
     public void SetTarget(PlayableCharacter character)
     {
-        if (_vcam == null || character == null)
+        if (IsVirtualCameraNull() || character == null)
             return;
 
         _vcam.Follow = character.CameraTransform;
@@ -46,7 +46,7 @@ public class CameraManager
 
     public void SetCameraMode(CameraWorkMode mode)
     {
-        if (_follow == null)
+        if (IsFollowNull())
             return;
 
         _currentMode = mode;
@@ -59,11 +59,9 @@ public class CameraManager
             case CameraWorkMode.JazzTargetFocus:
                 ApplyJazzTargetFocus();
                 break;
-
             case CameraWorkMode.CaveStorySmoothDualFocus:
                 ApplyCaveStorySmoothDualFocus();
                 break;
-
             case CameraWorkMode.CupheadLightFocus:
                 ApplyCupheadLightFocus();
                 break;
@@ -93,4 +91,10 @@ public class CameraManager
         // TODO: 컵헤드 스타일 구현
         _follow.TrackerSettings.PositionDamping = new Vector3(0.4f, 0.4f, 0f);
     }
+
+    private bool IsVirtualCameraNull()
+        => _vcam == null;
+
+    private bool IsFollowNull()
+        => _follow == null;
 }
