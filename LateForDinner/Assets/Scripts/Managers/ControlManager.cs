@@ -12,46 +12,19 @@ public class ControlManager
     private readonly HashSet<string> _triggeredCaches = new HashSet<string>();
     private readonly HashSet<string> _pressedCaches = new HashSet<string>();
     private readonly Dictionary<string, float> _doubleTriggeredCaches = new Dictionary<string, float>();
-    private readonly Vector2 _cursorHotspot = Define.Cursor.Hotspot;
     private InputActionAsset _actionAsset;
-    private Texture2D _normalCursorTexture;
-    private Texture2D _pressCursorTexture;
     private string _pendingDoubleActionName;
-    private Vector2 _lastMousePosition = Vector2.negativeInfinity;
-    private float _lastMouseMovedTime;
-    private bool _isCursorVisible = true;
 
     public void Setup()
     {
-        CacheCursorTextures();
-        StartUnifiedUpdateLoop();
+        StartInputUpdateLoop();
         RegisterShortcutHandlers();
-        _lastMouseMovedTime = Time.unscaledTime;
     }
 
-    private void CacheCursorTextures()
-    {
-        var normalSprite = Managers.Resource.GetSprite(Define.Atlas.Common, Define.Sprite.Cursor_Normal);
-        var pressSprite = Managers.Resource.GetSprite(Define.Atlas.Common, Define.Sprite.Cursor_Press);
-
-        if (AreCursorSpritesMissing(normalSprite, pressSprite))
-            return;
-
-        _normalCursorTexture = Managers.Resource.GetTextureFromSprite(normalSprite);
-        _pressCursorTexture = Managers.Resource.GetTextureFromSprite(pressSprite);
-    }
-
-    private bool AreCursorSpritesMissing(Sprite normal, Sprite press)
-        => normal == null || press == null;
-
-    private void StartUnifiedUpdateLoop()
+    private void StartInputUpdateLoop()
     {
         Observable.EveryUpdate()
-        .Subscribe(_ =>
-        {
-            CachePressedStates();
-            UpdateCursorState();
-        });
+        .Subscribe(_ => CachePressedStates());
     }
 
     private void CachePressedStates()
@@ -67,89 +40,6 @@ public class ControlManager
 
     private bool IsActionValidAndPressed(InputAction action)
         => action != null && action.IsPressed();
-
-    private void UpdateCursorState()
-    {
-        if (!CanUpdateCursorVisual())
-            return;
-
-        Vector2 mousePosition = GetCurrentMousePosition();
-
-        if (IsMouseUnavailableOrOutOfBounds(mousePosition))
-        {
-            SetDefaultCursor();
-            return;
-        }
-
-        HandleCursorVisibility(mousePosition);
-
-        if (!_isCursorVisible)
-            return;
-
-        SetCursorVisual(IsLeftMouseButtonPressed());
-    }
-
-    private void HandleCursorVisibility(Vector2 currentMousePosition)
-    {
-        if (_lastMousePosition == Vector2.negativeInfinity)
-        {
-            _lastMousePosition = currentMousePosition;
-            _lastMouseMovedTime = Time.unscaledTime;
-            return;
-        }
-
-        if (currentMousePosition != _lastMousePosition)
-        {
-            _lastMousePosition = currentMousePosition;
-            _lastMouseMovedTime = Time.unscaledTime;
-
-            if (!_isCursorVisible)
-            {
-                _isCursorVisible = true;
-                Cursor.visible = true;
-            }
-        }
-        else
-        {
-            if (_isCursorVisible && (Time.unscaledTime - _lastMouseMovedTime) >= Define.Cursor.Duration)
-            {
-                _isCursorVisible = false;
-                Cursor.visible = false;
-            }
-        }
-    }
-
-    private bool CanUpdateCursorVisual()
-    {
-        if (Application.isFocused == false)
-            return false;
-
-        if (_normalCursorTexture == null || _pressCursorTexture == null)
-            return false;
-
-        return true;
-    }
-
-    private Vector2 GetCurrentMousePosition()
-        => Mouse.current?.position.ReadValue() ?? Vector2.negativeInfinity;
-
-    private bool IsMouseUnavailableOrOutOfBounds(Vector2 position)
-        => Mouse.current == null || IsCursorOutOfBounds(position);
-
-    private bool IsCursorOutOfBounds(Vector2 position)
-        => position.x < 0 || position.x > Screen.width || position.y < 0 || position.y > Screen.height;
-
-    private bool IsLeftMouseButtonPressed()
-        => Mouse.current.leftButton.isPressed;
-
-    private void SetDefaultCursor()
-        => Cursor.SetCursor(null, Vector2.zero, CursorMode.ForceSoftware);
-
-    private void SetCursorVisual(bool isPressed)
-    {
-        var targetTexture = isPressed ? _pressCursorTexture : _normalCursorTexture;
-        Cursor.SetCursor(targetTexture, _cursorHotspot, CursorMode.ForceSoftware);
-    }
 
     private void RegisterShortcutHandlers()
     {

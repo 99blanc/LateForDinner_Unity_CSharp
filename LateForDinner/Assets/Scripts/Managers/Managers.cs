@@ -24,6 +24,7 @@ public class Managers : MonoBehaviour
     public static UIManager UI { get; private set; }
     public static ConfigManager Config { get; private set; }
     public static ControlManager Control { get; private set; }
+    public static CursorManager Cursor { get; private set; }
     public static SceneManager Scene { get; private set; }
     public static NotifyManager Notify { get; private set; }
     public static ConsoleManager Console { get; private set; }
@@ -56,6 +57,7 @@ public class Managers : MonoBehaviour
         UI = new UIManager();
         Config = new ConfigManager();
         Control = new ControlManager();
+        Cursor = new CursorManager();
         Scene = new SceneManager();
         Notify = new NotifyManager();
         Console = new ConsoleManager();
