@@ -353,6 +353,9 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
     }
     private bool IsPlayerTryingToClimb()
     {
+        if (this is IClimbableCharacter climbable && !climbable.CanClimb)
+            return false;
+
         if (!Managers.Control.IsPressed(Literal.Hotkeys.UpUtility) && !Managers.Control.IsPressed(Literal.Hotkeys.DownUtility))
             return false;
 

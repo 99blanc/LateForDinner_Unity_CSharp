@@ -9,27 +9,25 @@ public interface IClimbableCharacter
         public Ladder CurrentLadder = null;
         public bool IsClimbing = false;
         public float OriginalGravityScale = 1f;
-        public float XVelocity = 0f;
-        public CooldownRegistry CooldownProxy = new CooldownRegistry();
-    }
+        public CooldownRegistry EnterCooldownProxy = new CooldownRegistry();
+        public CooldownRegistry ExitCooldownProxy = new CooldownRegistry();
 
+    }
     SpriteRenderer Renderer { get; }
     Rigidbody2D Rigidbody { get; }
     AttributeRegistry Attributes { get; }
-
     public Ladder CurrentLadder
     {
         get => _climbValue.GetOrCreateValue(this).CurrentLadder;
         set => _climbValue.GetOrCreateValue(this).CurrentLadder = value;
     }
-
     public bool IsClimbing
     {
         get => _climbValue.GetOrCreateValue(this).IsClimbing;
         set => _climbValue.GetOrCreateValue(this).IsClimbing = value;
-    }
 
-    public bool CanClimb => !_climbValue.GetOrCreateValue(this).CooldownProxy.IsOnCooldown;
+    }
+    public bool CanClimb => !_climbValue.GetOrCreateValue(this).EnterCooldownProxy.IsOnCooldown && !_climbValue.GetOrCreateValue(this).ExitCooldownProxy.IsOnCooldown;
 
     public void StartClimbing(Ladder ladder)
     {
@@ -45,6 +43,11 @@ public interface IClimbableCharacter
         val.OriginalGravityScale = Rigidbody.gravityScale;
         Rigidbody.gravityScale = 0f;
         Rigidbody.linearVelocity = Vector2.zero;
+        float enterCooldownTime = Define.Scaler.Buffer;
+        val.EnterCooldownProxy.CooldownTime = enterCooldownTime;
+        val.EnterCooldownProxy.CurrentCooldown = enterCooldownTime;
+        val.EnterCooldownProxy.IsOnCooldown = true;
+        Managers.Cooldown.Register(val.EnterCooldownProxy);
     }
 
     public void StopClimbing()
@@ -56,11 +59,11 @@ public interface IClimbableCharacter
         val.IsClimbing = false;
         val.CurrentLadder = null;
         Rigidbody.gravityScale = val.OriginalGravityScale;
-        float exitCooldownTime = Define.Scaler.Threshold;
-        val.CooldownProxy.CooldownTime = exitCooldownTime;
-        val.CooldownProxy.CurrentCooldown = exitCooldownTime;
-        val.CooldownProxy.IsOnCooldown = true;
-        Managers.Cooldown.Register(val.CooldownProxy);
+        float exitCooldownTime = Define.Scaler.Buffer;
+        val.ExitCooldownProxy.CooldownTime = exitCooldownTime;
+        val.ExitCooldownProxy.CurrentCooldown = exitCooldownTime;
+        val.ExitCooldownProxy.IsOnCooldown = true;
+        Managers.Cooldown.Register(val.ExitCooldownProxy);
     }
 
     public void Climb(float verticalInput)
