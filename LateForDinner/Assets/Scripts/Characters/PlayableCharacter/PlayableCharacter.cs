@@ -179,6 +179,11 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
             to: CharacterStateType.Fall,
             condition: _ => CharacterAnimator.GetCurrentAnimatorNormalizedTime() >= 1f && !this.IsGrounded()
         ));
+        fsm.AddTransition(new Transition<CharacterStateType>(
+            from: CharacterStateType.Roll,
+            to: CharacterStateType.Dash,
+            condition: _ => IsPlayerTryingToDash()
+        ));
         // DESC ::: Dash 상태에서의 전환 조건
         fsm.AddTransition(new Transition<CharacterStateType>(
             from: CharacterStateType.Dash,
