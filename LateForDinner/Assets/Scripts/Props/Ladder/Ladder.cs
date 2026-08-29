@@ -16,7 +16,6 @@ public class Ladder : Prop, IInteractable
     public bool RequireKeyInput => _requireKeyInput;
     public bool TriggerOnProximity => _triggerOnProximity;
     public float InteractRadius => _interactRadius;
-
     protected override bool UseSaveState => false;
 
     public void OnInteract(PlayableCharacter player)

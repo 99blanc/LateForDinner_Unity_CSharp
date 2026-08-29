@@ -15,6 +15,7 @@ public interface IDashableCharacter
     SpriteRenderer Renderer { get; }
     Rigidbody2D Rigidbody { get; }
     AttributeRegistry Attributes { get; }
+    int MaxDashCount => Attributes.Get<short>(AttributeType.DashCount).Value;
     int RemainingDashCount
     {
         get

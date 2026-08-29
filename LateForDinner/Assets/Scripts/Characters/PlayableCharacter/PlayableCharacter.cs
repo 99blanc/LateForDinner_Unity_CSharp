@@ -409,10 +409,10 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
     private void ResetAirActionsForLadder()
     {
         if (this is IJumpableCharacter jumpable)
-            jumpable.RemainingJumpCount += 1;
+            jumpable.RemainingJumpCount = jumpable.MaxJumpCount;
 
         if (this is IDashableCharacter dashable)
-            dashable.RemainingDashCount += 1;
+            dashable.RemainingDashCount = dashable.MaxDashCount;
     }
 
     public bool IsJumpKeyTriggered()

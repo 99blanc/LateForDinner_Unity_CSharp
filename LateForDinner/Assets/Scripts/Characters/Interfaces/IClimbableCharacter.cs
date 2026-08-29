@@ -69,21 +69,18 @@ public interface IClimbableCharacter
             return;
 
         var val = _climbValue.GetOrCreateValue(this);
+        float targetVelocityX = 0f;
 
         if (val.CurrentLadder != null)
         {
             float targetX = val.CurrentLadder.transform.position.x;
-            float currentX = Rigidbody.transform.position.x;
-            float newX = Mathf.SmoothDamp(currentX, targetX, ref val.XVelocity, 0.08f, Mathf.Infinity, Time.fixedDeltaTime);
-            Vector3 pos = Rigidbody.transform.position;
-            pos.x = newX;
-            Rigidbody.transform.position = pos;
+            float currentX = Rigidbody.position.x;
+            float xDifference = targetX - currentX;
+            targetVelocityX = xDifference * 15f;
         }
 
         float maxClimbSpeed = Attributes.Get<float>(AttributeType.MoveSpeed).Value * 0.5f;
         float targetVelocityY = verticalInput * maxClimbSpeed;
-        Vector2 velocity = Rigidbody.linearVelocity;
-        velocity.y = targetVelocityY;
-        Rigidbody.linearVelocity = velocity;
+        Rigidbody.linearVelocity = new Vector2(targetVelocityX, targetVelocityY);
     }
 }
