@@ -7,17 +7,8 @@ using UnityEngine;
 public class PoolManager
 {
     private GameObject _root;
-    public GameObject Root
-    {
-        get
-        {
-            if (_root == null)
-                InitRoot();
-
-            return _root;
-        }
-    }
-
+    public GameObject Root 
+        => _root ??= InitRoot();
     private readonly Dictionary<string, Queue<GameObject>> _registries = new Dictionary<string, Queue<GameObject>>();
     private readonly Dictionary<string, Transform> _folders = new Dictionary<string, Transform>();
     private readonly Dictionary<GameObject, Transform> _parents = new Dictionary<GameObject, Transform>();
@@ -26,18 +17,19 @@ public class PoolManager
         { Literal.Keys.UI, Literal.Roots.UserInterfaces },
     };
 
-    private void InitRoot()
+    private GameObject InitRoot()
     {
         _root = new GameObject { name = Literal.Roots.Pools };
         _root.transform.SetParent(Managers.Instance.transform, false);
         SetupFolders();
+        return _root;
     }
 
     private void SetupFolders()
     {
         foreach (var folderName in _maps.Values)
         {
-            if (_folders.ContainsKey(folderName))
+            if (HasFolder(folderName))
                 continue;
 
             Transform folder = new GameObject { name = folderName }.transform;
@@ -50,7 +42,7 @@ public class PoolManager
     {
         var (instance, isNew) = await GetOrCreateInstanceAsync(key, parent);
 
-        if (instance == null)
+        if (IsInstanceNull(instance))
             return (null, null);
 
         InitializePoolable(instance, isNew);
@@ -63,7 +55,7 @@ public class PoolManager
         string key = typeof(T).Name;
         var (instance, rentHandle) = await PopAsync(key, parent);
 
-        if (instance == null)
+        if (IsInstanceNull(instance))
             return (null, null);
 
         return (instance.GetComponentAssert<T>(), rentHandle);
@@ -73,7 +65,7 @@ public class PoolManager
     {
         var (instance, isNew) = GetOrCreateInstance(key, parent);
 
-        if (instance == null)
+        if (IsInstanceNull(instance))
             return (null, null);
 
         InitializePoolable(instance, isNew);
@@ -86,7 +78,7 @@ public class PoolManager
         string key = typeof(T).Name;
         var (instance, rentHandle) = Pop(key, parent);
 
-        if (instance == null)
+        if (IsInstanceNull(instance))
             return (null, null);
 
         return (instance.GetComponentAssert<T>(), rentHandle);
@@ -94,7 +86,7 @@ public class PoolManager
 
     public void Push(GameObject gameObject, string key = null)
     {
-        if (gameObject == null)
+        if (IsGameObjectNull(gameObject))
             return;
 
         if (gameObject.TryGetComponent<IPoolable>(out var poolable))
@@ -106,7 +98,7 @@ public class PoolManager
         _parents[gameObject] = gameObject.transform.parent;
         string newKey = string.IsNullOrEmpty(key) ? gameObject.name : key;
 
-        if (!_registries.ContainsKey(newKey))
+        if (!HasRegistry(newKey))
             _registries.Add(newKey, new Queue<GameObject>());
 
         gameObject.SetActive(false);
@@ -116,7 +108,7 @@ public class PoolManager
 
     public void Push(Component component, string key = null)
     {
-        if (component != null)
+        if (IsComponentNotNull(component))
             Push(component.gameObject, key);
     }
 
@@ -124,17 +116,17 @@ public class PoolManager
     {
         string key = typeof(T).Name;
 
-        if (_registries.TryGetValue(key, out var queue) && queue.Count >= count)
+        if (HasEnoughCachedInstances(key, count))
             return;
 
-        int needed = count - (queue != null ? queue.Count : 0);
+        int needed = GetNeededPrewarmCount(key, count);
 
         for (int index = 0; index < needed; index++)
         {
             Transform targetParent = parent == null ? GetFolder(key) : parent;
             var instance = await Managers.Resource.InstantiateAsync(key, targetParent, false);
 
-            if (instance == null)
+            if (IsInstanceNull(instance))
                 continue;
 
             instance.name = key;
@@ -146,7 +138,7 @@ public class PoolManager
                 poolable.SetPooled(true);
             }
 
-            if (!_registries.ContainsKey(key))
+            if (!HasRegistry(key))
                 _registries.Add(key, new Queue<GameObject>());
 
             instance.SetActive(false);
@@ -157,9 +149,8 @@ public class PoolManager
 
     private async UniTask<(GameObject instance, bool isNew)> GetOrCreateInstanceAsync(string key, Transform parent)
     {
-        if (_registries.TryGetValue(key, out var queue) && queue.Count > 0)
+        if (TryGetCachedInstance(key, out var cachedInstance))
         {
-            var cachedInstance = queue.Dequeue();
             PrepareCachedInstance(cachedInstance, parent, key);
             return (cachedInstance, false);
         }
@@ -167,7 +158,7 @@ public class PoolManager
         Transform newParent = parent == null ? GetFolder(key) : parent;
         var newInstance = await Managers.Resource.InstantiateAsync(key, newParent, false);
 
-        if (newInstance == null)
+        if (IsInstanceNull(newInstance))
         {
             Log.Error(LocalizationKey.Log_Pool_InstantiateFailed, key);
             return (null, false);
@@ -180,9 +171,8 @@ public class PoolManager
 
     private (GameObject instance, bool isNew) GetOrCreateInstance(string key, Transform parent)
     {
-        if (_registries.TryGetValue(key, out var queue) && queue.Count > 0)
+        if (TryGetCachedInstance(key, out var cachedInstance))
         {
-            var cachedInstance = queue.Dequeue();
             PrepareCachedInstance(cachedInstance, parent, key);
             return (cachedInstance, false);
         }
@@ -190,7 +180,7 @@ public class PoolManager
         Transform newParent = parent == null ? GetFolder(key) : parent;
         var newInstance = Managers.Resource.Instantiate(key, newParent, false);
 
-        if (newInstance == null)
+        if (IsInstanceNull(newInstance))
         {
             Log.Error(LocalizationKey.Log_Pool_InstantiateFailed, key);
             return (null, false);
@@ -248,7 +238,7 @@ public class PoolManager
             {
                 GameObject instance = queue.Dequeue();
 
-                if (instance != null)
+                if (IsInstanceNotNull(instance))
                 {
                     UnityEngine.Object.Destroy(instance);
                     totalDestroyed++;
@@ -259,5 +249,45 @@ public class PoolManager
         _registries.Clear();
         _parents.Clear();
         Log.System(LocalizationKey.Log_Pool_Cleared, totalDestroyed);
+    }
+
+    private bool IsRootNull()
+        => _root == null;
+
+    private bool HasFolder(string folderName)
+        => _folders.ContainsKey(folderName);
+
+    private bool IsInstanceNull(GameObject instance)
+        => instance == null;
+
+    private bool IsInstanceNotNull(GameObject instance)
+        => instance != null;
+
+    private bool IsGameObjectNull(GameObject gameObject)
+        => gameObject == null;
+
+    private bool IsComponentNotNull(Component component)
+        => component != null;
+
+    private bool HasRegistry(string key)
+        => _registries.ContainsKey(key);
+
+    private bool HasEnoughCachedInstances(string key, int count)
+        => _registries.TryGetValue(key, out var queue) && queue.Count >= count;
+
+    private int GetNeededPrewarmCount(string key, int count)
+        => count - (_registries.TryGetValue(key, out var queue) && queue != null ? queue.Count : 0);
+
+    private bool TryGetCachedInstance(string key, out GameObject cachedInstance)
+    {
+        cachedInstance = null;
+
+        if (_registries.TryGetValue(key, out var queue) && queue.Count > 0)
+        {
+            cachedInstance = queue.Dequeue();
+            return true;
+        }
+
+        return false;
     }
 }

@@ -52,39 +52,48 @@ public class NotifyManager
 
     public async UniTask ToastAsync(LocalizationKey key)
     {
-        var toastSystem = await Managers.UI.OpenSystemAsync<UIToastSystem>(LayerType.System);
+        var toastSystem = await GetToastSystemAsync();
         await toastSystem.PushToastAsync(key);
     }
 
     public async UniTask ToastAsync<T1>(LocalizationKey key, T1 arg1)
     {
-        var toastSystem = await Managers.UI.OpenSystemAsync<UIToastSystem>(LayerType.System);
+        var toastSystem = await GetToastSystemAsync();
         await toastSystem.PushToastAsync(key, arg1);
     }
 
     public async UniTask ToastAsync<T1, T2>(LocalizationKey key, T1 arg1, T2 arg2)
     {
-        var toastSystem = await Managers.UI.OpenSystemAsync<UIToastSystem>(LayerType.System);
+        var toastSystem = await GetToastSystemAsync();
         await toastSystem.PushToastAsync(key, arg1, arg2);
     }
 
     public async UniTask ToastAsync<T1, T2, T3>(LocalizationKey key, T1 arg1, T2 arg2, T3 arg3)
     {
-        var toastSystem = await Managers.UI.OpenSystemAsync<UIToastSystem>(LayerType.System);
+        var toastSystem = await GetToastSystemAsync();
         await toastSystem.PushToastAsync(key, arg1, arg2, arg3);
     }
 
     public async UniTask ToastAsync(LocalizationKey key, params object[] args)
     {
-        var toastSystem = await Managers.UI.OpenSystemAsync<UIToastSystem>(LayerType.System);
+        var toastSystem = await GetToastSystemAsync();
         await toastSystem.PushToastAsync(key, args);
     }
 
+    private async UniTask<UIAlertPopup> OpenAlertPopupAsync()
+        => await Managers.UI.OpenPopupAsync<UIAlertPopup>(true);
+
+    private async UniTask<UIConfirmPopup> OpenConfirmPopupAsync()
+        => await Managers.UI.OpenPopupAsync<UIConfirmPopup>(true);
+
+    private async UniTask<UIToastSystem> GetToastSystemAsync()
+        => await Managers.UI.OpenSystemAsync<UIToastSystem>(LayerType.System);
+
     private async UniTask AlertInternalAsync(UserInterface owner, LocalizationKey titleKey, LocalizationKey messageKey, params object[] messageArgs)
     {
-        var popup = await Managers.UI.OpenPopupAsync<UIAlertPopup>(true);
+        var popup = await OpenAlertPopupAsync();
 
-        if (popup == null)
+        if (IsPopupNull(popup))
             return;
 
         bool isClosed = false;
@@ -99,26 +108,30 @@ public class NotifyManager
             Log.System(LocalizationKey.Log_Feedback_AlertPopup_Cancelled);
         }
 
-        if (!popup.IsPooled())
+        if (IsPopupNotPooled(popup))
             Managers.UI.Close(popup);
     }
 
     public async UniTask AlertAsync(UserInterface owner, LocalizationKey titleKey, LocalizationKey messageKey)
         => await AlertInternalAsync(owner, titleKey, messageKey);
+
     public async UniTask AlertAsync<T1>(UserInterface owner, LocalizationKey titleKey, LocalizationKey messageKey, T1 arg1)
         => await AlertInternalAsync(owner, titleKey, messageKey, arg1);
+
     public async UniTask AlertAsync<T1, T2>(UserInterface owner, LocalizationKey titleKey, LocalizationKey messageKey, T1 arg1, T2 arg2)
         => await AlertInternalAsync(owner, titleKey, messageKey, arg1, arg2);
+
     public async UniTask AlertAsync<T1, T2, T3>(UserInterface owner, LocalizationKey titleKey, LocalizationKey messageKey, T1 arg1, T2 arg2, T3 arg3)
         => await AlertInternalAsync(owner, titleKey, messageKey, arg1, arg2, arg3);
+
     public async UniTask AlertAsync(UserInterface owner, LocalizationKey titleKey, LocalizationKey messageKey, params object[] messageArgs)
         => await AlertInternalAsync(owner, titleKey, messageKey, messageArgs);
 
     private async UniTask<bool> ConfirmInternalAsync(UserInterface owner, LocalizationKey titleKey, LocalizationKey messageKey, params object[] messageArgs)
     {
-        var popup = await Managers.UI.OpenPopupAsync<UIConfirmPopup>(true);
+        var popup = await OpenConfirmPopupAsync();
 
-        if (popup == null)
+        if (IsPopupNull(popup))
             return false;
 
         bool result = false;
@@ -134,7 +147,7 @@ public class NotifyManager
             Log.System(LocalizationKey.Log_Feedback_ConfirmPopup_Cancelled);
         }
 
-        if (!popup.IsPooled())
+        if (IsPopupNotPooled(popup))
             Managers.UI.Close(popup);
 
         return result;
@@ -142,12 +155,22 @@ public class NotifyManager
 
     public async UniTask<bool> ConfirmAsync(UserInterface owner, LocalizationKey titleKey, LocalizationKey messageKey)
         => await ConfirmInternalAsync(owner, titleKey, messageKey);
+
     public async UniTask<bool> ConfirmAsync<T1>(UserInterface owner, LocalizationKey titleKey, LocalizationKey messageKey, T1 arg1)
         => await ConfirmInternalAsync(owner, titleKey, messageKey, arg1);
+
     public async UniTask<bool> ConfirmAsync<T1, T2>(UserInterface owner, LocalizationKey titleKey, LocalizationKey messageKey, T1 arg1, T2 arg2)
         => await ConfirmInternalAsync(owner, titleKey, messageKey, arg1, arg2);
+
     public async UniTask<bool> ConfirmAsync<T1, T2, T3>(UserInterface owner, LocalizationKey titleKey, LocalizationKey messageKey, T1 arg1, T2 arg2, T3 arg3)
         => await ConfirmInternalAsync(owner, titleKey, messageKey, arg1, arg2, arg3);
+
     public async UniTask<bool> ConfirmAsync(UserInterface owner, LocalizationKey titleKey, LocalizationKey messageKey, params object[] messageArgs)
         => await ConfirmInternalAsync(owner, titleKey, messageKey, messageArgs);
+
+    private bool IsPopupNull(UserInterface popup)
+        => popup == null;
+
+    private bool IsPopupNotPooled(UserInterface popup)
+        => !popup.IsPooled();
 }

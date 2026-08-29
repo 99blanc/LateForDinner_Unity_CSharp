@@ -5,26 +5,22 @@ using UnityEngine;
 
 public class SceneManager
 {
-    public SceneManager()
-        => GetScene();
-
     private SceneID _previousID;
     private readonly Dictionary<SceneID, Spawnpoint> _spawnpoints = new Dictionary<SceneID, Spawnpoint>();
     public SceneID CurrentSceneID { get; private set; }
 
+    public SceneManager()
+        => GetScene();
+
     private void GetScene()
     {
         string activeSceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
-
-        if (System.Enum.TryParse<SceneID>(activeSceneName, out var sceneID))
-            CurrentSceneID = sceneID;
-        else
-            CurrentSceneID = SceneID.Bootstrap;
+        CurrentSceneID = ParseSceneID(activeSceneName);
     }
 
     public async UniTask LoadSceneAsync(SceneID targetSceneID)
     {
-        if (TryGetSceneData(targetSceneID, out var sceneData) == false)
+        if (!TryGetSceneData(targetSceneID, out var sceneData))
             return;
 
         PrepareSceneTransition(targetSceneID);
@@ -33,7 +29,7 @@ public class SceneManager
 
     public async UniTask MoveToTransitionAsync(SceneID targetSceneID)
     {
-        if (ValidateSceneTransition(targetSceneID) == false)
+        if (!ValidateSceneTransition(targetSceneID))
             return;
 
         await LoadSceneAsync(targetSceneID);
@@ -41,31 +37,31 @@ public class SceneManager
 
     public void RegisterSpawnpoint(Spawnpoint spawn)
     {
-        if (spawn != null && !_spawnpoints.ContainsKey(spawn.FromSceneID))
+        if (IsSpawnValid(spawn) && !_spawnpoints.ContainsKey(spawn.FromSceneID))
             _spawnpoints.Add(spawn.FromSceneID, spawn);
     }
 
     public void UnregisterSpawnpoint(Spawnpoint spawn)
     {
-        if (spawn != null)
+        if (IsSpawnValid(spawn))
             _spawnpoints.Remove(spawn.FromSceneID);
     }
 
     public void RelocateCharacterToSpawnpoint()
     {
-        if (Managers.Game.Character == null)
+        if (IsCharacterNull())
         {
             Log.Warning(LocalizationKey.Log_Scene_NotFoundCharacter);
             return;
         }
 
-        if (_previousID < SceneID.Hospital1)
+        if (IsPreviousSceneBeforeHospital())
         {
             Log.System(LocalizationKey.Log_Scene_NotExistPreviousScene);
             return;
         }
 
-        if (_spawnpoints.TryGetValue(_previousID, out var targetSpawn) && targetSpawn != null)
+        if (TryGetTargetSpawnpoint(out var targetSpawn))
         {
             Managers.Game.Character.RelocateTo(targetSpawn);
             Log.System(LocalizationKey.Log_Scene_NormalizedSpawn, targetSpawn.transform.position.ToString());
@@ -115,11 +111,24 @@ public class SceneManager
                 return true;
         }
 
-        string currentTag = GetSceneTag(currentScene);
-        string targetTag = GetSceneTag(targetScene);
-        Log.Warning(LocalizationKey.Log_Scene_TransitionFailed, currentTag, targetTag);
+        Log.Warning(LocalizationKey.Log_Scene_TransitionFailed, GetSceneTag(currentScene), GetSceneTag(targetScene));
         return false;
     }
+
+    private SceneID ParseSceneID(string sceneName)
+        => System.Enum.TryParse<SceneID>(sceneName, out var sceneID) ? sceneID : SceneID.Bootstrap;
+
+    private bool IsSpawnValid(Spawnpoint spawn)
+        => spawn != null;
+
+    private bool IsCharacterNull()
+        => Managers.Game.Character == null;
+
+    private bool IsPreviousSceneBeforeHospital()
+        => _previousID < SceneID.Hospital1;
+
+    private bool TryGetTargetSpawnpoint(out Spawnpoint targetSpawn)
+        => _spawnpoints.TryGetValue(_previousID, out targetSpawn) && targetSpawn != null;
 
     private string GetSceneTag(int sceneID)
         => Managers.Data.Scenes.TryGetValue(sceneID, out var data) ? data.Tag : sceneID.ToString();

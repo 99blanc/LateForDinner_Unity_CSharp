@@ -12,23 +12,18 @@ public class SaveManager
     public SaveMeta MetaData { get; private set; } = new SaveMeta();
     public SaveData CurrentData { get; private set; } = new SaveData();
 
-    public async UniTask InitAsync() 
+    public async UniTask InitAsync()
         => await MetaAsync();
 
     public async UniTask LoadAsync(int index)
     {
         string path = GetPath(index);
         string backupPath = GetBackupPath(index);
-
-        if (!File.Exists(path) && File.Exists(backupPath))
-        {
-            File.Copy(backupPath, path, true);
-            Log.Warning(LocalizationKey.Log_Save_RestoredFromBackup, index);
-        }
+        RestoreBackupIfNeeded(path, backupPath, index);
 
         try
         {
-            if (!File.Exists(path))
+            if (!FileExists(path))
             {
                 Newgame(index);
                 return;
@@ -48,7 +43,7 @@ public class SaveManager
 
     public async UniTask SaveAsync()
     {
-        if (_currentSlot < 0)
+        if (IsSlotInvalid())
             return;
 
         Sync();
@@ -60,13 +55,8 @@ public class SaveManager
             SyncMeta();
             byte[] bytes = MemoryPackSerializer.Serialize(CurrentData);
             string dir = Path.GetDirectoryName(path);
-
-            if (!Directory.Exists(dir))
-                Directory.CreateDirectory(dir);
-
-            if (File.Exists(path))
-                File.Copy(path, backupPath, true);
-
+            EnsureDirectoryExists(dir);
+            BackupExistingFile(path, backupPath);
             await File.WriteAllBytesAsync(path, bytes);
             await SaveMetaAsync();
             Log.System(LocalizationKey.Log_Save_SaveSuccess, _currentSlot);
@@ -81,13 +71,11 @@ public class SaveManager
     {
         string path = GetMetaPath();
         string backupPath = GetMetaBackupPath();
-
-        if (!File.Exists(path) && File.Exists(backupPath))
-            File.Copy(backupPath, path, true);
+        RestoreBackupIfNeeded(path, backupPath);
 
         try
         {
-            if (!File.Exists(path))
+            if (!FileExists(path))
             {
                 MetaData = SaveMeta.Default;
                 ValidateMeta();
@@ -118,8 +106,8 @@ public class SaveManager
 
         MetaData.SlotOrder.Clear();
 
-        for (int ndex = 0; ndex < MetaData.Slots.Count; ndex++)
-            MetaData.SlotOrder.Add(ndex);
+        for (int index = 0; index < MetaData.Slots.Count; index++)
+            MetaData.SlotOrder.Add(index);
     }
 
     private void ValidateMeta()
@@ -177,13 +165,8 @@ public class SaveManager
         {
             byte[] bytes = MemoryPackSerializer.Serialize(MetaData);
             string dir = Path.GetDirectoryName(path);
-
-            if (!Directory.Exists(dir))
-                Directory.CreateDirectory(dir);
-
-            if (File.Exists(path))
-                File.Copy(path, backupPath, true);
-
+            EnsureDirectoryExists(dir);
+            BackupExistingFile(path, backupPath);
             await File.WriteAllBytesAsync(path, bytes);
         }
         catch
@@ -192,8 +175,8 @@ public class SaveManager
         }
     }
 
-    public void Select(int index) =>
-        _currentSlot = index;
+    public void Select(int index)
+        => _currentSlot = index;
 
     public async UniTask ClearAsync(int index)
     {
@@ -203,10 +186,7 @@ public class SaveManager
         _currentSlot = index;
         await SaveMetaAsync();
         string path = GetPath(index);
-
-        if (File.Exists(path))
-            File.Delete(path);
-
+        DeleteFileIfExists(path);
         Log.System(LocalizationKey.Log_Save_ClearSuccess, index);
     }
 
@@ -270,5 +250,40 @@ public class SaveManager
         MetaData.SlotOrder[posA] = MetaData.SlotOrder[posB];
         MetaData.SlotOrder[posB] = temp;
         await SaveMetaAsync();
+    }
+
+    private bool FileExists(string path)
+        => File.Exists(path);
+
+    private bool IsSlotInvalid()
+        => _currentSlot < 0;
+
+    private void EnsureDirectoryExists(string dir)
+    {
+        if (!Directory.Exists(dir))
+            Directory.CreateDirectory(dir);
+    }
+
+    private void BackupExistingFile(string path, string backupPath)
+    {
+        if (File.Exists(path))
+            File.Copy(path, backupPath, true);
+    }
+
+    private void DeleteFileIfExists(string path)
+    {
+        if (File.Exists(path))
+            File.Delete(path);
+    }
+
+    private void RestoreBackupIfNeeded(string path, string backupPath, int index = -1)
+    {
+        if (!File.Exists(path) && File.Exists(backupPath))
+        {
+            File.Copy(backupPath, path, true);
+
+            if (index >= 0)
+                Log.Warning(LocalizationKey.Log_Save_RestoredFromBackup, index);
+        }
     }
 }

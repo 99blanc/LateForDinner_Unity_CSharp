@@ -19,10 +19,13 @@ public class ProtagonistAnimator : CharacterAnimator
 
     public void PlayCrouch()
         => Play(Define.Animation.Crouch);
+
     public void PlayDoubleJump() 
         => Play(Define.Animation.DoubleJump);
+
     public void PlayRoll()
         => Play(Define.Animation.Roll);
+
     public void PlayDownDash()
         => Play(Define.Animation.DownDash);
 }

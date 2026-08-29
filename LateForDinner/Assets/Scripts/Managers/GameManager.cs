@@ -50,7 +50,7 @@ public class GameManager
         DespawnExistingPlayer();
         GameObject playerPrefab = await CreatePlayerPrefabAsync(characterID);
 
-        if (playerPrefab == null)
+        if (IsPlayerPrefabNull(playerPrefab))
             return null;
 
         if (!TrySetupCharacterComponents(playerPrefab, characterID, out var playerComponent, out var characterAnimator))
@@ -71,7 +71,7 @@ public class GameManager
     {
         GameObject playerPrefab = await Managers.Resource.InstantiateAsync(Literal.Assets.PlayableCharacterObject);
 
-        if (playerPrefab == null)
+        if (IsPlayerPrefabNull(playerPrefab))
         {
             Log.Error(LocalizationKey.Log_Game_PlayerSpawnFailed, characterID.ToString());
             return null;
@@ -87,7 +87,7 @@ public class GameManager
         characterAnimator = null;
         var (characterType, animatorType) = characterID.GetCharacterTypes();
 
-        if (characterType == null || animatorType == null)
+        if (HasAnyTypeMissing(characterType, animatorType))
         {
             Log.Error(LocalizationKey.Log_Game_PlayerSpawnFailed, characterID.ToString());
             return false;
@@ -96,7 +96,7 @@ public class GameManager
         playerComponent = playerPrefab.AddComponent(characterType) as PlayableCharacter;
         characterAnimator = playerPrefab.AddComponent(animatorType) as CharacterAnimator;
 
-        if (playerComponent == null || characterAnimator == null)
+        if (HasAnyComponentMissing(playerComponent, characterAnimator))
         {
             Log.Error(LocalizationKey.Log_Game_PlayerSpawnFailed, characterID.ToString());
             return false;
@@ -107,10 +107,22 @@ public class GameManager
 
     private void DespawnExistingPlayer()
     {
-        if (Character == null)
+        if (IsCharacterNull())
             return;
 
         UnityEngine.Object.Destroy(Character.gameObject);
         Character = null;
     }
+
+    private bool IsPlayerPrefabNull(GameObject playerPrefab)
+        => playerPrefab == null;
+
+    private bool HasAnyTypeMissing(Type characterType, Type animatorType)
+        => characterType == null || animatorType == null;
+
+    private bool HasAnyComponentMissing(PlayableCharacter playerComponent, CharacterAnimator characterAnimator)
+        => playerComponent == null || characterAnimator == null;
+
+    private bool IsCharacterNull()
+        => Character == null;
 }

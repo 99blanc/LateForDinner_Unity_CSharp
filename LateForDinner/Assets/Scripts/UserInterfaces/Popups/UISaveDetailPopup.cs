@@ -5,9 +5,6 @@ using LateForDinner.Data;
 
 public class UISaveDetailPopup : UIPopup, IFocusablePopup
 {
-    private readonly ReactiveProperty<ButtonState> _playButton = new ReactiveProperty<ButtonState>(ButtonState.Normal);
-    private readonly ReactiveProperty<ButtonState> _trashButton = new ReactiveProperty<ButtonState>(ButtonState.Normal);
-
     private enum Images
     {
         MealTimeImage,
@@ -31,6 +28,8 @@ public class UISaveDetailPopup : UIPopup, IFocusablePopup
         PlayButton
     }
 
+    private readonly ReactiveProperty<ButtonState> _playButton = new ReactiveProperty<ButtonState>(ButtonState.Normal);
+    private readonly ReactiveProperty<ButtonState> _trashButton = new ReactiveProperty<ButtonState>(ButtonState.Normal);
     private int? _selectedSlotIndex;
 
     public override void Init()

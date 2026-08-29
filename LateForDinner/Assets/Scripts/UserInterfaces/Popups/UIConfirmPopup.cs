@@ -1,12 +1,8 @@
-using Cysharp.Threading.Tasks;
 using R3;
 using System;
 
 public class UIConfirmPopup : UIPopup, IDraggablePopup, IFocusablePopup
 {
-    private readonly ReactiveProperty<ButtonState> _confirmButtonState = new ReactiveProperty<ButtonState>(ButtonState.Normal);
-    private readonly ReactiveProperty<ButtonState> _cancelButtonState = new ReactiveProperty<ButtonState>(ButtonState.Normal);
-
     private enum Images
     {
         ConfirmButtonImage,
@@ -27,6 +23,8 @@ public class UIConfirmPopup : UIPopup, IDraggablePopup, IFocusablePopup
         CancelButton
     }
 
+    private readonly ReactiveProperty<ButtonState> _confirmButtonState = new ReactiveProperty<ButtonState>(ButtonState.Normal);
+    private readonly ReactiveProperty<ButtonState> _cancelButtonState = new ReactiveProperty<ButtonState>(ButtonState.Normal);
     private Action _onConfirm;
     private Action _onCancel;
     private LocalizationKey _cachedTitleKey;

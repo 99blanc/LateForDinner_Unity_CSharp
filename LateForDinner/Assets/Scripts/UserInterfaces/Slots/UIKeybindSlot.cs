@@ -9,8 +9,6 @@ using ZLinq;
 
 public class UIKeybindSlot : UISlot
 {
-    private readonly ReactiveProperty<ButtonState> _resetButtonState = new ReactiveProperty<ButtonState>(ButtonState.Normal);
-
     private enum Images
     {
         KeybindButtonImage,
@@ -30,9 +28,14 @@ public class UIKeybindSlot : UISlot
         ResetButton
     }
 
-    private enum SlotMode { ActionRebind, DashCommandToggle }
+    private enum UI_KeybindMode 
+    { 
+        ActionRebind, 
+        DashCommandToggle 
+    }
 
-    private SlotMode _slotMode;
+    private readonly ReactiveProperty<ButtonState> _resetButtonState = new ReactiveProperty<ButtonState>(ButtonState.Normal);
+    private UI_KeybindMode _slotMode;
     private InputAction _targetAction;
     private string _cachedActionLocalizationKey;
     private LocalizationKey _cachedResetLocalizationKey;
@@ -60,7 +63,7 @@ public class UIKeybindSlot : UISlot
         base.Refresh();
         GetText(Texts.ActionNameText).text = Managers.Localization.Get(_cachedActionLocalizationKey);
 
-        if (_slotMode == SlotMode.DashCommandToggle)
+        if (_slotMode == UI_KeybindMode.DashCommandToggle)
         {
             bool isModifier = Managers.Config.Option.Access.modifierDash;
             SetKeybindText(isModifier ? LocalizationKey.UI_Option_Popup_Text_Modifier : LocalizationKey.UI_Option_Popup_Text_Tap);
@@ -78,7 +81,7 @@ public class UIKeybindSlot : UISlot
 
     public void Setup(string action, InputAction target, List<UIKeybindSlot> slots, Func<bool> locked, Action<bool> lockAction, Action<string, string> onDuplicated)
     {
-        _slotMode = SlotMode.ActionRebind;
+        _slotMode = UI_KeybindMode.ActionRebind;
         _targetAction = target;
         _keybinds = slots;
         _isLocked = locked;
@@ -92,7 +95,7 @@ public class UIKeybindSlot : UISlot
 
     public void SetupDashCommand(Func<bool> locked, Action<bool> lockAction)
     {
-        _slotMode = SlotMode.DashCommandToggle;
+        _slotMode = UI_KeybindMode.DashCommandToggle;
         _targetAction = null;
         _isLocked = locked;
         _setLock = lockAction;
@@ -146,7 +149,7 @@ public class UIKeybindSlot : UISlot
 
     private bool HandleDash()
     {
-        if (_slotMode != SlotMode.DashCommandToggle)
+        if (_slotMode != UI_KeybindMode.DashCommandToggle)
             return false;
 
         Managers.Config.Option.Access.modifierDash = !Managers.Config.Option.Access.modifierDash;

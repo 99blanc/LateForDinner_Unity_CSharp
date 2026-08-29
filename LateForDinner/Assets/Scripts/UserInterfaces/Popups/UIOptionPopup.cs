@@ -11,18 +11,6 @@ using ZLinq;
 
 public class UIOptionPopup : UIPopup, IDraggablePopup, IFocusablePopup
 {
-    private readonly ReactiveProperty<ButtonState> _soundButton = new ReactiveProperty<ButtonState>(ButtonState.Normal);
-    private readonly ReactiveProperty<ButtonState> _graphicButton = new ReactiveProperty<ButtonState>(ButtonState.Normal);
-    private readonly ReactiveProperty<ButtonState> _accessButton = new ReactiveProperty<ButtonState>(ButtonState.Normal);
-    private readonly ReactiveProperty<ButtonState> _applyButton = new ReactiveProperty<ButtonState>(ButtonState.Normal);
-    private readonly ReactiveProperty<ButtonState> _completeButton = new ReactiveProperty<ButtonState>(ButtonState.Normal);
-    private readonly ReactiveProperty<ButtonState> _cancelButton = new ReactiveProperty<ButtonState>(ButtonState.Normal);
-    private readonly ReactiveProperty<ButtonState> _defaultButton = new ReactiveProperty<ButtonState>(ButtonState.Normal);
-    private readonly ReactiveProperty<ButtonState> _resolutionArrowButton = new ReactiveProperty<ButtonState>(ButtonState.Normal);
-    private readonly ReactiveProperty<ButtonState> _fullscreenArrowButton = new ReactiveProperty<ButtonState>(ButtonState.Normal);
-    private readonly ReactiveProperty<ButtonState> _qualityArrowButton = new ReactiveProperty<ButtonState>(ButtonState.Normal);
-    private readonly ReactiveProperty<ButtonState> _languageArrowButton = new ReactiveProperty<ButtonState>(ButtonState.Normal);
-
     private enum Images
     {
         SoundButtonImage,
@@ -168,8 +156,24 @@ public class UIOptionPopup : UIPopup, IDraggablePopup, IFocusablePopup
         AccessPanel
     }
 
-    private enum UI_OptionState { Sound, Graphic, Access }
+    private enum UI_OptionState 
+    { 
+        Sound, 
+        Graphic, 
+        Access 
+    }
 
+    private readonly ReactiveProperty<ButtonState> _soundButton = new ReactiveProperty<ButtonState>(ButtonState.Normal);
+    private readonly ReactiveProperty<ButtonState> _graphicButton = new ReactiveProperty<ButtonState>(ButtonState.Normal);
+    private readonly ReactiveProperty<ButtonState> _accessButton = new ReactiveProperty<ButtonState>(ButtonState.Normal);
+    private readonly ReactiveProperty<ButtonState> _applyButton = new ReactiveProperty<ButtonState>(ButtonState.Normal);
+    private readonly ReactiveProperty<ButtonState> _completeButton = new ReactiveProperty<ButtonState>(ButtonState.Normal);
+    private readonly ReactiveProperty<ButtonState> _cancelButton = new ReactiveProperty<ButtonState>(ButtonState.Normal);
+    private readonly ReactiveProperty<ButtonState> _defaultButton = new ReactiveProperty<ButtonState>(ButtonState.Normal);
+    private readonly ReactiveProperty<ButtonState> _resolutionArrowButton = new ReactiveProperty<ButtonState>(ButtonState.Normal);
+    private readonly ReactiveProperty<ButtonState> _fullscreenArrowButton = new ReactiveProperty<ButtonState>(ButtonState.Normal);
+    private readonly ReactiveProperty<ButtonState> _qualityArrowButton = new ReactiveProperty<ButtonState>(ButtonState.Normal);
+    private readonly ReactiveProperty<ButtonState> _languageArrowButton = new ReactiveProperty<ButtonState>(ButtonState.Normal);
     private UI_OptionState _state;
     private Resolution[] _resolutions;
     private List<UIKeybindSlot> _keybinds = new List<UIKeybindSlot>();

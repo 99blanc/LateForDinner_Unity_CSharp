@@ -11,7 +11,7 @@ public class ConsoleManager
     private readonly CommandRegistry _registry = new CommandRegistry();
     private readonly List<string> _histories = new List<string>();
     private int _index = -1;
-    private const int _size = 50;
+    private const int _size = Define.Command.History;
 
     public void Setup()
         => _registry.RegisterCommands(this);
@@ -62,12 +62,13 @@ public class ConsoleManager
         PushHistory(inputCommand);
 
         var parts = inputCommand.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
         if (parts.Length == 0)
             return;
 
         string cmdName = parts[0].ToLower();
         var args = new string[parts.Length - 1];
-        Array.Copy(parts, 1, args, 0, args.Length); 
+        Array.Copy(parts, 1, args, 0, args.Length);
 
         if (_commands.TryGetValue(cmdName, out var action))
         {
@@ -86,7 +87,7 @@ public class ConsoleManager
 
     public string GetPreviousCommand()
     {
-        if (_histories.Count == 0)
+        if (HasNoHistories())
             return string.Empty;
 
         _index = Math.Max(0, _index - 1);
@@ -95,7 +96,7 @@ public class ConsoleManager
 
     public string GetNextCommand()
     {
-        if (_histories.Count == 0)
+        if (HasNoHistories())
             return string.Empty;
 
         _index++;
@@ -111,7 +112,7 @@ public class ConsoleManager
 
     private void PushHistory(string inputCommand)
     {
-        if (_histories.Count == 0 || _histories[^1] != inputCommand)
+        if (HasNoHistories() || _histories[^1] != inputCommand)
         {
             _histories.Add(inputCommand);
 
@@ -121,4 +122,7 @@ public class ConsoleManager
 
         _index = _histories.Count;
     }
+
+    private bool HasNoHistories()
+        => _histories.Count == 0;
 }

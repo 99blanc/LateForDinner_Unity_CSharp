@@ -62,7 +62,6 @@ public class LocalizationManager
                     Locate = language,
                     Translations = GetLocalizations()
                 };
-
                 await SaveAsync(path, file);
             }
             else
@@ -134,7 +133,7 @@ public class LocalizationManager
     {
         var dict = new Dictionary<string, string>();
 
-        if (Managers.Data == null)
+        if (IsDataModelNull())
             return dict;
 
         foreach (var data in Managers.Data.Localization.Values)
@@ -158,7 +157,7 @@ public class LocalizationManager
                 string json = File.ReadAllText(file);
                 var format = JsonConvert.DeserializeObject<LocalizationFormat>(json);
 
-                if (format == null || string.IsNullOrEmpty(format.Locate))
+                if (IsLocalizationFormatInvalid(format))
                     continue;
 
                 if (!languages.Contains(format.Locate))
@@ -184,20 +183,23 @@ public class LocalizationManager
         return id;
     }
 
-    public string Get(LocalizationKey id) 
+    public string Get(LocalizationKey id)
         => Get(id.ToString());
-    public string Get<T1>(LocalizationKey id, T1 arg1) 
+
+    public string Get<T1>(LocalizationKey id, T1 arg1)
         => FormatText(id, text => ZString.Format(text, arg1));
-    public string Get<T1, T2>(LocalizationKey id, T1 arg1, T2 arg2) 
+
+    public string Get<T1, T2>(LocalizationKey id, T1 arg1, T2 arg2)
         => FormatText(id, text => ZString.Format(text, arg1, arg2));
-    public string Get<T1, T2, T3>(LocalizationKey id, T1 arg1, T2 arg2, T3 arg3) 
+
+    public string Get<T1, T2, T3>(LocalizationKey id, T1 arg1, T2 arg2, T3 arg3)
         => FormatText(id, text => ZString.Format(text, arg1, arg2, arg3));
 
     public string Get(LocalizationKey id, params object[] args)
     {
         string text = Get(id);
 
-        if (args == null || args.Length == 0)
+        if (HasNoArguments(args))
             return text;
 
         try
@@ -230,4 +232,13 @@ public class LocalizationManager
         RefreshAsync();
         Log.Info(LocalizationKey.Log_Localization_LoadedSuccessfully);
     }
+
+    private bool IsDataModelNull()
+        => Managers.Data == null;
+
+    private bool IsLocalizationFormatInvalid(LocalizationFormat format)
+        => format == null || string.IsNullOrEmpty(format.Locate);
+
+    private bool HasNoArguments(object[] args)
+        => args == null || args.Length == 0;
 }

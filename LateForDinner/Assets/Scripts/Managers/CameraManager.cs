@@ -4,37 +4,29 @@ using UnityEngine;
 public class CameraManager
 {
     private GameObject _root;
-
-    public GameObject Root
-    {
-        get
-        {
-            if (_root == null)
-                InitRoot();
-
-            return _root;
-        }
-    }
+    public GameObject Root 
+        => _root ??= InitRoot();
     private CinemachineCamera _vcam;
     private Camera _mainCamera;
     private CinemachineFollow _follow;
     private CameraWorkMode _currentMode;
 
-    private void InitRoot()
+    private GameObject InitRoot()
     {
-        GameObject root = new GameObject { name = Literal.Roots.Camera };
-        root.transform.SetParent(Managers.Instance.transform, false);
-        _mainCamera = root.AddComponent<Camera>();
+        _root = new GameObject { name = Literal.Roots.Camera };
+        _root.transform.SetParent(Managers.Instance.transform, false);
+        _mainCamera = _root.AddComponent<Camera>();
         _mainCamera.tag = Literal.Tags.Camera;
         _mainCamera.clearFlags = CameraClearFlags.SolidColor;
         _mainCamera.backgroundColor = Color.gray;
         _mainCamera.orthographic = true;
-        root.AddComponent<CinemachineBrain>();
-        GameObject vcam = new GameObject { name = Literal.Roots.Virtual };
-        vcam.transform.SetParent(Managers.Instance.transform, false);
-        _vcam = vcam.AddComponent<CinemachineCamera>();
-        _follow = vcam.AddComponent<CinemachineFollow>();
+        _root.AddComponent<CinemachineBrain>();
+        GameObject vcamObject = new GameObject { name = Literal.Roots.Virtual };
+        vcamObject.transform.SetParent(Managers.Instance.transform, false);
+        _vcam = vcamObject.AddComponent<CinemachineCamera>();
+        _follow = vcamObject.AddComponent<CinemachineFollow>();
         _vcam.Lens.OrthographicSize = 5f;
+        return _root;
     }
 
     public void Setup()

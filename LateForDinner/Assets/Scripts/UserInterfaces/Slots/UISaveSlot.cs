@@ -6,10 +6,6 @@ using LateForDinner.Data;
 
 public class UISaveSlot : UISlot
 {
-    private readonly ReactiveProperty<ButtonState> _button = new ReactiveProperty<ButtonState>(ButtonState.Normal);
-    private readonly ReactiveProperty<ButtonState> _upButton = new ReactiveProperty<ButtonState>(ButtonState.Normal);
-    private readonly ReactiveProperty<ButtonState> _downButton = new ReactiveProperty<ButtonState>(ButtonState.Normal);
-
     private enum Images
     {
         SlotImage,
@@ -31,6 +27,9 @@ public class UISaveSlot : UISlot
         DownButton
     }
 
+    private readonly ReactiveProperty<ButtonState> _button = new ReactiveProperty<ButtonState>(ButtonState.Normal);
+    private readonly ReactiveProperty<ButtonState> _upButton = new ReactiveProperty<ButtonState>(ButtonState.Normal);
+    private readonly ReactiveProperty<ButtonState> _downButton = new ReactiveProperty<ButtonState>(ButtonState.Normal);
     private UITitleDisplay _display;
     private Action<int> _onSlotSelected;
     private int _index;

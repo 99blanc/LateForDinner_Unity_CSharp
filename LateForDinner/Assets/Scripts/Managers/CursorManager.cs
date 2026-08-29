@@ -7,7 +7,6 @@ public class CursorManager
     private Texture2D _normalCursorTexture;
     private Texture2D _pressCursorTexture;
     private readonly Vector2 _cursorHotspot = Define.Cursor.Hotspot;
-
     private Vector2 _lastMousePosition = Vector2.negativeInfinity;
     private float _lastMouseMovedTime;
     private bool _isCursorVisible = true;
@@ -24,7 +23,7 @@ public class CursorManager
         var normalSprite = Managers.Resource.GetSprite(Define.Atlas.Common, Define.Sprite.Cursor_Normal);
         var pressSprite = Managers.Resource.GetSprite(Define.Atlas.Common, Define.Sprite.Cursor_Press);
 
-        if (normalSprite == null || pressSprite == null)
+        if (HasAnySpriteMissing(normalSprite, pressSprite))
             return;
 
         _normalCursorTexture = Managers.Resource.GetTextureFromSprite(normalSprite);
@@ -52,22 +51,44 @@ public class CursorManager
 
         HandleCursorVisibility(mousePosition);
 
-        if (!_isCursorVisible)
+        if (!IsCursorVisibleState())
             return;
 
-        SetCursorVisual(Mouse.current != null && Mouse.current.leftButton.isPressed);
+        SetCursorVisual(IsLeftMousePressed());
     }
 
-    private bool CanUpdateCursorVisual() 
+    private void HandleCursorVisibility(Vector2 currentMousePosition)
+    {
+        if (IsInitialMousePosition())
+        {
+            InitializeMousePositionState(currentMousePosition);
+            return;
+        }
+
+        if (HasMouseMoved(currentMousePosition))
+        {
+            UpdateLastMousePosition(currentMousePosition);
+
+            if (!IsCursorVisibleState())
+                ShowCursor();
+
+            return;
+        }
+
+        if (IsCursorVisibleState() && HasCursorInactivityTimeoutExceeded())
+            HideCursor();
+    }
+
+    private bool CanUpdateCursorVisual()
         => Application.isFocused && _normalCursorTexture != null && _pressCursorTexture != null;
 
-    private Vector2 GetCurrentMousePosition() 
+    private Vector2 GetCurrentMousePosition()
         => Mouse.current?.position.ReadValue() ?? Vector2.negativeInfinity;
 
-    private bool IsMouseUnavailableOrOutOfBounds(Vector2 pos) 
+    private bool IsMouseUnavailableOrOutOfBounds(Vector2 pos)
         => Mouse.current == null || pos.x < 0 || pos.x > Screen.width || pos.y < 0 || pos.y > Screen.height;
 
-    private void SetDefaultCursor() 
+    private void SetDefaultCursor()
         => Cursor.SetCursor(null, Vector2.zero, CursorMode.ForceSoftware);
 
     private void SetCursorVisual(bool isPressed)
@@ -76,33 +97,45 @@ public class CursorManager
         Cursor.SetCursor(targetTexture, _cursorHotspot, CursorMode.ForceSoftware);
     }
 
-    private void HandleCursorVisibility(Vector2 currentMousePosition)
+    private bool HasAnySpriteMissing(Sprite normal, Sprite press)
+        => normal == null || press == null;
+
+    private bool IsCursorVisibleState()
+        => _isCursorVisible;
+
+    private bool IsLeftMousePressed()
+        => Mouse.current != null && Mouse.current.leftButton.isPressed;
+
+    private bool IsInitialMousePosition()
+        => _lastMousePosition == Vector2.negativeInfinity;
+
+    private void InitializeMousePositionState(Vector2 currentMousePosition)
     {
-        if (_lastMousePosition == Vector2.negativeInfinity)
-        {
-            _lastMousePosition = currentMousePosition;
-            _lastMouseMovedTime = Time.unscaledTime;
-            return;
-        }
+        _lastMousePosition = currentMousePosition;
+        _lastMouseMovedTime = Time.unscaledTime;
+    }
 
-        if (currentMousePosition != _lastMousePosition)
-        {
-            _lastMousePosition = currentMousePosition;
-            _lastMouseMovedTime = Time.unscaledTime;
+    private bool HasMouseMoved(Vector2 currentMousePosition)
+        => currentMousePosition != _lastMousePosition;
 
-            if (!_isCursorVisible)
-            {
-                _isCursorVisible = true;
-                Cursor.visible = true;
-            }
-        }
-        else
-        {
-            if (_isCursorVisible && (Time.unscaledTime - _lastMouseMovedTime) >= Define.Cursor.Duration)
-            {
-                _isCursorVisible = false;
-                Cursor.visible = false;
-            }
-        }
+    private void UpdateLastMousePosition(Vector2 currentMousePosition)
+    {
+        _lastMousePosition = currentMousePosition;
+        _lastMouseMovedTime = Time.unscaledTime;
+    }
+
+    private void ShowCursor()
+    {
+        _isCursorVisible = true;
+        Cursor.visible = true;
+    }
+
+    private bool HasCursorInactivityTimeoutExceeded()
+        => (Time.unscaledTime - _lastMouseMovedTime) >= Define.Cursor.Duration;
+
+    private void HideCursor()
+    {
+        _isCursorVisible = false;
+        Cursor.visible = false;
     }
 }

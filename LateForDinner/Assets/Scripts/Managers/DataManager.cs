@@ -63,7 +63,7 @@ public class DataManager
     {
         var list = await LoadListAsync<TValue>(name);
 
-        if (list == null || list.Count == 0)
+        if (HasNoItems(list))
             return new Dictionary<TKey, TValue>();
 
         var dictionary = new Dictionary<TKey, TValue>(list.Count);
@@ -94,7 +94,7 @@ public class DataManager
 
     private byte[] DecryptAssetBytes(byte[] encryptedBytes)
     {
-        if (encryptedBytes == null || encryptedBytes.Length == 0)
+        if (IsBytesEmpty(encryptedBytes))
             return Array.Empty<byte>();
 
         byte[] decryptedBytes = new byte[encryptedBytes.Length];
@@ -106,4 +106,10 @@ public class DataManager
 
         return decryptedBytes;
     }
+
+    private bool HasNoItems<T>(List<T> list)
+        => list == null || list.Count == 0;
+
+    private bool IsBytesEmpty(byte[] bytes)
+        => bytes == null || bytes.Length == 0;
 }

@@ -43,12 +43,16 @@ public abstract class CharacterAnimator : MonoBehaviour
 
     public virtual void PlayIdle() 
         => Play(Define.Animation.Idle);
+
     public virtual void PlayMove() 
         => Play(Define.Animation.Move);
+
     public virtual void PlayFall()
         => Play(Define.Animation.Fall);
+
     public virtual void PlayJump()
         => Play(Define.Animation.Jump);
+
     public virtual void PlayDash()
         => Play(Define.Animation.Dash);
 }

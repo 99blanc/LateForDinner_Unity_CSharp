@@ -1,5 +1,3 @@
-using Cysharp.Threading.Tasks;
-using R3;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -26,7 +24,12 @@ public class UITitleDisplay : UIDisplay
         LoadPanel
     }
 
-    private enum UI_TitleState { Main, Load }
+    private enum UI_TitleState 
+    { 
+        Main, 
+        Load 
+    }
+
     private UI_TitleState _state;
     private UISaveDetailPopup _detailPopup;
     private UISaveSlot[] _slots;

@@ -1,21 +1,11 @@
 using Cysharp.Threading.Tasks;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class Managers : MonoBehaviour
 {
     private static Managers _instance;
-    public static Managers Instance
-    {
-        get
-        {
-            if (_instance == null)
-                InitInstance();
-
-            return _instance;
-        }
-    }
-
+    public static Managers Instance 
+        => _instance ??= InitInstance();
     public static LogManager Log { get; private set; }
     public static ResourceManager Resource { get; private set; }
     public static DataManager Data { get; private set; }
@@ -40,11 +30,12 @@ public class Managers : MonoBehaviour
         await InitializeManagersAsync();
     }
 
-    private static void InitInstance()
+    private static Managers InitInstance()
     {
         var gameObject = new GameObject { name = Literal.Roots.Managers };
         _instance = gameObject.AddComponent<Managers>();
         DontDestroyOnLoad(_instance);
+        return _instance;
     }
 
     private void CreateManagers()

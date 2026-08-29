@@ -9,11 +9,10 @@ public class ConfigManager
 {
     private string _tempPath;
     private string _savePath;
-    private string TempPath 
+    private string TempPath
         => _tempPath ??= Path.Combine(Application.persistentDataPath, ZString.Concat(Literal.Files.Config, Literal.Extensions.Temp));
-    private string SavePath 
+    private string SavePath
         => _savePath ??= Path.Combine(Application.persistentDataPath, ZString.Concat(Literal.Files.Config, Literal.Extensions.Bytes));
-
     public Option Option { get; private set; } = new Option();
 
     public async UniTask LoadAsync()
@@ -81,7 +80,7 @@ public class ConfigManager
     {
         string[] args = Environment.GetCommandLineArgs();
 
-        if (args == null)
+        if (HasNoArguments(args))
             return;
 
         Option.Debug.enableConsole = false;
@@ -94,6 +93,7 @@ public class ConfigManager
                 Option.Debug.enableConsole = true;
                 Log.System(LocalizationKey.Log_Config_ConsoleEnabled);
             }
+
             if (arg.Equals(Define.Execute.Debug, StringComparison.OrdinalIgnoreCase))
             {
                 Option.Debug.isDebugMode = true;
@@ -104,7 +104,7 @@ public class ConfigManager
 
     public void ApplyToEngine()
     {
-        if (Option == null)
+        if (IsOptionInvalid())
             return;
 
         var graphic = Option.Graphic;
@@ -115,4 +115,10 @@ public class ConfigManager
         QualitySettings.SetQualityLevel((int)graphic.quality);
         Application.runInBackground = !sound.mute;
     }
+
+    private bool HasNoArguments(string[] args)
+        => args == null;
+
+    private bool IsOptionInvalid()
+        => Option == null;
 }

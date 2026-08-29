@@ -9,27 +9,16 @@ public class UIManager
 {
     private Canvas _canvas;
     private GameObject _root;
-
-    public GameObject Root
-    {
-        get
-        {
-            if (_root == null)
-                InitRoot();
-
-            return _root;
-        }
-    }
-
+    public GameObject Root 
+        => _root ??= InitRoot();
     public float ScaleFactor
         => _canvas != null ? _canvas.scaleFactor : 1f;
-
     private readonly Dictionary<LayerType, Transform> _layer = new Dictionary<LayerType, Transform>();
     private readonly List<UIPopup> _popups = new List<UIPopup>();
     private readonly Dictionary<UserInterface, IDisposable> _handles = new Dictionary<UserInterface, IDisposable>();
     private UIDisplay _display;
 
-    private void InitRoot()
+    private GameObject InitRoot()
     {
         _root = new GameObject { name = Literal.Roots.UserInterfaces };
         _root.transform.SetParent(Managers.Instance.transform, false);
@@ -38,6 +27,7 @@ public class UIManager
         CreateLayer(LayerType.System);
         CreateLayer(LayerType.Lock);
         Log.System(LocalizationKey.Log_UI_RootInitialized);
+        return _root;
     }
 
     private GameObject CreateCanvas(string name, Transform parent, int sortingOrder, out Canvas canvasOut)
@@ -76,134 +66,111 @@ public class UIManager
 
     public async UniTask<T> OpenDisplayAsync<T>() where T : UIDisplay
     {
-        if (_display is T existingDisplay)
+        if (HasExistingDisplay<T>(out var existingDisplay))
             return existingDisplay;
 
-        if (_display != null)
-            Close(_display);
-
+        CloseCurrentDisplayIfExist();
         var _ = Root;
         var (instance, rentHandle) = await Managers.Pool.PopAsync<T>(_layer[LayerType.Display]);
 
-        if (instance == null)
+        if (IsInstanceInvalid(instance, out var logKey, typeof(T).Name))
         {
-            Log.Error(LocalizationKey.Log_UI_OpenDisplayFailed, typeof(T).Name);
+            Log.Error(logKey, typeof(T).Name);
             return null;
         }
 
-        _display = instance;
-        _handles[instance] = rentHandle;
+        RegisterDisplay(instance, rentHandle);
         return instance;
     }
 
     public T OpenDisplay<T>() where T : UIDisplay
     {
-        if (_display is T existingScreen)
-            return existingScreen;
+        if (HasExistingDisplay<T>(out var existingDisplay))
+            return existingDisplay;
 
-        if (_display != null)
-            Close(_display);
-
+        CloseCurrentDisplayIfExist();
         var _ = Root;
         var (instance, rentHandle) = Managers.Pool.Pop<T>(_layer[LayerType.Display]);
 
-        if (instance == null)
+        if (IsInstanceInvalid(instance, out var logKey, typeof(T).Name))
         {
-            Log.Error(LocalizationKey.Log_UI_OpenDisplayFailed, typeof(T).Name);
+            Log.Error(logKey, typeof(T).Name);
             return null;
         }
 
-        _display = instance;
-        _handles[instance] = rentHandle;
+        RegisterDisplay(instance, rentHandle);
         return instance;
     }
 
     public async UniTask<T> OpenPopupAsync<T>(bool allowMultiple = false) where T : UIPopup
     {
-        if (!allowMultiple)
-        {
-            foreach (var popup in _popups)
-            {
-                if (popup is T targetPopup)
-                    return targetPopup;
-            }
-        }
+        if (!allowMultiple && HasExistingPopup<T>(out var targetPopup))
+            return targetPopup;
 
         var _ = Root;
         var (instance, rentHandle) = await Managers.Pool.PopAsync<T>(_layer[LayerType.Popup]);
 
-        if (instance == null)
+        if (IsInstanceInvalid(instance, out var logKey, typeof(T).Name))
         {
-            Log.Error(LocalizationKey.Log_UI_OpenPopupFailed, typeof(T).Name);
+            Log.Error(logKey, typeof(T).Name);
             return null;
         }
 
-        _popups.Add(instance);
-        _handles[instance] = rentHandle;
-        RefreshPopup();
+        RegisterPopup(instance, rentHandle);
         return instance;
     }
 
     public T OpenPopup<T>() where T : UIPopup
     {
-        foreach (var popup in _popups)
-        {
-            if (popup is T targetPopup)
-                return targetPopup;
-        }
+        if (HasExistingPopup<T>(out var targetPopup))
+            return targetPopup;
 
         var _ = Root;
         var (instance, rentHandle) = Managers.Pool.Pop<T>(_layer[LayerType.Popup]);
 
-        if (instance == null)
+        if (IsInstanceInvalid(instance, out var logKey, typeof(T).Name))
         {
-            Log.Error(LocalizationKey.Log_UI_OpenPopupFailed, typeof(T).Name);
+            Log.Error(logKey, typeof(T).Name);
             return null;
         }
 
-        _popups.Add(instance);
-        _handles[instance] = rentHandle;
-        RefreshPopup();
+        RegisterPopup(instance, rentHandle);
         return instance;
     }
 
     public async UniTask<T> OpenSystemAsync<T>(LayerType layer = LayerType.System) where T : UISystem
     {
-        var existingSystem = GetSystem<T>();
-
-        if (existingSystem != null)
+        if (HasExistingSystem<T>(out var existingSystem))
             return existingSystem;
 
         var _ = Root;
         var (instance, rentHandle) = await Managers.Pool.PopAsync<T>(_layer[layer]);
 
-        if (instance == null)
+        if (IsInstanceInvalid(instance, out var logKey, typeof(T).Name))
         {
-            Log.Error(LocalizationKey.Log_UI_OpenSystemFailed, typeof(T).Name);
+            Log.Error(logKey, typeof(T).Name);
             return null;
         }
 
-        _handles[instance] = rentHandle;
+        RegisterSystem(instance, rentHandle);
         return instance;
     }
 
     public T OpenSystem<T>(LayerType layer = LayerType.System) where T : UISystem
     {
-        var existingSystem = GetSystem<T>();
-
-        if (existingSystem != null)
+        if (HasExistingSystem<T>(out var existingSystem))
             return existingSystem;
 
         var _ = Root;
         var (instance, rentHandle) = Managers.Pool.Pop<T>(_layer[layer]);
 
-        if (instance == null)
+        if (IsInstanceInvalid(instance, out var logKey, typeof(T).Name))
         {
-            Log.Error(LocalizationKey.Log_UI_OpenSystemFailed, typeof(T).Name);
+            Log.Error(logKey, typeof(T).Name);
             return null;
         }
 
-        _handles[instance] = rentHandle;
+        RegisterSystem(instance, rentHandle);
         return instance;
     }
 
@@ -234,23 +201,12 @@ public class UIManager
 
     public void Close(UserInterface ui)
     {
-        if (ui == null || !_handles.ContainsKey(ui))
+        if (!IsUIValidAndManaged(ui))
             return;
 
-        if (_display == ui)
-            _display = null;
-
-        if (ui is UIPopup popup)
-        {
-            _popups.Remove(popup);
-            RefreshPopup();
-        }
-
-        if (_handles.TryGetValue(ui, out var handle))
-        {
-            _handles.Remove(ui);
-            handle?.Dispose();
-        }
+        HandleUIDisconnect(ui);
+        HandleUIPopupDisconnect(ui);
+        HandleUIHandleDispose(ui);
     }
 
     public void Close<T>() where T : UserInterface
@@ -265,35 +221,41 @@ public class UIManager
         }
     }
 
-    public void CloseAll()
+    public void CloseAll(params LayerType[] excludeLayers)
     {
-        foreach (var handle in _handles.Values)
-            handle?.Dispose();
+        if (HasNoExcludeLayers(excludeLayers))
+        {
+            ClearAllUIStates();
+            return;
+        }
 
-        _handles.Clear();
-        _popups.Clear();
-        _display = null;
-        RefreshPopup();
+        CloseFilteredUI(excludeLayers);
+    }
+
+    public void CloseAllExcept<T>() where T : UserInterface
+    {
+        var targetsToClose = CollectUIExceptType<T>();
+
+        foreach (var ui in targetsToClose)
+            Close(ui);
     }
 
     public bool CloseFocusPopup()
     {
-        if (_popups.Count <= 0)
+        if (HasNoPopups())
             return false;
 
-        var topPopup = _popups[_popups.Count - 1];
+        var topPopup = GetTopPopup();
         Close(topPopup);
         return true;
     }
 
     public void FocusPopup(UIPopup popup)
     {
-        if (popup == null || !_popups.Contains(popup))
+        if (!IsPopupValidAndOpened(popup))
             return;
 
-        _popups.Remove(popup);
-        _popups.Add(popup);
-        RefreshPopup();
+        ReorderPopupToTop(popup);
     }
 
     private void RefreshPopup()
@@ -311,5 +273,151 @@ public class UIManager
             if (ui != null)
                 ui.Refresh();
         }
+    }
+
+    private bool HasExistingDisplay<T>(out T display) where T : UIDisplay
+    {
+        display = _display as T;
+        return display != null;
+    }
+
+    private void CloseCurrentDisplayIfExist()
+    {
+        if (_display != null)
+            Close(_display);
+    }
+
+    private bool IsInstanceInvalid<T>(T instance, out LocalizationKey logKey, string typeName) where T : class
+    {
+        logKey = LocalizationKey.Log_UI_OpenDisplayFailed;
+        return instance == null;
+    }
+
+    private void RegisterDisplay(UIDisplay instance, IDisposable rentHandle)
+    {
+        _display = instance;
+        _handles[instance] = rentHandle;
+    }
+
+    private bool HasExistingPopup<T>(out T popup) where T : UIPopup
+    {
+        popup = GetPopup<T>();
+        return popup != null;
+    }
+
+    private void RegisterPopup(UIPopup instance, IDisposable rentHandle)
+    {
+        _popups.Add(instance);
+        _handles[instance] = rentHandle;
+        RefreshPopup();
+    }
+
+    private bool HasExistingSystem<T>(out T system) where T : UISystem
+    {
+        system = GetSystem<T>();
+        return system != null;
+    }
+
+    private void RegisterSystem(UISystem instance, IDisposable rentHandle)
+        => _handles[instance] = rentHandle;
+
+    private bool IsUIValidAndManaged(UserInterface ui)
+        => ui != null && _handles.ContainsKey(ui);
+
+    private void HandleUIDisconnect(UserInterface ui)
+    {
+        if (_display == ui)
+            _display = null;
+    }
+
+    private void HandleUIPopupDisconnect(UserInterface ui)
+    {
+        if (ui is UIPopup popup)
+        {
+            _popups.Remove(popup);
+            RefreshPopup();
+        }
+    }
+
+    private void HandleUIHandleDispose(UserInterface ui)
+    {
+        if (_handles.TryGetValue(ui, out var handle))
+        {
+            _handles.Remove(ui);
+            handle?.Dispose();
+        }
+    }
+
+    private bool HasNoExcludeLayers(LayerType[] excludeLayers)
+        => excludeLayers == null || excludeLayers.Length == 0;
+
+    private void ClearAllUIStates()
+    {
+        foreach (var handle in _handles.Values)
+            handle?.Dispose();
+
+        _handles.Clear();
+        _popups.Clear();
+        _display = null;
+        RefreshPopup();
+    }
+
+    private void CloseFilteredUI(LayerType[] excludeLayers)
+    {
+        var targetsToClose = new List<UserInterface>();
+
+        foreach (var pair in _handles)
+        {
+            var ui = pair.Key;
+
+            if (ui == null)
+                continue;
+
+            if (!IsBelongsToAnyLayer(ui, excludeLayers))
+                targetsToClose.Add(ui);
+        }
+
+        foreach (var ui in targetsToClose)
+            Close(ui);
+    }
+
+    private bool IsBelongsToAnyLayer(UserInterface ui, LayerType[] layers)
+    {
+        foreach (var layer in layers)
+        {
+            if (_layer.TryGetValue(layer, out var layerTransform) && ui.transform.IsChildOf(layerTransform))
+                return true;
+        }
+
+        return false;
+    }
+
+    private List<UserInterface> CollectUIExceptType<T>() where T : UserInterface
+    {
+        var targets = new List<UserInterface>();
+
+        foreach (var pair in _handles)
+        {
+            if (pair.Key != null && !(pair.Key is T))
+                targets.Add(pair.Key);
+        }
+
+        return targets;
+    }
+
+    private bool HasNoPopups()
+        => _popups.Count <= 0;
+
+    private UIPopup GetTopPopup()
+        => _popups[_popups.Count - 1];
+
+    private bool IsPopupValidAndOpened(UIPopup popup)
+        => popup != null && _popups.Contains(popup);
+
+    private void ReorderPopupToTop(UIPopup popup)
+    {
+        _popups.Remove(popup);
+        _popups.Add(popup);
+        RefreshPopup();
     }
 }

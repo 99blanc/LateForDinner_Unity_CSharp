@@ -2,7 +2,6 @@ using Cysharp.Text;
 using R3;
 using System;
 using System.Collections.Generic;
-using UnityEditor.U2D.Aseprite;
 using UnityEngine;
 
 public class LogManager
@@ -12,14 +11,13 @@ public class LogManager
     private readonly Queue<Action> _pendingLogs = new Queue<Action>();
     private readonly List<LogFormat> _logs = new List<LogFormat>();
     public IReadOnlyList<LogFormat> Logs => _logs;
-    public Observable<LogFormat> OnLogAdded 
-        => _logSubject;
+    public Observable<LogFormat> OnLogAdded => _logSubject;
 
     public void Setup()
     {
         _isReady.Value = true;
 
-        while (_pendingLogs.Count > 0)
+        while (HasPendingLogs())
             _pendingLogs.Dequeue()?.Invoke();
 
         Write(LocalizationKey.Log_Log_SetupCompleted, LogType.System);
@@ -27,7 +25,7 @@ public class LogManager
 
     private void ProcessLog(Action logAction)
     {
-        if (!_isReady.Value)
+        if (!IsReadyState())
         {
             _pendingLogs.Enqueue(logAction);
             return;
@@ -57,7 +55,7 @@ public class LogManager
             var logData = new LogFormat { Message = log, Type = type };
             _logs.Add(logData);
 
-            if (_logs.Count > Define.Log.Storage)
+            if (IsLogStorageExceeded())
                 _logs.RemoveAt(0);
 
             _logSubject.OnNext(logData);
@@ -65,16 +63,16 @@ public class LogManager
         });
     }
 
-    public void Write(LocalizationKey key, LogType type) 
+    public void Write(LocalizationKey key, LogType type)
         => Write(GetMessage(key), type);
 
-    public void Write<T1>(LocalizationKey key, LogType type, T1 arg1) 
+    public void Write<T1>(LocalizationKey key, LogType type, T1 arg1)
         => WriteFormatted(key, type, message => ZString.Format(message, arg1));
 
-    public void Write<T1, T2>(LocalizationKey key, LogType type, T1 arg1, T2 arg2) 
+    public void Write<T1, T2>(LocalizationKey key, LogType type, T1 arg1, T2 arg2)
         => WriteFormatted(key, type, message => ZString.Format(message, arg1, arg2));
 
-    public void Write<T1, T2, T3>(LocalizationKey key, LogType type, T1 arg1, T2 arg2, T3 arg3) 
+    public void Write<T1, T2, T3>(LocalizationKey key, LogType type, T1 arg1, T2 arg2, T3 arg3)
         => WriteFormatted(key, type, message => ZString.Format(message, arg1, arg2, arg3));
 
     public void Write(LocalizationKey key, LogType type, params object[] args)
@@ -82,7 +80,7 @@ public class LogManager
         ProcessLog(() =>
         {
             string message = GetMessage(key);
-            string formatted = (args != null && args.Length > 0) ? ZString.Format(message, args) : message;
+            string formatted = HasArguments(args) ? ZString.Format(message, args) : message;
             Write(formatted, type);
         });
     }
@@ -112,7 +110,22 @@ public class LogManager
     private string GetMessage(LocalizationKey key)
     {
         string newKey = key.ToString();
-        string raw = Managers.Localization == null ? newKey : Managers.Localization.Get(newKey);
+        string raw = IsLocalizationManagerNull() ? newKey : Managers.Localization.Get(newKey);
         return string.IsNullOrEmpty(raw) ? newKey : raw;
     }
+
+    private bool HasPendingLogs()
+        => _pendingLogs.Count > 0;
+
+    private bool IsReadyState()
+        => _isReady.Value;
+
+    private bool IsLogStorageExceeded()
+        => _logs.Count > Define.Log.Storage;
+
+    private bool HasArguments(object[] args)
+        => args != null && args.Length > 0;
+
+    private bool IsLocalizationManagerNull()
+        => Managers.Localization == null;
 }
