@@ -1,5 +1,6 @@
 public enum InteractionType
 {
+    None,
     NPC,
     Quest,
     Shop,

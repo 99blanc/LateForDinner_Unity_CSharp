@@ -1,12 +1,16 @@
 using Cysharp.Threading.Tasks;
 using LateForDinner.Data;
+using R3;
+using R3.Triggers;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class SceneManager
 {
     private SceneID _previousID;
     private readonly Dictionary<SceneID, Spawnpoint> _spawnpoints = new Dictionary<SceneID, Spawnpoint>();
+    private readonly Dictionary<IInteractable, CircleCollider2D> _interactables = new Dictionary<IInteractable, CircleCollider2D>();
     public SceneID CurrentSceneID { get; private set; }
 
     public SceneManager()
@@ -86,6 +90,7 @@ public class SceneManager
     {
         _previousID = CurrentSceneID;
         _spawnpoints.Clear();
+        _interactables.Clear();
         CurrentSceneID = targetSceneID;
         Managers.Control.ClearInputStates();
     }
@@ -132,4 +137,49 @@ public class SceneManager
 
     private string GetSceneTag(int sceneID)
         => Managers.Data.Scenes.TryGetValue(sceneID, out var data) ? data.Tag : sceneID.ToString();
+
+    public void RegisterProp(Prop prop)
+    {
+        if (prop is not IInteractable interactable)
+            return;
+
+        if (_interactables.ContainsKey(interactable))
+            return;
+
+        prop.OnDestroyAsObservable()
+        .Subscribe(_ => UnregisterProp(prop))
+        .RegisterTo(prop.GetCancellationTokenOnDestroy());
+
+        if (!interactable.TriggerOnProximity)
+            return;
+
+        var transform = prop.FindChild(Literal.Objects.InteractTransform, recursive: false);
+        GameObject range;
+
+        if (transform == null)
+        {
+            range = new GameObject { name = Literal.Objects.InteractTransform };
+            range.transform.SetParent(prop.transform);
+            range.transform.localPosition = Vector3.zero;
+        }
+        else
+            range = transform.gameObject;
+
+        var collider = range.GetComponent<CircleCollider2D>();
+
+        if (collider == null)
+            collider = range.AddComponent<CircleCollider2D>();
+
+        collider.isTrigger = true;
+        collider.radius = interactable.InteractRadius;
+        _interactables.Add(interactable, collider);
+    }
+
+    public void UnregisterProp(Prop prop)
+    {
+        if (prop is not IInteractable interactable)
+            return;
+
+        _interactables.Remove(interactable);
+    }
 }

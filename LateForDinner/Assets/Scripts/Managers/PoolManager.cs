@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using R3;
+using R3.Triggers;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -199,6 +200,9 @@ public class PoolManager
 
         if (isNew)
         {
+            instance.OnDestroyAsObservable()
+            .Subscribe(_ => poolable.ProtectedRelease())
+            .RegisterTo(instance.GetCancellationTokenOnDestroy());
             poolable.ProtectedInit();
             return;
         }

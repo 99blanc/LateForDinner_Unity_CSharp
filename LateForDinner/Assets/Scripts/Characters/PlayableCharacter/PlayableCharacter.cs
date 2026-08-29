@@ -1,4 +1,5 @@
 using Cysharp.Threading.Tasks;
+using R3;
 using System;
 using System.Linq;
 using UnityEngine;
@@ -11,6 +12,7 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
     public Transform BackTransform { get; private set; }
     public Transform FrontTransform { get; private set; }
     public Transform HitboxTransform { get; private set; }
+    private IInteractable _interact;
 
     public override async UniTask InitAsync()
     {
@@ -313,11 +315,48 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
     public bool IsJumpKeyTriggered()
         => Managers.Control.IsTriggered(Literal.Hotkeys.Jump);
 
-    private void TryExecuteInteraction()
+    /*
+    private void TryExecuteLadderClimb()
     {
+        bool isUpPressed = Managers.Control.IsPressed(Literal.Hotkeys.UpUtility);
+        bool isDownPressed = Managers.Control.IsPressed(Literal.Hotkeys.DownUtility);
+
+        if (!isUpPressed && !isDownPressed)
+            return;
+
         Collider2D hit = Physics2D.OverlapCircle(transform.position, Define.Scaler.Interact, LayerMask.GetMask(Literal.Layers.Interaction));
 
-        if (hit != null && hit.TryGetComponent<IInteractable>(out var interactable))
-            interactable.OnInteract(this);
+        if (hit != null && hit.TryGetComponent<Ladder>(out var ladder))
+        {
+
+        }
+    }
+    */
+
+    private void TryExecuteInteraction()
+    {
+        if (_interact != null && _interact.RequireKeyInput && _interact.CanInteract.Value)
+            _interact.ProtectedInteract(this);
+    }
+
+    private void OnTriggerEnter2D(Collider2D target)
+    {
+        if (target.GetComponentInParent<IInteractable>() is IInteractable interactable)
+        {
+            _interact = interactable;
+            interactable.CanInteract.Value = true;
+
+            if (interactable.TriggerOnProximity)
+                interactable.ProtectedInteract(this);
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D target)
+    {
+        if (target.GetComponentInParent<IInteractable>() is IInteractable interactable)
+        {
+            _interact = null;
+            interactable.CanInteract.Value = false;
+        }
     }
 }

@@ -8,11 +8,8 @@ public class Spawnpoint : Prop
     public SceneID ToSceneID => _toSceneID;
 
     protected override void Awake()
-    {
-        base.Awake();
-        Managers.Scene.RegisterSpawnpoint(this);
-    }
+        => Managers.Scene.RegisterSpawnpoint(this);
 
-    private void OnDestroy()
+    protected override void OnDestroy()
         => Managers.Scene.UnregisterSpawnpoint(this);
 }

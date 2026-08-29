@@ -30,7 +30,4 @@ public interface IPoolable
     virtual void OnRelease() { }
 
     virtual void LoadState() { }
-
-    protected virtual void OnDestroy()
-        => PoolDisposableRegistry.Clear(this);
 }

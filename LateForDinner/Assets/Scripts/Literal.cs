@@ -116,10 +116,11 @@ public class Literal
 
     public class Objects
     {
-        public const string CameraTransform = "CameraTransform";
         public const string BackTransform = "BackTransform";
+        public const string CameraTransform = "CameraTransform";
         public const string FrontTransform = "FrontTransform";
         public const string HitboxTransform = "HitboxTransform";
+        public const string InteractTransform = "@Interact";
     }
 
     public class Paths

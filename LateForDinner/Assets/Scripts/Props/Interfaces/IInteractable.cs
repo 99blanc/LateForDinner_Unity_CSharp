@@ -1,10 +1,20 @@
+using R3;
 using System.Runtime.CompilerServices;
+using UnityEngine;
 
 public interface IInteractable
 {
+    CircleCollider2D Collider { get; }
     InteractionType InteractionType { get; }
     LocalizationKey LocalizationPromptKey { get; }
-    bool CanInteract => true;
+    bool RequireKeyInput { get; }
+    bool TriggerOnProximity { get; }
+    float InteractRadius => Define.Scaler.Interact;
+    private static readonly ConditionalWeakTable<IInteractable, ReactiveProperty<bool>> _interactCaches = new();
+    public ReactiveProperty<bool> CanInteract
+    {
+        get => _interactCaches.GetValue(this, _ => new ReactiveProperty<bool>(false));
+    }
     private static readonly ConditionalWeakTable<IInteractable, IInteractAction> _actionCaches = new ConditionalWeakTable<IInteractable, IInteractAction>();
     private IInteractAction Action
     {

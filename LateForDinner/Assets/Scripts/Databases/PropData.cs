@@ -6,8 +6,6 @@ namespace LateForDinner.Data
     public partial class PropData
     {
         public string Key { get; set; }
-        public int SceneID { get; set; }
-        public string AddressableKey { get; set; }
         public string InteractionType { get; set; }
     }
 }

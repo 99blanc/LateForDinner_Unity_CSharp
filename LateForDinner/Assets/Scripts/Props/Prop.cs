@@ -14,6 +14,8 @@ public abstract class Prop : MonoBehaviour
     {
         if (UseSaveState)
             GenerateUniqueKey();
+
+        Managers.Scene.RegisterProp(this);
     }
 
     protected virtual void Start()
@@ -59,4 +61,7 @@ public abstract class Prop : MonoBehaviour
     }
 
     protected virtual void ApplyState(bool state) { }
+
+    protected virtual void OnDestroy()
+        => Managers.Scene.UnregisterProp(this);
 }

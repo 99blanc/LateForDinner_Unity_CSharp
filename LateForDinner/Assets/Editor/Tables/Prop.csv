@@ -1,0 +1,8 @@
+# Table Type: Prop,
+# Description: 맵 내 오브젝트 정의 테이블,
+# Rule: 콤마 사용 불가. Key는 고유 값이어야 하며 중복 불가. InteractionType은 상호작용 종류 구분을 위한 타입 번호,
+# Foreign ID: Scene.csv,
+Key,InteractionType
+# Index: Prop,
+Spawnpoint,None
+Ladder,None

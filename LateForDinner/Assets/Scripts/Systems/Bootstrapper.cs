@@ -17,7 +17,7 @@ public class Bootstrapper
         Managers.UI.Setup();
         Managers.Control.Setup();
         Managers.Cooldown.Setup();
-        await Managers.UI.OpenDisplayAsync<UISplashDisplay>().PlayAsync().Release();
+        await Managers.UI.OpenDisplayAsync<UISplashDisplay>().PlayAsync();
         Managers.UI.OpenDisplay<UITitleDisplay>();
     }
 }
