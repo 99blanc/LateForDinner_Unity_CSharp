@@ -37,14 +37,14 @@ public class SceneManager
 
     public void RegisterSpawnpoint(Spawnpoint spawn)
     {
-        if (IsSpawnValid(spawn) && !_spawnpoints.ContainsKey(spawn.FromSceneID))
-            _spawnpoints.Add(spawn.FromSceneID, spawn);
+        if (IsSpawnValid(spawn) && !_spawnpoints.ContainsKey(spawn.ToSceneID))
+            _spawnpoints.Add(spawn.ToSceneID, spawn);
     }
 
     public void UnregisterSpawnpoint(Spawnpoint spawn)
     {
         if (IsSpawnValid(spawn))
-            _spawnpoints.Remove(spawn.FromSceneID);
+            _spawnpoints.Remove(spawn.ToSceneID);
     }
 
     public void RelocateCharacterToSpawnpoint()

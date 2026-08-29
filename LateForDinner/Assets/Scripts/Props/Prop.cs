@@ -8,12 +8,19 @@ public abstract class Prop : MonoBehaviour
     [SerializeField, HideInInspector] private string _guid;
     private string _uniqueKey;
     public string UniqueKey => _uniqueKey;
+    protected abstract bool UseSaveState { get; }
 
     protected virtual void Awake()
-        => GenerateUniqueKey();
+    {
+        if (UseSaveState)
+            GenerateUniqueKey();
+    }
 
     protected virtual void Start()
-        => LoadState();
+    {
+        if (UseSaveState)
+            LoadState();
+    }
 
     private void GenerateUniqueKey()
     {
@@ -24,7 +31,7 @@ public abstract class Prop : MonoBehaviour
 #if UNITY_EDITOR
     protected virtual void OnValidate()
     {
-        if (string.IsNullOrEmpty(_guid) && !UnityEditor.EditorApplication.isPlayingOrWillChangePlaymode)
+        if (UseSaveState && string.IsNullOrEmpty(_guid) && !UnityEditor.EditorApplication.isPlayingOrWillChangePlaymode)
         {
             _guid = Guid.NewGuid().ToString("N");
             UnityEditor.EditorUtility.SetDirty(this);
@@ -34,7 +41,7 @@ public abstract class Prop : MonoBehaviour
 
     protected virtual void LoadState()
     {
-        if (string.IsNullOrEmpty(_uniqueKey)) 
+        if (!UseSaveState || string.IsNullOrEmpty(_uniqueKey)) 
             return;
 
         if (Managers.Save != null && Managers.Save.CurrentData.InteractableStates.TryGetValue(_uniqueKey, out bool state))
@@ -45,7 +52,7 @@ public abstract class Prop : MonoBehaviour
 
     protected void SaveState(bool state)
     {
-        if (Managers.Save == null || string.IsNullOrEmpty(_uniqueKey)) 
+        if (!UseSaveState || Managers.Save == null || string.IsNullOrEmpty(_uniqueKey)) 
             return;
 
         Managers.Save.CurrentData.InteractableStates[_uniqueKey] = state;

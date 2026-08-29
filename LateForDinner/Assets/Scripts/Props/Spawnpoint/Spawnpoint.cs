@@ -1,12 +1,17 @@
 using UnityEngine;
 
-public class Spawnpoint : MonoBehaviour
+public class Spawnpoint : Prop
 {
-    [SerializeField] private SceneID _fromSceneID;
-    public SceneID FromSceneID => _fromSceneID;
+    protected override bool UseSaveState => false;
 
-    private void Awake()
-        => Managers.Scene.RegisterSpawnpoint(this);
+    [SerializeField] private SceneID _toSceneID;
+    public SceneID ToSceneID => _toSceneID;
+
+    protected override void Awake()
+    {
+        base.Awake();
+        Managers.Scene.RegisterSpawnpoint(this);
+    }
 
     private void OnDestroy()
         => Managers.Scene.UnregisterSpawnpoint(this);
