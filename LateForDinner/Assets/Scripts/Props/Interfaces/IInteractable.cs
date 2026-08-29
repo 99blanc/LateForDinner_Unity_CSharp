@@ -4,12 +4,14 @@ using UnityEngine;
 
 public interface IInteractable
 {
-    CircleCollider2D Collider { get; }
+    Collider2D Collider { get; }
+    PropKey PropKey { get; }
     InteractionType InteractionType { get; }
     LocalizationKey LocalizationPromptKey { get; }
     bool RequireKeyInput { get; }
     bool TriggerOnProximity { get; }
-    float InteractRadius => Define.Scaler.Interact;
+    float InteractRadius { get; }
+    int Priority { get; }
     private static readonly ConditionalWeakTable<IInteractable, ReactiveProperty<bool>> _interactCaches = new();
     public ReactiveProperty<bool> CanInteract
     {

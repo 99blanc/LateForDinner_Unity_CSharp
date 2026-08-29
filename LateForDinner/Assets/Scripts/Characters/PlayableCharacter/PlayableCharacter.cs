@@ -1,18 +1,30 @@
 using Cysharp.Threading.Tasks;
-using R3;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityHFSM;
 
-public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovableCharacter, IFallableCharacter, ICrouchableCharacter, IJumpableCharacter, IRollableCharacter, IDashableCharacter
+public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovableCharacter, IFallableCharacter, ICrouchableCharacter, IJumpableCharacter, IRollableCharacter, IDashableCharacter, IClimbableCharacter
 {
+    private readonly HashSet<IInteractable> _interactables = new HashSet<IInteractable>();
+    public IInteractable CurrentInteractable
+    {
+        get
+        {
+            if (_interactables.Count == 0)
+                return null;
+
+            return _interactables
+            .OrderBy(x => x.Priority)
+            .FirstOrDefault();
+        }
+    }
     public Rigidbody2D Rigidbody { get; private set; }
     public Transform CameraTransform { get; private set; }
     public Transform BackTransform { get; private set; }
     public Transform FrontTransform { get; private set; }
     public Transform HitboxTransform { get; private set; }
-    private IInteractable _interact;
 
     public override async UniTask InitAsync()
     {
@@ -44,6 +56,7 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
         fsm.AddState(CharacterStateType.Fall, new FallState(this, GetPlayerMoveInput));
         fsm.AddState(CharacterStateType.Jump, new JumpState(this, GetPlayerMoveInput));
         fsm.AddState(CharacterStateType.Dash, new DashState(this, GetPlayerDashInput));
+        fsm.AddState(CharacterStateType.Climb, new ClimbState(this, GetPlayerVerticalInput));
     }
 
     protected override void RegisterTransitions(StateMachine<CharacterStateType> fsm)
@@ -75,6 +88,12 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
             to: CharacterStateType.Dash,
             condition: _ => IsPlayerTryingToDash()
         ));
+        fsm.AddTransition(new Transition<CharacterStateType>(
+            from: CharacterStateType.Idle,
+            to: CharacterStateType.Climb,
+            condition: _ => IsPlayerTryingToClimb(),
+            onTransition: _ => ResetAirActionsForLadder()
+        ));
         // DESC ::: Move 상태에서의 전환 조건
         fsm.AddTransition(new Transition<CharacterStateType>(
             from: CharacterStateType.Move,
@@ -101,6 +120,12 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
             to: CharacterStateType.Dash,
             condition: _ => IsPlayerTryingToDash()
         ));
+        fsm.AddTransition(new Transition<CharacterStateType>(
+            from: CharacterStateType.Move,
+            to: CharacterStateType.Climb,
+            condition: _ => IsPlayerTryingToClimb(),
+            onTransition: _ => ResetAirActionsForLadder()
+        ));
         // DESC ::: Fall 상태에서의 전환 조건
         fsm.AddTransition(new Transition<CharacterStateType>(
             from: CharacterStateType.Fall,
@@ -121,6 +146,12 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
             from: CharacterStateType.Fall,
             to: CharacterStateType.Dash,
             condition: _ => IsPlayerTryingToDash()
+        ));
+        fsm.AddTransition(new Transition<CharacterStateType>(
+            from: CharacterStateType.Fall,
+            to: CharacterStateType.Climb,
+            condition: _ => IsPlayerTryingToClimb(),
+            onTransition: _ => ResetAirActionsForLadder()
         ));
         // DESC ::: Crouch 상태에서의 전환 조건
         fsm.AddTransition(new Transition<CharacterStateType>(
@@ -169,6 +200,12 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
             to: CharacterStateType.Dash,
             condition: _ => IsPlayerTryingToDash()
         ));
+        fsm.AddTransition(new Transition<CharacterStateType>(
+            from: CharacterStateType.Jump,
+            to: CharacterStateType.Climb,
+            condition: _ => IsPlayerTryingToClimb(),
+            onTransition: _ => ResetAirActionsForLadder()
+        ));
         // DESC ::: Roll 상태에서의 전환 조건
         fsm.AddTransition(new Transition<CharacterStateType>(
             from: CharacterStateType.Roll,
@@ -190,16 +227,54 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
             to: CharacterStateType.Dash,
             condition: _ => IsPlayerTryingToDash()
         ));
+        fsm.AddTransition(new Transition<CharacterStateType>(
+            from: CharacterStateType.Roll,
+            to: CharacterStateType.Climb,
+            condition: _ => IsPlayerTryingToClimb(),
+            onTransition: _ => ResetAirActionsForLadder()
+        ));
         // DESC ::: Dash 상태에서의 전환 조건
         fsm.AddTransition(new Transition<CharacterStateType>(
             from: CharacterStateType.Dash,
             to: CharacterStateType.Idle,
-            condition: _ => (fsm.GetState(CharacterStateType.Dash) as DashState)?.IsDurationEnded == true && this.IsGrounded()
+            condition: _ => ((IDashableCharacter)this).IsDurationEnded == true && this.IsGrounded()
         ));
         fsm.AddTransition(new Transition<CharacterStateType>(
             from: CharacterStateType.Dash,
             to: CharacterStateType.Fall,
-            condition: _ => (fsm.GetState(CharacterStateType.Dash) as DashState)?.IsDurationEnded == true && !this.IsGrounded()
+            condition: _ => ((IDashableCharacter)this).IsDurationEnded == true && !this.IsGrounded()
+        ));
+        fsm.AddTransition(new Transition<CharacterStateType>(
+            from: CharacterStateType.Dash,
+            to: CharacterStateType.Climb,
+            condition: _ => IsPlayerTryingToClimb(),
+            onTransition: _ => ResetAirActionsForLadder()
+        ));
+        // DESC ::: Climb 상태에서의 전환 조건
+        fsm.AddTransition(new Transition<CharacterStateType>(
+            from: CharacterStateType.Climb,
+            to: CharacterStateType.Idle,
+            condition: _ => CurrentInteractable == null || (!Managers.Control.IsPressed(Literal.Hotkeys.UpUtility) && !Managers.Control.IsPressed(Literal.Hotkeys.DownUtility) && Mathf.Abs(GetPlayerMoveInput()) <= 0.01f && this.IsGrounded())
+        ));
+        fsm.AddTransition(new Transition<CharacterStateType>(
+            from: CharacterStateType.Climb,
+            to: CharacterStateType.Move,
+            condition: _ => CurrentInteractable != null && Mathf.Abs(GetPlayerMoveInput()) > 0.01f
+        ));
+        fsm.AddTransition(new Transition<CharacterStateType>(
+            from: CharacterStateType.Climb,
+            to: CharacterStateType.Jump,
+            condition: _ => IsPlayerTryingToJump()
+        ));
+        fsm.AddTransition(new Transition<CharacterStateType>(
+            from: CharacterStateType.Climb,
+            to: CharacterStateType.Fall,
+            condition: _ => CurrentInteractable == null && !this.IsGrounded()
+        ));
+        fsm.AddTransition(new Transition<CharacterStateType>(
+            from: CharacterStateType.Climb,
+            to: CharacterStateType.Dash,
+            condition: _ => IsPlayerTryingToDash()
         ));
     }
 
@@ -238,6 +313,17 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
         return input;
     }
 
+    protected float GetPlayerVerticalInput()
+    {
+        if (Managers.Control.IsPressed(Literal.Hotkeys.UpUtility))
+            return 1f;
+
+        if (Managers.Control.IsPressed(Literal.Hotkeys.DownUtility))
+            return -1f;
+
+        return 0f;
+    }
+
     private bool IsPlayerTryingToMove()
         => Mathf.Abs(GetPlayerMoveInput()) > 0.01f;
     private bool IsPlayerTryingToCrouch()
@@ -252,9 +338,7 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
     {
         if (this is IDashableCharacter dashable)
         {
-            var cooldownable = (ICooldownable)dashable;
-
-            if (cooldownable.IsOnCooldown)
+            if (dashable.IsOnCooldown)
                 return false;
         }
 
@@ -266,6 +350,16 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
         bool isLastJump = this is IJumpableCharacter jumpable && jumpable.RemainingJumpCount == 0;
         bool isAnimationReady = CharacterAnimator is ProtagonistAnimator protagonistAnimator && protagonistAnimator.GetCurrentAnimatorNormalizedTime() >= Define.Animation.NormalizedTime;
         return isLastJump && isAnimationReady;
+    }
+    private bool IsPlayerTryingToClimb()
+    {
+        if (!Managers.Control.IsPressed(Literal.Hotkeys.UpUtility) && !Managers.Control.IsPressed(Literal.Hotkeys.DownUtility))
+            return false;
+
+        if (CurrentInteractable != null && CurrentInteractable is IInteractable interactable && interactable.PropKey == PropKey.Ladder)
+            return true;
+
+        return false;
     }
 
     private bool HasPlayerStoppedMoving()
@@ -312,41 +406,37 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
         }
     }
 
+    private void ResetAirActionsForLadder()
+    {
+        if (this is IJumpableCharacter jumpable)
+            jumpable.RemainingJumpCount += 1;
+
+        if (this is IDashableCharacter dashable)
+            dashable.RemainingDashCount += 1;
+    }
+
     public bool IsJumpKeyTriggered()
         => Managers.Control.IsTriggered(Literal.Hotkeys.Jump);
 
-    /*
-    private void TryExecuteLadderClimb()
-    {
-        bool isUpPressed = Managers.Control.IsPressed(Literal.Hotkeys.UpUtility);
-        bool isDownPressed = Managers.Control.IsPressed(Literal.Hotkeys.DownUtility);
-
-        if (!isUpPressed && !isDownPressed)
-            return;
-
-        Collider2D hit = Physics2D.OverlapCircle(transform.position, Define.Scaler.Interact, LayerMask.GetMask(Literal.Layers.Interaction));
-
-        if (hit != null && hit.TryGetComponent<Ladder>(out var ladder))
-        {
-
-        }
-    }
-    */
-
     private void TryExecuteInteraction()
     {
-        if (_interact != null && _interact.RequireKeyInput && _interact.CanInteract.Value)
-            _interact.ProtectedInteract(this);
+        var target = CurrentInteractable;
+
+        if (target != null && target.RequireKeyInput && target.CanInteract.Value)
+            target.ProtectedInteract(this);
     }
 
     private void OnTriggerEnter2D(Collider2D target)
     {
         if (target.GetComponentInParent<IInteractable>() is IInteractable interactable)
         {
-            _interact = interactable;
+            _interactables.Add(interactable);
             interactable.CanInteract.Value = true;
 
-            if (interactable.TriggerOnProximity)
+            if (!interactable.TriggerOnProximity)
+                return;
+
+            if (interactable == CurrentInteractable)
                 interactable.ProtectedInteract(this);
         }
     }
@@ -355,7 +445,7 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
     {
         if (target.GetComponentInParent<IInteractable>() is IInteractable interactable)
         {
-            _interact = null;
+            _interactables.Remove(interactable);
             interactable.CanInteract.Value = false;
         }
     }

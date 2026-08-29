@@ -149,22 +149,15 @@ public class SceneManager
         prop.OnDestroyAsObservable()
         .Subscribe(_ => UnregisterProp(prop))
         .RegisterTo(prop.GetCancellationTokenOnDestroy());
+        var check = prop.FindChild<Collider2D>()?.isTrigger;
+        var transform = prop.FindChild(Literal.Objects.InteractTransform, recursive: false);
 
-        if (!interactable.TriggerOnProximity)
+        if (check != null || transform != null)
             return;
 
-        var transform = prop.FindChild(Literal.Objects.InteractTransform, recursive: false);
-        GameObject range;
-
-        if (transform == null)
-        {
-            range = new GameObject { name = Literal.Objects.InteractTransform };
-            range.transform.SetParent(prop.transform);
-            range.transform.localPosition = Vector3.zero;
-        }
-        else
-            range = transform.gameObject;
-
+        GameObject range = new GameObject { name = Literal.Objects.InteractTransform };
+        range.transform.SetParent(prop.transform);
+        range.transform.localPosition = Vector3.zero;
         var collider = range.GetComponent<CircleCollider2D>();
 
         if (collider == null)

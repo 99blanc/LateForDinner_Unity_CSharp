@@ -4,8 +4,16 @@ using UnityEngine;
 public class Managers : MonoBehaviour
 {
     private static Managers _instance;
-    public static Managers Instance 
-        => _instance ??= InitInstance();
+    public static Managers Instance
+    {
+        get 
+        {
+            if (_instance == null) 
+                InitInstance();
+
+            return _instance; 
+        }
+    }
     public static LogManager Log { get; private set; }
     public static ResourceManager Resource { get; private set; }
     public static DataManager Data { get; private set; }

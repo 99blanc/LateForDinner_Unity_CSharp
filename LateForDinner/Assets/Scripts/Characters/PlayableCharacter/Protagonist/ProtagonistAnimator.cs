@@ -13,6 +13,7 @@ public class ProtagonistAnimator : CharacterAnimator
             CharacterStateType.Roll => Define.Animation.Roll,
             CharacterStateType.Dash => Define.Animation.Dash,
             CharacterStateType.DownDash => Define.Animation.DownDash,
+            CharacterStateType.Climb => Define.Animation.Climb,
             _ => Define.Animation.Idle
         };
     }
@@ -28,4 +29,7 @@ public class ProtagonistAnimator : CharacterAnimator
 
     public void PlayDownDash()
         => Play(Define.Animation.DownDash);
+
+    public void PlayClimb()
+        => Play(Define.Animation.Climb);
 }

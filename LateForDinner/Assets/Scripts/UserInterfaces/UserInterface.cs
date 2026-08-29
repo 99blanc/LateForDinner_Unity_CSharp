@@ -10,7 +10,15 @@ public abstract class UserInterface : MonoBehaviour, IPoolable
 {
     private RectTransform _rectTransform;
     public RectTransform RectTransform
-        => _rectTransform ??= this.GetComponentAssert<RectTransform>();
+    {
+        get 
+        {
+            if (_rectTransform == null)
+                _rectTransform = this.GetComponentAssert<RectTransform>();
+
+            return _rectTransform; 
+        }
+    }
     private readonly Dictionary<Type, UnityEngine.Object[]> _views = new Dictionary<Type, UnityEngine.Object[]>();
     private readonly Dictionary<string, CancellationTokenSource> _tokens = new Dictionary<string, CancellationTokenSource>();
     private Vector2 _initialAnchoredPosition;

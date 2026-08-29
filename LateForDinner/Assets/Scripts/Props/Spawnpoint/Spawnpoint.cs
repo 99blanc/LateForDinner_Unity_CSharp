@@ -2,10 +2,10 @@ using UnityEngine;
 
 public class Spawnpoint : Prop
 {
-    protected override bool UseSaveState => false;
-
+    [Header("Spawnpoint Settings")]
     [SerializeField] private SceneID _toSceneID;
     public SceneID ToSceneID => _toSceneID;
+    protected override bool UseSaveState => false;
 
     protected override void Awake()
         => Managers.Scene.RegisterSpawnpoint(this);

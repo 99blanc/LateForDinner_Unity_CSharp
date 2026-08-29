@@ -4,10 +4,19 @@ using UnityEngine;
 
 public abstract class Prop : MonoBehaviour
 {
-    [SerializeField] private PropKey _propKey;
+    [SerializeField] public PropKey _propKey;
     [SerializeField, HideInInspector] private string _guid;
     private string _uniqueKey;
     public string UniqueKey => _uniqueKey;
+    public int Priority
+    {
+        get
+        {
+            if (Managers.Data.Props != null && Managers.Data.Props.TryGetValue(_propKey.ToString(), out var data))
+                return data.Priority;
+            return 0;
+        }
+    }
     protected abstract bool UseSaveState { get; }
 
     protected virtual void Awake()

@@ -68,8 +68,8 @@ public class ProtagonistJumpState : JumpState
 
 public class ProtagonistRollState : CharacterState
 {
-    private readonly Protagonist _protagonist;
     protected readonly Func<float> _inputProvider;
+    private readonly Protagonist _protagonist;
 
     public ProtagonistRollState(Character owner, Func<float> inputProvider) : base(owner)
     {
@@ -118,7 +118,7 @@ public class ProtagonistDashState : DashState
 {
     private Protagonist _protagonist;
 
-    public ProtagonistDashState(Character owner, Func<Vector2> inputProvider) : base(owner, inputProvider) 
+    public ProtagonistDashState(Character owner, Func<Vector2> inputProvider) : base(owner, inputProvider)
         => _protagonist = Owner as Protagonist;
 
     public override void OnEnter()
@@ -128,7 +128,7 @@ public class ProtagonistDashState : DashState
         if (_protagonist is not IDashableCharacter dashable)
             return;
 
-        PlayDashAnimation();
+        PlayDashAnimation(dashable);
     }
 
     public override void OnExit()
@@ -142,15 +142,89 @@ public class ProtagonistDashState : DashState
             jumpable.RemainingJumpCount = jumpable.MaxJumpCount;
     }
 
-    private void PlayDashAnimation()
+    private void PlayDashAnimation(IDashableCharacter dashable)
     {
         if (_protagonist?.CharacterAnimator is not ProtagonistAnimator protagonistAnimator)
             return;
 
-        if (_protagonist is not IDashableCharacter dashable)
+        Vector2 dir = dashable.DashDirection;
+        Action playAnimation = (dir == Vector2.down || dir.y < -0.5f) ? protagonistAnimator.PlayDownDash : protagonistAnimator.PlayDash;
+        playAnimation?.Invoke();
+    }
+}
+
+public class ClimbState : CharacterState
+{
+    private readonly Protagonist _protagonist;
+    protected readonly Func<float> _inputProvider;
+
+    public ClimbState(Character owner, Func<float> inputProvider) : base(owner)
+    {
+        _inputProvider = inputProvider;
+        _protagonist = Owner as Protagonist;
+    }
+
+    public override void OnEnter()
+    {
+        base.OnEnter();
+
+        if (_protagonist is not IClimbableCharacter climbable)
             return;
 
-        Action playAnimation = (_dashDirection == Vector2.down || _dashDirection.y < -0.5f) ? protagonistAnimator.PlayDownDash : protagonistAnimator.PlayDash;
-        playAnimation?.Invoke();
+        if (_protagonist.CurrentInteractable is Ladder ladder)
+            climbable.StartClimbing(ladder);
+
+        if (_protagonist.CharacterAnimator is ProtagonistAnimator protagonistAnimator)
+        {
+            PlayClimbAnimation();
+            protagonistAnimator.SetAnimatorSpeed(1f);
+        }
+    }
+
+    public override void OnLogic()
+    {
+        base.OnLogic();
+
+        if (_protagonist is not IClimbableCharacter climbable)
+            return;
+
+        if (_inputProvider == null)
+            return;
+
+        float verticalInput = _inputProvider.Invoke();
+        climbable.Climb(verticalInput);
+        UpdateClimbAnimation(verticalInput);
+    }
+
+    public override void OnExit()
+    {
+        base.OnExit();
+
+        if (_protagonist is not IClimbableCharacter climbable)
+            return;
+
+        if (_protagonist.CharacterAnimator is ProtagonistAnimator protagonistAnimator)
+            protagonistAnimator.SetAnimatorSpeed(1f);
+
+        climbable.StopClimbing();
+    }
+
+    private void PlayClimbAnimation()
+    {
+        if (_protagonist?.CharacterAnimator is not ProtagonistAnimator protagonistAnimator)
+            return;
+
+        protagonistAnimator.PlayClimb();
+    }
+
+    private void UpdateClimbAnimation(float verticalInput)
+    {
+        if (_protagonist?.CharacterAnimator is not ProtagonistAnimator protagonistAnimator)
+            return;
+
+        if (Mathf.Abs(verticalInput) > 0.01f)
+            protagonistAnimator.SetAnimatorSpeed(1f);
+        else
+            protagonistAnimator.SetAnimatorSpeed(0f);
     }
 }

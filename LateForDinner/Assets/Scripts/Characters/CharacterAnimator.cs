@@ -13,6 +13,12 @@ public abstract class CharacterAnimator : MonoBehaviour
             Animator.runtimeAnimatorController = overrideController;
     }
 
+    public void SetAnimatorSpeed(float speed)
+    {
+        if (Animator != null)
+            Animator.speed = speed;
+    }
+
     public virtual float GetCurrentAnimatorNormalizedTime()
     {
         if (Animator == null)

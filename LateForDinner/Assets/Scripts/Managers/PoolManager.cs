@@ -8,8 +8,16 @@ using UnityEngine;
 public class PoolManager
 {
     private GameObject _root;
-    public GameObject Root 
-        => _root ??= InitRoot();
+    public GameObject Root
+    {
+        get 
+        {
+            if (_root == null)
+                InitRoot();
+
+            return _root; 
+        }
+    }
     private readonly Dictionary<string, Queue<GameObject>> _registries = new Dictionary<string, Queue<GameObject>>();
     private readonly Dictionary<string, Transform> _folders = new Dictionary<string, Transform>();
     private readonly Dictionary<GameObject, Transform> _parents = new Dictionary<GameObject, Transform>();

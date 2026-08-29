@@ -10,24 +10,18 @@ public class CooldownManager
     public void Setup()
     {
         Observable.EveryUpdate()
-        .Subscribe(_ =>
-        {
-            float deltaTime = Time.deltaTime;
-
-            foreach (var item in _cooldownables.ToArray())
-                item.TickCooldown(deltaTime);
-        });
+        .Subscribe(_ => OnUpdate());
     }
 
     public void Register(ICooldownable cooldownable)
     {
-        if (!_cooldownables.Contains(cooldownable))
+        if (cooldownable != null && !_cooldownables.Contains(cooldownable))
             _cooldownables.Add(cooldownable);
     }
 
     public void Unregister(ICooldownable cooldownable)
     {
-        if (_cooldownables.Contains(cooldownable))
+        if (cooldownable != null && _cooldownables.Contains(cooldownable))
             _cooldownables.Remove(cooldownable);
     }
 
@@ -36,6 +30,14 @@ public class CooldownManager
         float deltaTime = Time.deltaTime;
 
         foreach (var item in _cooldownables.ToArray())
+        {
+            if (item == null) 
+                continue;
+
             item.TickCooldown(deltaTime);
+
+            if (!item.IsOnCooldown)
+                Unregister(item);
+        }
     }
 }

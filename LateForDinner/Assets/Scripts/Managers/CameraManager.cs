@@ -4,8 +4,16 @@ using UnityEngine;
 public class CameraManager
 {
     private GameObject _root;
-    public GameObject Root 
-        => _root ??= InitRoot();
+    public GameObject Root
+    {
+        get
+        {
+            if (_root == null)
+                InitRoot();
+
+            return _root;
+        }
+    }
     private CinemachineCamera _vcam;
     private Camera _mainCamera;
     private CinemachineFollow _follow;

@@ -119,9 +119,6 @@ public class JumpState : CharacterState
         if (Owner is not IJumpableCharacter jumpable)
             return;
 
-        if (jumpable.RemainingJumpCount < 0)
-            jumpable.RemainingJumpCount = jumpable.MaxJumpCount;
-
         Owner.CharacterAnimator?.PlayJump();
         float directionX = _inputProvider?.Invoke() ?? 0f;
         jumpable.Jump(directionX);
@@ -144,10 +141,6 @@ public class JumpState : CharacterState
 public class DashState : CharacterState
 {
     protected readonly Func<Vector2> _inputProvider;
-    protected Vector2 _dashDirection;
-    private float _durationTimer;
-    private float _gravityScale;
-    public bool IsDurationEnded => _durationTimer <= 0f;
 
     public DashState(Character owner, Func<Vector2> inputProvider) : base(owner)
         => _inputProvider = inputProvider;
@@ -156,19 +149,12 @@ public class DashState : CharacterState
     {
         base.OnEnter();
 
-        if (Owner is not IDashableCharacter dashable) 
+        if (Owner is not IDashableCharacter dashable)
             return;
 
-        _gravityScale = dashable.Rigidbody.gravityScale;
-        _dashDirection = _inputProvider?.Invoke() ?? Vector2.right;
-        _durationTimer = Define.Scaler.Duration;
-
-        if (_dashDirection == Vector2.zero)
-            _dashDirection = Owner.Renderer.flipX ? Vector2.left : Vector2.right;
-
-        dashable.Rigidbody.gravityScale = 0f;
+        Vector2 inputDir = _inputProvider?.Invoke() ?? Vector2.right;
         Owner.CharacterAnimator?.PlayDash();
-        dashable.Dash(_dashDirection);
+        dashable.StartDashing(inputDir);
     }
 
     public override void OnLogic()
@@ -178,7 +164,7 @@ public class DashState : CharacterState
         if (Owner is not IDashableCharacter dashable)
             return;
 
-        _durationTimer -= Time.deltaTime;
+        dashable.UpdateDashing(Time.deltaTime);
     }
 
     public override void OnExit()
@@ -188,7 +174,6 @@ public class DashState : CharacterState
         if (Owner is not IDashableCharacter dashable)
             return;
 
-        dashable.Rigidbody.gravityScale = _gravityScale;
-        dashable.Rigidbody.linearVelocity = Vector2.zero;
+        dashable.StopDashing();
     }
 }

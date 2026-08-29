@@ -9,8 +9,16 @@ public class UIManager
 {
     private Canvas _canvas;
     private GameObject _root;
-    public GameObject Root 
-        => _root ??= InitRoot();
+    public GameObject Root
+    {
+        get 
+        { 
+            if (_root == null)
+                InitRoot();
+
+            return _root; 
+        }
+    }
     public float ScaleFactor
         => _canvas != null ? _canvas.scaleFactor : 1f;
     private readonly Dictionary<LayerType, Transform> _layer = new Dictionary<LayerType, Transform>();

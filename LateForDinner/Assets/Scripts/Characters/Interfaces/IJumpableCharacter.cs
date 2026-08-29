@@ -31,6 +31,9 @@ public interface IJumpableCharacter
         if (this is not Character || Rigidbody == null || Attributes == null)
             return;
 
+        if (RemainingJumpCount < 0)
+            RemainingJumpCount = MaxJumpCount;
+
         Renderer.FlipX(directionX);
         float jumpForce = Attributes.Get<float>(AttributeType.JumpForce).Value;
         Vector2 velocity = Rigidbody.linearVelocity;
