@@ -47,9 +47,9 @@ public class UIKeybindSlot : UISlot
     private Action<bool> _setLock;
     private bool _isWaitingForInput;
 
-    public override void Init()
+    public override void OnInit()
     {
-        base.Init();
+        base.OnInit();
         BindImage(typeof(Images));
         BindText(typeof(Texts));
         BindButton(typeof(Buttons));

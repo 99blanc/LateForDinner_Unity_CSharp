@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using LateForDinner.Data;
+using Cysharp.Text;
 
 public class SaveManager
 {
@@ -210,7 +211,7 @@ public class SaveManager
     private string GetPath(int slot)
     {
         string dir = Literal.Folders.Saves.GetDirectory();
-        string fileName = (slot == 0) ? $"{Literal.Files.Save}_{Literal.Files.Auto}{Literal.Extensions.Data}" : $"{Literal.Files.Save}_{slot}{Literal.Extensions.Data}";
+        string fileName = (slot == 0) ? ZString.Concat(Literal.Files.Save, "_", Literal.Files.Auto, Literal.Extensions.Data) : ZString.Concat(Literal.Files.Save, "_", slot, Literal.Extensions.Data);
         return Path.Combine(dir, fileName);
     }
 
@@ -218,21 +219,21 @@ public class SaveManager
     {
         string dir = Literal.Folders.Saves.GetDirectory();
         string backup = Path.Combine(dir, Literal.Folders.Backups).GetDirectory();
-        string fileName = (slot == 0) ? $"{Literal.Files.Save}_{Literal.Files.Auto}{Literal.Extensions.Backup}" : $"{Literal.Files.Save}_{slot}{Literal.Extensions.Backup}";
+        string fileName = (slot == 0) ? ZString.Concat(Literal.Files.Save, "_", Literal.Files.Auto, Literal.Extensions.Backup) : ZString.Concat(Literal.Files.Save, "_", slot,  Literal.Extensions.Backup);
         return Path.Combine(backup, fileName);
     }
 
     private string GetMetaPath()
     {
         string dir = Literal.Folders.Saves.GetDirectory();
-        return Path.Combine(dir, $"{Literal.Files.Meta}{Literal.Extensions.Data}");
+        return Path.Combine(dir, ZString.Concat(Literal.Files.Meta, Literal.Extensions.Data));
     }
 
     private string GetMetaBackupPath()
     {
         string dir = Literal.Folders.Saves.GetDirectory();
         string backup = Path.Combine(dir, Literal.Folders.Backups).GetDirectory();
-        return Path.Combine(backup, $"{Literal.Files.Meta}{Literal.Extensions.Backup}");
+        return Path.Combine(backup, ZString.Concat(Literal.Files.Meta, Literal.Extensions.Backup));
     }
 
     public async UniTask SwapSlotOrderAsync(int indexA, int indexB)

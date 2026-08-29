@@ -46,9 +46,9 @@ public abstract class Character : MonoBehaviour, IPoolable
         }).RegisterToPool(this);
     }
 
-    public virtual void Get() { }
+    public virtual void OnGet() { }
 
-    public virtual void Release() { }
+    public virtual void OnRelease() { }
 
     protected virtual void RegisterStates(StateMachine<CharacterStateType> fsm) 
         => fsm.AddState(CharacterStateType.Idle, new IdleState(this));

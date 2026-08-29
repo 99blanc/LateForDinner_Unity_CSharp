@@ -34,9 +34,9 @@ public class UISaveSlot : UISlot
     private Action<int> _onSlotSelected;
     private int _index;
 
-    public override void Init()
+    public override void OnInit()
     {
-        base.Init();
+        base.OnInit();
         BindImage(typeof(Images));
         BindText(typeof(Texts));
         BindButton(typeof(Buttons));
@@ -48,9 +48,9 @@ public class UISaveSlot : UISlot
         GetButton(Buttons.DownButton).BindViewAsButton(data => OnClickDown(data).Forget(), ViewEvent.LeftClick, this, _downButton);
     }
 
-    public override void Get()
+    public override void OnGet()
     {
-        base.Get();
+        base.OnGet();
         SetSelected(false);
     }
 

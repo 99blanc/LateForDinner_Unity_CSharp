@@ -184,9 +184,9 @@ public class UIOptionPopup : UIPopup, IDraggablePopup, IFocusablePopup
     private string _initialKeybindJson;
     private string _initialBindingSnapshot;
 
-    public override void Init()
+    public override void OnInit()
     {
-        base.Init();
+        base.OnInit();
         BindImage(typeof(Images));
         BindText(typeof(Texts));
         BindInputField(typeof(InputFields));
@@ -379,9 +379,9 @@ public class UIOptionPopup : UIPopup, IDraggablePopup, IFocusablePopup
         resolutionDropdown.AddOptions(resolutionOptions);
     }
 
-    public override void Get()
+    public override void OnGet()
     {
-        base.Get();
+        base.OnGet();
         Refresh();
         _initialModifierDash = Managers.Config.Option.Access.modifierDash;
         _initialLanguage = Managers.Config.Option.Access.language;

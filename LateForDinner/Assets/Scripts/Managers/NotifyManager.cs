@@ -40,7 +40,7 @@ public class NotifyManager
         }
         finally
         {
-            load?.Release();
+            load?.OnRelease();
         }
     }
 

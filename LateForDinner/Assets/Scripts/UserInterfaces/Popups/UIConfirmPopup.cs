@@ -30,9 +30,9 @@ public class UIConfirmPopup : UIPopup, IDraggablePopup, IFocusablePopup
     private LocalizationKey _cachedTitleKey;
     private Func<string> _messageProvider;
 
-    public override void Init()
+    public override void OnInit()
     {
-        base.Init();
+        base.OnInit();
         BindImage(typeof(Images));
         BindText(typeof(Texts));
         BindButton(typeof(Buttons));

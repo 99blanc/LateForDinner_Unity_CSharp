@@ -12,15 +12,15 @@ public class UIFPSSystem : UISystem
     private float _pollingTime = Define.Framerate.PollingTime;
     private IDisposable _fpsSubscription;
 
-    public override void Init()
+    public override void OnInit()
     {
-        base.Init();
+        base.OnInit();
         BindText(typeof(Texts));
     }
 
-    public override void Get()
+    public override void OnGet()
     {
-        base.Get();
+        base.OnGet();
         _fpsSubscription?.Dispose();
         _fpsSubscription = Observable.EveryUpdate()
         .Scan((Accumulator: 0f, FrameCount: 0), (state, _) =>
@@ -41,9 +41,9 @@ public class UIFPSSystem : UISystem
         }).RegisterToPool(this);
     }
 
-    public override void Release()
+    public override void OnRelease()
     {
-        base.Release();
+        base.OnRelease();
         _fpsSubscription?.Dispose();
         _fpsSubscription = null;
     }

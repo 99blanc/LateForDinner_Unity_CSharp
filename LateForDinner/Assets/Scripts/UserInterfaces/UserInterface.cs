@@ -15,19 +15,19 @@ public abstract class UserInterface : MonoBehaviour, IPoolable
     private readonly Dictionary<string, CancellationTokenSource> _tokens = new Dictionary<string, CancellationTokenSource>();
     private Vector2 _initialAnchoredPosition;
 
-    public virtual void Init()
+    public virtual void OnInit()
     {
         var _ = RectTransform;
         _views.Clear();
         _initialAnchoredPosition = RectTransform.anchoredPosition;
     }
 
-    public virtual void Get()
+    public virtual void OnGet()
         => RectTransform.anchoredPosition = _initialAnchoredPosition;
 
     public virtual void Refresh() { }
 
-    public virtual void Release()
+    public virtual void OnRelease()
         => CancelAll();
 
     public virtual void Close()

@@ -16,6 +16,7 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
     {
         await base.InitAsync();
         InitAttributes();
+        Managers.Control.Subscribe(Literal.Hotkeys.Interact, () => TryExecuteInteraction()).RegisterToPool(this);
     }
 
     private void InitAttributes()
@@ -311,4 +312,12 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
 
     public bool IsJumpKeyTriggered()
         => Managers.Control.IsTriggered(Literal.Hotkeys.Jump);
+
+    private void TryExecuteInteraction()
+    {
+        Collider2D hit = Physics2D.OverlapCircle(transform.position, Define.Scaler.Interact, LayerMask.GetMask(Literal.Layers.Interaction));
+
+        if (hit != null && hit.TryGetComponent<IInteractable>(out var interactable))
+            interactable.OnInteract(this);
+    }
 }

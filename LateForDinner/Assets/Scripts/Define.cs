@@ -62,6 +62,7 @@ public class Define
 
     public class Scaler
     {
+        public const float Interact = 2.25f;
         public const float Threshold = 0.2f;
         public const float Duration = 0.15f;
         public const float Margin = 0.975f;

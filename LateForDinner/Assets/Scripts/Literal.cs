@@ -87,6 +87,7 @@ public class Literal
     public class Layers
     {
         public const string Ground = "Ground";
+        public const string Interaction = "Interaction";
     }
 
     public class Localizations
@@ -157,6 +158,7 @@ public class Literal
         public const string Character = "Character";
         public const string Localization = "Localization";
         public const string Scene = "Scene";
+        public const string Prop = "Prop";
         public const string SceneTransition = "SceneTransition";
         public const string PlayableCharacter = "PlayableCharacter";
         public const string PlayableCharacterTemplate = "PlayableCharacterTemplate";

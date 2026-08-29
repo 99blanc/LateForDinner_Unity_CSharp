@@ -2,18 +2,35 @@ public interface IPoolable
 {
     bool IsPooled => this.IsPooled();
 
-    virtual void Init()
-        => this.SetPooled(false);
+    public void ProtectedInit()
+    {
+        this.SetPooled(false);
+        LoadState();
+        OnInit();
+    }
 
-    virtual void Get() 
-        => this.SetPooled(false);
-
-    virtual void Release()
+    public void ProtectedRelease()
     {
         this.SetPooled(true);
         PoolDisposableRegistry.Clear(this);
+        OnRelease();
     }
 
-    virtual void OnDestroy()
+    public void ProtectedGet()
+    {
+        this.SetPooled(false);
+        LoadState();
+        OnGet();
+    }
+
+    virtual void OnInit() { }
+
+    virtual void OnGet() { }
+
+    virtual void OnRelease() { }
+
+    virtual void LoadState() { }
+
+    protected virtual void OnDestroy()
         => PoolDisposableRegistry.Clear(this);
 }

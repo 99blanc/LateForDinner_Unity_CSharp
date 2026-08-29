@@ -16,16 +16,16 @@ public class UIToastSlot : UISlot
 
     private Func<string> _messageProvider;
 
-    public override void Init()
+    public override void OnInit()
     {
-        base.Init();
+        base.OnInit();
         BindText(typeof(Texts));
         BindPanel(typeof(Panels));
     }
 
-    public override void Get()
+    public override void OnGet()
     {
-        base.Get();
+        base.OnGet();
         GetPanel(Panels.SlotPanel).alpha = 0f;
     }
 

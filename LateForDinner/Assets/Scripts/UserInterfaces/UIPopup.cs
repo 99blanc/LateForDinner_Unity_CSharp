@@ -1,8 +1,8 @@
 public abstract class UIPopup : UserInterface
 {
-    public override void Get()
+    public override void OnGet()
     {
-        base.Get();
+        base.OnGet();
         Managers.UI.FocusPopup(this);
     }
 }

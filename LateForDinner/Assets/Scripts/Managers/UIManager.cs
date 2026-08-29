@@ -49,7 +49,7 @@ public class UIManager
 
     private void CreateLayer(LayerType layer)
     {
-        string name = ZString.Concat(Literal.Roots.Layers, $"{layer}");
+        string name = ZString.Concat(Literal.Roots.Layers, layer.ToString());
         var gameObject = CreateCanvas(name, _root.transform, (int)layer, out var canvas);
 
         if (layer == LayerType.Display)

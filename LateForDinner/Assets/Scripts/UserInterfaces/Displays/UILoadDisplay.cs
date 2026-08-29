@@ -18,16 +18,16 @@ public class UILoadDisplay : UIDisplay, IAnimatable
 
     private float _current;
 
-    public override void Init()
+    public override void OnInit()
     {
-        base.Init();
+        base.OnInit();
         BindImage(typeof(Images));
         BindText(typeof(Texts));
     }
 
-    public override void Get()
+    public override void OnGet()
     {
-        base.Get();
+        base.OnGet();
         _current = 0f;
     }
 

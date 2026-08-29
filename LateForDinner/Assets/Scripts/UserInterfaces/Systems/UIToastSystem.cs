@@ -14,9 +14,9 @@ public class UIToastSystem : UISystem
     private const int _maxCount = Define.Toast.Count;
     private bool _isProcessingQueue;
 
-    public override void Init()
+    public override void OnInit()
     {
-        base.Init();
+        base.OnInit();
         BindPanel(typeof(Panels));
     }
 

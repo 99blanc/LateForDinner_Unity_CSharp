@@ -12,6 +12,7 @@ public class DataManager
     public Dictionary<string, LocalizationData> Localization { get; private set; } = new Dictionary<string, LocalizationData>();
     public Dictionary<int, CharacterData> Characters { get; private set; } = new Dictionary<int, CharacterData>();
     public Dictionary<int, SceneData> Scenes { get; private set; } = new Dictionary<int, SceneData>();
+    public Dictionary<string, PropData> Props { get; private set; } = new Dictionary<string, PropData>();
     public ILookup<int, SceneTransitionData> SceneTransitions { get; private set; } = Enumerable.Empty<SceneTransitionData>().ToLookup(x => x.SceneID);
     public Dictionary<int, PlayableCharacterData> PlayableCharacters { get; private set; } = new Dictionary<int, PlayableCharacterData>();
     public ILookup<int, PlayableCharacterTemplateData> PlayableCharacterTemplates { get; private set; } = Enumerable.Empty<PlayableCharacterTemplateData>().ToLookup(x => x.PlayableCharacterID);
@@ -27,6 +28,8 @@ public class DataManager
         Log.Info(LocalizationKey.Log_Data_LoadedSuccessfully, Literal.Tables.Character);
         Scenes = await LoadDictionaryAsync<int, SceneData>(Literal.Tables.Scene, data => data.ID);
         Log.Info(LocalizationKey.Log_Data_LoadedSuccessfully, Literal.Tables.Scene);
+        Props = await LoadDictionaryAsync<string, PropData>(Literal.Tables.Prop, data => data.Key);
+        Log.Info(LocalizationKey.Log_Data_LoadedSuccessfully, Literal.Tables.Prop);
         var sceneTransitions = await LoadListAsync<SceneTransitionData>(Literal.Tables.SceneTransition);
         SceneTransitions = sceneTransitions.ToLookup(x => x.SceneID);
         Log.Info(LocalizationKey.Log_Data_LoadedSuccessfully, Literal.Tables.SceneTransition);

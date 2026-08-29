@@ -3,7 +3,7 @@ using UnityEngine;
 
 public interface IDashableCharacter : ICooldownable
 {
-    private static readonly ConditionalWeakTable<IDashableCharacter, DashStateValue> _dashValue = new();
+    private static readonly ConditionalWeakTable<IDashableCharacter, DashStateValue> _dashValue = new ConditionalWeakTable<IDashableCharacter, DashStateValue>();
     private class DashStateValue
     {
         public int RemainingDashCount = -1;

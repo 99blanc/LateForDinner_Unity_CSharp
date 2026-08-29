@@ -29,9 +29,9 @@ public class UIConsoleSystem : UISystem
     private int _clearThresholdIndex = 0;
     private IDisposable _logSubscription;
 
-    public override void Init()
+    public override void OnInit()
     {
-        base.Init();
+        base.OnInit();
         BindText(typeof(Texts));
         BindInputField(typeof(InputFields));
         BindScrollRect(typeof(ScrollRects));
@@ -42,18 +42,18 @@ public class UIConsoleSystem : UISystem
         Managers.Control.Subscribe(Literal.Hotkeys.Tab, OnPressTab).RegisterToPool(this);
     }
 
-    public override void Get()
+    public override void OnGet()
     {
-        base.Get();
+        base.OnGet();
         _logSubscription?.Dispose();
         _logSubscription = Managers.Log.OnLogAdded.Subscribe(_ => Refresh());
         ResetInputField();
         Refresh();
     }
 
-    public override void Release()
+    public override void OnRelease()
     {
-        base.Release();
+        base.OnRelease();
         _logSubscription?.Dispose();
         _logSubscription = null;
     }

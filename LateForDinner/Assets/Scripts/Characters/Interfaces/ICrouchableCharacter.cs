@@ -3,7 +3,7 @@ using UnityEngine;
 
 public interface ICrouchableCharacter
 {
-    private static readonly ConditionalWeakTable<ICrouchableCharacter, CrouchStateValue> _crouchValue = new();
+    private static readonly ConditionalWeakTable<ICrouchableCharacter, CrouchStateValue> _crouchValue = new ConditionalWeakTable<ICrouchableCharacter, CrouchStateValue>();
     private class CrouchStateValue
     {
         public bool IsInitialized = false;

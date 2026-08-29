@@ -90,6 +90,16 @@ public enum LocalizationKey
     Console_Spawn_NotDemo                              , // 이 명령어는 Demo 맵에서만 사용할 수 있습니다.
     Console_Spawn_Success                              , // 캐릭터 [{0}] 소환 완료!
     Console_Spawn_Invalid                              , // 유효하지 않은 CharacterID입니다: '{0}'
+    Interaction_NPC                                    , // NPC 대화 시작/종료 처리
+    Interaction_Quest                                  , // 퀘스트 수락/완료 및 분기 트리거 연동
+    Interaction_Shop                                   , // 상점 UI 진입
+    Interaction_Save                                   , // 세이브 UI 진입 또는 즉시 저장
+    Interaction_Event                                  , // 컷신 이벤트 / 능력 해금 / 봉인된 문 조작
+    Interaction_StageProgress                          , // 게임 파트 이동 / 퍼즐 진입 / 보스전 선택
+    Interaction_Door                                   , // 맵 진입 및 경계 이동 처리
+    Interaction_TrayHolder                             , // 식판 획득 및 빈칸/채워짐 상태 확인
+    Interaction_Tray                                   , // 식판 획득/내려놓기/던지기/식탁 배치
+    Interaction_DiningTable                            , // 식탁 상태 체크 및 클리어 조건 확인
     Log_Attribute_Registry_Unsupported                 , // [AttributeRegistry] 지원하지 않는 데이터 타입입니다: {0}('{1}')
     Log_Camera_LoadSuccess                             , // [CameraManager] 카메라 로드에 성공했습니다.
     Log_Camera_LoadFailed                              , // [CameraManager] 카메라 로드에 실패했습니다.
@@ -118,6 +128,7 @@ public enum LocalizationKey
     Log_Game_Loading_UI                                , // [GameManager] 인터페이스를 불러오는 중입니다.
     Log_Game_PlayerSpawnFailed                         , // [GameManager] 캐릭터('{0}') 생성에 실패했습니다.
     Log_Game_PlayerSpawnSuccess                        , // [GameManager] 캐릭터('{0}')를 성공적으로 생성했습니다.
+    Log_Interact_NotRegistered                         , // [InteractManager] 등록되지 않은 상호작용 타입입니다: '{0}'
     Log_Localization_LoadedSuccessfully                , // [LocalizationManager] 현지화 시스템을 성공적으로 불러왔습니다.
     Log_Localization_FileReadFailed                    , // [LocalizationManager] 현지화 파일('{0}')을 읽는 중 오류가 발생했습니다.
     Log_Localization_Synced                            , // [LocalizationManager] 현지화 데이터 동기화를 완료했습니다: (변경: '{0}'건)

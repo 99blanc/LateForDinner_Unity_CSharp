@@ -3,7 +3,7 @@ using UnityEngine;
 
 public interface IJumpableCharacter
 {
-    private static readonly ConditionalWeakTable<IJumpableCharacter, JumpStateValue> _jumpValue = new();
+    private static readonly ConditionalWeakTable<IJumpableCharacter, JumpStateValue> _jumpValue = new ConditionalWeakTable<IJumpableCharacter, JumpStateValue>();
     private class JumpStateValue
     {
         public int RemainingJumpCount = -1;

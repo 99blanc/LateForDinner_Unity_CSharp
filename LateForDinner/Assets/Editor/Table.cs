@@ -29,6 +29,13 @@ public static class Table
             case "SceneTransition":
                 ConvertGeneric<SceneTransitionData>(name, GenerateSceneTransitionID);
                 break;
+            case "Prop":
+                ConvertGeneric<PropData>(name, records =>
+                {
+                    GeneratePropKey(records);
+                    GenerateInteractionType(records);
+                });
+                break;
             default:
                 return false;
         }
@@ -84,6 +91,18 @@ public static class Table
     {
         string filePath = Path.Combine(Application.dataPath, "Scripts/Enums/SceneTransitionType.cs");
         WriteEnumFile(filePath, "SceneTransitionType", records, data => data.Type, data => $"    {data.Type.Trim().PadRight(GetMaxKeyLength(records, d => d.Type))},");
+    }
+
+    public static void GeneratePropKey(List<PropData> records)
+    {
+        string filePath = Path.Combine(Application.dataPath, "Scripts/Enums/PropKey.cs");
+        WriteEnumFile(filePath, "PropKey", records, data => data.Key, data => $"    {data.Key.Trim().PadRight(GetMaxKeyLength(records, d => d.Key))},");
+    }
+
+    public static void GenerateInteractionType(List<PropData> records)
+    {
+        string filePath = Path.Combine(Application.dataPath, "Scripts/Enums/InteractionType.cs");
+        WriteEnumFile(filePath, "InteractionType", records, data => data.InteractionType, data => $"    {data.InteractionType.Trim().PadRight(GetMaxKeyLength(records, d => d.InteractionType))},");
     }
 
     private static void GenerateLocalizationKey(List<LocalizationData> records)

@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class CooldownManager
 {
-    private readonly HashSet<ICooldownable> _cooldownables = new();
+    private readonly HashSet<ICooldownable> _cooldownables = new HashSet<ICooldownable>();
 
     public void Setup()
     {

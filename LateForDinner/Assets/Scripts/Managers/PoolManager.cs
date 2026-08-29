@@ -90,10 +90,7 @@ public class PoolManager
             return;
 
         if (gameObject.TryGetComponent<IPoolable>(out var poolable))
-        {
-            poolable.Release();
-            poolable.SetPooled(true);
-        }
+            poolable.ProtectedRelease();
 
         _parents[gameObject] = gameObject.transform.parent;
         string newKey = string.IsNullOrEmpty(key) ? gameObject.name : key;
@@ -133,10 +130,7 @@ public class PoolManager
             _parents[instance] = targetParent;
 
             if (instance.TryGetComponent<IPoolable>(out var poolable))
-            {
-                poolable.Init();
-                poolable.SetPooled(true);
-            }
+                poolable.ProtectedInit();
 
             if (!HasRegistry(key))
                 _registries.Add(key, new Queue<GameObject>());
@@ -205,13 +199,11 @@ public class PoolManager
 
         if (isNew)
         {
-            poolable.Init();
-            poolable.SetPooled(false);
+            poolable.ProtectedInit();
             return;
         }
 
-        poolable.Get();
-        poolable.SetPooled(false);
+        poolable.ProtectedGet();
     }
 
     private Transform GetFolder(string key)
@@ -250,9 +242,6 @@ public class PoolManager
         _parents.Clear();
         Log.System(LocalizationKey.Log_Pool_Cleared, totalDestroyed);
     }
-
-    private bool IsRootNull()
-        => _root == null;
 
     private bool HasFolder(string folderName)
         => _folders.ContainsKey(folderName);

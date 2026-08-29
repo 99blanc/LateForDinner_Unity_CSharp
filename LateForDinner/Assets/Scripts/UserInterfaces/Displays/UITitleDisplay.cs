@@ -35,9 +35,9 @@ public class UITitleDisplay : UIDisplay
     private UISaveSlot[] _slots;
     private int? _currentSelectedIndex;
 
-    public override void Init()
+    public override void OnInit()
     {
-        base.Init();
+        base.OnInit();
         BindText(typeof(Texts));
         BindButton(typeof(Buttons));
         BindScrollRect(typeof(ScrollRects));
@@ -68,9 +68,9 @@ public class UITitleDisplay : UIDisplay
         }
     }
 
-    public override void Get()
+    public override void OnGet()
     {
-        base.Get();
+        base.OnGet();
         Switch(_state);
     }
 

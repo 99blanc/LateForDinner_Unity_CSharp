@@ -32,9 +32,9 @@ public class UISaveDetailPopup : UIPopup, IFocusablePopup
     private readonly ReactiveProperty<ButtonState> _trashButton = new ReactiveProperty<ButtonState>(ButtonState.Normal);
     private int? _selectedSlotIndex;
 
-    public override void Init()
+    public override void OnInit()
     {
-        base.Init();
+        base.OnInit();
         BindImage(typeof(Images));
         BindText(typeof(Texts));
         BindButton(typeof(Buttons));

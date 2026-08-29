@@ -12,17 +12,17 @@ public class UISplashDisplay : UIDisplay, IAnimatable
         TitleImage
     }
 
-    public override void Init()
+    public override void OnInit()
     {
-        base.Init();
+        base.OnInit();
         BindImage(typeof(Images));
         Revert();
         Managers.Control.Subscribe(Literal.Hotkeys.Any, () => CancelToken("SplashTask")).RegisterToPool(this);
     }
 
-    public override void Get()
+    public override void OnGet()
     {
-        base.Get();
+        base.OnGet();
         Revert();
     }
 

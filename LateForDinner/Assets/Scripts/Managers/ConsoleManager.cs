@@ -1,3 +1,4 @@
+using Cysharp.Text;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -78,7 +79,7 @@ public class ConsoleManager
             }
             catch (Exception ex)
             {
-                Log.Error(LocalizationKey.Log_Console_Error, $"{cmdName} - {ex.Message}");
+                Log.Error(LocalizationKey.Log_Console_Error, ZString.Concat(cmdName, " - ", ex.Message));
             }
         }
         else

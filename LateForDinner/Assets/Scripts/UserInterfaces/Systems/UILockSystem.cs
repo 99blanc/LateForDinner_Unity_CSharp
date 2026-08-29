@@ -10,9 +10,9 @@ public class UILockSystem : UISystem, IAnimatable
         RotateImage
     }
 
-    public override void Init()
+    public override void OnInit()
     {
-        base.Init();
+        base.OnInit();
         BindImage(typeof(Images));
     }
 

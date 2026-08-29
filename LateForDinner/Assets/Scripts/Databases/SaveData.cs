@@ -71,6 +71,7 @@ namespace LateForDinner.Data
         // DESC ::: 플레이어 위치, 퀘스트 목록, 인벤토리 등 게임 플레이 데이터 적재
         public CharacterID SelectedCharacterID;
         public SceneID CurrentSceneID;
+        public Dictionary<string, bool> InteractableStates = new Dictionary<string, bool>();
 
         [MemoryPackIgnore]
         public new static SaveData Default => new SaveData()

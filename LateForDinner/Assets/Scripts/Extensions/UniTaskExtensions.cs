@@ -23,7 +23,7 @@ public static class UniTaskExtensions
         var user = await task;
 
         if (user != null)
-            user.Release();
+            user.OnRelease();
     }
 
     public static async UniTask Release(this UniTask task)

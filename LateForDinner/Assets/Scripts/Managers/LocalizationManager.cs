@@ -21,7 +21,7 @@ public class LocalizationManager
     {
         string dir = Literal.Folders.Localizations.GetDirectory();
         string language = Managers.Config?.Option?.Access?.language ?? Literal.Languages.Korean;
-        string path = Path.Combine(dir, $"{Literal.Files.Localization}_{language.ToEnglish().ToLower()}{Literal.Extensions.Json}");
+        string path = Path.Combine(dir, ZString.Concat(Literal.Files.Localization, "_", language.ToEnglish().ToLower(), Literal.Extensions.Json));
         string[] files = Directory.GetFiles(dir, "*.json");
 
         for (int index = 0; index < files.Length; index++)
