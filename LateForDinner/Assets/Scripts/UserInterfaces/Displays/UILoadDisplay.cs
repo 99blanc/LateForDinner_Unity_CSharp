@@ -31,7 +31,7 @@ public class UILoadDisplay : UIDisplay, IAnimatable
         _current = 0f;
     }
 
-    public async UniTask LoadAsync(float targetProgress, string message)
+    public async UniTask LoadAsync(float targetProgress, string message = default)
     {
         var messageText = GetText(Texts.MessageText);
 

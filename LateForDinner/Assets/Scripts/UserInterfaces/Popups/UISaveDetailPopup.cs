@@ -133,7 +133,7 @@ public class UISaveDetailPopup : UIPopup, IFocusablePopup
         if (!meta.IsActive) 
             return;
 
-        bool isConfirmed = await Managers.Feedback.ConfirmAsync(this, LocalizationKey.UI_SaveDetail_Popup_Delete_Confirm_Title, LocalizationKey.UI_SaveDetail_Popup_Delete_Confirm_Message);
+        bool isConfirmed = await Managers.Notify.ConfirmAsync(this, LocalizationKey.UI_SaveDetail_Popup_Delete_Confirm_Title, LocalizationKey.UI_SaveDetail_Popup_Delete_Confirm_Message);
         
         if (!isConfirmed) 
             return;

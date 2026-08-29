@@ -1,4 +1,5 @@
 using Cysharp.Threading.Tasks;
+using System;
 using UnityEngine;
 
 public class CommandRegistry
@@ -9,12 +10,11 @@ public class CommandRegistry
     {
         _console = console;
         // DESC ::: 기본 명령어 등록
-        _console.RegisterCommand("help", OnCommandHelp, Managers.Localization.Get(LocalizationKey.Command_Desc_Help));
-        _console.RegisterCommand("debug", OnCommandToggleDebug, Managers.Localization.Get(LocalizationKey.Command_Desc_Debug));
-        _console.RegisterCommand("clear", OnCommandClear, Managers.Localization.Get(LocalizationKey.Command_Desc_Clear));
-        _console.RegisterCommand("fps", OnCommandToggleFPS, Managers.Localization.Get(LocalizationKey.Command_Desc_FPS));
-        _console.RegisterCommand("log_search", OnCommandLogSearch, Managers.Localization.Get(LocalizationKey.Command_Desc_LogSearch));
-        _console.RegisterCommand("log_filter", OnCommandLogFilter, Managers.Localization.Get(LocalizationKey.Command_Desc_LogFilter));
+        _console.RegisterCommand("help", OnCommandHelp, Managers.Localization.Get(LocalizationKey.Console_Desc_Help));
+        _console.RegisterCommand("debug", OnCommandToggleDebug, Managers.Localization.Get(LocalizationKey.Console_Desc_Debug));
+        _console.RegisterCommand("clear", OnCommandClear, Managers.Localization.Get(LocalizationKey.Console_Desc_Clear));
+        _console.RegisterCommand("log_search", OnCommandLogSearch, Managers.Localization.Get(LocalizationKey.Console_Desc_LogSearch));
+        _console.RegisterCommand("log_filter", OnCommandLogFilter, Managers.Localization.Get(LocalizationKey.Console_Desc_LogFilter));
         UpdateDebugCommands(CheckIsDebugMode());
     }
 
@@ -22,17 +22,23 @@ public class CommandRegistry
     {
         if (isDebugMode)
         {
-            _console.RegisterCommand("set", OnCommandSetVariable, Managers.Localization.Get(LocalizationKey.Command_Desc_Set));
-            _console.RegisterCommand("get", OnCommandGetVariable, Managers.Localization.Get(LocalizationKey.Command_Desc_Get));
-            _console.RegisterCommand("time_debug", OnCommandTimeScale, Managers.Localization.Get(LocalizationKey.Command_Desc_Time));
-            _console.RegisterCommand("ground_debug", OnCommandToggleGroundDebug, Managers.Localization.Get(LocalizationKey.Command_Desc_Ground));
+            _console.RegisterCommand("set", OnCommandSetVariable, Managers.Localization.Get(LocalizationKey.Console_Desc_Set));
+            _console.RegisterCommand("get", OnCommandGetVariable, Managers.Localization.Get(LocalizationKey.Console_Desc_Get));
+            _console.RegisterCommand("fps", OnCommandToggleFPS, Managers.Localization.Get(LocalizationKey.Console_Desc_FPS));
+            _console.RegisterCommand("time_debug", OnCommandTimeScale, Managers.Localization.Get(LocalizationKey.Console_Desc_Time));
+            _console.RegisterCommand("ground_debug", OnCommandToggleGroundDebug, Managers.Localization.Get(LocalizationKey.Console_Desc_Ground));
+            _console.RegisterCommand("scene", async (args) => await OnCommandScene(args), Managers.Localization.Get(LocalizationKey.Console_Desc_Scene));
+            _console.RegisterCommand("spawn", OnCommandSpawnCharacter, Managers.Localization.Get(LocalizationKey.Console_Desc_Spawn));
         }
         else
         {
             _console.UnregisterCommand("set");
             _console.UnregisterCommand("get");
+            _console.UnregisterCommand("fps");
             _console.UnregisterCommand("time_debug");
             _console.UnregisterCommand("ground_debug");
+            _console.UnregisterCommand("scene");
+            _console.UnregisterCommand("spawn");
         }
     }
 
@@ -46,7 +52,7 @@ public class CommandRegistry
             if (!string.IsNullOrEmpty(desc))
                 Log.Info(LocalizationKey.Console_Help_Detail, cmdName, desc);
             else
-                Log.Warning(LocalizationKey.Command_Help_NotFound, cmdName);
+                Log.Warning(LocalizationKey.Console_Help_NotFound, cmdName);
 
             return;
         }
@@ -66,7 +72,7 @@ public class CommandRegistry
         debug.isDebugMode = !debug.isDebugMode;
         Managers.Config.SaveAsync().Forget();
         UpdateDebugCommands(debug.isDebugMode);
-        Log.Info(LocalizationKey.Command_Debug_Toggle, debug.isDebugMode.ToString());
+        Log.Info(LocalizationKey.Console_Debug_Toggle, debug.isDebugMode.ToString());
     }
 
     private void OnCommandClear(string[] args)
@@ -76,10 +82,10 @@ public class CommandRegistry
         if (uiConsole != null)
         {
             uiConsole.ClearLogs();
-            Log.Info(LocalizationKey.Command_Clear_Success);
+            Log.Info(LocalizationKey.Console_Clear_Success);
         }
         else
-            Log.Warning(LocalizationKey.Command_Clear_NotOpen);
+            Log.Warning(LocalizationKey.Console_Clear_NotOpen);
     }
 
     private void OnCommandToggleFPS(string[] args)
@@ -89,12 +95,12 @@ public class CommandRegistry
         if (fpsSystem != null)
         {
             Managers.UI.Close(fpsSystem);
-            Log.Info(LocalizationKey.Command_FPS_Disabled);
+            Log.Info(LocalizationKey.Console_FPS_Disabled);
         }
         else
         {
             Managers.UI.OpenSystem<UIFPSSystem>();
-            Log.Info(LocalizationKey.Command_FPS_Enabled);
+            Log.Info(LocalizationKey.Console_FPS_Enabled);
         }
     }
 
@@ -108,13 +114,13 @@ public class CommandRegistry
         if (args.Length == 0)
         {
             uiConsole.SetSearchKeyword(string.Empty);
-            Log.Info(LocalizationKey.Command_LogSearch_Reset);
+            Log.Info(LocalizationKey.Console_LogSearch_Reset);
         }
         else
         {
             string keyword = args[0];
             uiConsole.SetSearchKeyword(keyword);
-            Log.Info(LocalizationKey.Command_LogSearch_Filtered, keyword);
+            Log.Info(LocalizationKey.Console_LogSearch_Filtered, keyword);
         }
     }
 
@@ -122,7 +128,7 @@ public class CommandRegistry
     {
         if (args == null || args.Length < 2)
         {
-            Log.Warning(LocalizationKey.Command_LogFilter_Usage);
+            Log.Warning(LocalizationKey.Console_LogFilter_Usage);
             return;
         }
 
@@ -135,7 +141,7 @@ public class CommandRegistry
 
         if (!bool.TryParse(args[1], out bool value))
         {
-            Log.Warning(LocalizationKey.Command_LogFilter_InvalidBool);
+            Log.Warning(LocalizationKey.Console_LogFilter_InvalidBool);
             return;
         }
 
@@ -155,11 +161,11 @@ public class CommandRegistry
                 uiConsole.SetFilterSystem(value);
                 break;
             default:
-                Log.Warning(LocalizationKey.Command_LogFilter_UnknownType, target);
+                Log.Warning(LocalizationKey.Console_LogFilter_UnknownType, target);
                 return;
         }
 
-        Log.Info(LocalizationKey.Command_LogFilter_Success, target, value);
+        Log.Info(LocalizationKey.Console_LogFilter_Success, target, value);
     }
 
     private void OnCommandTimeScale(string[] args)
@@ -170,10 +176,10 @@ public class CommandRegistry
         if (args.Length > 0 && float.TryParse(args[0], out float scale))
         {
             Time.timeScale = scale;
-            Log.Info(LocalizationKey.Command_Time_Set, scale);
+            Log.Info(LocalizationKey.Console_Time_Set, scale);
         }
         else
-            Log.Info(LocalizationKey.Command_Time_Current, Time.timeScale);
+            Log.Info(LocalizationKey.Console_Time_Current, Time.timeScale);
     }
 
     private void OnCommandSetVariable(string[] args)
@@ -181,14 +187,14 @@ public class CommandRegistry
         if (!CheckIsDebugMode())
             return;
 
-        if (args.Length < 2)
+        if (args.Length < 2 || args[0].Equals("help", StringComparison.OrdinalIgnoreCase))
         {
-            Log.Warning(LocalizationKey.Command_Set_Usage);
+            Log.Warning(LocalizationKey.Console_Set_Usage);
             return;
         }
 
         _console.SetVariable(args[0], args[1]);
-        Log.Info(LocalizationKey.Command_Set_Success, args[0], args[1]);
+        Log.Info(LocalizationKey.Console_Set_Success, args[0], args[1]);
     }
 
     private void OnCommandGetVariable(string[] args)
@@ -196,18 +202,18 @@ public class CommandRegistry
         if (!CheckIsDebugMode())
             return;
 
-        if (args.Length < 1)
+        if (args.Length < 1 || args[0].Equals("help", StringComparison.OrdinalIgnoreCase))
         {
-            Log.Warning(LocalizationKey.Command_Get_Usage);
+            Log.Warning(LocalizationKey.Console_Get_Usage);
             return;
         }
 
         string val = _console.GetVariable(args[0]);
 
         if (val != null)
-            Log.Info(LocalizationKey.Command_Get_Success, args[0], val);
+            Log.Info(LocalizationKey.Console_Get_Success, args[0], val);
         else
-            Log.Warning(LocalizationKey.Command_Get_NotFound, args[0]);
+            Log.Warning(LocalizationKey.Console_Get_NotFound, args[0]);
     }
 
     private void OnCommandToggleGroundDebug(string[] args)
@@ -216,7 +222,68 @@ public class CommandRegistry
             return;
 
         bool currentState = DebugExtensions.ToggleDebugView();
-        Log.Info(LocalizationKey.Command_Ground_Toggle, currentState.ToString());
+        Log.Info(LocalizationKey.Console_Ground_Toggle, currentState.ToString());
+    }
+
+    private async UniTask OnCommandScene(string[] args)
+    {
+        if (!CheckIsDebugMode())
+            return;
+
+        if (args.Length < 1 || args[0].Equals("help", StringComparison.OrdinalIgnoreCase) || args[0].Equals("list", StringComparison.OrdinalIgnoreCase))
+        {
+            Log.Warning(LocalizationKey.Console_Scene_Usage);
+            Log.Info(LocalizationKey.Console_Scene_Available);
+
+            foreach (var sceneName in Enum.GetNames(typeof(SceneID)))
+                Log.Info(LocalizationKey.Console_Scene_Format, sceneName);
+            return;
+        }
+
+        if (Enum.TryParse<SceneID>(args[0], true, out var targetSceneID))
+        {
+            Log.Info(Managers.Localization.Get(LocalizationKey.Console_Scene_MovingProcess, targetSceneID));
+            await ((Func<UILoadDisplay, UniTask>)(async load =>
+            {
+                await load.LoadAsync(1f);
+                await Managers.Scene.LoadSceneAsync(targetSceneID);
+                await Managers.UI.OpenDisplayAsync<UIHeadUpDisplay>();
+            })).Load();
+
+        }
+        else
+            Log.Warning(Managers.Localization.Get(LocalizationKey.Console_Scene_Invalid, args[0]));
+    }
+
+    private void OnCommandSpawnCharacter(string[] args)
+    {
+        if (!CheckIsDebugMode())
+            return;
+
+        string currentSceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+
+        if (!currentSceneName.Equals("Demo", StringComparison.OrdinalIgnoreCase))
+        {
+            Log.Warning(LocalizationKey.Console_Spawn_NotDemo);
+            return;
+        }
+
+        if (args.Length < 1 || args[0].Equals("help", StringComparison.OrdinalIgnoreCase))
+        {
+            Log.Warning(LocalizationKey.Console_Spawn_Usage);
+            return;
+        }
+
+        if (Enum.TryParse<CharacterID>(args[0], true, out var targetCharacterID))
+        {
+            if (!targetCharacterID.IsPlayable())
+                return;
+
+            Managers.Game.SpawnPlayerAsync(targetCharacterID).Forget();
+            Log.Info(LocalizationKey.Console_Spawn_Success, targetCharacterID);
+        }
+        else
+            Log.Warning(LocalizationKey.Console_Spawn_Invalid, args[0]);
     }
 
     private bool CheckIsDebugMode()

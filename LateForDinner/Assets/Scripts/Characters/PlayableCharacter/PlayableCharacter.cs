@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using System;
+using System.Linq;
 using UnityEngine;
 using UnityHFSM;
 
@@ -19,15 +20,17 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
 
     private void InitAttributes()
     {
-        if (Managers.Data.PlayableCharacterTemplates.TryGetValue((int)CharacterID, out var templateAttributes) == false)
+        var templateGroup = Managers.Data.PlayableCharacterTemplates[(int)CharacterID];
+
+        if (templateGroup == null || !templateGroup.Any())
             return;
 
-        foreach (var (key, value) in templateAttributes)
+        foreach (var template in templateGroup)
         {
-            if (Enum.TryParse<AttributeType>(key, out var attributeType) == false)
+            if (Enum.TryParse<AttributeType>(template.AttributeKey, out var attributeType) == false)
                 continue;
 
-            Attributes.SetParsedValue(attributeType, value);
+            Attributes.SetParsedValue(attributeType, template.Value);
         }
     }
 

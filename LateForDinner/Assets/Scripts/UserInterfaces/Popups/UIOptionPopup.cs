@@ -352,7 +352,7 @@ public class UIOptionPopup : UIPopup, IDraggablePopup, IFocusablePopup
             (duplicateActionName, duplicateKeyName) =>
             {
                 // DESC ::: 중복된 키 입력 시 토스트 출력
-                Managers.Feedback.ToastAsync(LocalizationKey.Log_Option_Popup_Keybind_Duplicate, duplicateActionName, duplicateKeyName).Forget();
+                Managers.Notify.ToastAsync(LocalizationKey.Log_Option_Popup_Keybind_Duplicate, duplicateActionName, duplicateKeyName).Forget();
             });
         }
     }
@@ -772,7 +772,7 @@ public class UIOptionPopup : UIPopup, IDraggablePopup, IFocusablePopup
     {
         try
         {
-            bool isConfirmed = await Managers.Feedback.ConfirmAsync(this, LocalizationKey.UI_Option_Popup_Default_Confirm_Title, LocalizationKey.UI_Option_Popup_Default_Confirm_Message);
+            bool isConfirmed = await Managers.Notify.ConfirmAsync(this, LocalizationKey.UI_Option_Popup_Default_Confirm_Title, LocalizationKey.UI_Option_Popup_Default_Confirm_Message);
 
             if (!isConfirmed)
                 return;

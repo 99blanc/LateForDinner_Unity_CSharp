@@ -76,6 +76,7 @@ Log_Scene_LoadSuccess,[SceneManager] '{0}'맵을 성공적으로 로드했습니
 Log_Scene_LoadFailed,[SceneManager] '{0}'맵을 로드하는 중 에셋을 찾지 못했습니다.
 Log_Scene_TransitionFailed,[SceneManager] '{0}'맵에서 '{1}'맵으로의 씬 전환 규칙이 존재하지 않습니다.
 Log_Scene_NotFoundCharacter,[SceneManager] 캐릭터가 존재하지 않아 스폰 위치로 이동할 수 없습니다.
+Log_Scene_NotExistPreviousScene,[SceneManager] 이전 맵이 존재하지 않습니다.
 Log_Scene_NormalizedSpawn,[SceneManager] 캐릭터를 스폰 포인트로 보정하여 이동시켰습니다: '{0}'
 Log_Scene_NotFoundSpawnpoint,[SceneManager] '{0}'에 해당하는 스폰 포인트를 찾지 못했습니다.
 # Index: UIManager,

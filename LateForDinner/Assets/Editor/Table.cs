@@ -83,7 +83,7 @@ public static class Table
     public static void GenerateSceneTransitionID(List<SceneTransitionData> records)
     {
         string filePath = Path.Combine(Application.dataPath, "Scripts/Enums/SceneTransitionType.cs");
-        WriteEnumFile(filePath, "SceneTransitionType", records, data => data.Type, data => $"    {data.Type.Trim().PadRight(GetMaxKeyLength(records, d => d.Type))} = {data.ID},");
+        WriteEnumFile(filePath, "SceneTransitionType", records, data => data.Type, data => $"    {data.Type.Trim().PadRight(GetMaxKeyLength(records, d => d.Type))},");
     }
 
     private static void GenerateLocalizationKey(List<LocalizationData> records)

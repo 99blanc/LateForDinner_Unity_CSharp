@@ -15,10 +15,6 @@ public enum LocalizationKey
     Action_Inventory                                   , // 인벤토리
     Action_Active                                      , // 액티브 스킬
     Action_DashCommand                                 , // 대시 커맨드
-    Console_Input                                      , // > {0}
-    Console_Help_Header                                , // --- 사용 가능한 명령어 목록 ---
-    Console_Help_Format                                , // - {0}: {1}
-    Console_Help_Detail                                , // [{0}] {1}
     None                                               , // None
     Apply                                              , // 적용
     Complete                                           , // 완료
@@ -49,36 +45,51 @@ public enum LocalizationKey
     Slot_Day_Format                                    , // Day {0}
     Slot_DayTime_Format                                , // {0}:{1}:{2}
     Slot_SaveTime_Format                               , // {0}/{1}/{2}
-    Command_Desc_Help                                  , // [CommandRegistry] 사용 가능한 명령어 목록을 표시하거나 명령어의 상세 설명을 확인합니다.
-    Command_Desc_Debug                                 , // [CommandRegistry] 디버그 모드를 켜거나 끕니다.
-    Command_Desc_Clear                                 , // [CommandRegistry] 콘솔창의 로그 기록을 지웁니다.
-    Command_Desc_FPS                                   , // [CommandRegistry] FPS 표시 UI를 켜거나 끕니다.
-    Command_Desc_Time                                  , // [CommandRegistry] 게임 타임 스케일을 설정하거나 확인합니다.
-    Command_Desc_Set                                   , // [CommandRegistry] 임의의 콘솔 변수를 설정합니다.
-    Command_Desc_Get                                   , // [CommandRegistry] 콘솔 변수의 값을 가져옵니다.
-    Command_Desc_LogSearch                             , // [CommandRegistry] 로그 메시지에서 특정 키워드를 검색합니다.
-    Command_Desc_LogFilter                             , // [CommandRegistry] 특정 타입의 로그 가시성을 설정합니다.
-    Command_Help_NotFound                              , // [CommandRegistry] '{0}' 명령어에 대한 설명을 찾을 수 없습니다.
-    Command_Debug_Toggle                               , // [CommandRegistry] 디버그 모드: {0}
-    Command_Clear_Success                              , // [CommandRegistry] 콘솔 로그를 초기화했습니다.
-    Command_Clear_NotOpen                              , // [CommandRegistry] 콘솔 UI가 열려있지 않습니다.
-    Command_FPS_Disabled                               , // [CommandRegistry] FPS UI를 껐습니다.
-    Command_FPS_Enabled                                , // [CommandRegistry] FPS UI를 켰습니다.
-    Command_Time_Set                                   , // [CommandRegistry] 타임 스케일이 {0}(으)로 설정되었습니다.
-    Command_Time_Current                               , // [CommandRegistry] 현재 타임 스케일: {0}
-    Command_Set_Usage                                  , // [CommandRegistry] 사용법: set [이름] [값]
-    Command_Set_Success                                , // [CommandRegistry] 변수 설정 완료 [{0} = {1}]
-    Command_Get_Usage                                  , // [CommandRegistry] 사용법: get [이름]
-    Command_Get_Success                                , // [CommandRegistry] [{0}] = {1}
-    Command_Get_NotFound                               , // [CommandRegistry] '{0}' 변수를 찾을 수 없습니다.
-    Command_LogSearch_Reset                            , // [CommandRegistry] 로그 검색 필터를 초기화했습니다.
-    Command_LogSearch_Filtered                         , // [CommandRegistry] 로그 검색 키워드: '{0}'
-    Command_LogFilter_Usage                            , // [CommandRegistry] 사용법: log_filter [info/warn/error/system] [true/false]
-    Command_LogFilter_InvalidBool                      , // [CommandRegistry] 올바른 불리언(true/false) 값이 아닙니다.
-    Command_LogFilter_UnknownType                      , // [CommandRegistry] 알 수 없는 로그 필터 타입입니다: '{0}'
-    Command_LogFilter_Success                          , // [CommandRegistry] 로그 필터 변경 [{0} -> {1}]
-    Command_Desc_Ground                                , // [CommandRegistry] 땅 감지 박스 디버그 표시를 토글합니다.
-    Command_Ground_Toggle                              , // [CommandRegistry] 땅 감지 디버그 박스 표시: {0}
+    Console_Input_Format                               , // > {0}
+    Console_Help_Header                                , // --- 사용 가능한 명령어 목록 ---
+    Console_Help_Format                                , // - {0}: {1}
+    Console_Help_Detail                                , // [{0}] {1}
+    Console_Help_NotFound                              , // {0}' 명령어에 대한 설명을 찾을 수 없습니다.
+    Console_Desc_Help                                  , // 사용 가능한 명령어 목록을 표시하거나 명령어의 상세 설명을 확인합니다.
+    Console_Desc_Debug                                 , // 디버그 모드를 켜거나 끕니다.
+    Console_Desc_Clear                                 , // 콘솔창의 로그 기록을 지웁니다.
+    Console_Desc_FPS                                   , // FPS 표시 UI를 켜거나 끕니다.
+    Console_Desc_Time                                  , // 게임 타임 스케일을 설정하거나 확인합니다.
+    Console_Desc_Set                                   , // 임의의 콘솔 변수를 설정합니다.
+    Console_Desc_Get                                   , // 콘솔 변수의 값을 가져옵니다.
+    Console_Desc_LogSearch                             , // 로그 메시지에서 특정 키워드를 검색합니다.
+    Console_Desc_LogFilter                             , // 특정 타입의 로그 가시성을 설정합니다.
+    Console_Desc_Ground                                , // 땅 감지 박스 디버그 표시를 토글합니다.
+    Console_Desc_Scene                                 , // 지정한 맵으로 즉시 이동합니다.
+    Console_Debug_Toggle                               , // 디버그 모드: {0}
+    Console_Clear_Success                              , // 콘솔 로그를 초기화했습니다.
+    Console_Clear_NotOpen                              , // 콘솔 UI가 열려있지 않습니다.
+    Console_FPS_Disabled                               , // FPS UI를 껐습니다.
+    Console_FPS_Enabled                                , // FPS UI를 켰습니다.
+    Console_Time_Set                                   , // 타임 스케일이 {0}(으)로 설정되었습니다.
+    Console_Time_Current                               , // 현재 타임 스케일: {0}
+    Console_Set_Usage                                  , // 사용법: set [이름] [값]
+    Console_Set_Success                                , // 변수 설정 완료 [{0} = {1}]
+    Console_Get_Usage                                  , // 사용법: get [이름]
+    Console_Get_Success                                , // [{0}] = {1}
+    Console_Get_NotFound                               , // {0}' 변수를 찾을 수 없습니다.
+    Console_LogSearch_Reset                            , // 로그 검색 필터를 초기화했습니다.
+    Console_LogSearch_Filtered                         , // 로그 검색 키워드: '{0}'
+    Console_LogFilter_Usage                            , // 사용법: log_filter [info/warn/error/system] [true/false]
+    Console_LogFilter_InvalidBool                      , // 올바른 불리언(true/false) 값이 아닙니다.
+    Console_LogFilter_UnknownType                      , // 알 수 없는 로그 필터 타입입니다: '{0}'
+    Console_LogFilter_Success                          , // 로그 필터 변경 [{0} -> {1}]
+    Console_Ground_Toggle                              , // 땅 감지 디버그 박스 표시: {0}
+    Console_Scene_Usage                                , // 사용법: scene [SceneID] (사용 가능한 맵 목록 'scene list' 입력)
+    Console_Scene_Available                            , // --- 이동 가능한 맵 목록 ---
+    Console_Scene_Format                               , // - {0}
+    Console_Scene_MovingProcess                        , // {0}' 맵으로 이동 중...
+    Console_Scene_Invalid                              , // 유효하지 않은 SceneID입니다: '{0}'. 맵 목록을 보려면 'scene list'를 입력하세요.
+    Console_Desc_Spawn                                 , // 지정한 캐릭터를 Demo 맵에 소환합니다.
+    Console_Spawn_Usage                                , // 사용법: spawn [CharacterID]
+    Console_Spawn_NotDemo                              , // 이 명령어는 Demo 맵에서만 사용할 수 있습니다.
+    Console_Spawn_Success                              , // 캐릭터 [{0}] 소환 완료!
+    Console_Spawn_Invalid                              , // 유효하지 않은 CharacterID입니다: '{0}'
     Log_Attribute_Registry_Unsupported                 , // [AttributeRegistry] 지원하지 않는 데이터 타입입니다: {0}('{1}')
     Log_Camera_LoadSuccess                             , // [CameraManager] 카메라 로드에 성공했습니다.
     Log_Camera_LoadFailed                              , // [CameraManager] 카메라 로드에 실패했습니다.
@@ -138,6 +149,7 @@ public enum LocalizationKey
     Log_Scene_LoadFailed                               , // [SceneManager] '{0}'맵을 로드하는 중 에셋을 찾지 못했습니다.
     Log_Scene_TransitionFailed                         , // [SceneManager] '{0}'맵에서 '{1}'맵으로의 씬 전환 규칙이 존재하지 않습니다.
     Log_Scene_NotFoundCharacter                        , // [SceneManager] 캐릭터가 존재하지 않아 스폰 위치로 이동할 수 없습니다.
+    Log_Scene_NotExistPreviousScene                    , // [SceneManager] 이전 맵이 존재하지 않습니다.
     Log_Scene_NormalizedSpawn                          , // [SceneManager] 캐릭터를 스폰 포인트로 보정하여 이동시켰습니다: '{0}'
     Log_Scene_NotFoundSpawnpoint                       , // [SceneManager] '{0}'에 해당하는 스폰 포인트를 찾지 못했습니다.
     Log_UI_RootInitialized                             , // [UIManager] UI 루트 및 레이어 구조가 성공적으로 초기화되었습니다.

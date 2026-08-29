@@ -58,7 +58,7 @@ public class ConsoleManager
         if (string.IsNullOrWhiteSpace(inputCommand))
             return;
 
-        Log.Info(LocalizationKey.Console_Input, inputCommand);
+        Log.Info(LocalizationKey.Console_Input_Format, inputCommand);
         PushHistory(inputCommand);
 
         var parts = inputCommand.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);

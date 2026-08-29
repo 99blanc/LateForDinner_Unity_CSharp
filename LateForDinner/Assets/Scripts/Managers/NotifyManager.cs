@@ -2,7 +2,7 @@ using Cysharp.Threading.Tasks;
 using System;
 using System.Threading;
 
-public class FeedbackManager
+public class NotifyManager
 {
     private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
 

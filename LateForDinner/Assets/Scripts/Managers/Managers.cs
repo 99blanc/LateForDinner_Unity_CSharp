@@ -25,7 +25,7 @@ public class Managers : MonoBehaviour
     public static ConfigManager Config { get; private set; }
     public static ControlManager Control { get; private set; }
     public static SceneManager Scene { get; private set; }
-    public static FeedbackManager Feedback { get; private set; }
+    public static NotifyManager Notify { get; private set; }
     public static ConsoleManager Console { get; private set; }
     public static SaveManager Save { get; private set; }
     public static PreloadManager Preload { get; private set; }
@@ -57,7 +57,7 @@ public class Managers : MonoBehaviour
         Config = new ConfigManager();
         Control = new ControlManager();
         Scene = new SceneManager();
-        Feedback = new FeedbackManager();
+        Notify = new NotifyManager();
         Console = new ConsoleManager();
         Save = new SaveManager();
         Preload = new PreloadManager();

@@ -223,7 +223,7 @@ public class SaveManager
         if (CurrentData == null)
             CurrentData = SaveData.Default;
 
-        if (Managers.Scene.CurrentSceneID != SceneID.Bootstrap)
+        if (Managers.Scene.CurrentSceneID >= SceneID.Hospital1)
             CurrentData.CurrentSceneID = Managers.Scene.CurrentSceneID;
     }
 

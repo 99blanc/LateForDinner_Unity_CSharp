@@ -59,6 +59,12 @@ public class SceneManager
             return;
         }
 
+        if (_previousID < SceneID.Hospital1)
+        {
+            Log.System(LocalizationKey.Log_Scene_NotExistPreviousScene);
+            return;
+        }
+
         if (_spawnpoints.TryGetValue(_previousID, out var targetSpawn) && targetSpawn != null)
         {
             Managers.Game.Character.RelocateTo(targetSpawn);
@@ -101,10 +107,11 @@ public class SceneManager
 
         int currentScene = (int)CurrentSceneID;
         int targetScene = (int)targetSceneID;
+        var transitions = Managers.Data.SceneTransitions[currentScene];
 
-        foreach (var transition in Managers.Data.SceneTransitions.Values)
+        foreach (var transition in transitions)
         {
-            if (transition.FromSceneID == currentScene && transition.ToSceneID == targetScene)
+            if (transition.ToSceneID == targetScene)
                 return true;
         }
 

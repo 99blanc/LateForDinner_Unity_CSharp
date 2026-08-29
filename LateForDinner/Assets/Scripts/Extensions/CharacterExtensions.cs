@@ -21,6 +21,12 @@ public static class CharacterExtensions
         return collider != null;
     }
 
+    public static bool IsPlayable(this CharacterID characterID)
+    {
+        int id = (int)characterID;
+        return Managers.Data.PlayableCharacters != null && Managers.Data.PlayableCharacters.ContainsKey(id);
+    }
+
     public static string GetAnimatorOverrideControllerPath(this CharacterID characterID)
         => ZString.Concat(characterID.ToString(), Literal.Assets.Animator);
 
