@@ -8,76 +8,38 @@ public interface IClimbableCharacter
     {
         public Ladder CurrentLadder = null;
         public bool IsClimbing = false;
-        public float OriginalGravityScale = 1f;
-        public CooldownRegistry EnterCooldownProxy = new CooldownRegistry();
-        public CooldownRegistry ExitCooldownProxy = new CooldownRegistry();
-        public CooldownRegistry GroundBufferCooldown = new CooldownRegistry();
+        public CooldownRegistry ExitCooldown = new CooldownRegistry();
     }
-
     SpriteRenderer Renderer { get; }
     Rigidbody2D Rigidbody { get; }
     AttributeRegistry Attributes { get; }
-
     public Ladder CurrentLadder
     {
         get => _climbValue.GetOrCreateValue(this).CurrentLadder;
         set => _climbValue.GetOrCreateValue(this).CurrentLadder = value;
     }
-
     public bool IsClimbing
     {
         get => _climbValue.GetOrCreateValue(this).IsClimbing;
         set => _climbValue.GetOrCreateValue(this).IsClimbing = value;
     }
-
-    public bool CanClimb => !_climbValue.GetOrCreateValue(this).EnterCooldownProxy.IsOnCooldown && !_climbValue.GetOrCreateValue(this).ExitCooldownProxy.IsOnCooldown;
-
-    public void StartGroundBuffer()
-    {
-        var val = _climbValue.GetOrCreateValue(this);
-
-        if (!val.GroundBufferCooldown.IsOnCooldown)
-        {
-            float bufferTime = Define.Scaler.Buffer;
-            val.GroundBufferCooldown.CooldownTime = bufferTime;
-            val.GroundBufferCooldown.CurrentCooldown = bufferTime;
-            val.GroundBufferCooldown.IsOnCooldown = true;
-            Managers.Cooldown.Register(val.GroundBufferCooldown);
-        }
-    }
-
-    public void ResetGroundBuffer()
-    {
-        var val = _climbValue.GetOrCreateValue(this);
-        val.GroundBufferCooldown.IsOnCooldown = false;
-        Managers.Cooldown.Unregister(val.GroundBufferCooldown);
-    }
-
-    public bool HasExceededGroundBuffer()
-    {
-        var val = _climbValue.GetOrCreateValue(this);
-        bool hasExceeded = val.GroundBufferCooldown.IsOnCooldown == false && val.GroundBufferCooldown.CurrentCooldown <= 0f;
-
-        if (hasExceeded && IsClimbing)
-            StopClimbing();
-
-        return val.GroundBufferCooldown.IsOnCooldown == false && val.GroundBufferCooldown.CurrentCooldown <= 0f;
-    }
+    public bool CanForceExit => this is Character character && character.IsGrounded();
+    public bool IsExitLocked => _climbValue.GetOrCreateValue(this).ExitCooldown.IsOnCooldown && !CanForceExit;
 
     public void StartClimbing(Ladder ladder)
     {
-        if (this is not Character || Rigidbody == null || ladder == null || !CanClimb)
+        if (this is not Character || Rigidbody == null || ladder == null)
             return;
 
         var val = _climbValue.GetOrCreateValue(this);
         val.CurrentLadder = ladder;
         val.IsClimbing = true;
-        float enterCooldownTime = Define.Scaler.Buffer;
-        val.EnterCooldownProxy.CooldownTime = enterCooldownTime;
-        val.EnterCooldownProxy.CurrentCooldown = enterCooldownTime;
-        val.EnterCooldownProxy.IsOnCooldown = true;
-        Managers.Cooldown.Register(val.EnterCooldownProxy);
         Rigidbody.gravityScale = 0f;
+        float bufferTime = Define.Scaler.Buffer;
+        val.ExitCooldown.CooldownTime = bufferTime;
+        val.ExitCooldown.CurrentCooldown = bufferTime;
+        val.ExitCooldown.IsOnCooldown = true;
+        Managers.Cooldown.Register(val.ExitCooldown);
     }
 
     public void StopClimbing()
@@ -88,13 +50,6 @@ public interface IClimbableCharacter
         var val = _climbValue.GetOrCreateValue(this);
         val.IsClimbing = false;
         val.CurrentLadder = null;
-        ResetGroundBuffer();
-
-        float exitCooldownTime = Define.Scaler.Buffer;
-        val.ExitCooldownProxy.CooldownTime = exitCooldownTime;
-        val.ExitCooldownProxy.CurrentCooldown = exitCooldownTime;
-        val.ExitCooldownProxy.IsOnCooldown = true;
-        Managers.Cooldown.Register(val.ExitCooldownProxy);
         Rigidbody.gravityScale = 1f;
     }
 

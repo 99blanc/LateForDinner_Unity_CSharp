@@ -107,49 +107,56 @@ public static class CharacterTransitionExtensions
     public static bool IsDashFinishedAndAirborne(this Character character)
         => character is IDashableCharacter dashable && dashable.IsDurationEnded && !character.IsGrounded();
 
-    public static bool IsTryingToClimb(this Character character, Func<bool> getVerticalInput, Func<bool> getDownInput)
+    public static bool IsTryingToClimb(this Character character, Func<float> getVerticalInput, Func<bool> getDownInput)
     {
-        if (character.IsHoldingProp())
+        if (character.IsHoldingProp() || character.CurrentInteractable?.PropKey != PropKey.Ladder)
             return false;
 
-        if (character is IClimbableCharacter climbable && !climbable.CanClimb)
+        float vertical = getVerticalInput();
+
+        if (Mathf.Abs(vertical) <= 0.01f)
             return false;
 
-        if (!getVerticalInput())
-            return false;
-
-        var interactable = character.CurrentInteractable;
-
-        if (interactable == null || interactable.PropKey != PropKey.Ladder)
-            return false;
-
-        if (character.IsGrounded() && getDownInput())
-            return true;
-
-        return true;
+        return vertical > 0f || (character.IsGrounded() && getDownInput());
     }
 
-    public static bool IsTryingToLeaveClimb(this Character character, Func<float> getMoveInput, Func<bool> getVerticalInput)
+    public static bool IsTryingToLeaveClimb(this Character character, Func<float> getMoveInput, Func<float> getVerticalInput)
     {
+        if (character is IClimbableCharacter climbable && climbable.IsExitLocked)
+            return false;
+
         bool isTryingToMoveHorizontally = Mathf.Abs(getMoveInput()) > 0.01f;
-        bool isNotPressingVertical = !getVerticalInput();
+        bool isNotPressingVertical = Mathf.Abs(getVerticalInput()) <= 0.01f;
         return isTryingToMoveHorizontally && isNotPressingVertical;
     }
 
-    public static bool IsClimbToIdle(this Character character, Func<float> getMoveInput, Func<bool> getVerticalInput)
+    public static bool IsClimbToIdle(this Character character, Func<float> getMoveInput, Func<float> getVerticalInput)
     {
-        bool isNotPressingVertical = !getVerticalInput();
+        if (character is IClimbableCharacter climbable && climbable.IsExitLocked)
+            return false;
+
+        bool isNotPressingVertical = Mathf.Abs(getVerticalInput()) <= 0.01f;
         bool isNoMoveInput = Mathf.Abs(getMoveInput()) <= 0.01f;
         return character.CurrentInteractable == null || (isNotPressingVertical && isNoMoveInput && character.IsGrounded());
     }
 
     public static bool IsClimbToFall(this Character character)
-        => character.CurrentInteractable == null && !character.IsGrounded();
+    {
+        if (character is IClimbableCharacter climbable && climbable.IsExitLocked)
+            return false;
+
+        return character.CurrentInteractable == null && !character.IsGrounded();
+    }
 
     public static bool IsClimbToGroundIdle(this Character character, Func<float> getMoveInput)
     {
         if (character is IClimbableCharacter climbable)
-            return climbable.HasExceededGroundBuffer() && Mathf.Abs(getMoveInput()) <= 0.01f;
+        {
+            if (climbable.IsExitLocked)
+                return false;
+
+            return climbable.CurrentLadder == null && Mathf.Abs(getMoveInput()) <= 0.01f && character.IsGrounded();
+        }
 
         return false;
     }
@@ -157,7 +164,12 @@ public static class CharacterTransitionExtensions
     public static bool IsClimbToGroundMove(this Character character, Func<float> getMoveInput)
     {
         if (character is IClimbableCharacter climbable)
-            return climbable.HasExceededGroundBuffer() && Mathf.Abs(getMoveInput()) > 0.01f;
+        {
+            if (climbable.IsExitLocked)
+                return false;
+
+            return climbable.CurrentLadder == null && Mathf.Abs(getMoveInput()) > 0.01f && character.IsGrounded();
+        }
 
         return false;
     }

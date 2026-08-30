@@ -57,7 +57,7 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
         Func<float> moveInput = GetPlayerMoveInput;
         Func<bool> jumpInput = IsPlayerJumpInput;
         Func<bool> crouchInput = IsPlayerCrouchInput;
-        Func<bool> climbInput = IsPlayerClimbInput;
+        Func<float> climbInput = GetPlayerClimbInput;
         Func<bool> dashInput = IsPlayerDashInput;
         // DESC ::: Idle 상태에서의 전환 조건
         fsm.AddTransition(new Transition<CharacterStateType>(
@@ -356,9 +356,6 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
 
     protected bool IsPlayerCrouchInput()
         => Managers.Control.IsPressed(Literal.Hotkeys.DownUtility);
-
-    protected bool IsPlayerClimbInput()
-        => Managers.Control.IsPressed(Literal.Hotkeys.UpUtility) || Managers.Control.IsPressed(Literal.Hotkeys.DownUtility);
 
     private bool CheckDashInput(bool isModifierDash, bool allowDownUtility)
     {

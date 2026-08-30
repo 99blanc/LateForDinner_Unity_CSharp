@@ -206,11 +206,6 @@ public class ClimbState : CharacterState
         if (Owner is not IClimbableCharacter climbable)
             return;
 
-        if (Owner.IsGrounded())
-            climbable.StartGroundBuffer();
-        else
-            climbable.ResetGroundBuffer();
-
         if (_inputProvider == null)
             return;
 
@@ -226,7 +221,6 @@ public class ClimbState : CharacterState
         if (Owner is not IClimbableCharacter climbable)
             return;
 
-        climbable.ResetGroundBuffer();
         Owner?.CharacterAnimator?.SetAnimatorSpeed(1f);
         climbable.StopClimbing();
     }
