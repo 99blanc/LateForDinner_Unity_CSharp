@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using UnityEngine;
 
 public class LocalizationManager
 {
@@ -12,6 +13,14 @@ public class LocalizationManager
 
     public async UniTask InitAsync()
     {
+#if UNITY_EDITOR
+        if (Application.isEditor)
+        {
+            RefreshAsync();
+            Log.Info(LocalizationKey.Log_Localization_LoadedSuccessfully);
+            return;
+        }
+#endif
         await SyncAsync();
         RefreshAsync();
         Log.Info(LocalizationKey.Log_Localization_LoadedSuccessfully);
