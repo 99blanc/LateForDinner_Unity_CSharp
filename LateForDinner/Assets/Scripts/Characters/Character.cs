@@ -26,7 +26,8 @@ public abstract class Character : MonoBehaviour, IPoolable
     public AttributeRegistry Attributes { get; protected set; } = new AttributeRegistry();
     public SpriteRenderer Renderer { get; private set; }
     public Animator Animator { get; private set; }
-    public Collider2D Collider { get; private set; }
+    public Rigidbody2D Rigidbody { get; protected set; }
+    public Collider2D Collider { get; protected set; }
     public StateMachine<CharacterStateType> StateMachine;
     public abstract CharacterAnimator CharacterAnimator { get; }
     protected abstract CharacterID CharacterID { get; }

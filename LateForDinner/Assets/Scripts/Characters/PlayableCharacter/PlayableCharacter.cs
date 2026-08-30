@@ -7,7 +7,6 @@ using ZLinq;
 
 public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovableCharacter, IFallableCharacter, ICrouchableCharacter, IJumpableCharacter, IRollableCharacter, IDashableCharacter, IClimbableCharacter, ICarriableCharacter
 {
-    public Rigidbody2D Rigidbody { get; private set; }
     public Transform CameraTransform { get; private set; }
     public Transform BackTransform { get; private set; }
     public Transform FrontTransform { get; private set; }

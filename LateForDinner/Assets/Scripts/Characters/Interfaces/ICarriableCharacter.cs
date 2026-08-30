@@ -65,17 +65,21 @@ public interface ICarriableCharacter
 
         var (instance, rentHandle) = Managers.Pool.Pop(HeldProp.UniqueKey);
 
-        if (instance != null)
-        {
-            if (instance.TryGetComponent<Rigidbody2D>(out var rigidbody))
-            {
-                float throwDirection = character.GetLookDirectionX();
+        if (instance == null)
+            return;
 
-                if (isUpPressed)
-                    rigidbody.linearVelocity = new Vector2(throwDirection * 4f, 7f);
-                else
-                    rigidbody.linearVelocity = new Vector2(throwDirection * 6f, 2f);
-            }
+        float throwDirection = character.GetLookDirectionX();
+        instance.transform.position = character.transform.position + new Vector3(throwDirection * 0.8f, 0.5f, 0f);
+
+        if (instance.TryGetComponent<Rigidbody2D>(out var rigidbody))
+        {
+            rigidbody.linearVelocity = Vector2.zero;
+            rigidbody.angularVelocity = 0f;
+            float playerVelocityX = character.Rigidbody != null ? character.Rigidbody.linearVelocity.x : 0f;
+            float baseThrowSpeedX = isUpPressed ? 4f : 6f;
+            float throwVelocityY = isUpPressed ? 7f : 2f;
+            float finalThrowX = (throwDirection * baseThrowSpeedX) + (playerVelocityX * 0.5f);
+            rigidbody.linearVelocity = new Vector2(finalThrowX, throwVelocityY);
         }
 
         ResetHoldState(character);
