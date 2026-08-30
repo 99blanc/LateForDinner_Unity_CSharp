@@ -59,10 +59,15 @@ public class PlayableCharacterJumpState : JumpState
         if (_player is not IJumpableCharacter jumpable)
             return;
 
-        if (jumpable.RemainingJumpCount >= jumpable.MaxJumpCount - 1)
+        bool isHoldingProp = _player is ICarriableCharacter carriable && carriable.IsHoldingProp;
+
+        if (jumpable.RemainingJumpCount >= jumpable.MaxJumpCount - 1 || isHoldingProp)
+        {
             playableAnimator.PlayState(CharacterStateType.Jump);
-        else
-            playableAnimator.PlayState(CharacterStateType.DoubleJump);
+            return;
+        }
+
+        playableAnimator.PlayState(CharacterStateType.DoubleJump);
     }
 }
 

@@ -2,9 +2,11 @@ using UnityEngine;
 
 public abstract class CharacterAnimator : MonoBehaviour
 {
-    public InteractionType CurrentHoldInteractionType { get; set; } = InteractionType.None;
-
+    public Character Owner { get; private set; }
     public Animator Animator { get; set; }
+
+    public void SetOwner(Character owner)
+        => Owner = owner;
 
     public void SetAnimator(Animator animator)
         => Animator = animator;
@@ -32,9 +34,11 @@ public abstract class CharacterAnimator : MonoBehaviour
 
     protected virtual int GetStateHash(CharacterStateType state)
     {
-        if (CurrentHoldInteractionType != InteractionType.None)
+        InteractionType currentHoldType = Owner != null ? Owner.CurrentHoldInteractionType : InteractionType.None;
+
+        if (currentHoldType != InteractionType.None)
         {
-            int interactionHash = GetInteractionStateHash(state, CurrentHoldInteractionType);
+            int interactionHash = GetInteractionStateHash(state, currentHoldType);
 
             if (interactionHash != 0)
                 return interactionHash;
@@ -63,14 +67,18 @@ public abstract class CharacterAnimator : MonoBehaviour
             (CharacterStateType.Move, InteractionType.Tray) => Define.Animation.PickupTrayMove,
             (CharacterStateType.Fall, InteractionType.Tray) => Define.Animation.PickupTrayFall,
             (CharacterStateType.Jump, InteractionType.Tray) => Define.Animation.PickupTrayJump,
-            (CharacterStateType.DoubleJump, InteractionType.Tray) => Define.Animation.PickupTrayDoubleJump,
             (CharacterStateType.Throw, InteractionType.Tray) => Define.Animation.ThrowTray,
             _ => 0
         };
     }
 
     private void Play(int hash)
-        => Animator?.Play(hash);
+    {
+        if (Animator == null)
+            return;
+        
+        Animator.Play(hash, 0, 0f);
+    }
 
     public virtual void PlayState(CharacterStateType state)
         => Play(GetStateHash(state));

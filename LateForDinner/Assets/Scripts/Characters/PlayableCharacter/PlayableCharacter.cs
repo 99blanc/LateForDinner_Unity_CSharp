@@ -48,6 +48,7 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
         fsm.AddState(CharacterStateType.Jump, new PlayableCharacterJumpState(this, GetPlayerMoveInput));
         fsm.AddState(CharacterStateType.Roll, new PlayableCharacterRollState(this, GetPlayerMoveInput));
         fsm.AddState(CharacterStateType.Dash, new PlayableCharacterDashState(this, GetPlayerDashInput));
+        fsm.AddState(CharacterStateType.Throw, new ThrowState(this, GetPlayerThrowInput));
     }
 
     protected override void RegisterTransitions(StateMachine<CharacterStateType> fsm)
@@ -334,6 +335,19 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
         return 0f;
     }
 
+    protected Vector2 GetPlayerThrowInput()
+    {
+        Vector2 input = Vector2.zero;
+
+        if (Managers.Control.IsPressed(Literal.Hotkeys.UpUtility))
+            input.y += 1f;
+
+        if (Managers.Control.IsPressed(Literal.Hotkeys.DownUtility))
+            input.y -= 1f;
+
+        return input;
+    }
+
     public bool IsPlayerJumpInput()
         => Managers.Control.IsTriggered(Literal.Hotkeys.Jump);
 
@@ -370,6 +384,20 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
 
     private void TryExecuteInteraction()
     {
+        if (this is ICarriableCharacter carriable && carriable.IsHoldingProp)
+        {
+            bool isDownPressed = Managers.Control.IsPressed(Literal.Hotkeys.DownUtility);
+
+            if (isDownPressed)
+            {
+                carriable.DropPropDirectly();
+                return;
+            }
+
+            StateMachine.RequestStateChange(CharacterStateType.Throw, forceInstantly: true);
+            return;
+        }
+
         if (CurrentInteractable != null && CurrentInteractable.RequireKeyInput && CurrentInteractable.CanInteract.Value)
             CurrentInteractable.ProtectedInteract(this);
     }

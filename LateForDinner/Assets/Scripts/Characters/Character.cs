@@ -22,6 +22,7 @@ public abstract class Character : MonoBehaviour, IPoolable
             .FirstOrDefault();
         }
     }
+    public InteractionType CurrentHoldInteractionType { get; set; } = InteractionType.None;
     public AttributeRegistry Attributes { get; protected set; } = new AttributeRegistry();
     public SpriteRenderer Renderer { get; private set; }
     public Animator Animator { get; private set; }
@@ -33,6 +34,7 @@ public abstract class Character : MonoBehaviour, IPoolable
     public virtual async UniTask InitAsync()
     {
         CacheComponents();
+        CharacterAnimator.SetOwner(this);
         CharacterAnimator.SetAnimator(Animator);
         await GetAnimatorControllerAsync();
         InitStateMachine();

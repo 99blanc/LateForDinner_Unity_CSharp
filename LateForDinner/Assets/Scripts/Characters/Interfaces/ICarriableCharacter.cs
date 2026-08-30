@@ -1,4 +1,4 @@
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using UnityEngine;
 
 public interface ICarriableCharacter
@@ -8,6 +8,7 @@ public interface ICarriableCharacter
     {
         public Prop HeldProp;
         public bool IsHoldingProp = false;
+        public bool HasThrown = false;
     }
     public Prop HeldProp
     {
@@ -19,39 +20,72 @@ public interface ICarriableCharacter
         get => _carryValues.GetOrCreateValue(this).IsHoldingProp;
         set => _carryValues.GetOrCreateValue(this).IsHoldingProp = value;
     }
+    public bool HasThrown
+    {
+        get => _carryValues.GetOrCreateValue(this).HasThrown;
+        set => _carryValues.GetOrCreateValue(this).HasThrown = value;
+    }
 
     public void PickupProp(Prop prop)
     {
         if (this is not Character character || prop is not IInteractable interactable)
             return;
 
-        if (character?.CharacterAnimator is PlayableCharacterAnimator playableAnimator)
-            playableAnimator.CurrentHoldInteractionType = interactable.InteractionType;
-
+        character.CurrentHoldInteractionType = interactable.InteractionType;
         character?.StateMachine?.RequestStateChange(CharacterStateType.Idle, forceInstantly: true);
-        Managers.Pool.Push(prop);
+        Managers.Pool.Push(prop, prop.UniqueKey);
         HeldProp = prop;
         IsHoldingProp = true;
+        HasThrown = false;
     }
 
-    public void ThrowProp()
+    public void DropPropDirectly()
     {
-        if (this is not Character character)
+        if (this is not Character character || HeldProp == null)
             return;
 
-        if (character?.CharacterAnimator is PlayableCharacterAnimator playableAnimator)
-            playableAnimator.CurrentHoldInteractionType = InteractionType.None;
+        var (instance, rentHandle) = Managers.Pool.Pop(HeldProp.UniqueKey);
 
-        string poolKey = HeldProp.GetType().Name;
-        var (instance, rentHandle) = Managers.Pool.Pop(poolKey);
+        if (instance != null)
+        {
+            float dropDirection = character.GetLookDirectionX();
+            instance.transform.position = character.transform.position + new Vector3(dropDirection * 0.5f, 0f, 0f);
 
-        if (instance == null)
+            if (instance.TryGetComponent<Rigidbody2D>(out var rd))
+                rd.linearVelocity = Vector2.zero;
+        }
+
+        ResetHoldState(character);
+    }
+
+    public void ExecuteThrow(bool isUpPressed)
+    {
+        if (this is not Character character || HeldProp == null)
             return;
 
-        var rd = instance.GetComponentAssert<Rigidbody2D>();
-        float throwDirection = character.GetLookDirectionX();
-        rd.linearVelocity = new Vector2(throwDirection * 5f, 3f);
+        var (instance, rentHandle) = Managers.Pool.Pop(HeldProp.UniqueKey);
+
+        if (instance != null)
+        {
+            if (instance.TryGetComponent<Rigidbody2D>(out var rigidbody))
+            {
+                float throwDirection = character.GetLookDirectionX();
+
+                if (isUpPressed)
+                    rigidbody.linearVelocity = new Vector2(throwDirection * 4f, 7f);
+                else
+                    rigidbody.linearVelocity = new Vector2(throwDirection * 6f, 2f);
+            }
+        }
+
+        ResetHoldState(character);
+    }
+
+    private void ResetHoldState(Character character)
+    {
+        character.CurrentHoldInteractionType = InteractionType.None;
         HeldProp = null;
         IsHoldingProp = false;
+        HasThrown = false;
     }
 }

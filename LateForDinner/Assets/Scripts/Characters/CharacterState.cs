@@ -239,3 +239,41 @@ public class ClimbState : CharacterState
             Owner?.CharacterAnimator?.SetAnimatorSpeed(0f);
     }
 }
+
+public class ThrowState : CharacterState
+{
+    protected readonly Func<Vector2> _inputProvider;
+
+    public ThrowState(Character owner, Func<Vector2> inputProvider) : base(owner)
+        => _inputProvider = inputProvider;
+
+    public override void OnEnter()
+    {
+        base.OnEnter();
+
+        if (Owner is not ICarriableCharacter carriable)
+            return;
+
+        carriable.HasThrown = false;
+        Owner?.CharacterAnimator?.PlayState(CharacterStateType.Throw);
+    }
+
+    public override void OnLogic()
+    {
+        base.OnLogic();
+
+        if (Owner is not ICarriableCharacter carriable)
+            return;
+
+        if (!carriable.HasThrown && Owner.CharacterAnimator.GetCurrentAnimatorNormalizedTime() >= 0.5f)
+        {
+            carriable.HasThrown = true;
+            Vector2 inputDir = _inputProvider?.Invoke() ?? Vector2.zero;
+            bool isUpPressed = inputDir.y > 0f;
+            carriable.ExecuteThrow(isUpPressed);
+        }
+
+        if (Owner.CharacterAnimator.GetCurrentAnimatorNormalizedTime() >= 1.0f)
+            Owner.StateMachine.RequestStateChange(CharacterStateType.Idle, forceInstantly: true);
+    }
+}
