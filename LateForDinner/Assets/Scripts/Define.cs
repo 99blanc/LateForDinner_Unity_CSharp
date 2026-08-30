@@ -24,7 +24,7 @@ public class Define
 
     public class Command
     {
-        public const int History = 50;
+        public const int History = 100;
     }
 
     public class Cursor

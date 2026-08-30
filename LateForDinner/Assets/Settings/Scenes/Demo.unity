@@ -579,7 +579,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2890677619805323147, guid: 3074eeb44fc51ce4c97fcc28d4491b88, type: 3}
       propertyPath: m_Name
-      value: Ladder
+      value: LadderProp
       objectReference: {fileID: 0}
     - target: {fileID: 8984036973655757841, guid: 3074eeb44fc51ce4c97fcc28d4491b88, type: 3}
       propertyPath: m_LocalPosition.x

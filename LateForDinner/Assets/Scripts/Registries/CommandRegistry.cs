@@ -20,6 +20,7 @@ public class CommandRegistry
 
     private void UpdateDebugCommands(bool isDebugMode)
     {
+        // DESC ::: 디버그 명령어 등록
         if (isDebugMode)
         {
             _console.RegisterCommand("set", OnCommandSetVariable, Managers.Localization.Get(LocalizationKey.Console_Desc_Set));
@@ -28,7 +29,7 @@ public class CommandRegistry
             _console.RegisterCommand("time_debug", OnCommandTimeScale, Managers.Localization.Get(LocalizationKey.Console_Desc_Time));
             _console.RegisterCommand("ground_debug", OnCommandToggleGroundDebug, Managers.Localization.Get(LocalizationKey.Console_Desc_Ground));
             _console.RegisterCommand("scene", async (args) => await OnCommandScene(args), Managers.Localization.Get(LocalizationKey.Console_Desc_Scene));
-            _console.RegisterCommand("spawn", OnCommandSpawnCharacter, Managers.Localization.Get(LocalizationKey.Console_Desc_Spawn));
+            _console.RegisterCommand("spawn", async (args) => await OnCommandSpawnCharacter(args), Managers.Localization.Get(LocalizationKey.Console_Desc_Spawn));
         }
         else
         {
@@ -255,7 +256,7 @@ public class CommandRegistry
             Log.Warning(Managers.Localization.Get(LocalizationKey.Console_Scene_Invalid, args[0]));
     }
 
-    private void OnCommandSpawnCharacter(string[] args)
+    private async UniTask OnCommandSpawnCharacter(string[] args)
     {
         if (!CheckIsDebugMode())
             return;
@@ -268,22 +269,49 @@ public class CommandRegistry
             return;
         }
 
-        if (args.Length < 1 || args[0].Equals("help", StringComparison.OrdinalIgnoreCase))
+        if (args.Length < 1 || args[0].Equals("help", StringComparison.OrdinalIgnoreCase) || args[0].Equals("list", StringComparison.OrdinalIgnoreCase))
         {
             Log.Warning(LocalizationKey.Console_Spawn_Usage);
+            Log.Info(LocalizationKey.Console_Spawn_Available);
+
+            foreach (var characterName in Enum.GetNames(typeof(CharacterID)))
+                Log.Info(LocalizationKey.Console_Spawn_Format, characterName);
+
             return;
         }
 
-        if (Enum.TryParse<CharacterID>(args[0], true, out var targetCharacterID))
+        if (!Enum.TryParse<CharacterID>(args[0], true, out var targetCharacterID))
         {
-            if (!targetCharacterID.IsPlayable())
-                return;
-
-            Managers.Game.SpawnPlayerAsync(targetCharacterID).Forget();
-            Log.Info(LocalizationKey.Console_Spawn_Success, targetCharacterID);
-        }
-        else
             Log.Warning(LocalizationKey.Console_Spawn_Invalid, args[0]);
+            return;
+        }
+
+        bool isPlayable = Managers.Data.PlayableCharacters.ContainsKey((int)targetCharacterID);
+
+        if (isPlayable)
+        {
+            if (Managers.Game.Character == null)
+                Log.Info(LocalizationKey.Console_Spawn_NotFoundPlayableCharacter, targetCharacterID.ToString());
+
+            await Managers.Game.SpawnPlayerAsync(targetCharacterID);
+            return;
+        }
+
+        if (Managers.Game.Character == null)
+        {
+            Log.Info(LocalizationKey.Console_Spawn_NotFoundPlayableCharacter, CharacterID.Protagonist.ToString());
+            await Managers.Game.SpawnPlayerAsync(CharacterID.Protagonist);
+        }
+
+        SpawnGeneralCharacter(targetCharacterID);
+    }
+
+    private void SpawnGeneralCharacter(CharacterID characterID)
+    {
+        Vector2 lookDir = Managers.Game.Character.GetLookDirection();
+        Vector3 spawnPosition = Managers.Game.Character.transform.position + (Vector3)(lookDir * 2f);
+        Managers.Game.SpawnCharacterAsync<Character>(characterID, spawnPosition).Forget();
+        Log.Info(LocalizationKey.Console_Spawn_Success, characterID);
     }
 
     private bool CheckIsDebugMode()

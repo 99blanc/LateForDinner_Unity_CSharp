@@ -61,7 +61,7 @@ public static class CharacterTransitionExtensions
     public static bool IsPlayerReadyToRoll(this Character character)
     {
         bool isLastJump = character is IJumpableCharacter jumpable && jumpable.RemainingJumpCount == 0;
-        bool isAnimationReady = character.CharacterAnimator is ProtagonistAnimator protagonistAnimator && protagonistAnimator.GetCurrentAnimatorNormalizedTime() >= Define.Animation.NormalizedTime;
+        bool isAnimationReady = character.CharacterAnimator is PlayableCharacterAnimator protagonistAnimator && protagonistAnimator.GetCurrentAnimatorNormalizedTime() >= Define.Animation.NormalizedTime;
         return isLastJump && isAnimationReady;
     }
 

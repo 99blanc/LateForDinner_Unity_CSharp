@@ -74,4 +74,22 @@ public static class CharacterBehaviorExtensions
         if (Mathf.Abs(directionX) > 0.01f)
             renderer.flipX = directionX < 0f;
     }
+
+    public static float GetLookDirectionX(this SpriteRenderer renderer)
+    {
+        if (renderer == null)
+            return 1f;
+
+        return renderer.flipX ? -1f : 1f;
+    }
+    public static Vector2 GetLookDirection(this SpriteRenderer renderer)
+        => new Vector2(renderer.GetLookDirectionX(), 0f);
+
+    public static Vector2 GetLookDirection(this Character character)
+    {
+        if (character == null || character.Renderer == null)
+            return Vector2.right;
+
+        return character.Renderer.GetLookDirection();
+    }
 }

@@ -6,6 +6,7 @@ public abstract class Prop : MonoBehaviour
 {
     [SerializeField] public PropKey _propKey;
     [SerializeField, HideInInspector] private string _guid;
+    [SerializeField] public SpriteRenderer Renderer;
     private string _uniqueKey;
     public string UniqueKey => _uniqueKey;
     public int Priority

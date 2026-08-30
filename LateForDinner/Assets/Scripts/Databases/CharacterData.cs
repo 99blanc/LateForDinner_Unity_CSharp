@@ -7,5 +7,6 @@ namespace LateForDinner.Data
     {
         public int ID { get; set; }
         public string Name { get; set; }
+        public string AddressableKey { get; set; }
     }
 }

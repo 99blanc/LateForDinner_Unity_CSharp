@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using System;
+using System.Runtime.InteropServices;
 using UnityEngine;
 
 public class GameManager
@@ -45,60 +46,92 @@ public class GameManager
         Managers.Scene.RelocateCharacterToSpawnpoint();
     }
 
-    public async UniTask<PlayableCharacter> SpawnPlayerAsync(CharacterID characterID)
+    public async UniTask<T> SpawnPlayerAsync<T>(CharacterID characterID) where T : PlayableCharacter
     {
         DespawnExistingPlayer();
-        GameObject playerPrefab = await CreatePlayerPrefabAsync(characterID);
+        var character = await SpawnCharacterAsync<T>(characterID, Vector3.zero);
 
-        if (IsPlayerPrefabNull(playerPrefab))
-            return null;
-
-        if (!TrySetupCharacterComponents(playerPrefab, characterID, out var playerComponent, out var characterAnimator))
+        if (character != null)
         {
-            UnityEngine.Object.Destroy(playerPrefab);
+            Character = character;
+            UnityEngine.Object.DontDestroyOnLoad(character.gameObject);
+            Managers.Camera.SetTarget(Character);
+        }
+
+        return character;
+    }
+
+    public async UniTask<PlayableCharacter> SpawnPlayerAsync(CharacterID characterID)
+        => await SpawnPlayerAsync<PlayableCharacter>(characterID);
+
+    public async UniTask<T> SpawnCharacterAsync<T>(CharacterID characterID, Vector3 position, Quaternion rotation = default) where T : Character
+    {
+        GameObject characterPrefab = await CreateCharacterPrefabAsync(characterID);
+
+        if (characterPrefab == null)
+            return default;
+
+        characterPrefab.transform.position = position;
+        characterPrefab.transform.rotation = rotation == default ? Quaternion.identity : rotation;
+
+        if (!TrySetupGeneralCharacterComponents(characterPrefab, characterID, out var characterComponent, out var animatorComponent))
+        {
+            UnityEngine.Object.Destroy(characterPrefab);
+            return default;
+        }
+
+        if (characterComponent is not T typedCharacter)
+        {
+            Log.Error(LocalizationKey.Log_Game_CharacterSpawnFailed, characterID.ToString());
+            UnityEngine.Object.Destroy(characterPrefab);
+            return default;
+        }
+
+        await typedCharacter.InitAsync();
+        Log.System(LocalizationKey.Log_Game_CharacterSpawnSuccess, characterID.ToString());
+        return typedCharacter;
+    }
+
+    private async UniTask<GameObject> CreateCharacterPrefabAsync(CharacterID characterID)
+    {
+        if (!Managers.Data.Characters.TryGetValue((int)characterID, out var characterData) || string.IsNullOrEmpty(characterData.AddressableKey))
+        {
+            Log.Error(LocalizationKey.Log_Game_CharacterSpawnFailed, characterID.ToString());
             return null;
         }
 
-        Character = playerComponent;
-        await Character.InitAsync();
-        UnityEngine.Object.DontDestroyOnLoad(playerPrefab);
-        Managers.Camera.SetTarget(Character);
-        Log.System(LocalizationKey.Log_Game_PlayerSpawnSuccess, characterID.ToString());
-        return Character;
-    }
+        GameObject prefab = await Managers.Resource.InstantiateAsync(characterData.AddressableKey);
 
-    private async UniTask<GameObject> CreatePlayerPrefabAsync(CharacterID characterID)
-    {
-        GameObject playerPrefab = await Managers.Resource.InstantiateAsync(Literal.Assets.PlayableCharacterObject);
-
-        if (IsPlayerPrefabNull(playerPrefab))
+        if (prefab == null)
         {
-            Log.Error(LocalizationKey.Log_Game_PlayerSpawnFailed, characterID.ToString());
+            Log.Error(LocalizationKey.Log_Game_CharacterSpawnFailed, characterID.ToString());
             return null;
         }
 
-        playerPrefab.name = characterID.ToString();
-        return playerPrefab;
+        prefab.name = characterID.ToString();
+        return prefab;
     }
 
-    private bool TrySetupCharacterComponents(GameObject playerPrefab, CharacterID characterID, out PlayableCharacter playerComponent, out CharacterAnimator characterAnimator)
+    private bool TrySetupGeneralCharacterComponents(GameObject prefab, CharacterID characterID, out Character characterComponent, out CharacterAnimator characterAnimator)
     {
-        playerComponent = null;
+        characterComponent = null;
         characterAnimator = null;
         var (characterType, animatorType) = characterID.GetCharacterTypes();
 
-        if (HasAnyTypeMissing(characterType, animatorType))
+        if (characterType == null)
         {
-            Log.Error(LocalizationKey.Log_Game_PlayerSpawnFailed, characterID.ToString());
+            Log.Error(LocalizationKey.Log_Game_CharacterSpawnFailed, characterID.ToString());
             return false;
         }
 
-        playerComponent = playerPrefab.AddComponent(characterType) as PlayableCharacter;
-        characterAnimator = playerPrefab.AddComponent(animatorType) as CharacterAnimator;
+        characterComponent = prefab.AddComponent(characterType) as Character;
 
-        if (HasAnyComponentMissing(playerComponent, characterAnimator))
+        if (animatorType != null)
+            characterAnimator = prefab.AddComponent(animatorType) as CharacterAnimator;
+
+        if (characterComponent == null)
         {
-            Log.Error(LocalizationKey.Log_Game_PlayerSpawnFailed, characterID.ToString());
+            Log.Error(LocalizationKey.Log_Game_CharacterSpawnFailed, characterID.ToString());
             return false;
         }
 
@@ -113,15 +146,6 @@ public class GameManager
         UnityEngine.Object.Destroy(Character.gameObject);
         Character = null;
     }
-
-    private bool IsPlayerPrefabNull(GameObject playerPrefab)
-        => playerPrefab == null;
-
-    private bool HasAnyTypeMissing(Type characterType, Type animatorType)
-        => characterType == null || animatorType == null;
-
-    private bool HasAnyComponentMissing(PlayableCharacter playerComponent, CharacterAnimator characterAnimator)
-        => playerComponent == null || characterAnimator == null;
 
     private bool IsCharacterNull()
         => Character == null;

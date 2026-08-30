@@ -88,4 +88,28 @@ public abstract class Character : MonoBehaviour, IPoolable
         transform.position = spawnPosition;
         transform.rotation = targetSpawn.transform.rotation;
     }
+
+    protected virtual void OnTriggerEnter2D(Collider2D target)
+    {
+        if (target.GetComponentInParent<IInteractable>() is IInteractable interactable)
+        {
+            _interactables.Add(interactable);
+            interactable.CanInteract.Value = true;
+
+            if (!interactable.TriggerOnProximity)
+                return;
+
+            if (interactable == CurrentInteractable)
+                interactable.ProtectedInteract(this);
+        }
+    }
+
+    protected virtual void OnTriggerExit2D(Collider2D target)
+    {
+        if (target.GetComponentInParent<IInteractable>() is IInteractable interactable)
+        {
+            _interactables.Remove(interactable);
+            interactable.CanInteract.Value = false;
+        }
+    }
 }

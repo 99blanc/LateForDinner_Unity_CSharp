@@ -90,7 +90,7 @@ GameObject:
   - component: {fileID: 7682468558932832268}
   - component: {fileID: 8953417934167172905}
   m_Layer: 0
-  m_Name: Ladder
+  m_Name: LadderProp
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -185,6 +185,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Ladder
   _propKey: 1
   _guid: 
+  Renderer: {fileID: 7682468558932832268}
   _collider: {fileID: 1413046859792644861}
   _interactionType: 0
   _promptKey: 15

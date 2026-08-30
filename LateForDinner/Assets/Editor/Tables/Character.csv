@@ -1,7 +1,7 @@
-# Table Type: Character,
-# Description: 캐릭터 고유 번호 정의 테이블,
-# Rule: 콤마 사용 불가. ID는 고유 값이어야 하며 중복 불가. Name은 여러 캐릭터 정의 테이블의 고유 Name,
-# ID : 여러 캐릭터 정의 테이블.csv,
-ID,Name
-# Index: Character,
-1,Protagonist
+# Table Type: Character,,
+# Description: 캐릭터 고유 번호 정의 테이블,,
+# Rule: 콤마 사용 불가. ID는 고유 값이어야 하며 중복 불가. AddressableKey는 해당 오브젝트의 실제 프리팹 이름. Name은 여러 캐릭터 정의 테이블의 고유 Name,,
+# ID : 여러 캐릭터 정의 테이블.csv,,
+ID,AddressableKey,Name
+# Index: Character,,
+1,ProtagonistObject,Protagonist

@@ -371,28 +371,4 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
         if (target != null && target.RequireKeyInput && target.CanInteract.Value)
             target.ProtectedInteract(this);
     }
-
-    private void OnTriggerEnter2D(Collider2D target)
-    {
-        if (target.GetComponentInParent<IInteractable>() is IInteractable interactable)
-        {
-            _interactables.Add(interactable);
-            interactable.CanInteract.Value = true;
-
-            if (!interactable.TriggerOnProximity)
-                return;
-
-            if (interactable == CurrentInteractable)
-                interactable.ProtectedInteract(this);
-        }
-    }
-
-    private void OnTriggerExit2D(Collider2D target)
-    {
-        if (target.GetComponentInParent<IInteractable>() is IInteractable interactable)
-        {
-            _interactables.Remove(interactable);
-            interactable.CanInteract.Value = false;
-        }
-    }
 }

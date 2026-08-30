@@ -5,7 +5,6 @@ public class Literal
         public const string Animator = "Animator";
         public const string EventSystem = "EventSystem";
         public const string InputActionAsset = "InputSystem_Actions";
-        public const string PlayableCharacterObject = "PlayableCharacterObject";
     }
 
     public class Extensions

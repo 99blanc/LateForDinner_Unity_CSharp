@@ -1,18 +1,18 @@
 using System;
 using UnityEngine;
 
-public class ProtagonistCrouchState : CharacterState
+public class PlayableCharacterCrouchState : CharacterState
 {
-    private readonly Protagonist _protagonist;
+    private readonly PlayableCharacter _player;
 
-    public ProtagonistCrouchState(Character owner) : base(owner)
-        => _protagonist = owner as Protagonist;
+    public PlayableCharacterCrouchState(Character owner) : base(owner)
+        => _player = owner as PlayableCharacter;
 
     public override void OnEnter()
     {
         base.OnEnter();
 
-        if (_protagonist is not ICrouchableCharacter crouchable)
+        if (_player is not ICrouchableCharacter crouchable)
             return;
 
         crouchable.Crouch();
@@ -23,7 +23,7 @@ public class ProtagonistCrouchState : CharacterState
     {
         base.OnExit();
 
-        if (_protagonist is not ICrouchableCharacter crouchable)
+        if (_player is not ICrouchableCharacter crouchable)
             return;
 
         crouchable.StandUp();
@@ -31,19 +31,19 @@ public class ProtagonistCrouchState : CharacterState
 
     private void PlayCrouchAnimation()
     {
-        if (_protagonist?.CharacterAnimator is not ProtagonistAnimator protagonistAnimator)
+        if (_player?.CharacterAnimator is not PlayableCharacterAnimator protagonistAnimator)
             return;
 
         protagonistAnimator.PlayCrouch();
     }
 }
 
-public class ProtagonistJumpState : JumpState
+public class PlayableCharacterJumpState : JumpState
 {
-    private readonly Protagonist _protagonist;
+    private readonly PlayableCharacter _player;
 
-    public ProtagonistJumpState(Character owner, Func<float> inputProvider) : base(owner, inputProvider)
-        => _protagonist = Owner as Protagonist;
+    public PlayableCharacterJumpState(Character owner, Func<float> inputProvider) : base(owner, inputProvider)
+        => _player = Owner as PlayableCharacter;
 
     public override void OnEnter()
     {
@@ -53,10 +53,10 @@ public class ProtagonistJumpState : JumpState
 
     private void PlayJumpAnimation()
     {
-        if (_protagonist?.CharacterAnimator is not ProtagonistAnimator protagonistAnimator)
+        if (_player?.CharacterAnimator is not PlayableCharacterAnimator protagonistAnimator)
             return;
 
-        if (_protagonist is not IJumpableCharacter jumpable)
+        if (_player is not IJumpableCharacter jumpable)
             return;
 
         if (jumpable.RemainingJumpCount >= jumpable.MaxJumpCount - 1)
@@ -66,22 +66,22 @@ public class ProtagonistJumpState : JumpState
     }
 }
 
-public class ProtagonistRollState : CharacterState
+public class PlayableCharacterRollState : CharacterState
 {
     protected readonly Func<float> _inputProvider;
-    private readonly Protagonist _protagonist;
+    private readonly PlayableCharacter _player;
 
-    public ProtagonistRollState(Character owner, Func<float> inputProvider) : base(owner)
+    public PlayableCharacterRollState(Character owner, Func<float> inputProvider) : base(owner)
     {
         _inputProvider = inputProvider;
-        _protagonist = Owner as Protagonist;
+        _player = Owner as PlayableCharacter;
     }
 
     public override void OnEnter()
     {
         base.OnEnter();
 
-        if (_protagonist is not IRollableCharacter rollable)
+        if (_player is not IRollableCharacter rollable)
             return;
 
         float directionX = _inputProvider?.Invoke() ?? 0f;
@@ -93,7 +93,7 @@ public class ProtagonistRollState : CharacterState
     {
         base.OnLogic();
 
-        if (_protagonist is not IRollableCharacter rollable)
+        if (_player is not IRollableCharacter rollable)
             return;
 
         if (_inputProvider == null)
@@ -107,25 +107,25 @@ public class ProtagonistRollState : CharacterState
 
     private void PlayRollAnimation()
     {
-        if (_protagonist?.CharacterAnimator is not ProtagonistAnimator protagonistAnimator)
+        if (_player?.CharacterAnimator is not PlayableCharacterAnimator protagonistAnimator)
             return;
 
         protagonistAnimator.PlayRoll();
     }
 }
 
-public class ProtagonistDashState : DashState
+public class PlayableCharacterDashState : DashState
 {
-    private Protagonist _protagonist;
+    private PlayableCharacter _player;
 
-    public ProtagonistDashState(Character owner, Func<Vector2> inputProvider) : base(owner, inputProvider)
-        => _protagonist = Owner as Protagonist;
+    public PlayableCharacterDashState(Character owner, Func<Vector2> inputProvider) : base(owner, inputProvider)
+        => _player = Owner as PlayableCharacter;
 
     public override void OnEnter()
     {
         base.OnEnter();
 
-        if (_protagonist is not IDashableCharacter dashable)
+        if (_player is not IDashableCharacter dashable)
             return;
 
         PlayDashAnimation(dashable);
@@ -135,16 +135,16 @@ public class ProtagonistDashState : DashState
     {
         base.OnExit();
 
-        if (_protagonist is not IDashableCharacter dashable)
+        if (_player is not IDashableCharacter dashable)
             return;
 
-        if (_protagonist.IsGrounded() && _protagonist is IJumpableCharacter jumpable)
+        if (_player.IsGrounded() && _player is IJumpableCharacter jumpable)
             jumpable.RemainingJumpCount = jumpable.MaxJumpCount;
     }
 
     private void PlayDashAnimation(IDashableCharacter dashable)
     {
-        if (_protagonist?.CharacterAnimator is not ProtagonistAnimator protagonistAnimator)
+        if (_player?.CharacterAnimator is not PlayableCharacterAnimator protagonistAnimator)
             return;
 
         Vector2 dir = dashable.DashDirection;

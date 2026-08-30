@@ -86,10 +86,13 @@ public enum LocalizationKey
     Console_Scene_MovingProcess                        , // {0}' 맵으로 이동 중...
     Console_Scene_Invalid                              , // 유효하지 않은 SceneID입니다: '{0}'. 맵 목록을 보려면 'scene list'를 입력하세요.
     Console_Desc_Spawn                                 , // 지정한 캐릭터를 Demo 맵에 소환합니다.
+    Console_Spawn_Available                            , // --- 소환 가능한 캐릭터 목록 ---
+    Console_Spawn_Format                               , // - {0}
     Console_Spawn_Usage                                , // 사용법: spawn [CharacterID]
     Console_Spawn_NotDemo                              , // 이 명령어는 Demo 맵에서만 사용할 수 있습니다.
+    Console_Spawn_NotFoundPlayableCharacter            , // 활성화된 플레이어 캐릭터가 없어 기본 '{0}' 캐릭터를 먼저 생성합니다.
     Console_Spawn_Success                              , // 캐릭터 [{0}] 소환 완료!
-    Console_Spawn_Invalid                              , // 유효하지 않은 CharacterID입니다: '{0}'
+    Console_Spawn_Invalid                              , // 유효하지 않은 CharacterID입니다: '{0}'. 캐릭터 목록을 보려면 'spawn list'를 입력하세요.
     Interaction_NPC                                    , // NPC 대화 시작/종료 처리
     Interaction_Quest                                  , // 퀘스트 수락/완료 및 분기 트리거 연동
     Interaction_Shop                                   , // 상점 UI 진입
@@ -126,8 +129,8 @@ public enum LocalizationKey
     Log_Game_Loading_SaveData                          , // [GameManager] 새로운 게임 데이터를 생성하는 중입니다.
     Log_Game_Loading_PlayerSpawn                       , // [GameManager] 캐릭터를 생성하고 월드로 이동하는 중입니다.
     Log_Game_Loading_UI                                , // [GameManager] 인터페이스를 불러오는 중입니다.
-    Log_Game_PlayerSpawnFailed                         , // [GameManager] 캐릭터('{0}') 생성에 실패했습니다.
-    Log_Game_PlayerSpawnSuccess                        , // [GameManager] 캐릭터('{0}')를 성공적으로 생성했습니다.
+    Log_Game_CharacterSpawnFailed                      , // [GameManager] 캐릭터('{0}') 생성에 실패했습니다.
+    Log_Game_CharacterSpawnSuccess                     , // [GameManager] 캐릭터('{0}')를 성공적으로 생성했습니다.
     Log_Interact_NotRegistered                         , // [InteractManager] 등록되지 않은 상호작용 타입입니다: '{0}'
     Log_Localization_LoadedSuccessfully                , // [LocalizationManager] 현지화 시스템을 성공적으로 불러왔습니다.
     Log_Localization_FileReadFailed                    , // [LocalizationManager] 현지화 파일('{0}')을 읽는 중 오류가 발생했습니다.

@@ -4,14 +4,29 @@ using UnityEngine;
 
 public interface IInteractable
 {
+    private static readonly ConditionalWeakTable<IInteractable, InteractValue> _interactValue = new ConditionalWeakTable<IInteractable, InteractValue>();
+    private class InteractValue
+    {
+        public float InteractRadius = 0f;
+        public int Priority = 0;
+    }
+
     Collider2D Collider { get; }
     PropKey PropKey { get; }
     InteractionType InteractionType { get; }
     LocalizationKey LocalizationPromptKey { get; }
     bool RequireKeyInput { get; }
     bool TriggerOnProximity { get; }
-    float InteractRadius { get; }
-    int Priority { get; }
+    public float InteractRadius
+    {
+        get => _interactValue.GetOrCreateValue(this).InteractRadius;
+        set => _interactValue.GetOrCreateValue(this).InteractRadius = value;
+    }
+    public int Priority
+    {
+        get => _interactValue.GetOrCreateValue(this).Priority;
+        set => _interactValue.GetOrCreateValue(this).Priority = value;
+    }
     private static readonly ConditionalWeakTable<IInteractable, ReactiveProperty<bool>> _interactCaches = new();
     public ReactiveProperty<bool> CanInteract
     {
@@ -27,16 +42,16 @@ public interface IInteractable
 
             IInteractAction newAction = InteractionType switch
             {
-                InteractionType.NPC => new NPCInteractAction(),
-                InteractionType.Quest => new QuestInteractAction(),
-                InteractionType.Shop => new ShopInteractAction(),
-                InteractionType.Save => new SaveInteractAction(),
-                InteractionType.Event => new EventInteractAction(),
-                InteractionType.StageProgress => new StageProgressInteractAction(),
-                InteractionType.Door => new DoorInteractAction(),
-                InteractionType.TrayHolder => new TrayHolderInteractAction(),
+                //InteractionType.NPC => new NPCInteractAction(),
+                //InteractionType.Quest => new QuestInteractAction(),
+                //InteractionType.Shop => new ShopInteractAction(),
+                //InteractionType.Save => new SaveInteractAction(),
+                //InteractionType.Event => new EventInteractAction(),
+                //InteractionType.StageProgress => new StageProgressInteractAction(),
+                //InteractionType.Door => new DoorInteractAction(),
+                //InteractionType.TrayHolder => new TrayHolderInteractAction(),
                 InteractionType.Tray => new TrayInteractAction(),
-                InteractionType.DiningTable => new DiningTableInteractAction(),
+                //InteractionType.DiningTable => new DiningTableInteractAction(),
                 _ => null
             };
 
@@ -47,11 +62,11 @@ public interface IInteractable
         }
     }
 
-    public void ProtectedInteract(PlayableCharacter player)
+    public void ProtectedInteract(Character character)
     {
-        Action?.Execute(player);
-        OnInteract(player);
+        Action?.Execute(character);
+        OnInteract(character);
     }
 
-    virtual void OnInteract(PlayableCharacter player) { }
+    virtual void OnInteract(Character character) { }
 }

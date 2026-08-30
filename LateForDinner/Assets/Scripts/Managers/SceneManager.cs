@@ -164,6 +164,13 @@ public class SceneManager
             collider = range.AddComponent<CircleCollider2D>();
 
         collider.isTrigger = true;
+        SpriteRenderer renderer = prop.Renderer;
+        Bounds bounds = renderer.bounds;
+        float maxBounds = Mathf.Max(bounds.size.x, bounds.size.y);
+        float maxScale = Mathf.Max(prop.transform.localScale.x, prop.transform.localScale.y);
+        float calculatedRadius = (maxBounds * maxScale) * 0.5f;
+        collider.radius = calculatedRadius;
+        interactable.InteractRadius = collider.radius;
         collider.radius = interactable.InteractRadius;
         _interactables.Add(interactable, collider);
     }

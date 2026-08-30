@@ -6,3 +6,4 @@ Key,AddressableKey,InteractionType,Priority
 # Index: Prop,,,
 Spawnpoint,SpawnpointProp,None,0
 Ladder,LadderProp,None,10
+Tray,TrayProp,Tray,5
