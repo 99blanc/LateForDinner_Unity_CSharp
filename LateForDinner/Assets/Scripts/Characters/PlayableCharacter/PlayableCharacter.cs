@@ -320,6 +320,9 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
         if (Managers.Control.IsPressed(Literal.Hotkeys.DownUtility))
             input.y -= 1f;
 
+        if (input == Vector2.zero)
+            input.x = Renderer.GetLookDirectionX();
+
         return input;
     }
 
@@ -360,12 +363,19 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
     {
         if (isModifierDash)
         {
-            bool triggered = Managers.Control.IsModifierTriggered(Literal.Hotkeys.Dash, Literal.Hotkeys.Left) || Managers.Control.IsModifierTriggered(Literal.Hotkeys.Dash, Literal.Hotkeys.Right);
+            bool isDashPressed = Managers.Control.IsPressed(Literal.Hotkeys.Dash);
 
-            if (allowDownUtility)
-                triggered |= Managers.Control.IsModifierTriggered(Literal.Hotkeys.Dash, Literal.Hotkeys.DownUtility);
+            if (!isDashPressed)
+                return false;
 
-            return triggered;
+            bool isLeftPressed = Managers.Control.IsPressed(Literal.Hotkeys.Left);
+            bool isRightPressed = Managers.Control.IsPressed(Literal.Hotkeys.Right);
+            bool isDownPressed = allowDownUtility && Managers.Control.IsPressed(Literal.Hotkeys.DownUtility);
+
+            if (isLeftPressed || isRightPressed || isDownPressed)
+                return Managers.Control.IsHoldRepeated(Literal.Hotkeys.Dash);
+
+            return false;
         }
         else
         {

@@ -9,6 +9,7 @@ public class ControlManager
 {
     private readonly Dictionary<string, InputAction> _actionCaches = new Dictionary<string, InputAction>();
     private readonly Dictionary<string, float> _lastFirstTapTimes = new Dictionary<string, float>();
+    private readonly Dictionary<string, float> _repeatTimers = new Dictionary<string, float>();
     private readonly HashSet<string> _triggeredCaches = new HashSet<string>();
     private readonly HashSet<string> _pressedCaches = new HashSet<string>();
     private readonly Dictionary<string, float> _doubleTriggeredCaches = new Dictionary<string, float>();
@@ -294,6 +295,29 @@ public class ControlManager
 
     public bool IsModifierTriggered(string modifierActionName, string mainActionName)
         => IsPressed(modifierActionName) && IsTriggered(mainActionName);
+
+    public bool IsHoldRepeated(string actionName, float interval = Define.Scaler.Threshold)
+    {
+        if (!IsPressed(actionName))
+        {
+            _repeatTimers.Remove(actionName);
+            return false;
+        }
+
+        float currentTime = Time.unscaledTime;
+
+        if (!_repeatTimers.TryGetValue(actionName, out float nextTriggerTime))
+        {
+            _repeatTimers[actionName] = currentTime + interval;
+            return true;
+        }
+
+        if (currentTime < nextTriggerTime)
+            return false;
+
+        _repeatTimers[actionName] = currentTime + interval;
+        return true;
+    }
 
     public Observable<Unit> AsObservable(string actionName)
     {
