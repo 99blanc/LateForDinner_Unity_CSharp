@@ -49,7 +49,7 @@ public interface ICarriableCharacter
         if (instance != null)
         {
             float dropDirection = character.GetLookDirectionX();
-            instance.transform.position = character.transform.position + new Vector3(dropDirection * 0.5f, 0f, 0f);
+            instance.transform.position = character.transform.position;
 
             if (instance.TryGetComponent<Rigidbody2D>(out var rd))
                 rd.linearVelocity = Vector2.zero;
