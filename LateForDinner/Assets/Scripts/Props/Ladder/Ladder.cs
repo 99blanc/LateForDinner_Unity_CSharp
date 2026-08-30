@@ -18,5 +18,5 @@ public class Ladder : Prop, IInteractable
     public float InteractRadius => _interactRadius;
     protected override bool UseSaveState => false;
 
-    public void OnInteract(Character player) { }
+    public void OnInteract(Character character) { }
 }

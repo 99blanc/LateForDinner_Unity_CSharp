@@ -4,6 +4,9 @@ using UnityHFSM;
 
 public static class CharacterTransitionExtensions
 {
+    private static bool IsHoldingProp(this Character character)
+        => character is ICarriableCharacter carriable && carriable.IsHoldingProp;
+
     public static bool IsTryingToMove(this Character character, Func<float> getMoveInput)
         => Mathf.Abs(getMoveInput()) > 0.01f;
 
@@ -17,7 +20,12 @@ public static class CharacterTransitionExtensions
         => !character.IsGrounded() && rb.linearVelocity.y < -0.1f;
 
     public static bool IsTryingToCrouch(this Character character, Func<bool> getDownInput)
-        => character.IsGrounded() && getDownInput();
+    {
+        if (character.IsHoldingProp())
+            return false;
+
+        return character.IsGrounded() && getDownInput();
+    }
 
     public static bool IsCrouchToIdle(this Character character, Func<float> getMoveInput, Func<bool> getDownInput)
         => !getDownInput() && Mathf.Abs(getMoveInput()) <= 0.01f;
@@ -27,9 +35,11 @@ public static class CharacterTransitionExtensions
 
     public static bool IsTryingToJump(this Character character, Func<bool> getJumpInput)
     {
-        bool isKeyTriggered = getJumpInput();
+        if (!getJumpInput())
+            return false;
+
         bool hasJumpCount = character is IJumpableCharacter jumpable && jumpable.RemainingJumpCount > 0;
-        return isKeyTriggered && hasJumpCount;
+        return hasJumpCount;
     }
 
     public static bool IsLandingToIdle(this Character character, Func<float> getMoveInput)
@@ -60,8 +70,11 @@ public static class CharacterTransitionExtensions
 
     public static bool IsPlayerReadyToRoll(this Character character)
     {
+        if (character.IsHoldingProp())
+            return false;
+
         bool isLastJump = character is IJumpableCharacter jumpable && jumpable.RemainingJumpCount == 0;
-        bool isAnimationReady = character.CharacterAnimator is PlayableCharacterAnimator protagonistAnimator && protagonistAnimator.GetCurrentAnimatorNormalizedTime() >= Define.Animation.NormalizedTime;
+        bool isAnimationReady = character.CharacterAnimator is PlayableCharacterAnimator playableAnimator && playableAnimator.GetCurrentAnimatorNormalizedTime() >= Define.Animation.NormalizedTime;
         return isLastJump && isAnimationReady;
     }
 
@@ -79,6 +92,9 @@ public static class CharacterTransitionExtensions
 
     public static bool IsTryingToDash(this Character character, Func<bool> getDashInput)
     {
+        if (character.IsHoldingProp())
+            return false;
+
         if (character is IDashableCharacter dashable && dashable.IsOnCooldown)
             return false;
 
@@ -93,6 +109,9 @@ public static class CharacterTransitionExtensions
 
     public static bool IsTryingToClimb(this Character character, Func<bool> getVerticalInput, Func<bool> getDownInput)
     {
+        if (character.IsHoldingProp())
+            return false;
+
         if (character is IClimbableCharacter climbable && !climbable.CanClimb)
             return false;
 

@@ -73,12 +73,7 @@ public class GameManager
 
         characterPrefab.transform.position = position;
         characterPrefab.transform.rotation = rotation == default ? Quaternion.identity : rotation;
-
-        if (!TrySetupGeneralCharacterComponents(characterPrefab, characterID, out var characterComponent, out var animatorComponent))
-        {
-            UnityEngine.Object.Destroy(characterPrefab);
-            return default;
-        }
+        var characterComponent = characterPrefab.GetComponentAssert<Character>();
 
         if (characterComponent is not T typedCharacter)
         {
@@ -110,32 +105,6 @@ public class GameManager
 
         prefab.name = characterID.ToString();
         return prefab;
-    }
-
-    private bool TrySetupGeneralCharacterComponents(GameObject prefab, CharacterID characterID, out Character characterComponent, out CharacterAnimator characterAnimator)
-    {
-        characterComponent = null;
-        characterAnimator = null;
-        var (characterType, animatorType) = characterID.GetCharacterTypes();
-
-        if (characterType == null)
-        {
-            Log.Error(LocalizationKey.Log_Game_CharacterSpawnFailed, characterID.ToString());
-            return false;
-        }
-
-        characterComponent = prefab.AddComponent(characterType) as Character;
-
-        if (animatorType != null)
-            characterAnimator = prefab.AddComponent(animatorType) as CharacterAnimator;
-
-        if (characterComponent == null)
-        {
-            Log.Error(LocalizationKey.Log_Game_CharacterSpawnFailed, characterID.ToString());
-            return false;
-        }
-
-        return true;
     }
 
     private void DespawnExistingPlayer()

@@ -24,6 +24,8 @@ public class PoolManager
     private readonly Dictionary<string, string> _maps = new Dictionary<string, string>()
     {
         { Literal.Keys.UI, Literal.Roots.UserInterfaces },
+        { Literal.Keys.Prop, Literal.Roots.Props },
+        { Literal.Keys.Object, Literal.Roots.Objects },
     };
 
     private GameObject InitRoot()
@@ -228,6 +230,11 @@ public class PoolManager
             if (_folders.TryGetValue(pair.Value, out var folder) && folder != null)
                 return folder;
         }
+
+        string defaultFolderName = Literal.Roots.Objects;
+
+        if (_folders.TryGetValue(defaultFolderName, out var defaultFolder) && defaultFolder != null)
+            return defaultFolder;
 
         return Root.transform;
     }

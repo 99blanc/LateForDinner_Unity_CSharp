@@ -21,7 +21,7 @@ public class IdleState : CharacterState
         if (Owner is not IIdleableCharacter)
             return;
 
-        Owner.CharacterAnimator?.PlayIdle();
+        Owner?.CharacterAnimator?.PlayState(CharacterStateType.Idle);
     }
 
     public override void OnLogic()
@@ -49,7 +49,7 @@ public class MoveState : CharacterState
         if (Owner is not IMovableCharacter)
             return;
 
-        Owner.CharacterAnimator?.PlayMove();
+        Owner?.CharacterAnimator?.PlayState(CharacterStateType.Move);
     }
 
     public override void OnLogic()
@@ -83,7 +83,7 @@ public class FallState : CharacterState
         if (Owner is not IFallableCharacter)
             return;
 
-        Owner.CharacterAnimator?.PlayFall();
+        Owner?.CharacterAnimator?.PlayState(CharacterStateType.Fall);
     }
 
     public override void OnLogic()
@@ -119,7 +119,7 @@ public class JumpState : CharacterState
         if (Owner is not IJumpableCharacter jumpable)
             return;
 
-        Owner.CharacterAnimator?.PlayJump();
+        Owner?.CharacterAnimator?.PlayState(CharacterStateType.Jump);
         float directionX = _inputProvider?.Invoke() ?? 0f;
         jumpable.Jump(directionX);
     }
@@ -153,7 +153,7 @@ public class DashState : CharacterState
             return;
 
         Vector2 inputDir = _inputProvider?.Invoke() ?? Vector2.right;
-        Owner.CharacterAnimator?.PlayDash();
+        Owner?.CharacterAnimator?.PlayState(CharacterStateType.Dash);
         dashable.StartDashing(inputDir);
     }
 
@@ -195,8 +195,8 @@ public class ClimbState : CharacterState
         if (Owner.CurrentInteractable is Ladder ladder)
             climbable.StartClimbing(ladder);
 
-        Owner?.CharacterAnimator.PlayClimb();
-        Owner?.CharacterAnimator.SetAnimatorSpeed(1f);
+        Owner?.CharacterAnimator?.PlayState(CharacterStateType.Climb);
+        Owner?.CharacterAnimator?.SetAnimatorSpeed(1f);
     }
 
     public override void OnLogic()
@@ -227,15 +227,15 @@ public class ClimbState : CharacterState
             return;
 
         climbable.ResetGroundBuffer();
-        Owner?.CharacterAnimator.SetAnimatorSpeed(1f);
+        Owner?.CharacterAnimator?.SetAnimatorSpeed(1f);
         climbable.StopClimbing();
     }
 
     private void UpdateClimbAnimation(float verticalInput)
     {
         if (Mathf.Abs(verticalInput) > 0.01f)
-            Owner?.CharacterAnimator.SetAnimatorSpeed(1f);
+            Owner?.CharacterAnimator?.SetAnimatorSpeed(1f);
         else
-            Owner?.CharacterAnimator.SetAnimatorSpeed(0f);
+            Owner?.CharacterAnimator?.SetAnimatorSpeed(0f);
     }
 }

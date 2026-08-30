@@ -31,10 +31,10 @@ public class PlayableCharacterCrouchState : CharacterState
 
     private void PlayCrouchAnimation()
     {
-        if (_player?.CharacterAnimator is not PlayableCharacterAnimator protagonistAnimator)
+        if (_player?.CharacterAnimator is not PlayableCharacterAnimator playableAnimator)
             return;
 
-        protagonistAnimator.PlayCrouch();
+        playableAnimator.PlayState(CharacterStateType.Crouch);
     }
 }
 
@@ -53,16 +53,16 @@ public class PlayableCharacterJumpState : JumpState
 
     private void PlayJumpAnimation()
     {
-        if (_player?.CharacterAnimator is not PlayableCharacterAnimator protagonistAnimator)
+        if (_player?.CharacterAnimator is not PlayableCharacterAnimator playableAnimator)
             return;
 
         if (_player is not IJumpableCharacter jumpable)
             return;
 
         if (jumpable.RemainingJumpCount >= jumpable.MaxJumpCount - 1)
-            protagonistAnimator.PlayJump();
+            playableAnimator.PlayState(CharacterStateType.Jump);
         else
-            protagonistAnimator.PlayDoubleJump();
+            playableAnimator.PlayState(CharacterStateType.DoubleJump);
     }
 }
 
@@ -107,10 +107,10 @@ public class PlayableCharacterRollState : CharacterState
 
     private void PlayRollAnimation()
     {
-        if (_player?.CharacterAnimator is not PlayableCharacterAnimator protagonistAnimator)
+        if (_player?.CharacterAnimator is not PlayableCharacterAnimator playableAnimator)
             return;
 
-        protagonistAnimator.PlayRoll();
+        playableAnimator.PlayState(CharacterStateType.Roll);
     }
 }
 
@@ -144,11 +144,11 @@ public class PlayableCharacterDashState : DashState
 
     private void PlayDashAnimation(IDashableCharacter dashable)
     {
-        if (_player?.CharacterAnimator is not PlayableCharacterAnimator protagonistAnimator)
+        if (_player?.CharacterAnimator is not PlayableCharacterAnimator playableAnimator)
             return;
 
         Vector2 dir = dashable.DashDirection;
-        Action playAnimation = (dir == Vector2.down || dir.y < -0.5f) ? protagonistAnimator.PlayDownDash : protagonistAnimator.PlayDash;
+        Action playAnimation = (dir == Vector2.down || dir.y < -0.5f) ? () => playableAnimator.PlayState(CharacterStateType.DownDash) : () => playableAnimator.PlayState(CharacterStateType.Dash);
         playAnimation?.Invoke();
     }
 }

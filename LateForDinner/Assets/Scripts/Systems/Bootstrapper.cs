@@ -14,10 +14,12 @@ public class Bootstrapper
         Managers.Console.Setup();
         Managers.Camera.Setup();
         await Managers.Preload.Release_BootAsync();
+        Managers.Cursor.Setup();
         Managers.UI.Setup();
         Managers.Control.Setup();
         Managers.Cooldown.Setup();
         await Managers.UI.OpenDisplayAsync<UISplashDisplay>().PlayAsync();
         Managers.UI.OpenDisplay<UITitleDisplay>();
+        Managers.Camera.SetBackgroundColor(Color.gray);
     }
 }

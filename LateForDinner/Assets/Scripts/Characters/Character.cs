@@ -9,6 +9,7 @@ using ZLinq;
 public abstract class Character : MonoBehaviour, IPoolable
 {
     protected readonly HashSet<IInteractable> _interactables = new HashSet<IInteractable>();
+    private readonly Dictionary<Collider2D, IInteractable> _interactableCaches = new Dictionary<Collider2D, IInteractable> ();
     public IInteractable CurrentInteractable
     {
         get
@@ -17,7 +18,7 @@ public abstract class Character : MonoBehaviour, IPoolable
                 return null;
 
             return _interactables
-            .OrderBy(x => x.Priority)
+            .OrderByDescending(x => x.Priority)
             .FirstOrDefault();
         }
     }
@@ -91,22 +92,25 @@ public abstract class Character : MonoBehaviour, IPoolable
 
     protected virtual void OnTriggerEnter2D(Collider2D target)
     {
-        if (target.GetComponentInParent<IInteractable>() is IInteractable interactable)
+        if (!_interactableCaches.TryGetValue(target, out var interactable))
         {
-            _interactables.Add(interactable);
-            interactable.CanInteract.Value = true;
-
-            if (!interactable.TriggerOnProximity)
-                return;
-
-            if (interactable == CurrentInteractable)
-                interactable.ProtectedInteract(this);
+            interactable = target.GetComponentInParent<IInteractable>() ?? target.GetComponentInChildren<IInteractable>();
+            _interactableCaches[target] = interactable;
         }
+
+        if (interactable == null)
+            return;
+
+        _interactables.Add(interactable);
+        interactable.CanInteract.Value = true;
+
+        if (interactable.TriggerOnProximity && interactable == CurrentInteractable)
+            interactable.ProtectedInteract(this);
     }
 
     protected virtual void OnTriggerExit2D(Collider2D target)
     {
-        if (target.GetComponentInParent<IInteractable>() is IInteractable interactable)
+        if (_interactableCaches.TryGetValue(target, out var interactable) && interactable != null)
         {
             _interactables.Remove(interactable);
             interactable.CanInteract.Value = false;

@@ -16,6 +16,11 @@ public class Tray : Prop, IInteractable, IPoolable
     public bool TriggerOnProximity => _triggerOnProximity;
     protected override bool UseSaveState => true;
 
-    public void OnInteract(Character player)
-        => Managers.Pool.Push(this);
+    public void OnInteract(Character character)
+    {
+        if (character is not ICarriableCharacter carriable)
+            return;
+
+        carriable.PickupProp(this);
+    }
 }

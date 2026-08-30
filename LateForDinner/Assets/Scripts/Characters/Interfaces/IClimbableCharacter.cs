@@ -77,6 +77,7 @@ public interface IClimbableCharacter
         val.EnterCooldownProxy.CurrentCooldown = enterCooldownTime;
         val.EnterCooldownProxy.IsOnCooldown = true;
         Managers.Cooldown.Register(val.EnterCooldownProxy);
+        Rigidbody.gravityScale = 0f;
     }
 
     public void StopClimbing()
@@ -94,6 +95,7 @@ public interface IClimbableCharacter
         val.ExitCooldownProxy.CurrentCooldown = exitCooldownTime;
         val.ExitCooldownProxy.IsOnCooldown = true;
         Managers.Cooldown.Register(val.ExitCooldownProxy);
+        Rigidbody.gravityScale = 1f;
     }
 
     public void Climb(float verticalInput)

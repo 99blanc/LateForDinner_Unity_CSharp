@@ -76,6 +76,8 @@ public class Literal
     public class Keys
     {
         public const string UI = "UI";
+        public const string Prop = "Prop";
+        public const string Object = "Object";
     }
 
     public class Languages
@@ -141,6 +143,8 @@ public class Literal
         public const string Events = "-Event";
         public const string Layers = "Layer: ";
         public const string Managers = "@Managers";
+        public const string Objects = "Objects";
+        public const string Props = "Props";
         public const string Pools = "Pools";
         public const string UserInterfaces = "UserInterfaces";
         public const string Virtual = "-Virtual";

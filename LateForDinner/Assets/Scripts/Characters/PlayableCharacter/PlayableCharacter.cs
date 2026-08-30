@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityHFSM;
 using ZLinq;
 
-public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovableCharacter, IFallableCharacter, ICrouchableCharacter, IJumpableCharacter, IRollableCharacter, IDashableCharacter, IClimbableCharacter
+public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovableCharacter, IFallableCharacter, ICrouchableCharacter, IJumpableCharacter, IRollableCharacter, IDashableCharacter, IClimbableCharacter, ICarriableCharacter
 {
     public Rigidbody2D Rigidbody { get; private set; }
     public Transform CameraTransform { get; private set; }
@@ -41,9 +41,13 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
         base.RegisterStates(fsm);
         fsm.AddState(CharacterStateType.Move, new MoveState(this, GetPlayerMoveInput));
         fsm.AddState(CharacterStateType.Fall, new FallState(this, GetPlayerMoveInput));
+        fsm.AddState(CharacterStateType.Crouch, new PlayableCharacterCrouchState(this));
         fsm.AddState(CharacterStateType.Jump, new JumpState(this, GetPlayerMoveInput));
         fsm.AddState(CharacterStateType.Dash, new DashState(this, GetPlayerDashInput));
         fsm.AddState(CharacterStateType.Climb, new ClimbState(this, GetPlayerClimbInput));
+        fsm.AddState(CharacterStateType.Jump, new PlayableCharacterJumpState(this, GetPlayerMoveInput));
+        fsm.AddState(CharacterStateType.Roll, new PlayableCharacterRollState(this, GetPlayerMoveInput));
+        fsm.AddState(CharacterStateType.Dash, new PlayableCharacterDashState(this, GetPlayerDashInput));
     }
 
     protected override void RegisterTransitions(StateMachine<CharacterStateType> fsm)
@@ -366,9 +370,7 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
 
     private void TryExecuteInteraction()
     {
-        var target = CurrentInteractable;
-
-        if (target != null && target.RequireKeyInput && target.CanInteract.Value)
-            target.ProtectedInteract(this);
+        if (CurrentInteractable != null && CurrentInteractable.RequireKeyInput && CurrentInteractable.CanInteract.Value)
+            CurrentInteractable.ProtectedInteract(this);
     }
 }

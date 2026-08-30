@@ -26,7 +26,6 @@ public class CameraManager
         _mainCamera = _root.AddComponent<Camera>();
         _mainCamera.tag = Literal.Tags.Camera;
         _mainCamera.clearFlags = CameraClearFlags.SolidColor;
-        _mainCamera.backgroundColor = Color.gray;
         _mainCamera.orthographic = true;
         _root.AddComponent<CinemachineBrain>();
         GameObject vcamObject = new GameObject { name = Literal.Roots.Virtual };
@@ -41,8 +40,12 @@ public class CameraManager
     {
         var _ = Root;
         SetCameraMode(CameraWorkMode.CupheadLightFocus);
+        SetBackgroundColor(Color.black);
         Log.System(LocalizationKey.Log_Camera_LoadSuccess);
     }
+
+    public void SetBackgroundColor(Color color)
+        => _mainCamera.backgroundColor = color;
 
     public void SetTarget(PlayableCharacter character)
     {

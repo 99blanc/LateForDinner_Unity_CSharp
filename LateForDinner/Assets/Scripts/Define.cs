@@ -14,6 +14,12 @@ public class Define
         public static readonly int Dash = Animator.StringToHash("Dash");
         public static readonly int DownDash = Animator.StringToHash("DownDash");
         public static readonly int Climb = Animator.StringToHash("Climb");
+        public static readonly int PickupTrayIdle = Animator.StringToHash("PickupTrayIdle");
+        public static readonly int PickupTrayMove = Animator.StringToHash("PickupTrayMove");
+        public static readonly int PickupTrayFall = Animator.StringToHash("PickupTrayFall");
+        public static readonly int PickupTrayJump = Animator.StringToHash("PickupTrayJump");
+        public static readonly int PickupTrayDoubleJump = Animator.StringToHash("PickupTrayDoubleJump");
+        public static readonly int ThrowTray = Animator.StringToHash("ThrowTray");
         public const float NormalizedTime = 0.95f;
     }
 

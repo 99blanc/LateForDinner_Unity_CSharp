@@ -58,10 +58,45 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1816891047004181672, guid: 8c2665e69dc9fae4ca4b97a83de49ccf, type: 3}
       propertyPath: m_Name
-      value: Protagonist Variant
+      value: ProtagonistObject
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1816891047004181672, guid: 8c2665e69dc9fae4ca4b97a83de49ccf, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3832137401875790687}
+    - targetCorrespondingSourceObject: {fileID: 1816891047004181672, guid: 8c2665e69dc9fae4ca4b97a83de49ccf, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: -5861893555556888073}
   m_SourcePrefab: {fileID: 100100000, guid: 8c2665e69dc9fae4ca4b97a83de49ccf, type: 3}
+--- !u!1 &2652939061546457458 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1816891047004181672, guid: 8c2665e69dc9fae4ca4b97a83de49ccf, type: 3}
+  m_PrefabInstance: {fileID: 4460752495319813594}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &3832137401875790687
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2652939061546457458}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 099f76716703a3245a5905d3d82516ad, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Protagonist
+--- !u!114 &-5861893555556888073
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2652939061546457458}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dcd1393a227f3c94fa08209a189c3bcf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ProtagonistAnimator

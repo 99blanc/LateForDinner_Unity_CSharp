@@ -3,68 +3,19 @@ public interface IInteractAction
     public void Execute(Character character);
 }
 
-public class NPCInteractAction : IInteractAction
+public class LadderInteractAction : IInteractAction
 {
     public void Execute(Character character)
-        => Log.System(LocalizationKey.Interaction_NPC);
+        => Log.System(LocalizationKey.Interaction_Ladder);
 }
 
-public class QuestInteractAction : IInteractAction
-{
-    public void Execute(Character character)
-        => Log.System(LocalizationKey.Interaction_Quest);
-}
-
-public class ShopInteractAction : IInteractAction
-{
-    public void Execute(Character character)
-        => Log.System(LocalizationKey.Interaction_Shop);
-}
-
-public class SaveInteractAction : IInteractAction
-{
-    public void Execute(Character character)
-        => Log.System(LocalizationKey.Interaction_Save);
-}
-
-public class EventInteractAction : IInteractAction
-{
-    public void Execute(Character character)
-        => Log.System(LocalizationKey.Interaction_Event);
-}
-
-public class StageProgressInteractAction : IInteractAction
-{
-    public void Execute(Character character)
-        => Log.System(LocalizationKey.Interaction_StageProgress);
-}
-
-public class DoorInteractAction : IInteractAction
-{
-    public void Execute(Character character)
-        => Log.System(LocalizationKey.Interaction_Door);
-}
-
-public class TrayHolderInteractAction : IInteractAction
+public class TrayInteractAction : IInteractAction
 {
     public void Execute(Character character)
     {
         if (character is not ICarriableCharacter carriable)
             return;
 
-        carriable.IsHoldingProp = true;
-        Log.System(LocalizationKey.Interaction_TrayHolder);
+        Log.System(LocalizationKey.Interaction_Tray);
     }
-}
-
-public class TrayInteractAction : IInteractAction
-{
-    public void Execute(Character character)
-        => Log.System(LocalizationKey.Interaction_Tray);
-}
-
-public class DiningTableInteractAction : IInteractAction
-{
-    public void Execute(Character character)
-        => Log.System(LocalizationKey.Interaction_DiningTable);
 }

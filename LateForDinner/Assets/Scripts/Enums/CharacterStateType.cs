@@ -9,5 +9,6 @@ public enum CharacterStateType
     Roll,
     Dash,
     DownDash,
-    Climb
+    Climb,
+    Throw
 }

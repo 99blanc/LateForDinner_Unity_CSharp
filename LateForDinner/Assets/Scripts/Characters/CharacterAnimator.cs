@@ -2,6 +2,8 @@ using UnityEngine;
 
 public abstract class CharacterAnimator : MonoBehaviour
 {
+    public InteractionType CurrentHoldInteractionType { get; set; } = InteractionType.None;
+
     public Animator Animator { get; set; }
 
     public void SetAnimator(Animator animator)
@@ -28,10 +30,20 @@ public abstract class CharacterAnimator : MonoBehaviour
         return stateInfo.normalizedTime;
     }
 
-    protected void Play(int hash)
-        => Animator?.Play(hash);
-
     protected virtual int GetStateHash(CharacterStateType state)
+    {
+        if (CurrentHoldInteractionType != InteractionType.None)
+        {
+            int interactionHash = GetInteractionStateHash(state, CurrentHoldInteractionType);
+
+            if (interactionHash != 0)
+                return interactionHash;
+        }
+
+        return GetDefaultStateHash(state);
+    }
+
+    protected virtual int GetDefaultStateHash(CharacterStateType state)
     {
         return state switch
         {
@@ -39,30 +51,27 @@ public abstract class CharacterAnimator : MonoBehaviour
             CharacterStateType.Move => Define.Animation.Move,
             CharacterStateType.Fall => Define.Animation.Fall,
             CharacterStateType.Jump => Define.Animation.Jump,
-            CharacterStateType.Dash => Define.Animation.Dash,
-            CharacterStateType.Climb => Define.Animation.Climb,
             _ => Define.Animation.Idle
         };
     }
 
+    protected virtual int GetInteractionStateHash(CharacterStateType state, InteractionType interactionType)
+    {
+        return (state, interactionType) switch
+        {
+            (CharacterStateType.Idle, InteractionType.Tray) => Define.Animation.PickupTrayIdle,
+            (CharacterStateType.Move, InteractionType.Tray) => Define.Animation.PickupTrayMove,
+            (CharacterStateType.Fall, InteractionType.Tray) => Define.Animation.PickupTrayFall,
+            (CharacterStateType.Jump, InteractionType.Tray) => Define.Animation.PickupTrayJump,
+            (CharacterStateType.DoubleJump, InteractionType.Tray) => Define.Animation.PickupTrayDoubleJump,
+            (CharacterStateType.Throw, InteractionType.Tray) => Define.Animation.ThrowTray,
+            _ => 0
+        };
+    }
+
+    private void Play(int hash)
+        => Animator?.Play(hash);
+
     public virtual void PlayState(CharacterStateType state)
         => Play(GetStateHash(state));
-
-    public virtual void PlayIdle() 
-        => Play(Define.Animation.Idle);
-
-    public virtual void PlayMove() 
-        => Play(Define.Animation.Move);
-
-    public virtual void PlayFall()
-        => Play(Define.Animation.Fall);
-
-    public virtual void PlayJump()
-        => Play(Define.Animation.Jump);
-
-    public virtual void PlayDash()
-        => Play(Define.Animation.Dash);
-    
-    public void PlayClimb()
-        => Play(Define.Animation.Climb);
 }

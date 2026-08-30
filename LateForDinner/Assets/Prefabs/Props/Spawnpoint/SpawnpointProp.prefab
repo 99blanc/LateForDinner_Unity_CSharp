@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8250849751190271576}
   - component: {fileID: 6316905227922229880}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: SpawnpointProp
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -46,4 +46,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spawnpoint
   _propKey: 0
   _guid: 
+  Renderer: {fileID: 0}
   _toSceneID: 0

@@ -42,16 +42,8 @@ public interface IInteractable
 
             IInteractAction newAction = InteractionType switch
             {
-                //InteractionType.NPC => new NPCInteractAction(),
-                //InteractionType.Quest => new QuestInteractAction(),
-                //InteractionType.Shop => new ShopInteractAction(),
-                //InteractionType.Save => new SaveInteractAction(),
-                //InteractionType.Event => new EventInteractAction(),
-                //InteractionType.StageProgress => new StageProgressInteractAction(),
-                //InteractionType.Door => new DoorInteractAction(),
-                //InteractionType.TrayHolder => new TrayHolderInteractAction(),
+                InteractionType.Ladder => new LadderInteractAction(),
                 InteractionType.Tray => new TrayInteractAction(),
-                //InteractionType.DiningTable => new DiningTableInteractAction(),
                 _ => null
             };
 

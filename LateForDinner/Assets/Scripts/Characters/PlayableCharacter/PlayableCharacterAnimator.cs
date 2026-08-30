@@ -1,6 +1,6 @@
 public abstract class PlayableCharacterAnimator : CharacterAnimator
 {
-    protected override int GetStateHash(CharacterStateType state)
+    protected override int GetDefaultStateHash(CharacterStateType state)
     {
         return state switch
         {
@@ -13,19 +13,8 @@ public abstract class PlayableCharacterAnimator : CharacterAnimator
             CharacterStateType.Roll => Define.Animation.Roll,
             CharacterStateType.Dash => Define.Animation.Dash,
             CharacterStateType.DownDash => Define.Animation.DownDash,
+            CharacterStateType.Climb => Define.Animation.Climb,
             _ => Define.Animation.Idle
         };
     }
-
-    public void PlayCrouch()
-        => Play(Define.Animation.Crouch);
-
-    public void PlayDoubleJump() 
-        => Play(Define.Animation.DoubleJump);
-
-    public void PlayRoll()
-        => Play(Define.Animation.Roll);
-
-    public void PlayDownDash()
-        => Play(Define.Animation.DownDash);
 }

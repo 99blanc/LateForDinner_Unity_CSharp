@@ -47,6 +47,7 @@ public class UIConsoleSystem : UISystem
         base.OnGet();
         _logSubscription?.Dispose();
         _logSubscription = Managers.Log.OnLogAdded.Subscribe(_ => Refresh());
+        Managers.Control.DisableActionMap(Literal.Maps.User);
         ResetInputField();
         Refresh();
     }
@@ -56,6 +57,7 @@ public class UIConsoleSystem : UISystem
         base.OnRelease();
         _logSubscription?.Dispose();
         _logSubscription = null;
+        Managers.Control.EnableActionMap(Literal.Maps.User);
     }
 
     public override void Refresh()

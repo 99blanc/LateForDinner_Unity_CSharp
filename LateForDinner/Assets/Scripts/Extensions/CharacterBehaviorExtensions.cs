@@ -30,41 +30,6 @@ public static class CharacterBehaviorExtensions
     public static string GetAnimatorOverrideControllerPath(this CharacterID characterID)
         => ZString.Concat(characterID.ToString(), Literal.Assets.Animator);
 
-    public static (Type characterType, Type animatorType) GetCharacterTypes(this CharacterID characterID)
-    {
-        if (_caches.TryGetValue(characterID, out var cachedTypes))
-            return cachedTypes;
-
-        string charTypeName = characterID.ToString();
-        string animTypeName = ZString.Concat(characterID.ToString(), Literal.Assets.Animator);
-        Type charType = null;
-        Type animType = null;
-
-        foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
-        {
-            if (charType == null)
-            {
-                var t = assembly.GetType(charTypeName);
-
-                if (t != null && typeof(PlayableCharacter).IsAssignableFrom(t))
-                    charType = t;
-            }
-
-            if (animType == null)
-            {
-                var t = assembly.GetType(animTypeName);
-
-                if (t != null && typeof(CharacterAnimator).IsAssignableFrom(t))
-                    animType = t;
-            }
-
-            if (charType != null && animType != null)
-                break;
-        }
-
-        _caches[characterID] = (charType, animType);
-        return (charType, animType);
-    }
 
     public static void FlipX(this SpriteRenderer renderer, float directionX)
     {
@@ -82,6 +47,15 @@ public static class CharacterBehaviorExtensions
 
         return renderer.flipX ? -1f : 1f;
     }
+
+    public static float GetLookDirectionX(this Character character)
+    {
+        if (character == null || character.Renderer == null)
+            return 0f;
+
+        return GetLookDirectionX(character.Renderer);
+    }
+
     public static Vector2 GetLookDirection(this SpriteRenderer renderer)
         => new Vector2(renderer.GetLookDirectionX(), 0f);
 

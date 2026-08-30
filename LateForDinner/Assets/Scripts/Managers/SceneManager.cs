@@ -165,13 +165,12 @@ public class SceneManager
 
         collider.isTrigger = true;
         SpriteRenderer renderer = prop.Renderer;
-        Bounds bounds = renderer.bounds;
-        float maxBounds = Mathf.Max(bounds.size.x, bounds.size.y);
+        Vector2 spriteSize = renderer.sprite.bounds.size;
         float maxScale = Mathf.Max(prop.transform.localScale.x, prop.transform.localScale.y);
-        float calculatedRadius = (maxBounds * maxScale) * 0.5f;
+        float maxBounds = Mathf.Max(spriteSize.x, spriteSize.y) * maxScale * 0.5f;
+        float calculatedRadius = maxBounds + 0.25f;
         collider.radius = calculatedRadius;
         interactable.InteractRadius = collider.radius;
-        collider.radius = interactable.InteractRadius;
         _interactables.Add(interactable, collider);
     }
 

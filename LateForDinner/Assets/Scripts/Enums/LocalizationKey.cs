@@ -93,16 +93,8 @@ public enum LocalizationKey
     Console_Spawn_NotFoundPlayableCharacter            , // 활성화된 플레이어 캐릭터가 없어 기본 '{0}' 캐릭터를 먼저 생성합니다.
     Console_Spawn_Success                              , // 캐릭터 [{0}] 소환 완료!
     Console_Spawn_Invalid                              , // 유효하지 않은 CharacterID입니다: '{0}'. 캐릭터 목록을 보려면 'spawn list'를 입력하세요.
-    Interaction_NPC                                    , // NPC 대화 시작/종료 처리
-    Interaction_Quest                                  , // 퀘스트 수락/완료 및 분기 트리거 연동
-    Interaction_Shop                                   , // 상점 UI 진입
-    Interaction_Save                                   , // 세이브 UI 진입 또는 즉시 저장
-    Interaction_Event                                  , // 컷신 이벤트 / 능력 해금 / 봉인된 문 조작
-    Interaction_StageProgress                          , // 게임 파트 이동 / 퍼즐 진입 / 보스전 선택
-    Interaction_Door                                   , // 맵 진입 및 경계 이동 처리
-    Interaction_TrayHolder                             , // 식판 획득 및 빈칸/채워짐 상태 확인
+    Interaction_Ladder                                 , // 사다리 진입
     Interaction_Tray                                   , // 식판 획득/내려놓기/던지기/식탁 배치
-    Interaction_DiningTable                            , // 식탁 상태 체크 및 클리어 조건 확인
     Log_Attribute_Registry_Unsupported                 , // [AttributeRegistry] 지원하지 않는 데이터 타입입니다: {0}('{1}')
     Log_Camera_LoadSuccess                             , // [CameraManager] 카메라 로드에 성공했습니다.
     Log_Camera_LoadFailed                              , // [CameraManager] 카메라 로드에 실패했습니다.
@@ -146,7 +138,6 @@ public enum LocalizationKey
     Log_Preload_Boot_Asset                             , // [PreloadManager] 에셋 리소스를 불러오는 중...
     Log_Preload_Boot_UI                                , // [PreloadManager] UI 리소스를 불러오는 중...
     Log_Preload_Boot_Object                            , // [PreloadManager] 오브젝트 풀을 불러오는 중...
-    Log_Preload_Boot_Complete                          , // [PreloadManager] 로딩이 완료되었습니다.
     Log_Preload_BootFinished                           , // [PreloadManager] 게임 초기 부팅 프리로드 프로세스가 성공적으로 완료되었습니다.
     Log_Resource_LoadFailed_Null                       , // [ResourceManager] 경로('{0}')의 에셋을 불러왔으나 결과가 null 입니다.
     Log_Resource_LoadFailed_Exception                  , // [ResourceManager] 경로('{0}')의 에셋을 로드하는 중 예외가 발생했습니다.

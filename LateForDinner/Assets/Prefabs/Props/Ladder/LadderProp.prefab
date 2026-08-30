@@ -187,7 +187,7 @@ MonoBehaviour:
   _guid: 
   Renderer: {fileID: 7682468558932832268}
   _collider: {fileID: 1413046859792644861}
-  _interactionType: 0
+  _interactionType: 1
   _promptKey: 15
   _requireKeyInput: 0
   _triggerOnProximity: 1

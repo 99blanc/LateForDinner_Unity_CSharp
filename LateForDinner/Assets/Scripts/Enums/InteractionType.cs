@@ -1,5 +1,6 @@
 public enum InteractionType
 {
-    None,
-    Tray,
+    None  ,
+    Ladder,
+    Tray  ,
 }
