@@ -1,10 +1,26 @@
 using Cysharp.Threading.Tasks;
 using R3;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityHFSM;
+using ZLinq;
 
 public abstract class Character : MonoBehaviour, IPoolable
 {
+    protected readonly HashSet<IInteractable> _interactables = new HashSet<IInteractable>();
+    public IInteractable CurrentInteractable
+    {
+        get
+        {
+            if (_interactables.Count == 0)
+                return null;
+
+            return _interactables
+            .OrderBy(x => x.Priority)
+            .FirstOrDefault();
+        }
+    }
     public AttributeRegistry Attributes { get; protected set; } = new AttributeRegistry();
     public SpriteRenderer Renderer { get; private set; }
     public Animator Animator { get; private set; }

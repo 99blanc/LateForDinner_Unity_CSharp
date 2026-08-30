@@ -177,3 +177,65 @@ public class DashState : CharacterState
         dashable.StopDashing();
     }
 }
+
+public class ClimbState : CharacterState
+{
+    protected readonly Func<float> _inputProvider;
+
+    public ClimbState(Character owner, Func<float> inputProvider) : base(owner)
+        => _inputProvider = inputProvider;
+
+    public override void OnEnter()
+    {
+        base.OnEnter();
+
+        if (Owner is not IClimbableCharacter climbable)
+            return;
+
+        if (Owner.CurrentInteractable is Ladder ladder)
+            climbable.StartClimbing(ladder);
+
+        Owner?.CharacterAnimator.PlayClimb();
+        Owner?.CharacterAnimator.SetAnimatorSpeed(1f);
+    }
+
+    public override void OnLogic()
+    {
+        base.OnLogic();
+
+        if (Owner is not IClimbableCharacter climbable)
+            return;
+
+        if (Owner.IsGrounded())
+            climbable.StartGroundBuffer();
+        else
+            climbable.ResetGroundBuffer();
+
+        if (_inputProvider == null)
+            return;
+
+        float verticalInput = _inputProvider.Invoke();
+        climbable.Climb(verticalInput);
+        UpdateClimbAnimation(verticalInput);
+    }
+
+    public override void OnExit()
+    {
+        base.OnExit();
+
+        if (Owner is not IClimbableCharacter climbable)
+            return;
+
+        climbable.ResetGroundBuffer();
+        Owner?.CharacterAnimator.SetAnimatorSpeed(1f);
+        climbable.StopClimbing();
+    }
+
+    private void UpdateClimbAnimation(float verticalInput)
+    {
+        if (Mathf.Abs(verticalInput) > 0.01f)
+            Owner?.CharacterAnimator.SetAnimatorSpeed(1f);
+        else
+            Owner?.CharacterAnimator.SetAnimatorSpeed(0f);
+    }
+}

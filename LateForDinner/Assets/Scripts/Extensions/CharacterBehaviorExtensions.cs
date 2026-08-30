@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public static class CharacterExtensions
+public static class CharacterBehaviorExtensions
 {
     private static readonly Dictionary<CharacterID, (Type characterType, Type animatorType)> _caches = new Dictionary<CharacterID, (Type characterType, Type animatorType)>();
 

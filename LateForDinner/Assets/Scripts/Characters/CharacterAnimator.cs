@@ -40,6 +40,7 @@ public abstract class CharacterAnimator : MonoBehaviour
             CharacterStateType.Fall => Define.Animation.Fall,
             CharacterStateType.Jump => Define.Animation.Jump,
             CharacterStateType.Dash => Define.Animation.Dash,
+            CharacterStateType.Climb => Define.Animation.Climb,
             _ => Define.Animation.Idle
         };
     }
@@ -61,4 +62,7 @@ public abstract class CharacterAnimator : MonoBehaviour
 
     public virtual void PlayDash()
         => Play(Define.Animation.Dash);
+    
+    public void PlayClimb()
+        => Play(Define.Animation.Climb);
 }
