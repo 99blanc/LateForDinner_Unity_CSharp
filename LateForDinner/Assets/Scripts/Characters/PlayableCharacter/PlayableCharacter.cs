@@ -211,7 +211,7 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
             from: CharacterStateType.Jump,
             to: CharacterStateType.Climb,
             condition: _ => this.IsTryingToClimb(climbInput, crouchInput),
-            onTransition: _ => this.AddAirActionsForLadder()
+            onTransition: _ => this.AddJumpActionForLadder()
         ));
         // DESC ::: Roll 상태에서의 전환 조건
         fsm.AddTransition(new Transition<CharacterStateType>(
@@ -238,7 +238,7 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
             from: CharacterStateType.Roll,
             to: CharacterStateType.Climb,
             condition: _ => this.IsTryingToClimb(climbInput, crouchInput),
-            onTransition: _ => this.AddAirActionsForLadder()
+            onTransition: _ => this.AddJumpActionForLadder()
         ));
         // DESC ::: Dash 상태에서의 전환 조건
         fsm.AddTransition(new Transition<CharacterStateType>(
@@ -255,7 +255,7 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
             from: CharacterStateType.Dash,
             to: CharacterStateType.Climb,
             condition: _ => this.IsTryingToClimb(climbInput, crouchInput),
-            onTransition: _ => this.AddAirActionsForLadder()
+            onTransition: _ => this.AddDashActionForLadder()
         ));
         // DESC ::: Climb 상태에서의 전환 조건
         fsm.AddTransition(new Transition<CharacterStateType>(

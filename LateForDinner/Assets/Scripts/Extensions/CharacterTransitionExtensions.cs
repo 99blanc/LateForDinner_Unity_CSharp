@@ -174,11 +174,14 @@ public static class CharacterTransitionExtensions
         return false;
     }
 
-    public static void AddAirActionsForLadder(this Character character)
+    public static void AddJumpActionForLadder(this Character character)
     {
         if (character is IJumpableCharacter jumpable)
             jumpable.RemainJumpCount = Mathf.Min(jumpable.RemainJumpCount + 1, jumpable.MaxJumpCount);
+    }
 
+    public static void AddDashActionForLadder(this Character character)
+    {
         if (character is IDashableCharacter dashable)
             dashable.RemainDashCount = Mathf.Min(dashable.RemainDashCount + 1, dashable.MaxDashCount);
     }

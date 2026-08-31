@@ -62,6 +62,7 @@ public class UIDashCountSlot : UISlot
             case UI_DashState.Charged:
                 gameObject.SetActive(true);
                 await _animator.AwaitForComplete(Define.Animation.HeadUpDashCharge);
+                GetImage(Images.DashCountImage).sprite = _sprite;
                 break;
 
             case UI_DashState.Used:
