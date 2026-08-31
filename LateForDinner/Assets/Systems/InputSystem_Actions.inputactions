@@ -124,6 +124,15 @@
                     "initialStateCheck": true
                 },
                 {
+                    "name": "Menu",
+                    "type": "Button",
+                    "id": "a56103a8-52ff-46be-babd-59437d175b01",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
                     "name": "Active",
                     "type": "Button",
                     "id": "4d36c4e5-bb8c-4b8d-a17f-76ec2e7d2eca",
@@ -263,6 +272,17 @@
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
                     "action": "Inventory",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "5aad89e5-54b4-4708-a073-eb50feea1174",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "Menu",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -515,7 +535,7 @@
                 {
                     "name": "",
                     "id": "834b27fa-ab9d-46c7-8b1f-2fa241769691",
-                    "path": "<Keyboard>/backquote",
+                    "path": "<Keyboard>/f1",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
