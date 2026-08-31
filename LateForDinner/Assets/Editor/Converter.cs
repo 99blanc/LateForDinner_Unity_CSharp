@@ -27,7 +27,19 @@ public class Converter
             return;
         }
 
-        CleanupObsoleteBinaries(csvFiles);
+        string binariesPath = Path.Combine(Application.dataPath, Literal.Paths.Binaries);
+
+        if (Directory.Exists(binariesPath))
+        {
+            string[] existingFiles = Directory.GetFiles(binariesPath, "*.*");
+
+            foreach (var file in existingFiles)
+                File.Delete(file);
+
+            AssetDatabase.Refresh();
+            Debug.Log("[Converter] Cleared all existing binary files before conversion.");
+        }
+
         var localizationFiles = new List<string>();
         var otherFiles = new List<string>();
         CategorizeFiles(csvFiles, localizationFiles, otherFiles);
@@ -63,46 +75,6 @@ public class Converter
         string locStatus = localizationFiles.Count > 0 ? (successLocalization ? $"Merged ({localizationFiles.Count} files)" : "Failed") : "None";
         string resultMessage = "Table Conversion Complete!\n\n" + $"General Tables: {successGeneral} / {otherFiles.Count} processed\n" + $"Localization: {locStatus}";
         EditorUtility.DisplayDialog("Table Bake Result", resultMessage, "OK");
-    }
-
-    private static void CleanupObsoleteBinaries(string[] csvFiles)
-    {
-        string binariesPath = Path.Combine(Application.dataPath, Literal.Paths.Binaries);
-
-        if (!Directory.Exists(binariesPath)) 
-            return;
-
-        var validNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-        foreach (var file in csvFiles)
-        {
-            string name = Path.GetFileNameWithoutExtension(file);
-
-            if (name.StartsWith("Localization", StringComparison.OrdinalIgnoreCase))
-                validNames.Add("Localization");
-            else
-                validNames.Add(name);
-        }
-
-        string[] existingBytesFiles = Directory.GetFiles(binariesPath, "*.bytes");
-
-        foreach (var bytesFile in existingBytesFiles)
-        {
-            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(bytesFile);
-
-            if (!validNames.Contains(fileNameWithoutExt))
-            {
-                File.Delete(bytesFile);
-                string metaFile = bytesFile + ".meta";
-
-                if (File.Exists(metaFile))
-                    File.Delete(metaFile);
-
-                Debug.Log($"[Converter] Removed obsolete binary file: {fileNameWithoutExt}.bytes");
-            }
-        }
-
-        AssetDatabase.Refresh();
     }
 
     private static void CategorizeFiles(string[] csvFiles, List<string> localizationFiles, List<string> otherFiles)
