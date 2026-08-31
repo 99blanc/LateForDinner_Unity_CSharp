@@ -1,4 +1,3 @@
-using Cysharp.Threading.Tasks;
 using R3;
 using UnityEngine;
 
@@ -11,22 +10,19 @@ public class UIDashCountSlot : UISlot
 
     private enum UI_DashState
     {
-        None,
         Charged,
         Used
     }
 
     private int _index;
     private Animator _animator;
-    private Sprite _sprite;
-    private UI_DashState _currentState = UI_DashState.None;
+    private UI_DashState _currentState = UI_DashState.Charged;
 
     public override void OnInit()
     {
         base.OnInit();
         BindImage(typeof(Images));
         _animator = GetImage(Images.DashCountImage).AddAnimator();
-        _sprite = Managers.Resource.GetSprite(Define.Atlas.HeadUp, Define.Sprite.HUD_PlayerDashCount);
     }
 
     public void SetIndex(int index, ReadOnlyReactiveProperty<int> dashCountStream)
@@ -35,7 +31,7 @@ public class UIDashCountSlot : UISlot
         int initialDash = dashCountStream.CurrentValue;
         bool isFilled = _index < initialDash;
         _currentState = isFilled ? UI_DashState.Charged : UI_DashState.Used;
-        PlayDashAnimation(_currentState, isInit: false).Forget();
+        PlayDashAnimation(_currentState, isInit: false);
         dashCountStream
         .Subscribe(currentDash =>
         {
@@ -52,23 +48,19 @@ public class UIDashCountSlot : UISlot
             return;
 
         _currentState = nextState;
-        PlayDashAnimation(_currentState, isInit: false).Forget();
+        PlayDashAnimation(_currentState, isInit: false);
     }
 
-    private async UniTask PlayDashAnimation(UI_DashState state, bool isInit)
+    private void PlayDashAnimation(UI_DashState state, bool isInit)
     {
         switch (state)
         {
             case UI_DashState.Charged:
-                gameObject.SetActive(true);
-                await _animator.AwaitForComplete(Define.Animation.HeadUpDashCharge);
-                GetImage(Images.DashCountImage).sprite = _sprite;
+                _animator.Play(Define.Animation.HeadUpDashCharge);
                 break;
 
             case UI_DashState.Used:
-                gameObject.SetActive(true);
-                await _animator.AwaitForComplete(Define.Animation.HeadUpDashUse);
-                gameObject.SetActive(false);
+                _animator.Play(Define.Animation.HeadUpDashUse);
                 break;
         }
     }

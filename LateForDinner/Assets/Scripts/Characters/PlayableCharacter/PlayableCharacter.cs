@@ -47,15 +47,14 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
     protected override void RegisterStates(StateMachine<CharacterStateType> fsm)
     {
         base.RegisterStates(fsm);
+
         fsm.AddState(CharacterStateType.Move, new MoveState(this, GetPlayerMoveInput));
         fsm.AddState(CharacterStateType.Fall, new FallState(this, GetPlayerMoveInput));
         fsm.AddState(CharacterStateType.Crouch, new PlayableCharacterCrouchState(this));
-        fsm.AddState(CharacterStateType.Jump, new JumpState(this, GetPlayerMoveInput));
-        fsm.AddState(CharacterStateType.Dash, new DashState(this, GetPlayerDashInput));
-        fsm.AddState(CharacterStateType.Climb, new ClimbState(this, GetPlayerClimbInput));
         fsm.AddState(CharacterStateType.Jump, new PlayableCharacterJumpState(this, GetPlayerMoveInput));
-        fsm.AddState(CharacterStateType.Roll, new PlayableCharacterRollState(this, GetPlayerMoveInput));
         fsm.AddState(CharacterStateType.Dash, new PlayableCharacterDashState(this, GetPlayerDashInput));
+        fsm.AddState(CharacterStateType.Climb, new ClimbState(this, GetPlayerClimbInput));
+        fsm.AddState(CharacterStateType.Roll, new PlayableCharacterRollState(this, GetPlayerMoveInput));
         fsm.AddState(CharacterStateType.Throw, new ThrowState(this, GetPlayerThrowInput));
     }
 

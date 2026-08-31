@@ -18,7 +18,7 @@ public class Bootstrapper
         Managers.UI.Setup();
         Managers.Control.Setup();
         Managers.Cooldown.Setup();
-        await Managers.UI.OpenDisplayAsync<UISplashDisplay>();
+        await Managers.UI.OpenDisplayAsync<UISplashDisplay>().PlayAsync();
         Managers.UI.OpenDisplay<UITitleDisplay>();
         Managers.Camera.SetBackgroundColor(Color.gray);
     }
