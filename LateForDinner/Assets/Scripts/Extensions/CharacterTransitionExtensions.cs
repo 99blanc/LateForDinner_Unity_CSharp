@@ -38,7 +38,7 @@ public static class CharacterTransitionExtensions
         if (!getJumpInput())
             return false;
 
-        bool hasJumpCount = character is IJumpableCharacter jumpable && jumpable.RemainingJumpCount > 0;
+        bool hasJumpCount = character is IJumpableCharacter jumpable && jumpable.RemainJumpCount > 0;
         return hasJumpCount;
     }
 
@@ -47,7 +47,7 @@ public static class CharacterTransitionExtensions
         if (character.IsGrounded())
         {
             if (character is IJumpableCharacter jumpable)
-                jumpable.RemainingJumpCount = jumpable.MaxJumpCount;
+                jumpable.RemainJumpCount = jumpable.MaxJumpCount;
 
             return Mathf.Abs(getMoveInput()) <= 0.01f;
         }
@@ -60,7 +60,7 @@ public static class CharacterTransitionExtensions
         if (character.IsGrounded())
         {
             if (character is IJumpableCharacter jumpable)
-                jumpable.RemainingJumpCount = jumpable.MaxJumpCount;
+                jumpable.RemainJumpCount = jumpable.MaxJumpCount;
 
             return Mathf.Abs(getMoveInput()) > 0.01f;
         }
@@ -73,7 +73,7 @@ public static class CharacterTransitionExtensions
         if (character.IsHoldingProp())
             return false;
 
-        bool isLastJump = character is IJumpableCharacter jumpable && jumpable.RemainingJumpCount == 0;
+        bool isLastJump = character is IJumpableCharacter jumpable && jumpable.RemainJumpCount == 0;
         bool isAnimationReady = character.CharacterAnimator is PlayableCharacterAnimator playableAnimator && playableAnimator.GetCurrentAnimatorNormalizedTime() >= Define.Animation.NormalizedTime;
         return isLastJump && isAnimationReady;
     }
@@ -177,9 +177,9 @@ public static class CharacterTransitionExtensions
     public static void AddAirActionsForLadder(this Character character)
     {
         if (character is IJumpableCharacter jumpable)
-            jumpable.RemainingJumpCount = Mathf.Min(jumpable.RemainingJumpCount + 1, jumpable.MaxJumpCount);
+            jumpable.RemainJumpCount = Mathf.Min(jumpable.RemainJumpCount + 1, jumpable.MaxJumpCount);
 
         if (character is IDashableCharacter dashable)
-            dashable.RemainingDashCount = Mathf.Min(dashable.RemainingDashCount + 1, dashable.MaxDashCount);
+            dashable.RemainDashCount = Mathf.Min(dashable.RemainDashCount + 1, dashable.MaxDashCount);
     }
 }

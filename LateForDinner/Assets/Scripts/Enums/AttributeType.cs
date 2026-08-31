@@ -1,21 +1,21 @@
 public enum AttributeType
 {
-    Health                 , // short
-    TemporaryHealth        , // short
+    Health                 , // int
+    TemporaryHealth        , // int
     MoveSpeed              , // float
     Acceleration           , // float
     Deceleration           , // float
     TurnDeceleration       , // float
-    Damage                 , // short
+    Damage                 , // int
     AttackSpeed            , // float
     AttackRange            , // float
     AttackInterval         , // float
     ChargeMultiplier       , // float
-    PierceCount            , // short
-    DashCount              , // short
+    PierceCount            , // int
+    DashCount              , // int
     DashCooldown           , // float
     DashDistance           , // float
-    JumpCount              , // short
+    JumpCount              , // int
     JumpForce              , // float
     GravityReduction       , // float
     InvulnerabilityDuration, // float

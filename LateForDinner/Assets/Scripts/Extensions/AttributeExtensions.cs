@@ -79,18 +79,23 @@ public static class AttributeExtensions
         {
             case float val: 
                 attributes.Set(attributeType, val); 
+                attributes.SetBase(attributeType, val);
                 break;
             case int val: 
-                attributes.Set(attributeType, val); 
+                attributes.Set(attributeType, val);
+                attributes.SetBase(attributeType, val);
                 break;
             case short val: 
-                attributes.Set(attributeType, val); 
+                attributes.Set(attributeType, val);
+                attributes.SetBase(attributeType, val);
                 break;
             case long val: 
-                attributes.Set(attributeType, val); 
+                attributes.Set(attributeType, val);
+                attributes.SetBase(attributeType, val);
                 break;
             case double val: 
-                attributes.Set(attributeType, val); 
+                attributes.Set(attributeType, val);
+                attributes.SetBase(attributeType, val);
                 break;
         }
     }

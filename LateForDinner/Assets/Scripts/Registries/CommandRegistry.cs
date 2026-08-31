@@ -244,12 +244,7 @@ public class CommandRegistry
         if (Enum.TryParse<SceneID>(args[0], true, out var targetSceneID))
         {
             Log.Info(Managers.Localization.Get(LocalizationKey.Console_Scene_MovingProcess, targetSceneID));
-            await ((Func<UILoadDisplay, UniTask>)(async load =>
-            {
-                await load.LoadAsync(1f);
-                await Managers.Scene.LoadSceneAsync(targetSceneID);
-                await Managers.UI.OpenDisplayAsync<UIHeadUpDisplay>();
-            })).Load();
+            await Managers.Game.DebugGameAsync(targetSceneID);
 
         }
         else

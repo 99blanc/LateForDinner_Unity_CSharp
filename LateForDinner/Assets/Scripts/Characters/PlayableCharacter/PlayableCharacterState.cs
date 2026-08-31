@@ -61,7 +61,7 @@ public class PlayableCharacterJumpState : JumpState
 
         bool isHoldingProp = _player is ICarriableCharacter carriable && carriable.IsHoldingProp;
 
-        if (jumpable.RemainingJumpCount >= jumpable.MaxJumpCount - 1 || isHoldingProp)
+        if (jumpable.RemainJumpCount >= jumpable.MaxJumpCount - 1 || isHoldingProp)
         {
             playableAnimator.PlayState(CharacterStateType.Jump);
             return;
@@ -144,7 +144,7 @@ public class PlayableCharacterDashState : DashState
             return;
 
         if (_player.IsGrounded() && _player is IJumpableCharacter jumpable)
-            jumpable.RemainingJumpCount = jumpable.MaxJumpCount;
+            jumpable.RemainJumpCount = jumpable.MaxJumpCount;
     }
 
     private void PlayDashAnimation(IDashableCharacter dashable)

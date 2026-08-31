@@ -118,7 +118,7 @@ public class LogManager
         => _pendingLogs.Count > 0;
 
     private bool IsReadyState()
-        => _isReady.Value;
+        => _isReady.CurrentValue;
 
     private bool IsLogStorageExceeded()
         => _logs.Count > Define.Log.Storage;

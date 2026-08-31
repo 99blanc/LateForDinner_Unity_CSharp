@@ -1,11 +1,12 @@
 using Cysharp.Threading.Tasks;
+using System;
 using System.Threading;
 using UnityEngine;
 using UnityEngine.UI;
 
 public static class TweenExtensions
 {
-    public static async UniTask<T> PlayAsync<T>(this UniTask<T> task) where T : UserInterface, IAnimatable
+    public static async UniTask<T> PlayAsync<T>(this UniTask<T> task) where T : UserInterface, IAnimationUIView
     {
         var display = await task;
 
@@ -15,7 +16,7 @@ public static class TweenExtensions
         return display;
     }
 
-    public static async UniTask<T> PlayAsync<T>(this T user) where T : UserInterface, IAnimatable
+    public static async UniTask<T> PlayAsync<T>(this T user) where T : UserInterface, IAnimationUIView
     {
         if (user != null)
             await user.PlayAsync();
@@ -98,6 +99,26 @@ public static class TweenExtensions
     {
         float rawTime = Mathf.Clamp01(elapsedTime / duration);
         return 1f - Mathf.Pow(1f - rawTime, power);
+    }
+
+    public static async UniTask SmoothDampFillAmountAsync(this Image image, float target, float smoothTime = 0.2f, float delay = 0f, CancellationToken token = default)
+    {
+        if (image == null)
+            return;
+
+        if (delay > 0f)
+            await UniTask.Delay(TimeSpan.FromSeconds(delay), ignoreTimeScale: true, cancellationToken: token);
+
+        float velocity = 0f;
+
+        while (Mathf.Abs(image.fillAmount - target) > 0.001f)
+        {
+            token.ThrowIfCancellationRequested();
+            image.fillAmount = Mathf.SmoothDamp(image.fillAmount, target, ref velocity, smoothTime, Mathf.Infinity, Time.unscaledDeltaTime);
+            await UniTask.Yield(PlayerLoopTiming.Update, token);
+        }
+
+        image.fillAmount = target;
     }
 
     private static void SetImageAlpha(Image image, float alpha)

@@ -117,10 +117,11 @@ public enum LocalizationKey
     Log_Data_DuplicateKey                              , // [DataManager] 테이블 '{0}'에서 중복된 키가 발견되어 무시됩니다: '{1}'
     Log_Feedback_AlertPopup_Cancelled                  , // [FeedbackManager] 알림 팝업 대기가 취소되었습니다.
     Log_Feedback_ConfirmPopup_Cancelled                , // [FeedbackManager] 확인 팝업 대기가 취소되었습니다.
+    Log_Game_Loading_DebugData                         , // [GameManager] 디버그 전용 게임 데이터를 생성하는 중입니다.
     Log_Game_Loading_NewData                           , // [GameManager] 세이브 파일을 불러오는 중입니다.
     Log_Game_Loading_SaveData                          , // [GameManager] 새로운 게임 데이터를 생성하는 중입니다.
     Log_Game_Loading_PlayerSpawn                       , // [GameManager] 캐릭터를 생성하고 월드로 이동하는 중입니다.
-    Log_Game_Loading_UI                                , // [GameManager] 인터페이스를 불러오는 중입니다.
+    Log_Game_Loading_ResourcePackaging                 , // [GameManager] 리소스를 불러오는 중입니다.
     Log_Game_CharacterSpawnFailed                      , // [GameManager] 캐릭터('{0}') 생성에 실패했습니다.
     Log_Game_CharacterSpawnSuccess                     , // [GameManager] 캐릭터('{0}')를 성공적으로 생성했습니다.
     Log_Interact_NotRegistered                         , // [InteractManager] 등록되지 않은 상호작용 타입입니다: '{0}'
@@ -132,6 +133,7 @@ public enum LocalizationKey
     Log_Localization_LanguageFileParseFailed           , // [LocalizationManager] 언어 지원 파일('{0}')을 분석하는 중 오류가 발생했습니다.
     Log_Log_SetupCompleted                             , // [LogManager] 로깅 시스템 초기화 및 대기열 처리를 완료했습니다.
     Log_Pool_InstantiateFailed                         , // [PoolManager] 키에 해당하는 오브젝트 생성에 실패했습니다: '{0}'
+    Log_Pool_DestroyResult                             , // [PoolManager] {0}개의 풀링 오브젝트를 파괴했습니다: (Key: '{1}')
     Log_Pool_Cleared                                   , // [PoolManager] 오브젝트 풀을 정리했습니다. 총 파괴된 개수: {0}
     Log_Preload_BootStarted                            , // [PreloadManager] 게임 초기 부팅 프리로드 프로세스를 시작합니다.
     Log_Preload_Boot_Data                              , // [PreloadManager] 환경 설정을 불러오는 중...

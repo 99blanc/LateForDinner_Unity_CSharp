@@ -63,8 +63,8 @@ public abstract class UserInterface : MonoBehaviour, IPoolable
         return IsIndexOutOfBounds(index, newView.Length) ? null : newView[index] as T;
     }
 
-    protected void BindObject(Type type)
-        => Bind<GameObject>(type);
+    protected void BindRectTransform(Type type)
+        => Bind<RectTransform>(type);
 
     protected void BindImage(Type type)
         => Bind<Image>(type);
@@ -93,8 +93,8 @@ public abstract class UserInterface : MonoBehaviour, IPoolable
     protected void BindPanel(Type type)
         => Bind<CanvasGroup>(type);
 
-    protected GameObject GetObject<TEnum>(TEnum element) where TEnum : Enum
-        => Get<GameObject, TEnum>(element);
+    protected RectTransform GetRectTransform<TEnum>(TEnum element) where TEnum : Enum
+        => Get<RectTransform, TEnum>(element);
 
     protected Image GetImage<TEnum>(TEnum element) where TEnum : Enum
         => Get<Image, TEnum>(element);

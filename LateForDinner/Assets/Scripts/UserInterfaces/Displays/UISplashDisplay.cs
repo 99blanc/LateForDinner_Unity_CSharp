@@ -2,7 +2,7 @@ using Cysharp.Threading.Tasks;
 using System;
 using UnityEngine;
 
-public class UISplashDisplay : UIDisplay, IAnimatable
+public class UISplashDisplay : UIDisplay, IAnimationUIView
 {
     private enum Images
     {

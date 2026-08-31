@@ -4,7 +4,7 @@ using System;
 using TMPro;
 using UnityEngine;
 
-public class UILoadDisplay : UIDisplay, IAnimatable
+public class UILoadDisplay : UIDisplay, IAnimationUIView
 {
     private enum Images
     {

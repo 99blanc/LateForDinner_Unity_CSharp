@@ -52,7 +52,7 @@ public static class UIExtensions
         if (prop == null)
             return true;
 
-        return prop.Value != ButtonState.Disable;
+        return prop.CurrentValue != ButtonState.Disable;
     }
 
     public static void BindViewAsButton(this UIBehaviour view, Action<PointerEventData> action, ViewEvent type, IPoolable component, ReactiveProperty<ButtonState> prop, Func<bool> stayCondition = null)

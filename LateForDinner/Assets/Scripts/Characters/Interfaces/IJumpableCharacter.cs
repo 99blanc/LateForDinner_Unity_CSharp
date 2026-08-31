@@ -1,29 +1,15 @@
-using System.Runtime.CompilerServices;
 using UnityEngine;
 
 public interface IJumpableCharacter
 {
-    private static readonly ConditionalWeakTable<IJumpableCharacter, JumpStateValue> _jumpValue = new ConditionalWeakTable<IJumpableCharacter, JumpStateValue>();
-    private class JumpStateValue
-    {
-        public int RemainingJumpCount = -1;
-    }
     SpriteRenderer Renderer { get; }
     Rigidbody2D Rigidbody { get; }
     AttributeRegistry Attributes { get; }
-    int MaxJumpCount => Attributes.Get<short>(AttributeType.JumpCount).Value;
-    int RemainingJumpCount
+    int MaxJumpCount => Attributes.GetBase<int>(AttributeType.JumpCount).Value;
+    int RemainJumpCount
     {
-        get
-        {
-            var val = _jumpValue.GetOrCreateValue(this);
-
-            if (val.RemainingJumpCount < 0)
-                val.RemainingJumpCount = MaxJumpCount;
-
-            return val.RemainingJumpCount;
-        }
-        set => _jumpValue.GetOrCreateValue(this).RemainingJumpCount = value;
+        get => Attributes.Get<int>(AttributeType.JumpCount).Value;
+        set => Attributes.Set(AttributeType.JumpCount, value);
     }
 
     public void Jump(float directionX)
@@ -31,14 +17,14 @@ public interface IJumpableCharacter
         if (this is not Character || Rigidbody == null || Attributes == null)
             return;
 
-        if (RemainingJumpCount < 0)
-            RemainingJumpCount = MaxJumpCount;
+        if (RemainJumpCount < 0)
+            RemainJumpCount = MaxJumpCount;
 
         Renderer.FlipX(directionX);
         float jumpForce = Attributes.Get<float>(AttributeType.JumpForce).Value;
         Vector2 velocity = Rigidbody.linearVelocity;
         velocity.y = jumpForce;
         Rigidbody.linearVelocity = velocity;
-        RemainingJumpCount--;
+        RemainJumpCount--;
     }
 }

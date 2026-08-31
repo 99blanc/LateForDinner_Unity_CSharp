@@ -17,21 +17,6 @@ public abstract class CharacterAnimator : MonoBehaviour
             Animator.runtimeAnimatorController = overrideController;
     }
 
-    public void SetAnimatorSpeed(float speed)
-    {
-        if (Animator != null)
-            Animator.speed = speed;
-    }
-
-    public virtual float GetCurrentAnimatorNormalizedTime()
-    {
-        if (Animator == null)
-            return 0f;
-
-        AnimatorStateInfo stateInfo = Animator.GetCurrentAnimatorStateInfo(0);
-        return stateInfo.normalizedTime;
-    }
-
     protected virtual int GetStateHash(CharacterStateType state)
     {
         InteractionType currentHoldType = Owner != null ? Owner.CurrentHoldInteractionType : InteractionType.None;

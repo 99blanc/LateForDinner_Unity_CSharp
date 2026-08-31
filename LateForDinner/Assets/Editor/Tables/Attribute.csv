@@ -6,10 +6,10 @@
 # IJumpableCharacter: JumpCount. JumpForce,
 Key,DataType
 # Index: AttributeRegistry,
-# Property: 체력,
-Health,short
-# Property: 체력,
-TemporaryHealth,short
+# Property: 체력. Description: 체력은 HUD 반 칸 기준으로 가산,
+Health,int
+# Property: 임시 체력. Description: 임시 체력은 HUD 반 칸 기준으로 가산,
+TemporaryHealth,int
 # Property: 이동속도,
 MoveSpeed,float
 # Property: 가속도. Priority: MoveSpeed,
@@ -19,7 +19,7 @@ Deceleration,float
 # Property: 방향 전환 감속. Priority: MoveSpeed,
 TurnDeceleration,float
 # Property: 공격력,
-Damage,short
+Damage,int
 # Property: 공격속도. Priority: Damage,
 AttackSpeed,float
 # Property: 공격범위. Priority: Damage,
@@ -29,15 +29,15 @@ AttackInterval,float
 # Property: 차지배율. Priority: Damage,
 ChargeMultiplier,float
 # Property: 관통계수. Priority: Damage,
-PierceCount,short
+PierceCount,int
 # Property: 대시횟수,
-DashCount,short
+DashCount,int
 # Property: 대시쿨타임. Priority: DashCount,
 DashCooldown,float
 # Property: 대시거리. Priority: DashCount,
 DashDistance,float
 # Property: 점프횟수,
-JumpCount,short
+JumpCount,int
 # Property: 점프력. Priority: JumpCount,
 JumpForce,float
 # Property: 중력저항,

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using LateForDinner.Data;
 using Cysharp.Text;
+using UnityEngine;
 
 public class SaveManager
 {
@@ -199,6 +200,13 @@ public class SaveManager
         Log.System(LocalizationKey.Log_Save_NewGameStarted, slotIndex);
     }
 
+    public void SetDebugDefaultData()
+    {
+        _currentSlot = -1;
+        CurrentData = SaveData.Default;
+        Log.System(LocalizationKey.Log_Save_NewGameStarted, -1);
+    }
+
     private void Sync()
     {
         if (CurrentData == null)
@@ -206,6 +214,17 @@ public class SaveManager
 
         if (Managers.Scene.CurrentSceneID >= SceneID.Hospital1)
             CurrentData.CurrentSceneID = Managers.Scene.CurrentSceneID;
+
+        var player = Managers.Game.Character;
+
+        if (player != null)
+        {
+            if (player.Attributes != null)
+                CurrentData.SavedAttributes = player.Attributes.ExportSaveData();
+
+            CurrentData.PlayerPosition = player.transform.position;
+            CurrentData.PlayerRotation = player.transform.rotation.z;
+        }
     }
 
     private string GetPath(int slot)

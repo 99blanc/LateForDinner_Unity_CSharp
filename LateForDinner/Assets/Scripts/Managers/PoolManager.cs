@@ -262,6 +262,63 @@ public class PoolManager
         Log.System(LocalizationKey.Log_Pool_Cleared, totalDestroyed);
     }
 
+    public void DestroyByKey(string key)
+    {
+        if (string.IsNullOrEmpty(key) || !HasRegistry(key))
+            return;
+
+        var queue = _registries[key];
+        int destroyedCount = 0;
+
+        while (queue.Count > 0)
+        {
+            GameObject instance = queue.Dequeue();
+
+            if (IsInstanceNotNull(instance))
+            {
+                _parents.Remove(instance);
+                UnityEngine.Object.Destroy(instance);
+                destroyedCount++;
+            }
+        }
+
+        _registries.Remove(key);
+        Log.System(LocalizationKey.Log_Pool_DestroyResult, destroyedCount, key);
+    }
+
+    public void DestroyByKey<T>() where T : Component
+        => DestroyByKey(typeof(T).Name);
+
+    public void DestroyByObject(GameObject targetObject)
+    {
+        if (IsGameObjectNull(targetObject))
+            return;
+
+        _parents.Remove(targetObject);
+        UnityEngine.Object.Destroy(targetObject);
+    }
+
+    public void Destroy(GameObject targetObject)
+        => UnityEngine.Object.Destroy(targetObject);
+
+    public bool DestroyFromFolder(string key, string objectName)
+    {
+        Transform folder = GetFolder(key);
+
+        if (folder == null)
+            return false;
+
+        Transform target = folder.Find(objectName);
+
+        if (target != null)
+        {
+            DestroyByObject(target.gameObject);
+            return true;
+        }
+
+        return false;
+    }
+
     private bool HasFolder(string folderName)
         => _folders.ContainsKey(folderName);
 

@@ -74,7 +74,8 @@
         "com.github-glitchenzo",
         "com.baltin",
         "games.corundum",
-        "com.inspiaaa"
+        "com.inspiaaa",
+        "com.manefunction.dotween-ui-controller"
       ]
     }
   ]

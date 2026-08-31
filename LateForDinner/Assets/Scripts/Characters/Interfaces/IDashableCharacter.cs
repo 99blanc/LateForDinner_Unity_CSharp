@@ -6,7 +6,6 @@ public interface IDashableCharacter
     private static readonly ConditionalWeakTable<IDashableCharacter, DashStateValue> _dashValue = new ConditionalWeakTable<IDashableCharacter, DashStateValue>();
     private class DashStateValue
     {
-        public int RemainingDashCount = -1;
         public float DurationTimer = 0f;
         public float OriginalGravityScale = 1f;
         public Vector2 DashDirection = Vector2.right;
@@ -15,19 +14,11 @@ public interface IDashableCharacter
     SpriteRenderer Renderer { get; }
     Rigidbody2D Rigidbody { get; }
     AttributeRegistry Attributes { get; }
-    int MaxDashCount => Attributes.Get<short>(AttributeType.DashCount).Value;
-    int RemainingDashCount
+    int MaxDashCount => Attributes.GetBase<int>(AttributeType.DashCount).CurrentValue;
+    int RemainDashCount
     {
-        get
-        {
-            var val = _dashValue.GetOrCreateValue(this);
-
-            if (val.RemainingDashCount < 0)
-                val.RemainingDashCount = Attributes.Get<short>(AttributeType.DashCount).Value;
-
-            return val.RemainingDashCount;
-        }
-        set => _dashValue.GetOrCreateValue(this).RemainingDashCount = value;
+        get => Attributes.Get<int>(AttributeType.DashCount).Value;
+        set => Attributes.Set(AttributeType.DashCount, value);
     }
     public bool IsOnCooldown
     {
@@ -53,7 +44,7 @@ public interface IDashableCharacter
         {
             val.CooldownRegistry = new CooldownRegistry(() =>
             {
-                RemainingDashCount = Attributes.Get<short>(AttributeType.DashCount).Value;
+                RemainDashCount = MaxDashCount;
             });
         }
 
@@ -67,14 +58,14 @@ public interface IDashableCharacter
         if (val.DashDirection.x != 0)
             Renderer.FlipX(val.DashDirection.x);
 
-        float dashSpeed = Attributes.Get<float>(AttributeType.DashDistance).Value / Define.Scaler.Duration;
+        float dashSpeed = Attributes.Get<float>(AttributeType.DashDistance).CurrentValue / Define.Scaler.Duration;
         Rigidbody.gravityScale = 0f;
         Rigidbody.linearVelocity = val.DashDirection.normalized * dashSpeed;
-        RemainingDashCount--;
+        RemainDashCount--;
 
-        if (RemainingDashCount <= 0)
+        if (RemainDashCount <= 0)
         {
-            float cooldownTime = Attributes.Get<float>(AttributeType.DashCooldown).Value;
+            float cooldownTime = Attributes.Get<float>(AttributeType.DashCooldown).CurrentValue;
             val.CooldownRegistry.CooldownTime = cooldownTime;
             val.CooldownRegistry.CurrentCooldown = cooldownTime;
             val.CooldownRegistry.IsOnCooldown = true;

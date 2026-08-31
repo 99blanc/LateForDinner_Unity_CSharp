@@ -5,8 +5,8 @@
 # Foreign Key: Attribute.csv,,
 PlayableCharacterID,AttributeKey,Value
 # Index: PlayableCharacterTemplate,,
-1,Health,3
-1,TemporaryHealth,1
+1,Health,6
+1,TemporaryHealth,0
 1,MoveSpeed,5
 1,Acceleration,15
 1,Deceleration,20

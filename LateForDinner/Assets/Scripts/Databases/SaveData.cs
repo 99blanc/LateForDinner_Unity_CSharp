@@ -1,5 +1,6 @@
 using MemoryPack;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace LateForDinner.Data
 {
@@ -69,9 +70,12 @@ namespace LateForDinner.Data
     public partial class SaveData : Slot
     {
         // DESC ::: 플레이어 위치, 퀘스트 목록, 인벤토리 등 게임 플레이 데이터 적재
-        public CharacterID SelectedCharacterID;
+        public CharacterID SelectedPlayerID;
         public SceneID CurrentSceneID;
-        public Dictionary<string, bool> InteractableStates = new Dictionary<string, bool>();
+        public Dictionary<string, bool> InteractableStates;
+        public List<AttributeSaveData> SavedAttributes;
+        public Vector2 PlayerPosition;
+        public float PlayerRotation;
 
         [MemoryPackIgnore]
         public new static SaveData Default => new SaveData()
@@ -84,8 +88,20 @@ namespace LateForDinner.Data
             Year = 1,
             Month = 1,
             Date = 1,
-            SelectedCharacterID = CharacterID.Protagonist,
-            CurrentSceneID = SceneID.Hospital1
+            SelectedPlayerID = CharacterID.Protagonist,
+            CurrentSceneID = SceneID.Hospital1,
+            InteractableStates = new Dictionary<string, bool>(),
+            SavedAttributes= new List<AttributeSaveData>(),
+            PlayerPosition = Vector2.zero,
+            PlayerRotation = 0f
         };
+    }
+
+    [MemoryPackable]
+    public partial class AttributeSaveData
+    {
+        public string Key;
+        public string DataType;
+        public double Value;
     }
 }

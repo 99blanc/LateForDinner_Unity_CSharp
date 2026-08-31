@@ -1,6 +1,5 @@
 using Cysharp.Threading.Tasks;
 using System;
-using System.Runtime.InteropServices;
 using UnityEngine;
 
 public class GameManager
@@ -17,8 +16,8 @@ public class GameManager
             await Managers.Save.LoadAsync(slotIndex);
             await load.LoadAsync(0.7f, Managers.Localization.Get(LocalizationKey.Log_Game_Loading_PlayerSpawn));
             await PrepareAndSpawnPlayerAsync();
-            await load.LoadAsync(1.0f, Managers.Localization.Get(LocalizationKey.Log_Game_Loading_UI));
-            await Managers.UI.OpenDisplayAsync<UIHeadUpDisplay>();
+            await load.LoadAsync(1.0f, Managers.Localization.Get(LocalizationKey.Log_Game_Loading_ResourcePackaging));
+            await Managers.Preload.Release_GameAsync(Managers.Save.CurrentData.Day);
         })).Load();
     }
 
@@ -33,8 +32,24 @@ public class GameManager
             await Managers.Save.SaveAsync();
             await load.LoadAsync(0.7f, Managers.Localization.Get(LocalizationKey.Log_Game_Loading_PlayerSpawn));
             await PrepareAndSpawnPlayerAsync();
-            await load.LoadAsync(1.0f, Managers.Localization.Get(LocalizationKey.Log_Game_Loading_UI));
-            await Managers.UI.OpenDisplayAsync<UIHeadUpDisplay>();
+            await load.LoadAsync(1.0f, Managers.Localization.Get(LocalizationKey.Log_Game_Loading_ResourcePackaging));
+            await Managers.Preload.Release_GameAsync(Managers.Save.CurrentData.Day);
+        })).Load();
+    }
+
+    public async UniTask DebugGameAsync(SceneID targetSceneID)
+    {
+        Managers.UI.CloseAll();
+
+        await ((Func<UILoadDisplay, UniTask>)(async load =>
+        {
+            await load.LoadAsync(0.3f, Managers.Localization.Get(LocalizationKey.Log_Game_Loading_DebugData));
+            Managers.Save.SetDebugDefaultData();
+            Managers.Save.CurrentData.CurrentSceneID = targetSceneID;
+            await load.LoadAsync(0.7f, Managers.Localization.Get(LocalizationKey.Log_Game_Loading_PlayerSpawn));
+            await PrepareAndSpawnPlayerAsync();
+            await load.LoadAsync(1.0f, Managers.Localization.Get(LocalizationKey.Log_Game_Loading_ResourcePackaging));
+            await Managers.Preload.Release_GameAsync();
         })).Load();
     }
 
@@ -42,7 +57,7 @@ public class GameManager
     {
         var saveData = Managers.Save.CurrentData;
         await Managers.Scene.LoadSceneAsync(saveData.CurrentSceneID);
-        await SpawnPlayerAsync(saveData.SelectedCharacterID);
+        await SpawnPlayerAsync(saveData.SelectedPlayerID);
         Managers.Scene.RelocateCharacterToSpawnpoint();
     }
 
@@ -78,7 +93,7 @@ public class GameManager
         if (characterComponent is not T typedCharacter)
         {
             Log.Error(LocalizationKey.Log_Game_CharacterSpawnFailed, characterID.ToString());
-            UnityEngine.Object.Destroy(characterPrefab);
+            Managers.Pool.Destroy(characterPrefab);
             return default;
         }
 
@@ -112,7 +127,7 @@ public class GameManager
         if (IsCharacterNull())
             return;
 
-        UnityEngine.Object.Destroy(Character.gameObject);
+        Managers.Pool.Destroy(Character.gameObject);
         Character = null;
     }
 

@@ -74,7 +74,7 @@ public interface IClimbableCharacter
             targetVelocityX = xDifference * 15f;
         }
 
-        float maxClimbSpeed = Attributes.Get<float>(AttributeType.MoveSpeed).Value * 0.5f;
+        float maxClimbSpeed = Attributes.Get<float>(AttributeType.MoveSpeed).CurrentValue * 0.5f;
         float targetVelocityY = verticalInput * maxClimbSpeed;
         Rigidbody.linearVelocity = new Vector2(targetVelocityX, targetVelocityY);
     }

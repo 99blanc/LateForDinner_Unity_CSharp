@@ -1,6 +1,6 @@
 using Cysharp.Threading.Tasks;
 
-public interface IAnimatable
+public interface IAnimationUIView
 {
     UniTask PlayAsync();
 }

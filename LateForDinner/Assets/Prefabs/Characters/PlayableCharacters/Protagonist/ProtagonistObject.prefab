@@ -60,6 +60,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: ProtagonistObject
       objectReference: {fileID: 0}
+    - target: {fileID: 5521085977429679974, guid: 8c2665e69dc9fae4ca4b97a83de49ccf, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
