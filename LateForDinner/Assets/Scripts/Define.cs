@@ -41,9 +41,8 @@ public class Define
 
     public class Atlas
     {
-        public const string Splash = "splash_atlas";
         public const string Common = "common_atlas";
-        public const string Title = "title_atlas";
+        public const string Title = "splash_title_atlas";
         public const string Load = "load_atlas";
         public const string PlayableCharacter = "playablecharacter_atlas";
         public const string HeadUp = "headup_atlas";

@@ -10,12 +10,10 @@ public class PreloadManager
         await Managers.Config.LoadAsync();
         await Managers.Control.LoadAsync();
         Log.System(LocalizationKey.Log_Preload_Boot_Asset);
-        await Managers.Resource.LoadAnimatorControllerAsync(Define.Animator.UIAnimator);
-        await Managers.Resource.LoadAssetAsync<SpriteAtlas>(Define.Atlas.Common);
-        await Managers.Resource.LoadAssetAsync<SpriteAtlas>(Define.Atlas.Splash);
         await Managers.Resource.LoadAssetAsync<SpriteAtlas>(Define.Atlas.Common);
         await Managers.Resource.LoadAssetAsync<SpriteAtlas>(Define.Atlas.Title);
         await Managers.Resource.LoadAssetAsync<SpriteAtlas>(Define.Atlas.Load);
+        await Managers.Resource.LoadAnimatorControllerAsync(Define.Animator.UIAnimator);
         Log.System(LocalizationKey.Log_Preload_Boot_Object);
         await Managers.Resource.LoadPrefabAsync(Literal.Assets.EventSystem);
         Log.System(LocalizationKey.Log_Preload_Boot_UI);
