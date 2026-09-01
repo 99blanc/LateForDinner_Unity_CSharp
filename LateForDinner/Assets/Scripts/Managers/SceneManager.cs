@@ -155,9 +155,9 @@ public class SceneManager
         if (_interactables.ContainsKey(interactable))
             return;
 
-        prop.OnDestroyAsObservable()
+        prop.OnDisableAsObservable()
         .Subscribe(_ => UnregisterProp(prop))
-        .RegisterTo(prop.GetCancellationTokenOnDestroy());
+        .RegisterToPool(prop as IPoolable);
         var check = prop.FindChild<Collider2D>()?.isTrigger;
         var transform = prop.FindChild(Literal.Objects.InteractTransform, recursive: false);
 

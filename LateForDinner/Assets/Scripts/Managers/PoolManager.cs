@@ -210,9 +210,9 @@ public class PoolManager
 
         if (isNew)
         {
-            instance.OnDestroyAsObservable()
+            instance.OnDisableAsObservable()
             .Subscribe(_ => poolable.ProtectedRelease())
-            .RegisterTo(instance.GetCancellationTokenOnDestroy());
+            .RegisterToPool(poolable);
             poolable.ProtectedInit();
             return;
         }
