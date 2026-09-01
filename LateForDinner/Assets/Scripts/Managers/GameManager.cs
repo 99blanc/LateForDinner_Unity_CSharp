@@ -12,11 +12,11 @@ public class GameManager
 
         await ((Func<UILoadDisplay, UniTask>)(async load =>
         {
-            await load.LoadAsync(0.3f, Managers.Localization.Get(LocalizationKey.Log_Game_Loading_SaveData));
+            await load.LoadAsync(0.3f, LocalizationKey.Log_Game_Loading_SaveData);
             await Managers.Save.LoadAsync(slotIndex);
-            await load.LoadAsync(0.7f, Managers.Localization.Get(LocalizationKey.Log_Game_Loading_PlayerSpawn));
+            await load.LoadAsync(0.7f, LocalizationKey.Log_Game_Loading_PlayerSpawn);
             await PrepareAndSpawnPlayerAsync();
-            await load.LoadAsync(1.0f, Managers.Localization.Get(LocalizationKey.Log_Game_Loading_ResourcePackaging));
+            await load.LoadAsync(1.0f, LocalizationKey.Log_Game_Loading_ResourcePackaging);
             await Managers.Preload.Release_GameAsync(Managers.Save.CurrentData.Day);
         })).Load();
     }
@@ -27,12 +27,12 @@ public class GameManager
 
         await ((Func<UILoadDisplay, UniTask>)(async load =>
         {
-            await load.LoadAsync(0.3f, Managers.Localization.Get(LocalizationKey.Log_Game_Loading_NewData));
+            await load.LoadAsync(0.3f, LocalizationKey.Log_Game_Loading_NewData);
             Managers.Save.Newgame(slotIndex);
             await Managers.Save.SaveAsync();
-            await load.LoadAsync(0.7f, Managers.Localization.Get(LocalizationKey.Log_Game_Loading_PlayerSpawn));
+            await load.LoadAsync(0.7f, LocalizationKey.Log_Game_Loading_PlayerSpawn);
             await PrepareAndSpawnPlayerAsync();
-            await load.LoadAsync(1.0f, Managers.Localization.Get(LocalizationKey.Log_Game_Loading_ResourcePackaging));
+            await load.LoadAsync(1.0f, LocalizationKey.Log_Game_Loading_ResourcePackaging);
             await Managers.Preload.Release_GameAsync(Managers.Save.CurrentData.Day);
         })).Load();
     }
@@ -43,12 +43,12 @@ public class GameManager
 
         await ((Func<UILoadDisplay, UniTask>)(async load =>
         {
-            await load.LoadAsync(0.3f, Managers.Localization.Get(LocalizationKey.Log_Game_Loading_DebugData));
+            await load.LoadAsync(0.3f, LocalizationKey.Log_Game_Loading_DebugData);
             Managers.Save.SetDebugDefaultData();
             Managers.Save.CurrentData.CurrentSceneID = targetSceneID;
-            await load.LoadAsync(0.7f, Managers.Localization.Get(LocalizationKey.Log_Game_Loading_PlayerSpawn));
+            await load.LoadAsync(0.7f, LocalizationKey.Log_Game_Loading_PlayerSpawn);
             await PrepareAndSpawnPlayerAsync();
-            await load.LoadAsync(1.0f, Managers.Localization.Get(LocalizationKey.Log_Game_Loading_ResourcePackaging));
+            await load.LoadAsync(1.0f, LocalizationKey.Log_Game_Loading_ResourcePackaging);
             await Managers.Preload.Release_GameAsync();
         })).Load();
     }
@@ -129,6 +129,23 @@ public class GameManager
 
         Managers.Pool.Destroy(Character.gameObject);
         Character = null;
+    }
+
+    public async UniTask TitleGameAsync()
+    {
+        if (Managers.Scene.CurrentSceneID == SceneID.Bootstrap)
+            return;
+
+        Managers.UI.CloseAll();
+        Resume();
+        await ((Func<UILoadDisplay, UniTask>)(async load =>
+        {
+            await load.LoadAsync(0.5f, LocalizationKey.Log_Game_Loading_Title);
+            DespawnExistingPlayer();
+            await Managers.Scene.LoadSceneAsync(SceneID.Bootstrap);
+            await load.LoadAsync(1.0f, LocalizationKey.Log_Game_Loading_ResourcePackaging);
+        })).Load();
+        Managers.UI.OpenDisplay<UITitleDisplay>();
     }
 
     private bool IsCharacterNull()

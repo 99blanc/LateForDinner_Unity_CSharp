@@ -79,6 +79,12 @@ public class UIKeybindSlot : UISlot
         SetResetText(_cachedResetLocalizationKey);
     }
 
+    public override void OnRelease()
+    {
+        base.OnRelease();
+        _cachedResetLocalizationKey = LocalizationKey.None;
+    }
+
     public void Setup(string action, InputAction target, List<UIKeybindSlot> slots, Func<bool> locked, Action<bool> lockAction, Action<string, string> onDuplicated)
     {
         _slotMode = UI_KeybindMode.ActionRebind;

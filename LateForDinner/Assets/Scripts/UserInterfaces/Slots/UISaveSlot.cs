@@ -32,7 +32,6 @@ public class UISaveSlot : UISlot
     private readonly ReactiveProperty<ButtonState> _downButton = new ReactiveProperty<ButtonState>(ButtonState.Normal);
     private Action<int> _onSlotSelected;
     private int _index;
-    private bool _isSelected;
 
     public override void OnInit()
     {
@@ -43,8 +42,7 @@ public class UISaveSlot : UISlot
         GetImage(Images.SlotImage).BindState(_button, Define.Atlas.Common, this);
         GetImage(Images.UpButtonImage).BindStateAsArrow(_upButton, Define.Atlas.Common, this);
         GetImage(Images.DownButtonImage).BindStateAsArrow(_downButton, Define.Atlas.Common, this);
-        Func<bool> stayCondition = () => _isSelected;
-        GetButton(Buttons.SlotButton).BindViewAsToggle(data => OnClickSlot(data), ViewEvent.LeftClick, this, _button, stayCondition);
+        GetButton(Buttons.SlotButton).BindViewAsToggle(data => OnClickSlot(data), ViewEvent.LeftClick, this, _button);
         GetButton(Buttons.UpButton).BindViewAsButton(data => OnClickUp(data).Forget(), ViewEvent.LeftClick, this, _upButton);
         GetButton(Buttons.DownButton).BindViewAsButton(data => OnClickDown(data).Forget(), ViewEvent.LeftClick, this, _downButton);
     }
@@ -150,10 +148,7 @@ public class UISaveSlot : UISlot
     }
 
     public void SetSelected(bool isSelected)
-    {
-        _isSelected = isSelected;
-        _button.Value = isSelected ? ButtonState.Disable : ButtonState.Normal;
-    }
+        => _button.Value = isSelected ? ButtonState.Disable : ButtonState.Normal;
 
     private void SetText(Texts textEnum, LocalizationKey key) 
         => GetText(textEnum).text = Managers.Localization.Get(key);

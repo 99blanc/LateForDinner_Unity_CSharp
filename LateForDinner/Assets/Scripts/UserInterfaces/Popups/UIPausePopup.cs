@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using R3;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -56,7 +57,7 @@ public class UIPausePopup : UIPopup
     {
         GetButton(Buttons.ContinueButton).BindViewAsButton(OnClickContinue, ViewEvent.LeftClick, this, _continueButtonState);
         GetButton(Buttons.OptionButton).BindViewAsButton(OnClickOption, ViewEvent.LeftClick, this, _optionButtonState);
-        GetButton(Buttons.TitleButton).BindViewAsButton(OnClickTitle, ViewEvent.LeftClick, this, _titleButtonState);
+        GetButton(Buttons.TitleButton).BindViewAsButton(async (data) => await OnClickTitle(data), ViewEvent.LeftClick, this, _titleButtonState);
     }
 
     private void InitStaticTexts()
@@ -88,8 +89,8 @@ public class UIPausePopup : UIPopup
     private void OnClickOption(PointerEventData data)
         => Managers.UI.OpenPopup<UIOptionPopup>();
 
-    private void OnClickTitle(PointerEventData data)
-        => Managers.UI.OpenDisplay<UITitleDisplay>();
+    private async UniTask OnClickTitle(PointerEventData data)
+        => await Managers.Game.TitleGameAsync();
 
     private void SetText(Texts textEnum, LocalizationKey key)
         => GetText(textEnum).text = Managers.Localization.Get(key);

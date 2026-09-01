@@ -15,6 +15,7 @@ public enum LocalizationKey
     Action_Inventory                                   , // 인벤토리
     Action_Active                                      , // 액티브 스킬
     Action_Pause                                       , // 일시정지 메뉴
+    Action_Cancel                                      , // 팝업 캔슬
     Action_DashCommand                                 , // 대시 커맨드
     None                                               , // None
     Apply                                              , // 적용
@@ -123,6 +124,7 @@ public enum LocalizationKey
     Log_Game_Loading_SaveData                          , // [GameManager] 새로운 게임 데이터를 생성하는 중입니다.
     Log_Game_Loading_PlayerSpawn                       , // [GameManager] 캐릭터를 생성하고 월드로 이동하는 중입니다.
     Log_Game_Loading_ResourcePackaging                 , // [GameManager] 리소스를 불러오는 중입니다.
+    Log_Game_Loading_Title                             , // [GameManager] 타이틀 화면으로 이동합니다.
     Log_Game_CharacterSpawnFailed                      , // [GameManager] 캐릭터('{0}') 생성에 실패했습니다.
     Log_Game_CharacterSpawnSuccess                     , // [GameManager] 캐릭터('{0}')를 성공적으로 생성했습니다.
     Log_Interact_NotRegistered                         , // [InteractManager] 등록되지 않은 상호작용 타입입니다: '{0}'
@@ -181,7 +183,7 @@ public enum LocalizationKey
     UI_FPS_System_Indicator                            , // FPS: {0}
     UI_Pause_Popup_Text_Continue                       , // 계속하기
     UI_Pause_Popup_Text_Option                         , // 설정
-    UI_Pause_Popup_Text_Title                          , // 메뉴
+    UI_Pause_Popup_Text_Title                          , // 타이틀
     UI_Title_Display_Text_Press_Any_Key                , // Press any key to start.
     UI_Option_Popup_Text_Sound                         , // 사운드
     UI_Option_Popup_Text_Graphic                       , // 그래픽

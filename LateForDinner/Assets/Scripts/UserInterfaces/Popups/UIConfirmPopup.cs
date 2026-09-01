@@ -50,6 +50,13 @@ public class UIConfirmPopup : UIPopup, IDraggablePopup, IFocusablePopup
         GetText(Texts.MessageText).text = _messageProvider();
     }
 
+    public override void OnRelease()
+    {
+        base.OnRelease();
+        _cachedTitleKey = LocalizationKey.None;
+        _messageProvider = null;
+    }
+
     public void Setup(LocalizationKey titleKey, LocalizationKey messageKey, Action onConfirm, Action onCancel = null)
     {
         _onConfirm = onConfirm;

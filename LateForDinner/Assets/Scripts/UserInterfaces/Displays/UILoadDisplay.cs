@@ -17,6 +17,8 @@ public class UILoadDisplay : UIDisplay, IAnimationUIView
     }
 
     private float _current;
+    private LocalizationKey _cachedKey;
+    private Func<string> _messageProvider;
 
     public override void OnInit()
     {
@@ -31,13 +33,50 @@ public class UILoadDisplay : UIDisplay, IAnimationUIView
         _current = 0f;
     }
 
-    public async UniTask LoadAsync(float targetProgress, string message = default)
+
+    public override void OnRelease()
     {
+        base.OnRelease();
+        _cachedKey = LocalizationKey.None;
+        _messageProvider = null;
+    }
+
+    public void Setup(LocalizationKey key)
+    {
+        _cachedKey = key;
+        _messageProvider = () => Managers.Localization.Get(key);
+    }
+
+    public void Setup<T1>(LocalizationKey key, T1 arg1)
+    {
+        _cachedKey = key;
+        _messageProvider = () => Managers.Localization.Get(key, arg1);
+    }
+
+    public void Setup<T1, T2>(LocalizationKey key, T1 arg1, T2 arg2)
+    {
+        _cachedKey = key;
+        _messageProvider = () => Managers.Localization.Get(key, arg1, arg2);
+    }
+
+    public void Setup<T1, T2, T3>(LocalizationKey key, T1 arg1, T2 arg2, T3 arg3)
+    {
+        _cachedKey = key;
+        _messageProvider = () => Managers.Localization.Get(key, arg1, arg2, arg3);
+    }
+
+    public void Setup(LocalizationKey key, params object[] args)
+    {
+        _cachedKey = key;
+        _messageProvider = () => (args != null && args.Length > 0) ? Managers.Localization.Get(key, args) : Managers.Localization.Get(key);
+    }
+
+    public async UniTask LoadAsync(float targetProgress, LocalizationKey key = LocalizationKey.None)
+    {
+        if (key != default && key != _cachedKey)
+            Setup(key);
+
         var messageText = GetText(Texts.MessageText);
-
-        if (messageText == null)
-            return;
-
         var token = GetToken("LoadTask");
         float start = _current;
         float duration = 0.3f;
@@ -51,12 +90,12 @@ public class UILoadDisplay : UIDisplay, IAnimationUIView
                 elapsedTime += Time.unscaledDeltaTime;
                 float t = Mathf.Clamp01(elapsedTime / duration);
                 _current = Mathf.Lerp(start, targetProgress, t);
-                UpdateMessageText(messageText, message, _current);
+                UpdateMessageText(messageText, _current);
                 await UniTask.Yield(PlayerLoopTiming.Update, token);
             }
 
             _current = targetProgress;
-            UpdateMessageText(messageText, message, targetProgress);
+            UpdateMessageText(messageText, targetProgress);
         }
         catch (OperationCanceledException)
         {
@@ -91,9 +130,11 @@ public class UILoadDisplay : UIDisplay, IAnimationUIView
         }
     }
 
-    private void UpdateMessageText(TMP_Text textComponent, string message, float progress)
+    private void UpdateMessageText(TMP_Text textComponent, float progress)
     {
         int percent = Mathf.RoundToInt(progress * 100f);
+        string message = _messageProvider != null ? _messageProvider() : string.Empty;
         textComponent.text = ZString.Format("{0} {1}%", message, percent);
+        Log.System(_cachedKey);
     }
 }

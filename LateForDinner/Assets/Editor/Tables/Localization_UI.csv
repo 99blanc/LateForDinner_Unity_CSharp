@@ -9,7 +9,7 @@ UI_FPS_System_Indicator,FPS: {0}
 # Index: UIPausePopup,
 UI_Pause_Popup_Text_Continue,계속하기
 UI_Pause_Popup_Text_Option,설정
-UI_Pause_Popup_Text_Title,메뉴
+UI_Pause_Popup_Text_Title,타이틀
 # Index: UITitleDisplay,
 UI_Title_Display_Text_Press_Any_Key,Press any key to start.
 # Index: UIOptionPopup,
