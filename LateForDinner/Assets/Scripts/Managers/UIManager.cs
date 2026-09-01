@@ -182,7 +182,7 @@ public class UIManager
         return instance;
     }
 
-    public T GetScreen<T>() where T : UIDisplay
+    public T GetDisplay<T>() where T : UIDisplay
         => _display as T;
 
     public T GetPopup<T>() where T : UIPopup

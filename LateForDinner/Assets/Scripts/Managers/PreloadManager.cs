@@ -19,7 +19,7 @@ public class PreloadManager
         Log.System(LocalizationKey.Log_Preload_Boot_UI);
         await Managers.Pool.PrewarmAsync<UILockSystem>(1);
         await Managers.Pool.PrewarmAsync<UIToastSlot>(Define.Toast.Count);
-        // DESC ::: 대시 조합키 추가를 위한 1 덧셈
+        await Managers.Pool.PrewarmAsync<UIPausePopup>(1);
         await Managers.Pool.PrewarmAsync<UIKeybindSlot>(Managers.Control.GetBindableActions().Count + 1);
         await Managers.Pool.PrewarmAsync<UISaveDetailPopup>(1);
         await Managers.Pool.PrewarmAsync<UISaveSlot>(Define.Amount.Save);

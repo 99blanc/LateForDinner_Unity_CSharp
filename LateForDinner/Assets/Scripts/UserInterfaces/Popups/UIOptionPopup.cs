@@ -486,9 +486,9 @@ public class UIOptionPopup : UIPopup, IDraggablePopup, IFocusablePopup
         }
     }
 
-    public override void Close()
+    public override void OnRelease()
     {
-        base.Close();
+        base.OnRelease();
         CloseAllDropdowns();
     }
 

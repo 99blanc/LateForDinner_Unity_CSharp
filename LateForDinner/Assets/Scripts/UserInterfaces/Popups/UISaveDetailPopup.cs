@@ -2,6 +2,7 @@ using Cysharp.Threading.Tasks;
 using R3;
 using UnityEngine.EventSystems;
 using LateForDinner.Data;
+using UnityEngine;
 
 public class UISaveDetailPopup : UIPopup, IFocusablePopup
 {
@@ -46,6 +47,17 @@ public class UISaveDetailPopup : UIPopup, IFocusablePopup
     {
         base.Refresh();
         SetText(Texts.PlayButtonText, LocalizationKey.Play);
+    }
+
+    public override void OnRelease()
+    {
+        base.OnRelease();
+        var display = Managers.UI.GetDisplay<UITitleDisplay>();
+
+        if (display != null && _selectedSlotIndex.HasValue)
+            display.ClearSlotSelection();
+
+        _selectedSlotIndex = null;
     }
 
     private void BindButtonStates()
@@ -112,7 +124,7 @@ public class UISaveDetailPopup : UIPopup, IFocusablePopup
             {
                 await Managers.Game.NewgameAsync(index);
                 Setup(index);
-                Managers.UI.GetScreen<UITitleDisplay>()?.Refresh();
+                Managers.UI.GetDisplay<UITitleDisplay>()?.Refresh();
             }
         }
         catch
@@ -139,7 +151,7 @@ public class UISaveDetailPopup : UIPopup, IFocusablePopup
 
         await Managers.Save.ClearAsync(index).Lock();
         Setup(index);
-        Managers.UI.GetScreen<UITitleDisplay>()?.Refresh();
+        Managers.UI.GetDisplay<UITitleDisplay>()?.Refresh();
     }
 
     private void SetText(Texts textEnum, string text)

@@ -14,7 +14,7 @@ public enum LocalizationKey
     Action_QuickSlot4                                  , // 퀵슬롯4
     Action_Inventory                                   , // 인벤토리
     Action_Active                                      , // 액티브 스킬
-    Action_Menu                                        , // 메뉴
+    Action_Pause                                       , // 일시정지 메뉴
     Action_DashCommand                                 , // 대시 커맨드
     None                                               , // None
     Apply                                              , // 적용
@@ -179,6 +179,9 @@ public enum LocalizationKey
     Log_Splash_Display_Skip                            , // [UISplashScreen] 스플래시 이미지를 건너뛰었습니다.
     UI_Console_System_AutoComplete_Candidates          , // 자동 완성 후보: {0}
     UI_FPS_System_Indicator                            , // FPS: {0}
+    UI_Pause_Popup_Text_Continue                       , // 계속하기
+    UI_Pause_Popup_Text_Option                         , // 설정
+    UI_Pause_Popup_Text_Title                          , // 메뉴
     UI_Title_Display_Text_Press_Any_Key                , // Press any key to start.
     UI_Option_Popup_Text_Sound                         , // 사운드
     UI_Option_Popup_Text_Graphic                       , // 그래픽

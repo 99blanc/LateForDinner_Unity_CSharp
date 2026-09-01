@@ -124,7 +124,7 @@
                     "initialStateCheck": true
                 },
                 {
-                    "name": "Menu",
+                    "name": "Pause",
                     "type": "Button",
                     "id": "a56103a8-52ff-46be-babd-59437d175b01",
                     "expectedControlType": "",
@@ -282,7 +282,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
-                    "action": "Menu",
+                    "action": "Pause",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

@@ -31,7 +31,6 @@ public class UITitleDisplay : UIDisplay
     }
 
     private UI_TitleState _state;
-    private UISaveDetailPopup _detailPopup;
     private UISaveSlot[] _slots;
     private int? _currentSelectedIndex;
 
@@ -62,7 +61,6 @@ public class UITitleDisplay : UIDisplay
         {
             var (slot, _) = Managers.Pool.Pop<UISaveSlot>(content);
             _slots[index] = slot;
-            _slots[index].SetDisplay(this);
             int slotIndex = index;
             _slots[index].SetIndex(slotIndex, OnClickSlotItem);
         }
@@ -95,9 +93,10 @@ public class UITitleDisplay : UIDisplay
         }
 
         UpdateSlotSelection();
+        var popup = Managers.UI.GetPopup<UISaveDetailPopup>();
 
-        if (_currentSelectedIndex.HasValue && _detailPopup != null)
-            _detailPopup.Setup(_currentSelectedIndex.Value);
+        if (_currentSelectedIndex.HasValue && popup != null)
+            popup.Setup(_currentSelectedIndex.Value);
     }
 
     private void OnClickOption(PointerEventData data) 
@@ -116,11 +115,12 @@ public class UITitleDisplay : UIDisplay
 
         _currentSelectedIndex = slotIndex;
         UpdateSlotSelection();
+        var popup = Managers.UI.GetPopup<UISaveDetailPopup>();
 
-        if (_detailPopup == null)
-            _detailPopup = Managers.UI.OpenPopup<UISaveDetailPopup>();
-
-        _detailPopup.Setup(slotIndex);
+        if (popup == null)
+            Managers.UI.OpenPopup<UISaveDetailPopup>().Setup(slotIndex);
+        else
+            popup.Setup(slotIndex);
     }
 
     private void UpdateSlotSelection()
@@ -140,11 +140,19 @@ public class UITitleDisplay : UIDisplay
 
     private void CloseDetailPopup()
     {
-        if (_detailPopup != null)
-        {
-            Managers.UI.Close(_detailPopup);
-            _detailPopup = null;
-        }
+        var popup = Managers.UI.GetPopup<UISaveDetailPopup>();
+
+        if (popup != null)
+            Managers.UI.Close(popup);
+
+        _currentSelectedIndex = null;
+        UpdateSlotSelection();
+    }
+
+    public void ClearSlotSelection()
+    {
+        foreach (var slot in _slots)
+            slot?.SetSelected(false);
 
         _currentSelectedIndex = null;
         UpdateSlotSelection();

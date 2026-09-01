@@ -60,6 +60,7 @@ public class Literal
         public const string Left = "Left";
         public const string LeftClick = "LeftClick";
         public const string Look = "Look";
+        public const string Pause = "Pause";
         public const string Point = "Point";
         public const string QuickSlot1 = "QuickSlot1";
         public const string QuickSlot2 = "QuickSlot2";

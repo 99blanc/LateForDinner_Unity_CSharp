@@ -46,6 +46,15 @@ public class ControlManager
     {
         BindSystemUIToggleAction<UIConsoleSystem>(Literal.Hotkeys.Console);
         BindAction(Literal.Hotkeys.Cancel, () => Managers.UI.CloseFocusPopup());
+        BindAction(Literal.Hotkeys.Pause, () =>
+        {
+            var targetUI = Managers.UI.GetPopup<UIPausePopup>();
+
+            if (targetUI != null)
+                Managers.UI.OpenPopup<UIPausePopup>();
+            else
+                Managers.UI.Close(targetUI);
+        });
     }
 
     private void BindSystemUIToggleAction<T>(string hotkeyName) where T : UISystem

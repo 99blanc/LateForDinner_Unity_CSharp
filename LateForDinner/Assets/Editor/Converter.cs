@@ -37,7 +37,6 @@ public class Converter
                 File.Delete(file);
 
             AssetDatabase.Refresh();
-            Debug.Log("[Converter] Cleared all existing binary files before conversion.");
         }
 
         var localizationFiles = new List<string>();

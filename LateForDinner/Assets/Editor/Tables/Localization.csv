@@ -17,7 +17,7 @@ Action_QuickSlot3,퀵슬롯3
 Action_QuickSlot4,퀵슬롯4
 Action_Inventory,인벤토리
 Action_Active,액티브 스킬
-Action_Menu,메뉴
+Action_Pause,일시정지 메뉴
 Action_DashCommand,대시 커맨드
 # Index: Default,
 None,None
