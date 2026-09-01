@@ -90,7 +90,12 @@ public class UIPausePopup : UIPopup
         => Managers.UI.OpenPopup<UIOptionPopup>();
 
     private async UniTask OnClickTitle(PointerEventData data)
-        => await Managers.Game.TitleGameAsync();
+    {
+        bool confirmed = await Managers.Notify.ConfirmAsync(this, LocalizationKey.UI_Pause_Popup_Confirm_Title, LocalizationKey.UI_Pause_Popup_Confirm_Desc);
+
+        if (confirmed)
+            await Managers.Game.TitleGameAsync();
+    }
 
     private void SetText(Texts textEnum, LocalizationKey key)
         => GetText(textEnum).text = Managers.Localization.Get(key);

@@ -184,6 +184,8 @@ public enum LocalizationKey
     UI_Pause_Popup_Text_Continue                       , // 계속하기
     UI_Pause_Popup_Text_Option                         , // 설정
     UI_Pause_Popup_Text_Title                          , // 타이틀
+    UI_Pause_Popup_Confirm_Title                       , // 경고
+    UI_Pause_Popup_Confirm_Desc                        , // 저장되지 않은 사항을 잃어버릴 수 있습니다. \n계속하시겠습니까?
     UI_Title_Display_Text_Press_Any_Key                , // Press any key to start.
     UI_Option_Popup_Text_Sound                         , // 사운드
     UI_Option_Popup_Text_Graphic                       , // 그래픽

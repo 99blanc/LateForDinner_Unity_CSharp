@@ -6,21 +6,21 @@ public static class AttributeExtensions
 {
     private static readonly Dictionary<AttributeType, Type> _attributes = new Dictionary<AttributeType, Type>();
 
-    public static void BindTypes(this List<AttributeData> attributes)
+    public static Dictionary<string, AttributeData> BindTypes(this Dictionary<string, AttributeData> attributes)
     {
-        if (attributes == null) 
-            return;
+        if (attributes == null)
+            return attributes;
 
-        for (int index = 0; index < attributes.Count; index++)
+        foreach (var data in attributes.Values)
         {
-            var data = attributes[index];
-
             if (data == null || string.IsNullOrWhiteSpace(data.Key))
                 continue;
 
             if (Enum.TryParse<AttributeType>(data.Key, out var attributeType))
                 RegisterType(attributeType, data.DataType);
         }
+
+        return attributes;
     }
 
     public static void RegisterType(AttributeType attributeType, string dataType)

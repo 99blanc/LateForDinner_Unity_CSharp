@@ -9,7 +9,7 @@ using ZLinq;
 
 public class DataManager
 {
-    public Dictionary<AttributeType, AttributeData> Attributes { get; private set; } = new Dictionary<AttributeType, AttributeData>();
+    public Dictionary<string, AttributeData> Attributes { get; private set; } = new Dictionary<string, AttributeData>();
     public Dictionary<string, LocalizationData> Localization { get; private set; } = new Dictionary<string, LocalizationData>();
     public Dictionary<int, CharacterData> Characters { get; private set; } = new Dictionary<int, CharacterData>();
     public Dictionary<int, SceneData> Scenes { get; private set; } = new Dictionary<int, SceneData>();
@@ -22,8 +22,7 @@ public class DataManager
     {
         Localization = await LoadDictionaryAsync<string, LocalizationData>(Literal.Tables.Localization, data => data.Key);
         Log.Info(LocalizationKey.Log_Data_LoadedSuccessfully, Literal.Tables.Localization);
-        var attributes = await LoadListAsync<AttributeData>(Literal.Tables.Attribute);
-        attributes.BindTypes();
+        Attributes = (await LoadDictionaryAsync<string, AttributeData>(Literal.Tables.Attribute, data => data.Key)).BindTypes();
         Log.Info(LocalizationKey.Log_Data_LoadedSuccessfully, Literal.Tables.Attribute);
         Characters = await LoadDictionaryAsync<int, CharacterData>(Literal.Tables.Character, data => data.ID);
         Log.Info(LocalizationKey.Log_Data_LoadedSuccessfully, Literal.Tables.Character);
@@ -31,13 +30,11 @@ public class DataManager
         Log.Info(LocalizationKey.Log_Data_LoadedSuccessfully, Literal.Tables.Scene);
         Props = await LoadDictionaryAsync<string, PropData>(Literal.Tables.Prop, data => data.Key);
         Log.Info(LocalizationKey.Log_Data_LoadedSuccessfully, Literal.Tables.Prop);
-        var sceneTransitions = await LoadListAsync<SceneTransitionData>(Literal.Tables.SceneTransition);
-        SceneTransitions = sceneTransitions.ToLookup(x => x.SceneID);
+        SceneTransitions = (await LoadListAsync<SceneTransitionData>(Literal.Tables.SceneTransition)).ToLookup(x => x.SceneID);
         Log.Info(LocalizationKey.Log_Data_LoadedSuccessfully, Literal.Tables.SceneTransition);
         PlayableCharacters = await LoadDictionaryAsync<int, PlayableCharacterData>(Literal.Tables.PlayableCharacter, data => data.ID);
         Log.Info(LocalizationKey.Log_Data_LoadedSuccessfully, Literal.Tables.PlayableCharacter);
-        var playableCharacterTemplateList = await LoadListAsync<PlayableCharacterTemplateData>(Literal.Tables.PlayableCharacterTemplate);
-        PlayableCharacterTemplates = playableCharacterTemplateList.ToLookup(x => x.PlayableCharacterID);
+        PlayableCharacterTemplates = (await LoadListAsync<PlayableCharacterTemplateData>(Literal.Tables.PlayableCharacterTemplate)).ToLookup(x => x.PlayableCharacterID);
         Log.Info(LocalizationKey.Log_Data_LoadedSuccessfully, Literal.Tables.PlayableCharacterTemplate);
     }
 

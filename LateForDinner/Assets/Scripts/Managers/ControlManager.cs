@@ -66,6 +66,9 @@ public class ControlManager
     {
         BindAction(hotkeyName, () =>
         {
+            if (Managers.UI.GetDisplay<UITitleDisplay>())
+                return;
+
             var targetUI = Managers.UI.GetPopup<T>();
 
             if (targetUI != null)
