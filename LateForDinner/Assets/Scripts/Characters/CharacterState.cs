@@ -259,7 +259,7 @@ public class ThrowState : CharacterState
         if (Owner is not ICarriableCharacter carriable)
             return;
 
-        if (!carriable.HasThrown && Owner.CharacterAnimator.GetCurrentAnimatorNormalizedTime() >= 0.65f)
+        if (!carriable.HasThrown && Owner?.CharacterAnimator?.GetCurrentAnimatorNormalizedTime() >= 0.65f)
         {
             carriable.HasThrown = true;
             Vector2 inputDir = _inputProvider?.Invoke() ?? Vector2.zero;
@@ -267,7 +267,7 @@ public class ThrowState : CharacterState
             carriable.ExecuteThrow(isUpPressed);
         }
 
-        if (Owner.CharacterAnimator.GetCurrentAnimatorNormalizedTime() >= 1.0f)
-            Owner.StateMachine.RequestStateChange(CharacterStateType.Idle, forceInstantly: true);
+        if (Owner?.CharacterAnimator?.GetCurrentAnimatorNormalizedTime() >= 1.0f)
+            Owner?.StateMachine?.RequestStateChange(CharacterStateType.Idle, forceInstantly: true);
     }
 }

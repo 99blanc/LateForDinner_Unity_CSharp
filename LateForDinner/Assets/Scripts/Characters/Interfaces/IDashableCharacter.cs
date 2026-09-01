@@ -33,6 +33,20 @@ public interface IDashableCharacter
     public Vector2 DashDirection 
         => _dashValue.GetOrCreateValue(this).DashDirection;
 
+    public void ResetDashCooldownAndRestoreCount()
+    {
+        var val = _dashValue.GetOrCreateValue(this);
+
+        if (val.CooldownRegistry != null && val.CooldownRegistry.IsOnCooldown)
+        {
+            Managers.Cooldown.Unregister(val.CooldownRegistry);
+            val.CooldownRegistry.IsOnCooldown = false;
+            val.CooldownRegistry.CurrentCooldown = 0f;
+        }
+
+        RemainDashCount = Mathf.Min(RemainDashCount + 1, MaxDashCount);
+    }
+
     public void StartDashing(Vector2 inputDirection)
     {
         if (this is not Character || Rigidbody == null || Attributes == null)
@@ -83,7 +97,7 @@ public interface IDashableCharacter
 
     public void StopDashing()
     {
-        if (this is not Character || Rigidbody == null)
+        if (this is not Character character || Rigidbody == null)
             return;
 
         var val = _dashValue.GetOrCreateValue(this);

@@ -12,6 +12,9 @@ public interface IJumpableCharacter
         set => Attributes.Set(AttributeType.JumpCount, value);
     }
 
+    public void RestoreJumpCount()
+        => RemainJumpCount = Mathf.Min(RemainJumpCount + 1, MaxJumpCount);
+
     public void Jump(float directionX)
     {
         if (this is not Character || Rigidbody == null || Attributes == null)
