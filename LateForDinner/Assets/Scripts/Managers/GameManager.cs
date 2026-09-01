@@ -1,4 +1,5 @@
 using Cysharp.Threading.Tasks;
+using LateForDinner.Data;
 using System;
 using UnityEngine;
 
@@ -48,7 +49,10 @@ public class GameManager
         await ((Func<UILoadDisplay, UniTask>)(async load =>
         {
             await load.LoadAsync(0.3f, LocalizationKey.Log_Game_Loading_DebugData);
-            Managers.Save.SetDebugDefaultData();
+
+            if (Managers.Game.Character == null)
+                Managers.Save.SetDebugDefaultData();
+
             Managers.Save.CurrentData.CurrentSceneID = targetSceneID;
             await load.LoadAsync(0.7f, LocalizationKey.Log_Game_Loading_PlayerSpawn);
             await PrepareAndSpawnPlayerAsync(forceTransition: true);

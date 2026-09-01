@@ -1,4 +1,5 @@
 using Cysharp.Threading.Tasks;
+using LateForDinner.Data;
 using System;
 using UnityEngine;
 
@@ -244,8 +245,11 @@ public class CommandRegistry
         if (Enum.TryParse<SceneID>(args[0], true, out var targetSceneID))
         {
             Log.Info(Managers.Localization.Get(LocalizationKey.Console_Scene_MovingProcess, targetSceneID));
-            await Managers.Game.DebugGameAsync(targetSceneID);
 
+            if (Managers.Game.Character == null)
+                await Managers.Game.DebugGameAsync(targetSceneID);
+            else
+                await Managers.Scene.LoadSceneAsync(targetSceneID, forceTransition: true);
         }
         else
             Log.Warning(Managers.Localization.Get(LocalizationKey.Console_Scene_Invalid, args[0]));

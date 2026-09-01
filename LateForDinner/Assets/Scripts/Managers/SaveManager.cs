@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.IO;
 using LateForDinner.Data;
 using Cysharp.Text;
-using UnityEngine;
 
 public class SaveManager
 {
@@ -207,7 +206,7 @@ public class SaveManager
         Log.System(LocalizationKey.Log_Save_NewGameStarted, -1);
     }
 
-    private void Sync()
+    public void Sync()
     {
         if (CurrentData == null)
             CurrentData = SaveData.Default;

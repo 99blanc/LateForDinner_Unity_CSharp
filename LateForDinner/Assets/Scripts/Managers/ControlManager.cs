@@ -347,12 +347,6 @@ public class ControlManager
 
         if (_actionAsset == null)
             return;
-
-        foreach (var map in _actionAsset.actionMaps)
-        {
-            map.Disable();
-            map.Enable();
-        }
     }
 
     public void LoadBindingFromJson(string json)

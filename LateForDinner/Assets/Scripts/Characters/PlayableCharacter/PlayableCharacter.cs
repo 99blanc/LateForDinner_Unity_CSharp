@@ -15,16 +15,16 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
     public override async UniTask InitAsync()
     {
         await base.InitAsync();
-        var saveData = Managers.Save.CurrentData;
-        var savedAttributes = saveData.SavedAttributes;
+        var data = Managers.Save.CurrentData;
+        var attributes = data.SavedAttributes;
 
-        if (savedAttributes != null && savedAttributes.Count > 0)
-            Attributes.ImportSaveData(savedAttributes);
+        if (attributes != null && attributes.Count > 0)
+            Attributes.ImportSaveData(attributes);
         else
             InitAttributes();
 
-        Rigidbody.position = saveData.PlayerPosition;
-        Rigidbody.rotation = saveData.PlayerRotation;
+        Rigidbody.position = data.PlayerPosition;
+        Rigidbody.rotation = data.PlayerRotation;
         Managers.Control.Subscribe(Literal.Hotkeys.Interact, () => TryExecuteInteraction()).RegisterToPool(this);
     }
 
