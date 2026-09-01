@@ -3,6 +3,7 @@
 # Rule: 콤마 사용 불가. Key는 고유 값이어야 하며 중복 불가. 각 Key별 Text에 포맷팅 파라미터({0}/{2} 등) 사용 가능,
 Key,Text
 # Index: CommandRegistry,
+Console_Parameter_Format,- {0}
 Console_Input_Format,> {0}
 Console_Help_Header,--- 사용 가능한 명령어 목록 ---
 Console_Help_Format,- {0}: {1}
@@ -26,6 +27,7 @@ Console_FPS_Disabled,FPS UI를 껐습니다.
 Console_FPS_Enabled,FPS UI를 켰습니다.
 Console_Time_Set,타임 스케일이 {0}(으)로 설정되었습니다.
 Console_Time_Current,현재 타임 스케일: {0}
+Console_Variable_Header,--- 사용 가능한 능력치 목록 ---
 Console_Set_Usage,사용법: set [이름] [값]
 Console_Set_Success,변수 설정 완료 [{0} = {1}]
 Console_Get_Usage,사용법: get [이름]
@@ -40,12 +42,10 @@ Console_LogFilter_Success,로그 필터 변경 [{0} -> {1}]
 Console_Ground_Toggle,땅 감지 디버그 박스 표시: {0}
 Console_Scene_Usage,사용법: scene [SceneID] (사용 가능한 맵 목록 'scene list' 입력)
 Console_Scene_Available,--- 이동 가능한 맵 목록 ---
-Console_Scene_Format,- {0}
 Console_Scene_MovingProcess,{0}' 맵으로 이동 중...
 Console_Scene_Invalid,유효하지 않은 SceneID입니다: '{0}'. 맵 목록을 보려면 'scene list'를 입력하세요.
 Console_Desc_Spawn,지정한 캐릭터를 Demo 맵에 소환합니다.
 Console_Spawn_Available,--- 소환 가능한 캐릭터 목록 ---
-Console_Spawn_Format,- {0}
 Console_Spawn_Usage,사용법: spawn [CharacterID]
 Console_Spawn_NotDemo,이 명령어는 Demo 맵에서만 사용할 수 있습니다.
 Console_Spawn_NotFoundPlayableCharacter,활성화된 플레이어 캐릭터가 없어 기본 '{0}' 캐릭터를 먼저 생성합니다.

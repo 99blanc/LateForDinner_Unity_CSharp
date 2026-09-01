@@ -428,4 +428,10 @@ public class UIManager
         _popups.Add(popup);
         RefreshPopup();
     }
+
+    public void RefreshDisplay()
+    {
+        if (_display != null)
+            _display.Refresh();
+    }
 }

@@ -124,4 +124,7 @@ public class AttributeRegistry
             }
         }
     }
+
+    public IEnumerable<AttributeType> GetRegisteredAttributeTypes()
+        => _attributes.Keys;
 }

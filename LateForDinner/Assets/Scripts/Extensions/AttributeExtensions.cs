@@ -99,4 +99,26 @@ public static class AttributeExtensions
                 break;
         }
     }
+
+    public static string GetParsedValueString(this AttributeRegistry attributes, AttributeType attributeType)
+    {
+        var targetType = attributeType.GetValueType();
+
+        if (targetType == typeof(float))
+            return attributes.Get(attributeType, default(float)).Value.ToString();
+
+        if (targetType == typeof(short))
+            return attributes.Get(attributeType, default(short)).Value.ToString();
+
+        if (targetType == typeof(int))
+            return attributes.Get(attributeType, default(int)).Value.ToString();
+
+        if (targetType == typeof(long))
+            return attributes.Get(attributeType, default(long)).Value.ToString();
+
+        if (targetType == typeof(double))
+            return attributes.Get(attributeType, default(double)).Value.ToString();
+
+        return null;
+    }
 }

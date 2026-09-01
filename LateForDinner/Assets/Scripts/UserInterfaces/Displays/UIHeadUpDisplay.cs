@@ -27,8 +27,8 @@ public class UIHeadUpDisplay : UIDisplay
     }
 
     private UIQuickSlot[] _quickSlots;
-    private UIDashCountSlot[] _dashSlots;
-    private UIRemainHealthSlot[] _healthSlots;
+    private List<UIDashCountSlot> _dashSlots = new List<UIDashCountSlot>();
+    private List<UIRemainHealthSlot> _healthSlots = new List<UIRemainHealthSlot>();
 
     public override void OnInit()
     {
@@ -39,58 +39,20 @@ public class UIHeadUpDisplay : UIDisplay
         GetPanel(Panels.BossPanel).SetActivePanel(false);
         GetPanel(Panels.SlotPanel).SetActivePanel(true);
         GetPanel(Panels.AttributePanel).SetActivePanel(true);
-        InitUIComponents();
+        InitQuickSlots();
     }
 
     public override void OnGet()
     {
         base.OnGet();
-        InitUIComponents();
+        Refresh();
     }
 
-    private void InitUIComponents()
+    public override void Refresh()
     {
-        ClearSlots();
-        InitQuickSlots();
+        base.Refresh();
         InitDashSlots();
         InitHealthSlots();
-    }
-
-    private void ClearSlots()
-    {
-        var dashContent = GetRectTransform(RectTransforms.DashContent).transform;
-        List<UIDashCountSlot> dashList = new List<UIDashCountSlot>();
-
-        foreach (Transform child in dashContent)
-        {
-            if (child.TryGetComponent<UIDashCountSlot>(out var slot))
-                dashList.Add(slot);
-        }
-        foreach (var slot in dashList)
-            Managers.Pool.Push(slot);
-
-        var healthContent = GetRectTransform(RectTransforms.HealthContent).transform;
-        List<UIRemainHealthSlot> healthList = new List<UIRemainHealthSlot>();
-
-        foreach (Transform child in healthContent)
-        {
-            if (child.TryGetComponent<UIRemainHealthSlot>(out var slot))
-                healthList.Add(slot);
-        }
-        foreach (var slot in healthList)
-            Managers.Pool.Push(slot);
-
-        var slotContent = GetRectTransform(RectTransforms.SlotContent).transform;
-        List<UIQuickSlot> quickList = new List<UIQuickSlot>();
-
-        foreach (Transform child in slotContent)
-        {
-            if (child.TryGetComponent<UIQuickSlot>(out var slot))
-                quickList.Add(slot);
-        }
-
-        foreach (var slot in quickList)
-            Managers.Pool.Push(slot);
     }
 
     private void InitQuickSlots()
@@ -108,27 +70,40 @@ public class UIHeadUpDisplay : UIDisplay
 
     private void InitDashSlots()
     {
-        var attributes = Managers.Game.Character.Attributes;
+        var character = Managers.Game.Character;
+
+        if (character == null || character.Attributes == null)
+            return;
+
+        var attributes = character.Attributes;
         int maxDashCount = attributes.GetBase<int>(AttributeType.DashCount).CurrentValue;
         var dashStream = attributes.Stream<int>(AttributeType.DashCount);
-        _dashSlots = new UIDashCountSlot[maxDashCount];
         var content = GetRectTransform(RectTransforms.DashContent).transform;
+
+        foreach (var slot in _dashSlots)
+        {
+            if (slot != null)
+                Managers.Pool.Push(slot);
+        }
+
+        _dashSlots.Clear();
 
         for (int index = 0; index < maxDashCount; index++)
         {
             var (slot, _) = Managers.Pool.Pop<UIDashCountSlot>(content);
-            _dashSlots[index] = slot;
-            slot.SetIndex(index);
-            slot.ForceSetState(dashStream.CurrentValue);
+
+            if (slot != null)
+            {
+                _dashSlots.Add(slot);
+                slot.SetIndex(index);
+                slot.ForceSetState(dashStream.CurrentValue);
+            }
         }
 
         dashStream
         .Subscribe(currentDash =>
         {
-            if (_dashSlots == null)
-                return;
-
-            for (int index = 0; index < _dashSlots.Length; index++)
+            for (int index = 0; index < _dashSlots.Count; index++)
             {
                 if (_dashSlots[index] != null)
                     _dashSlots[index].UpdateState(currentDash);
@@ -138,21 +113,38 @@ public class UIHeadUpDisplay : UIDisplay
 
     private void InitHealthSlots()
     {
-        var attributes = Managers.Game.Character.Attributes;
+        var character = Managers.Game.Character;
+
+        if (character == null || character.Attributes == null)
+            return;
+
+        var attributes = character.Attributes;
         int totalHealth = attributes.GetBase<int>(AttributeType.Health).CurrentValue;
         int maxHealthSlots = Mathf.CeilToInt(totalHealth / 2f);
         var healthStream = attributes.Stream<int>(AttributeType.Health);
-        _healthSlots = new UIRemainHealthSlot[maxHealthSlots];
         var content = GetRectTransform(RectTransforms.HealthContent).transform;
 
+        foreach (var slot in _healthSlots)
+        {
+            if (slot != null)
+                Managers.Pool.Push(slot);
+        }
+
+        _healthSlots.Clear();
+
+        // 2. 새로 생성
         for (int index = 0; index < maxHealthSlots; index++)
         {
             var (slot, _) = Managers.Pool.Pop<UIRemainHealthSlot>(content);
-            _healthSlots[index] = slot;
-            slot.SetIndex(index, healthStream, onSlotBecomeEmpty: (emptyIndex) =>
+
+            if (slot != null)
             {
-                // TODO ::: 플레이어 사망 연출 또는 매니저 호출 로직
-            });
+                _healthSlots.Add(slot);
+                slot.SetIndex(index, healthStream, onSlotBecomeEmpty: (emptyIndex) =>
+                {
+                    // TODO ::: 플레이어 사망 연출 또는 매니저 호출 로직
+                });
+            }
         }
     }
 

@@ -189,14 +189,44 @@ public class CommandRegistry
         if (!CheckIsDebugMode())
             return;
 
-        if (args.Length < 2 || args[0].Equals("help", StringComparison.OrdinalIgnoreCase))
+        var character = Managers.Game.Character;
+
+        if (args.Length < 2 || args[0].Equals("help", StringComparison.OrdinalIgnoreCase) || args[0].Equals("list", StringComparison.OrdinalIgnoreCase))
         {
             Log.Warning(LocalizationKey.Console_Set_Usage);
+
+            if (character == null || character.Attributes == null)
+            {
+                Log.Warning(LocalizationKey.Log_Scene_NotFoundCharacter);
+                return;
+            }
+
+            Log.Info(LocalizationKey.Console_Variable_Header);
+
+            foreach (var attrType in character.Attributes.GetRegisteredAttributeTypes())
+                Log.Info(LocalizationKey.Console_Parameter_Format, attrType.ToString());
+
             return;
         }
 
-        _console.SetVariable(args[0], args[1]);
-        Log.Info(LocalizationKey.Console_Set_Success, args[0], args[1]);
+        string attrKey = args[0];
+        string rawValue = args[1];
+
+        if (!Enum.TryParse<AttributeType>(attrKey, true, out var attributeType))
+        {
+            Log.Warning(Managers.Localization.Get(LocalizationKey.Console_Scene_Invalid, attrKey));
+            return;
+        }
+
+        if (character == null || character.Attributes == null)
+        {
+            Log.Warning(LocalizationKey.Log_Scene_NotFoundCharacter);
+            return;
+        }
+
+        character.Attributes.SetParsedValue(attributeType, rawValue);
+        Log.Info(LocalizationKey.Console_Set_Success, attrKey, rawValue);
+        Managers.UI.RefreshDisplay();
     }
 
     private void OnCommandGetVariable(string[] args)
@@ -204,18 +234,46 @@ public class CommandRegistry
         if (!CheckIsDebugMode())
             return;
 
-        if (args.Length < 1 || args[0].Equals("help", StringComparison.OrdinalIgnoreCase))
+        var character = Managers.Game.Character;
+
+        if (args.Length < 1 || args[0].Equals("help", StringComparison.OrdinalIgnoreCase) || args[0].Equals("list", StringComparison.OrdinalIgnoreCase))
         {
             Log.Warning(LocalizationKey.Console_Get_Usage);
+
+            if (character == null || character.Attributes == null)
+            {
+                Log.Warning(LocalizationKey.Log_Scene_NotFoundCharacter);
+                return;
+            }
+
+            Log.Info(LocalizationKey.Console_Variable_Header);
+
+            foreach (var attrType in character.Attributes.GetRegisteredAttributeTypes())
+                Log.Info(LocalizationKey.Console_Parameter_Format, attrType.ToString());
+
             return;
         }
 
-        string val = _console.GetVariable(args[0]);
+        string attrKey = args[0];
 
-        if (val != null)
-            Log.Info(LocalizationKey.Console_Get_Success, args[0], val);
+        if (!Enum.TryParse<AttributeType>(attrKey, true, out var attributeType))
+        {
+            Log.Warning(Managers.Localization.Get(LocalizationKey.Console_Scene_Invalid, attrKey));
+            return;
+        }
+
+        if (character == null || character.Attributes == null)
+        {
+            Log.Warning(LocalizationKey.Log_Scene_NotFoundCharacter);
+            return;
+        }
+
+        string resultVal = character.Attributes.GetParsedValueString(attributeType);
+
+        if (resultVal != null)
+            Log.Info(LocalizationKey.Console_Get_Success, attrKey, resultVal);
         else
-            Log.Warning(LocalizationKey.Console_Get_NotFound, args[0]);
+            Log.Warning(LocalizationKey.Console_Get_NotFound, attrKey);
     }
 
     private void OnCommandToggleGroundDebug(string[] args)
@@ -238,7 +296,7 @@ public class CommandRegistry
             Log.Info(LocalizationKey.Console_Scene_Available);
 
             foreach (var sceneName in Enum.GetNames(typeof(SceneID)))
-                Log.Info(LocalizationKey.Console_Scene_Format, sceneName);
+                Log.Info(LocalizationKey.Console_Parameter_Format, sceneName);
             return;
         }
 
@@ -274,7 +332,7 @@ public class CommandRegistry
             Log.Info(LocalizationKey.Console_Spawn_Available);
 
             foreach (var characterName in Enum.GetNames(typeof(CharacterID)))
-                Log.Info(LocalizationKey.Console_Spawn_Format, characterName);
+                Log.Info(LocalizationKey.Console_Parameter_Format, characterName);
 
             return;
         }
