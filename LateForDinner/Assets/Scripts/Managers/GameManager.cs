@@ -19,6 +19,8 @@ public class GameManager
             await load.LoadAsync(1.0f, LocalizationKey.Log_Game_Loading_ResourcePackaging);
             await Managers.Preload.Release_GameAsync(Managers.Save.CurrentData.Day);
         })).Load();
+
+        Managers.UI.OpenDisplay<UIHeadUpDisplay>();
     }
 
     public async UniTask NewgameAsync(int slotIndex)
@@ -35,6 +37,8 @@ public class GameManager
             await load.LoadAsync(1.0f, LocalizationKey.Log_Game_Loading_ResourcePackaging);
             await Managers.Preload.Release_GameAsync(Managers.Save.CurrentData.Day);
         })).Load();
+
+        Managers.UI.OpenDisplay<UIHeadUpDisplay>();
     }
 
     public async UniTask DebugGameAsync(SceneID targetSceneID)
@@ -51,12 +55,14 @@ public class GameManager
             await load.LoadAsync(1.0f, LocalizationKey.Log_Game_Loading_ResourcePackaging);
             await Managers.Preload.Release_GameAsync();
         })).Load();
+
+        Managers.UI.OpenDisplay<UIHeadUpDisplay>();
     }
 
     private async UniTask PrepareAndSpawnPlayerAsync(bool forceTransition = false)
     {
         var saveData = Managers.Save.CurrentData;
-        await Managers.Scene.LoadSceneAsync(saveData.CurrentSceneID);
+        await Managers.Scene.LoadSceneAsync(saveData.CurrentSceneID, forceTransition);
         await SpawnPlayerAsync(saveData.SelectedPlayerID);
         Managers.Scene.RelocateCharacterToSpawnpoint();
     }

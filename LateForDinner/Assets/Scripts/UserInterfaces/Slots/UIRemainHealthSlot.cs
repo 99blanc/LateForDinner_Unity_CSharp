@@ -17,15 +17,15 @@ public class UIRemainHealthSlot : UISlot
     }
 
     private int _index;
-    private Animator _animator;
     private UI_RemainHealthState _currentState = UI_RemainHealthState.Full;
     private Action<int> _onSlotBecomeEmpty;
+    [HideInInspector] public Animator Animator { get; set; }
 
     public override void OnInit()
     {
         base.OnInit();
         BindImage(typeof(Images));
-        _animator = GetImage(Images.RemainHealthImage).GetComponentAssert<Animator>();
+        Animator = GetImage(Images.RemainHealthImage).GetComponentAssert<Animator>();
     }
 
     public void SetIndex(int index, ReadOnlyReactiveProperty<int> healthStream, Action<int> onSlotBecomeEmpty = null)
@@ -66,13 +66,13 @@ public class UIRemainHealthSlot : UISlot
         switch (state)
         {
             case UI_RemainHealthState.Help:
-                _animator?.Play(Define.Animation.HeadUpHealthHelp, 0, 0f);
+                Animator.Play(Define.Animation.HeadUpHealthHelp);
                 break;
             case UI_RemainHealthState.Half:
-                _animator?.Play(Define.Animation.HeadUpHealthHalf, 0, 0f);
+                Animator.Play(Define.Animation.HeadUpHealthHalf);
                 break;
             case UI_RemainHealthState.Full:
-                _animator?.Play(Define.Animation.HeadUpHealthFull, 0, 0f);
+                Animator.Play(Define.Animation.HeadUpHealthFull);
                 break;
         }
     }

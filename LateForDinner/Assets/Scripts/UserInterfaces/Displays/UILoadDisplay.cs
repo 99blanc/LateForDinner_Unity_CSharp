@@ -4,7 +4,7 @@ using System;
 using TMPro;
 using UnityEngine;
 
-public class UILoadDisplay : UIDisplay, IAnimationUIView
+public class UILoadDisplay : UIDisplay, IAnimatableUI
 {
     private enum Images
     {
@@ -32,7 +32,6 @@ public class UILoadDisplay : UIDisplay, IAnimationUIView
         base.OnGet();
         _current = 0f;
     }
-
 
     public override void OnRelease()
     {

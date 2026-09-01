@@ -9,18 +9,18 @@ public interface IPoolable
         OnInit();
     }
 
-    public void ProtectedRelease()
-    {
-        this.SetPooled(true);
-        PoolDisposableRegistry.Clear(this);
-        OnRelease();
-    }
-
     public void ProtectedGet()
     {
         this.SetPooled(false);
         LoadState();
         OnGet();
+    }
+
+    public void ProtectedRelease()
+    {
+        this.SetPooled(true);
+        PoolDisposableRegistry.Clear(this);
+        OnRelease();
     }
 
     virtual void OnInit() { }

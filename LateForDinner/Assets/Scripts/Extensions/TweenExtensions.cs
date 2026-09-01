@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public static class TweenExtensions
 {
-    public static async UniTask<T> PlayAsync<T>(this UniTask<T> task) where T : UserInterface, IAnimationUIView
+    public static async UniTask<T> PlayAsync<T>(this UniTask<T> task) where T : UserInterface, IAnimatableUI
     {
         var display = await task;
 
@@ -16,7 +16,7 @@ public static class TweenExtensions
         return display;
     }
 
-    public static async UniTask<T> PlayAsync<T>(this T user) where T : UserInterface, IAnimationUIView
+    public static async UniTask<T> PlayAsync<T>(this T user) where T : UserInterface, IAnimatableUI
     {
         if (user != null)
             await user.PlayAsync();

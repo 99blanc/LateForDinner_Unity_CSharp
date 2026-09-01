@@ -1,4 +1,3 @@
-using R3;
 using UnityEngine;
 
 public class UIDashCountSlot : UISlot
@@ -8,14 +7,14 @@ public class UIDashCountSlot : UISlot
         DashCountImage
     }
 
-    private enum UI_DashState
+    public enum UI_DashState
     {
         Charged,
         Used
     }
 
+    private Animator _animator { get; set; }
     private int _index;
-    private Animator _animator;
     private UI_DashState _currentState = UI_DashState.Charged;
 
     public override void OnInit()
@@ -25,21 +24,10 @@ public class UIDashCountSlot : UISlot
         _animator = GetImage(Images.DashCountImage).AddAnimator();
     }
 
-    public void SetIndex(int index, ReadOnlyReactiveProperty<int> dashCountStream)
-    {
-        _index = index;
-        int initialDash = dashCountStream.CurrentValue;
-        bool isFilled = _index < initialDash;
-        _currentState = isFilled ? UI_DashState.Charged : UI_DashState.Used;
-        PlayDashAnimation(_currentState, isInit: false);
-        dashCountStream
-        .Subscribe(currentDash =>
-        {
-            UpdateDashState(currentDash);
-        }).RegisterToPool(this);
-    }
+    public void SetIndex(int index)
+        => _index = index;
 
-    private void UpdateDashState(int currentDashCount)
+    public void UpdateState(int currentDashCount)
     {
         bool isFilled = _index < currentDashCount;
         UI_DashState nextState = isFilled ? UI_DashState.Charged : UI_DashState.Used;
@@ -48,10 +36,17 @@ public class UIDashCountSlot : UISlot
             return;
 
         _currentState = nextState;
-        PlayDashAnimation(_currentState, isInit: false);
+        PlayDashAnimation(_currentState);
     }
 
-    private void PlayDashAnimation(UI_DashState state, bool isInit)
+    public void ForceSetState(int currentDashCount)
+    {
+        bool isFilled = _index < currentDashCount;
+        _currentState = isFilled ? UI_DashState.Charged : UI_DashState.Used;
+        PlayDashAnimation(_currentState);
+    }
+
+    private void PlayDashAnimation(UI_DashState state)
     {
         switch (state)
         {

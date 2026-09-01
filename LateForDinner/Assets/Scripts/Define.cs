@@ -2,8 +2,10 @@ public class Define
 {
     public class Amount
     {
-        public const int Save = 4;
-        public const int QuickSlot = 4;
+        public const int MaxSaveSlot = 4;
+        public const int MaxQuickSlot = 4;
+        public const int MaxDashCount = 28;
+        public const int MaxHealthCount = 56;
     }
 
     public class Animation

@@ -89,7 +89,7 @@ namespace LateForDinner.Data
             Month = 1,
             Date = 1,
             SelectedPlayerID = CharacterID.Protagonist,
-            CurrentSceneID = SceneID.Bootstrap,
+            CurrentSceneID = SceneID.Hospital1,
             InteractableStates = new Dictionary<string, bool>(),
             SavedAttributes= new List<AttributeSaveData>(),
             PlayerPosition = Vector2.zero,

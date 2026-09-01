@@ -53,11 +53,11 @@ public class UITitleDisplay : UIDisplay
 
     private void InitSaveSlots()
     {
-        Managers.Save.EnsureSlot(Define.Amount.Save);
-        _slots = new UISaveSlot[Define.Amount.Save];
+        Managers.Save.EnsureSlot(Define.Amount.MaxSaveSlot);
+        _slots = new UISaveSlot[Define.Amount.MaxSaveSlot];
         var content = GetScrollRect(ScrollRects.LoadScrollRect).content;
 
-        for (int index = 0; index < Define.Amount.Save; index++)
+        for (int index = 0; index < Define.Amount.MaxSaveSlot; index++)
         {
             var (slot, _) = Managers.Pool.Pop<UISaveSlot>(content);
             _slots[index] = slot;

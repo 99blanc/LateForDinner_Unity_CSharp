@@ -7,8 +7,8 @@ using UnityEngine;
 
 public class SceneManager
 {
-    private SceneID _previousID;
-    private readonly Dictionary<SceneID, Spawnpoint> _spawnpoints = new Dictionary<SceneID, Spawnpoint>();
+    private SceneID _previousID = SceneID.Bootstrap;
+    private readonly List<Spawnpoint> _spawnpoints = new List<Spawnpoint>();
     private readonly Dictionary<IInteractable, CircleCollider2D> _interactables = new Dictionary<IInteractable, CircleCollider2D>();
     public SceneID CurrentSceneID { get; private set; }
 
@@ -23,7 +23,7 @@ public class SceneManager
 
     public async UniTask LoadSceneAsync(SceneID targetSceneID, bool forceTransition = false)
     {
-        if (!ValidateSceneTransition(targetSceneID) && !forceTransition)
+        if (!forceTransition && !ValidateSceneTransition(targetSceneID))
             return;
 
         if (!TryGetSceneData(targetSceneID, out var sceneData))
@@ -35,14 +35,14 @@ public class SceneManager
 
     public void RegisterSpawnpoint(Spawnpoint spawn)
     {
-        if (IsSpawnValid(spawn) && !_spawnpoints.ContainsKey(spawn.ToSceneID))
-            _spawnpoints.Add(spawn.ToSceneID, spawn);
+        if (IsSpawnValid(spawn) && !_spawnpoints.Contains(spawn))
+            _spawnpoints.Add(spawn);
     }
 
     public void UnregisterSpawnpoint(Spawnpoint spawn)
     {
         if (IsSpawnValid(spawn))
-            _spawnpoints.Remove(spawn.ToSceneID);
+            _spawnpoints.Remove(spawn);
     }
 
     public void RelocateCharacterToSpawnpoint()
@@ -127,7 +127,22 @@ public class SceneManager
         => _previousID < SceneID.Hospital1;
 
     private bool TryGetTargetSpawnpoint(out Spawnpoint targetSpawn)
-        => _spawnpoints.TryGetValue(_previousID, out targetSpawn) && targetSpawn != null;
+    {
+        targetSpawn = null;
+
+        if (_spawnpoints.Count == 0)
+            return false;
+
+        targetSpawn = _spawnpoints.Find(s => s != null && s.ToSceneID == _previousID);
+
+        if (targetSpawn == null && _spawnpoints.Count > 0)
+        {
+            targetSpawn = _spawnpoints[0];
+            Log.System(LocalizationKey.Log_Scene_NotFoundSpawnpoint, _previousID.ToString());
+        }
+
+        return targetSpawn != null;
+    }
 
     private string GetSceneTag(int sceneID)
         => Managers.Data.Scenes.TryGetValue(sceneID, out var data) ? data.Tag : sceneID.ToString();
