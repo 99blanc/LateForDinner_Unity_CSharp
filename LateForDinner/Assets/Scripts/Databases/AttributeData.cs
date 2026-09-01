@@ -6,6 +6,7 @@ namespace LateForDinner.Data
     public partial class AttributeData
     {
         public string Key { get; set; }
+        public float MaxValue { get; set; }
         public string DataType { get; set; }
     }
 }

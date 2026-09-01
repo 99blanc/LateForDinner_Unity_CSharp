@@ -14,12 +14,14 @@ Console_Desc_Debug,디버그 모드를 켜거나 끕니다.
 Console_Desc_Clear,콘솔창의 로그 기록을 지웁니다.
 Console_Desc_FPS,FPS 표시 UI를 켜거나 끕니다.
 Console_Desc_Time,게임 타임 스케일을 설정하거나 확인합니다.
-Console_Desc_Set,임의의 콘솔 변수를 설정합니다.
-Console_Desc_Get,콘솔 변수의 값을 가져옵니다.
+Console_Desc_Set,임의의 현재 변수를 설정합니다.
+Console_Desc_SetBase,임의의 기준 변수를 설정합니다.
+Console_Desc_Get,지정한 변수의 값을 가져옵니다.
 Console_Desc_LogSearch,로그 메시지에서 특정 키워드를 검색합니다.
 Console_Desc_LogFilter,특정 타입의 로그 가시성을 설정합니다.
 Console_Desc_Ground,땅 감지 박스 디버그 표시를 토글합니다.
 Console_Desc_Scene,지정한 맵으로 즉시 이동합니다.
+Console_Desc_Spawn,지정한 캐릭터를 Demo 맵에 소환합니다.
 Console_Debug_Toggle,디버그 모드: {0}
 Console_Clear_Success,콘솔 로그를 초기화했습니다.
 Console_Clear_NotOpen,콘솔 UI가 열려있지 않습니다.
@@ -30,6 +32,8 @@ Console_Time_Current,현재 타임 스케일: {0}
 Console_Variable_Header,--- 사용 가능한 능력치 목록 ---
 Console_Set_Usage,사용법: set [이름] [값]
 Console_Set_Success,변수 설정 완료 [{0} = {1}]
+Console_SetBase_Usage,사용법: setbase [이름] [값]
+Console_SetBase_Success,변수 설정 완료 [{0} = {1}]
 Console_Get_Usage,사용법: get [이름]
 Console_Get_Success,[{0}] = {1}
 Console_Get_NotFound,{0}' 변수를 찾을 수 없습니다.
@@ -44,7 +48,6 @@ Console_Scene_Usage,사용법: scene [SceneID] (사용 가능한 맵 목록 'sce
 Console_Scene_Available,--- 이동 가능한 맵 목록 ---
 Console_Scene_MovingProcess,{0}' 맵으로 이동 중...
 Console_Scene_Invalid,유효하지 않은 SceneID입니다: '{0}'. 맵 목록을 보려면 'scene list'를 입력하세요.
-Console_Desc_Spawn,지정한 캐릭터를 Demo 맵에 소환합니다.
 Console_Spawn_Available,--- 소환 가능한 캐릭터 목록 ---
 Console_Spawn_Usage,사용법: spawn [CharacterID]
 Console_Spawn_NotDemo,이 명령어는 Demo 맵에서만 사용할 수 있습니다.

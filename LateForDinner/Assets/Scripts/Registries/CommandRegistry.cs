@@ -25,6 +25,7 @@ public class CommandRegistry
         if (isDebugMode)
         {
             _console.RegisterCommand("set", OnCommandSetVariable, Managers.Localization.Get(LocalizationKey.Console_Desc_Set));
+            _console.RegisterCommand("setbase", OnCommandSetBaseVariable, Managers.Localization.Get(LocalizationKey.Console_Desc_SetBase));
             _console.RegisterCommand("get", OnCommandGetVariable, Managers.Localization.Get(LocalizationKey.Console_Desc_Get));
             _console.RegisterCommand("fps", OnCommandToggleFPS, Managers.Localization.Get(LocalizationKey.Console_Desc_FPS));
             _console.RegisterCommand("time_debug", OnCommandTimeScale, Managers.Localization.Get(LocalizationKey.Console_Desc_Time));
@@ -35,6 +36,7 @@ public class CommandRegistry
         else
         {
             _console.UnregisterCommand("set");
+            _console.UnregisterCommand("setbase");
             _console.UnregisterCommand("get");
             _console.UnregisterCommand("fps");
             _console.UnregisterCommand("time_debug");
@@ -186,7 +188,7 @@ public class CommandRegistry
 
     private void OnCommandSetVariable(string[] args)
     {
-        if (!CheckIsDebugMode())
+        if (!CheckIsDebugMode()) 
             return;
 
         var character = Managers.Game.Character;
@@ -194,44 +196,49 @@ public class CommandRegistry
         if (args.Length < 2 || args[0].Equals("help", StringComparison.OrdinalIgnoreCase) || args[0].Equals("list", StringComparison.OrdinalIgnoreCase))
         {
             Log.Warning(LocalizationKey.Console_Set_Usage);
-
-            if (character == null || character.Attributes == null)
-            {
-                Log.Warning(LocalizationKey.Log_Scene_NotFoundCharacter);
-                return;
-            }
-
-            Log.Info(LocalizationKey.Console_Variable_Header);
-
-            foreach (var attrType in character.Attributes.GetRegisteredAttributeTypes())
-                Log.Info(LocalizationKey.Console_Parameter_Format, attrType.ToString());
-
+            PrintAttributeList(character);
             return;
         }
 
-        string attrKey = args[0];
-        string rawValue = args[1];
-
-        if (!Enum.TryParse<AttributeType>(attrKey, true, out var attributeType))
+        if (!Enum.TryParse<AttributeType>(args[0], true, out var attributeType) || character?.Attributes == null)
         {
-            Log.Warning(Managers.Localization.Get(LocalizationKey.Console_Scene_Invalid, attrKey));
+            Log.Warning(Managers.Localization.Get(LocalizationKey.Console_Scene_Invalid, args[0]));
             return;
         }
 
-        if (character == null || character.Attributes == null)
+        character.Attributes.SetParsedValue(attributeType, args[1]);
+        Log.Info(LocalizationKey.Console_Set_Success, args[0], args[1]);
+        Managers.UI.RefreshDisplay();
+    }
+
+    private void OnCommandSetBaseVariable(string[] args)
+    {
+        if (!CheckIsDebugMode()) 
+            return;
+
+        var character = Managers.Game.Character;
+
+        if (args.Length < 2 || args[0].Equals("help", StringComparison.OrdinalIgnoreCase) || args[0].Equals("list", StringComparison.OrdinalIgnoreCase))
         {
-            Log.Warning(LocalizationKey.Log_Scene_NotFoundCharacter);
+            Log.Warning(LocalizationKey.Console_SetBase_Usage);
+            PrintAttributeList(character);
             return;
         }
 
-        character.Attributes.SetParsedValue(attributeType, rawValue);
-        Log.Info(LocalizationKey.Console_Set_Success, attrKey, rawValue);
+        if (!Enum.TryParse<AttributeType>(args[0], true, out var attributeType) || character?.Attributes == null)
+        {
+            Log.Warning(Managers.Localization.Get(LocalizationKey.Console_Scene_Invalid, args[0]));
+            return;
+        }
+
+        character.Attributes.SetBaseParsedValue(attributeType, args[1]);
+        Log.Info(LocalizationKey.Console_SetBase_Success, args[0], args[1]);
         Managers.UI.RefreshDisplay();
     }
 
     private void OnCommandGetVariable(string[] args)
     {
-        if (!CheckIsDebugMode())
+        if (!CheckIsDebugMode()) 
             return;
 
         var character = Managers.Game.Character;
@@ -239,41 +246,36 @@ public class CommandRegistry
         if (args.Length < 1 || args[0].Equals("help", StringComparison.OrdinalIgnoreCase) || args[0].Equals("list", StringComparison.OrdinalIgnoreCase))
         {
             Log.Warning(LocalizationKey.Console_Get_Usage);
-
-            if (character == null || character.Attributes == null)
-            {
-                Log.Warning(LocalizationKey.Log_Scene_NotFoundCharacter);
-                return;
-            }
-
-            Log.Info(LocalizationKey.Console_Variable_Header);
-
-            foreach (var attrType in character.Attributes.GetRegisteredAttributeTypes())
-                Log.Info(LocalizationKey.Console_Parameter_Format, attrType.ToString());
-
+            PrintAttributeList(character);
             return;
         }
 
-        string attrKey = args[0];
-
-        if (!Enum.TryParse<AttributeType>(attrKey, true, out var attributeType))
+        if (!Enum.TryParse<AttributeType>(args[0], true, out var attributeType) || character?.Attributes == null)
         {
-            Log.Warning(Managers.Localization.Get(LocalizationKey.Console_Scene_Invalid, attrKey));
+            Log.Warning(Managers.Localization.Get(LocalizationKey.Console_Scene_Invalid, args[0]));
             return;
         }
 
+        string currentVal = character.Attributes.GetParsedValueString(attributeType);
+        string baseVal = character.Attributes.GetParsedBaseValueString(attributeType);
+
+        if (currentVal != null && baseVal != null)
+            Log.Info(LocalizationKey.Console_Get_Success, args[0], currentVal, baseVal);
+        else
+            Log.Warning(LocalizationKey.Console_Get_NotFound, args[0]);
+    }
+
+    private void PrintAttributeList(Character character)
+    {
         if (character == null || character.Attributes == null)
         {
             Log.Warning(LocalizationKey.Log_Scene_NotFoundCharacter);
             return;
         }
 
-        string resultVal = character.Attributes.GetParsedValueString(attributeType);
-
-        if (resultVal != null)
-            Log.Info(LocalizationKey.Console_Get_Success, attrKey, resultVal);
-        else
-            Log.Warning(LocalizationKey.Console_Get_NotFound, attrKey);
+        Log.Info(LocalizationKey.Console_Variable_Header);
+        foreach (var attrType in character.Attributes.GetRegisteredAttributeTypes())
+            Log.Info(LocalizationKey.Console_Parameter_Format, attrType.ToString());
     }
 
     private void OnCommandToggleGroundDebug(string[] args)

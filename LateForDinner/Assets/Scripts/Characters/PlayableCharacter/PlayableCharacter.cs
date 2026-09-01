@@ -41,6 +41,7 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
                 continue;
 
             Attributes.SetParsedValue(attributeType, template.Value);
+            Attributes.SetBaseParsedValue(attributeType, template.Value);
         }
     }
 

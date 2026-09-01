@@ -1,6 +1,7 @@
+using LateForDinner.Data;
 using System;
 using System.Collections.Generic;
-using LateForDinner.Data;
+using UnityEngine;
 
 public static class AttributeExtensions
 {
@@ -75,29 +76,91 @@ public static class AttributeExtensions
         if (parsedValue == null)
             return;
 
+        string keyStr = attributeType.ToString();
+        double maxLimit = 0.0;
+        bool hasMaxLimit = Managers.Data.Attributes.TryGetValue(keyStr, out var attrData) && attrData.MaxValue > 0f;
+
+        if (hasMaxLimit)
+            maxLimit = attrData.MaxValue;
+
+        double finalValue = parsedValue switch
+        {
+            float val => hasMaxLimit ? Math.Clamp(val, 0.0, maxLimit) : Math.Max(0.0, val),
+            int val => hasMaxLimit ? Math.Clamp(val, 0.0, maxLimit) : Math.Max(0.0, val),
+            short val => hasMaxLimit ? Math.Clamp(val, 0.0, maxLimit) : Math.Max(0.0, val),
+            long val => hasMaxLimit ? Math.Clamp(val, 0.0, maxLimit) : Math.Max(0.0, val),
+            double val => hasMaxLimit ? Math.Clamp(val, 0.0, maxLimit) : Math.Max(0.0, val),
+            _ => 0.0
+        };
+
         switch (parsedValue)
         {
-            case float val: 
-                attributes.Set(attributeType, val); 
-                attributes.SetBase(attributeType, val);
+            case float: 
+                Set((float)finalValue); 
                 break;
-            case int val: 
-                attributes.Set(attributeType, val);
-                attributes.SetBase(attributeType, val);
+            case int: 
+                Set((int)finalValue); 
                 break;
-            case short val: 
-                attributes.Set(attributeType, val);
-                attributes.SetBase(attributeType, val);
+            case short: 
+                Set((short)finalValue); 
                 break;
-            case long val: 
-                attributes.Set(attributeType, val);
-                attributes.SetBase(attributeType, val);
+            case long: 
+                Set((long)finalValue); 
                 break;
-            case double val: 
-                attributes.Set(attributeType, val);
-                attributes.SetBase(attributeType, val);
+            case double: 
+                Set(finalValue); 
                 break;
         }
+
+        void Set<T>(T v) where T : struct
+            => attributes.Set(attributeType, v);
+    }
+
+    public static void SetBaseParsedValue(this AttributeRegistry attributes, AttributeType attributeType, string value)
+    {
+        object parsedValue = attributeType.ParseValue(value);
+
+        if (parsedValue == null)
+            return;
+
+        string keyStr = attributeType.ToString();
+        double maxLimit = 0.0;
+        bool hasMaxLimit = Managers.Data.Attributes.TryGetValue(keyStr, out var attrData) && attrData.MaxValue > 0f;
+
+        if (hasMaxLimit)
+            maxLimit = attrData.MaxValue;
+
+        double finalValue = parsedValue switch
+        {
+            float val => hasMaxLimit ? Math.Clamp(val, 0.0, maxLimit) : Math.Max(0.0, val),
+            int val => hasMaxLimit ? Math.Clamp(val, 0.0, maxLimit) : Math.Max(0.0, val),
+            short val => hasMaxLimit ? Math.Clamp(val, 0.0, maxLimit) : Math.Max(0.0, val),
+            long val => hasMaxLimit ? Math.Clamp(val, 0.0, maxLimit) : Math.Max(0.0, val),
+            double val => hasMaxLimit ? Math.Clamp(val, 0.0, maxLimit) : Math.Max(0.0, val),
+            _ => 0.0
+        };
+
+        switch (parsedValue)
+        {
+            case float:
+                Set((float)finalValue);
+                break;
+            case int:
+                Set((int)finalValue);
+                break;
+            case short:
+                Set((short)finalValue);
+                break;
+            case long:
+                Set((long)finalValue);
+                break;
+            case double:
+                Set(finalValue);
+                break;
+        }
+
+        void Set<T>(T v) where T : struct
+            => attributes.SetBase(attributeType, v);
     }
 
     public static string GetParsedValueString(this AttributeRegistry attributes, AttributeType attributeType)
@@ -118,6 +181,28 @@ public static class AttributeExtensions
 
         if (targetType == typeof(double))
             return attributes.Get(attributeType, default(double)).Value.ToString();
+
+        return null;
+    }
+
+    public static string GetParsedBaseValueString(this AttributeRegistry attributes, AttributeType attributeType)
+    {
+        var targetType = attributeType.GetValueType();
+
+        if (targetType == typeof(float))
+            return attributes.GetBase(attributeType, default(float)).Value.ToString();
+
+        if (targetType == typeof(short))
+            return attributes.GetBase(attributeType, default(short)).Value.ToString();
+
+        if (targetType == typeof(int))
+            return attributes.GetBase(attributeType, default(int)).Value.ToString();
+
+        if (targetType == typeof(long))
+            return attributes.GetBase(attributeType, default(long)).Value.ToString();
+
+        if (targetType == typeof(double))
+            return attributes.GetBase(attributeType, default(double)).Value.ToString();
 
         return null;
     }

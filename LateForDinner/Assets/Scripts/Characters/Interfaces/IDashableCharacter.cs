@@ -1,5 +1,7 @@
+using R3;
 using System.Runtime.CompilerServices;
 using UnityEngine;
+using UnityEngine.TextCore.Text;
 
 public interface IDashableCharacter
 {
@@ -10,6 +12,7 @@ public interface IDashableCharacter
         public float OriginalGravityScale = 1f;
         public Vector2 DashDirection = Vector2.right;
         public CooldownRegistry CooldownRegistry;
+        public bool IsInitialized = false;
     }
     SpriteRenderer Renderer { get; }
     Rigidbody2D Rigidbody { get; }
@@ -28,14 +31,41 @@ public interface IDashableCharacter
             return val.CooldownRegistry != null && val.CooldownRegistry.IsOnCooldown;
         }
     }
-    public bool IsDurationEnded 
-        => _dashValue.GetOrCreateValue(this).DurationTimer <= 0f;
-    public Vector2 DashDirection 
-        => _dashValue.GetOrCreateValue(this).DashDirection;
+    public bool IsDurationEnded => _dashValue.GetOrCreateValue(this).DurationTimer <= 0f;
+    public Vector2 DashDirection => _dashValue.GetOrCreateValue(this).DashDirection;
+
+    private static DashStateValue GetOrCreateDashState(IDashableCharacter character)
+    {
+        var val = _dashValue.GetOrCreateValue(character);
+
+        if (!val.IsInitialized && character is MonoBehaviour mono)
+        {
+            val.IsInitialized = true;
+            val.CooldownRegistry = new CooldownRegistry(() =>
+            {
+                character.RemainDashCount = character.MaxDashCount;
+            });
+            character.Attributes.Get<int>(AttributeType.DashCount)
+            .Where(count => count <= 0)
+            .Subscribe(_ =>
+            {
+                if (!val.CooldownRegistry.IsOnCooldown)
+                {
+                    float cooldownTime = character.Attributes.Get<float>(AttributeType.DashCooldown).CurrentValue;
+                    val.CooldownRegistry.CooldownTime = cooldownTime;
+                    val.CooldownRegistry.CurrentCooldown = cooldownTime;
+                    val.CooldownRegistry.IsOnCooldown = true;
+                    Managers.Cooldown.Register(val.CooldownRegistry);
+                }
+            }).RegisterToPool(character as IPoolable);
+        }
+
+        return val;
+    }
 
     public void ResetDashCooldownAndRestoreCount()
     {
-        var val = _dashValue.GetOrCreateValue(this);
+        var val = GetOrCreateDashState(this);
 
         if (val.CooldownRegistry != null && val.CooldownRegistry.IsOnCooldown)
         {
@@ -52,15 +82,7 @@ public interface IDashableCharacter
         if (this is not Character || Rigidbody == null || Attributes == null)
             return;
 
-        var val = _dashValue.GetOrCreateValue(this);
-
-        if (val.CooldownRegistry == null)
-        {
-            val.CooldownRegistry = new CooldownRegistry(() =>
-            {
-                RemainDashCount = MaxDashCount;
-            });
-        }
+        var val = GetOrCreateDashState(this);
 
         val.OriginalGravityScale = Rigidbody.gravityScale;
         val.DurationTimer = Define.Scaler.Duration;
@@ -76,31 +98,21 @@ public interface IDashableCharacter
         Rigidbody.gravityScale = 0f;
         Rigidbody.linearVelocity = val.DashDirection.normalized * dashSpeed;
         RemainDashCount--;
-
-        if (RemainDashCount <= 0)
-        {
-            float cooldownTime = Attributes.Get<float>(AttributeType.DashCooldown).CurrentValue;
-            val.CooldownRegistry.CooldownTime = cooldownTime;
-            val.CooldownRegistry.CurrentCooldown = cooldownTime;
-            val.CooldownRegistry.IsOnCooldown = true;
-            Managers.Cooldown.Register(val.CooldownRegistry);
-        }
     }
 
     public void UpdateDashing(float deltaTime)
     {
-        var val = _dashValue.GetOrCreateValue(this);
-
+        var val = GetOrCreateDashState(this);
         if (val.DurationTimer > 0f)
             val.DurationTimer -= deltaTime;
     }
 
     public void StopDashing()
     {
-        if (this is not Character character || Rigidbody == null)
+        if (this is not Character || Rigidbody == null)
             return;
 
-        var val = _dashValue.GetOrCreateValue(this);
+        var val = GetOrCreateDashState(this);
         Rigidbody.gravityScale = val.OriginalGravityScale;
         Rigidbody.linearVelocity = Vector2.zero;
     }
