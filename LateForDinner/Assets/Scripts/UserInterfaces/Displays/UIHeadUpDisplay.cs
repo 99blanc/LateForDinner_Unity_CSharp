@@ -29,6 +29,7 @@ public class UIHeadUpDisplay : UIDisplay
     private UIQuickSlot[] _quickSlots;
     private List<UIDashCountSlot> _dashSlots = new List<UIDashCountSlot>();
     private List<UIRemainHealthSlot> _healthSlots = new List<UIRemainHealthSlot>();
+    private List<UIRemainHealthSlot> _temporaryHealthSlots = new List<UIRemainHealthSlot>();
 
     public override void OnInit()
     {
@@ -119,9 +120,12 @@ public class UIHeadUpDisplay : UIDisplay
             return;
 
         var attributes = character.Attributes;
-        int totalHealth = attributes.GetBase<int>(AttributeType.Health).CurrentValue;
-        int maxHealthSlots = Mathf.CeilToInt(totalHealth / 2f);
+        int maxHealth = attributes.GetBase<int>(AttributeType.Health).CurrentValue;
+        int maxTempHealth = attributes.GetBase<int>(AttributeType.TemporaryHealth).CurrentValue;
+        int normalSlotCount = Mathf.CeilToInt(maxHealth / 2f);
+        int tempSlotCount = Mathf.CeilToInt(maxTempHealth / 2f);
         var healthStream = attributes.Stream<int>(AttributeType.Health);
+        var tempHealthStream = attributes.Stream<int>(AttributeType.TemporaryHealth);
         var content = GetRectTransform(RectTransforms.HealthContent).transform;
 
         foreach (var slot in _healthSlots)
@@ -132,20 +136,56 @@ public class UIHeadUpDisplay : UIDisplay
 
         _healthSlots.Clear();
 
-        // 2. 새로 생성
-        for (int index = 0; index < maxHealthSlots; index++)
+        foreach (var slot in _temporaryHealthSlots)
+        {
+            if (slot != null)
+                Managers.Pool.Push(slot);
+        }
+
+        _temporaryHealthSlots.Clear();
+
+        for (int index = 0; index < normalSlotCount; index++)
         {
             var (slot, _) = Managers.Pool.Pop<UIRemainHealthSlot>(content);
 
             if (slot != null)
             {
                 _healthSlots.Add(slot);
-                slot.SetIndex(index, healthStream, onSlotBecomeEmpty: (emptyIndex) =>
-                {
-                    // TODO ::: 플레이어 사망 연출 또는 매니저 호출 로직
-                });
+                slot.SetIndex(index);
+                slot.UpdateHealthState(healthStream.CurrentValue);
             }
         }
+
+        for (int index = 0; index < tempSlotCount; index++)
+        {
+            var (slot, _) = Managers.Pool.Pop<UIRemainHealthSlot>(content);
+
+            if (slot != null)
+            {
+                _temporaryHealthSlots.Add(slot);
+                slot.SetIndex(normalSlotCount + index);
+                slot.UpdateTempHealthState(tempHealthStream.CurrentValue);
+            }
+        }
+
+        healthStream
+        .Subscribe(currentHealth =>
+        {
+            for (int index = 0; index < _healthSlots.Count; index++)
+            {
+                if (_healthSlots[index] != null)
+                    _healthSlots[index].UpdateHealthState(currentHealth);
+            }
+        }).RegisterToPool(this);
+        tempHealthStream
+        .Subscribe(currentTempHealth =>
+        {
+            for (int index = 0; index < _temporaryHealthSlots.Count; index++)
+            {
+                if (_temporaryHealthSlots[index] != null)
+                    _temporaryHealthSlots[index].UpdateTempHealthState(currentTempHealth);
+            }
+        }).RegisterToPool(this);
     }
 
     public void BindBossHealth(Character bossCharacter)

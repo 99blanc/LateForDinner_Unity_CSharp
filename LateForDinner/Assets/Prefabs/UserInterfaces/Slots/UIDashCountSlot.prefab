@@ -107,7 +107,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7913273001643023921}
-  - component: {fileID: 4576533051211413027}
   - component: {fileID: 7297095920556149276}
   m_Layer: 5
   m_Name: UIDashCountSlot
@@ -134,20 +133,8 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 300, y: 450}
+  m_SizeDelta: {x: 310, y: 465}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!225 &4576533051211413027
-CanvasGroup:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6854545011443789644}
-  m_Enabled: 1
-  m_Alpha: 1
-  m_Interactable: 1
-  m_BlocksRaycasts: 1
-  m_IgnoreParentGroups: 0
 --- !u!114 &7297095920556149276
 MonoBehaviour:
   m_ObjectHideFlags: 0

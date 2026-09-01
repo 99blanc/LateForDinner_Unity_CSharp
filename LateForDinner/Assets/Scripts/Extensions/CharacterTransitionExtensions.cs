@@ -38,7 +38,13 @@ public static class CharacterTransitionExtensions
         if (!getJumpInput())
             return false;
 
-        bool hasJumpCount = character is IJumpableCharacter jumpable && jumpable.RemainJumpCount > 0;
+        if (character.IsHoldingProp())
+        {
+            if (character is IJumpableCharacter jumpable && jumpable.RemainJumpCount < jumpable.MaxJumpCount)
+                return false;
+        }
+
+        bool hasJumpCount = character is IJumpableCharacter jumpableCheck && jumpableCheck.RemainJumpCount > 0;
         return hasJumpCount;
     }
 

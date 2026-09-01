@@ -238,7 +238,7 @@ public class ThrowState : CharacterState
 {
     protected readonly Func<Vector2> _inputProvider;
 
-    public ThrowState(Character owner, Func<Vector2> inputProvider) : base(owner)
+    public ThrowState(Character owner, Func<Vector2> inputProvider) : base(owner, hasExitTime: true)
         => _inputProvider = inputProvider;
 
     public override void OnEnter()
@@ -267,7 +267,7 @@ public class ThrowState : CharacterState
             carriable.ExecuteThrow(isUpPressed);
         }
 
-        if (Owner?.CharacterAnimator?.GetCurrentAnimatorNormalizedTime() >= 1.0f)
-            Owner?.StateMachine?.RequestStateChange(CharacterStateType.Idle, forceInstantly: true);
+        if (Owner?.CharacterAnimator?.GetCurrentAnimatorNormalizedTime() >= 1f)
+            Owner?.StateMachine.RequestStateChange(CharacterStateType.Idle, forceInstantly: true);
     }
 }

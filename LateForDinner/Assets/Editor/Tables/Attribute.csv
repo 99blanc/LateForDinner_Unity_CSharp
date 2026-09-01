@@ -9,7 +9,7 @@ Key,MaxValue,DataType
 # Property: 체력. Description: 체력은 HUD 반 칸 기준으로 가산,,
 Health,56,int
 # Property: 임시 체력. Description: 임시 체력은 HUD 반 칸 기준으로 가산,,
-TemporaryHealth,0,int
+TemporaryHealth,2,int
 # Property: 이동속도,,
 MoveSpeed,0,float
 # Property: 가속도. Priority: MoveSpeed,,

@@ -28,11 +28,13 @@ public class Define
         public static readonly int PickupTrayJump = UnityEngine.Animator.StringToHash("PickupTrayJump");
         public static readonly int ThrowTray = UnityEngine.Animator.StringToHash("ThrowTray");
         // DESC ::: HeadUpDisplay Animator ÇØ½Ã
-        public static readonly int HeadUpHealthFull = UnityEngine.Animator.StringToHash("UIHeadUpDisplay_HealthFull");
-        public static readonly int HeadUpHealthHalf = UnityEngine.Animator.StringToHash("UIHeadUpDisplay_HealthHalf");
-        public static readonly int HeadUpHealthHelp = UnityEngine.Animator.StringToHash("UIHeadUpDisplay_HealthHelp");
-        public static readonly int HeadUpDashCharge = UnityEngine.Animator.StringToHash("UIHeadUpDisplay_DashCharge");
-        public static readonly int HeadUpDashUse = UnityEngine.Animator.StringToHash("UIHeadUpDisplay_DashUse");
+        public static readonly int HeadUpHealthFull = UnityEngine.Animator.StringToHash("HeadUpDisplay_HealthFull");
+        public static readonly int HeadUpHealthHalf = UnityEngine.Animator.StringToHash("HeadUpDisplay_HealthHalf");
+        public static readonly int HeadUpHealthHelp = UnityEngine.Animator.StringToHash("HeadUpDisplay_HealthHelp");
+        public static readonly int HeadUpTemporaryHealthFull = UnityEngine.Animator.StringToHash("HeadUpDisplay_TemporaryHealthFull");
+        public static readonly int HeadUpTemporaryHealthHalf = UnityEngine.Animator.StringToHash("HeadUpDisplay_TemporaryHealthHalf");
+        public static readonly int HeadUpDashCharge = UnityEngine.Animator.StringToHash("HeadUpDisplay_DashCharge");
+        public static readonly int HeadUpDashUse = UnityEngine.Animator.StringToHash("HeadUpDisplay_DashUse");
         public const float NormalizedTime = 0.95f;
     }
 
@@ -116,13 +118,14 @@ public class Define
         public const string Slot_Highlight = "ui_common_image_slot_highlight";
         public const string Slot_New = "ui_common_image_slot_new";
         public const string Slot_Normal = "ui_common_image_slot_normal";
+        public const string Empty = "ui_common_empty";
 
         public const string HUD_PlayerDashCount = "ui_headup_player_dash_count";
         public const string HUD_PlayerHealth_Empty = "ui_headup_player_health_empty";
         public const string HUD_PlayerHealth_Half = "ui_headup_player_health_half";
         public const string HUD_PlayerHealth_Full = "ui_headup_player_health_full";
         public const string HUD_PlayerTemporaryHealth_Half = "ui_headup_player_temporary_health_half";
-        public const string HUD_PlayerTemporartHealth_Full = "ui_headup_player_temporary_health_full";
+        public const string HUD_PlayerTemporaryHealth_Full = "ui_headup_player_temporary_health_full";
     }
 
     public class Toast
