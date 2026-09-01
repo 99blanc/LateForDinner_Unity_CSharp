@@ -91,6 +91,12 @@ public class UIPausePopup : UIPopup
 
     private async UniTask OnClickTitle(PointerEventData data)
     {
+        if (Managers.Scene.CurrentSceneID == SceneID.Demo)
+        {
+            await Managers.Game.TitleGameAsync();
+            return;
+        }
+
         bool confirmed = await Managers.Notify.ConfirmAsync(this, LocalizationKey.UI_Pause_Popup_Confirm_Title, LocalizationKey.UI_Pause_Popup_Confirm_Desc);
 
         if (confirmed)
