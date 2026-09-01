@@ -76,6 +76,9 @@ public class UILoadDisplay : UIDisplay, IAnimationUIView
         if (key != default && key != _cachedKey)
             Setup(key);
 
+        if (_cachedKey != LocalizationKey.None)
+            Log.System(_cachedKey);
+
         var messageText = GetText(Texts.MessageText);
         var token = GetToken("LoadTask");
         float start = _current;
@@ -135,6 +138,5 @@ public class UILoadDisplay : UIDisplay, IAnimationUIView
         int percent = Mathf.RoundToInt(progress * 100f);
         string message = _messageProvider != null ? _messageProvider() : string.Empty;
         textComponent.text = ZString.Format("{0} {1}%", message, percent);
-        Log.System(_cachedKey);
     }
 }
