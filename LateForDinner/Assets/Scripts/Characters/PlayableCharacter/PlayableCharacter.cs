@@ -293,6 +293,27 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
             to: CharacterStateType.Dash,
             condition: _ => this.IsTryingToDash(dashInput)
         ));
+        // DESC ::: Throw 상태에서의 전환 조건
+        fsm.AddTransition(new Transition<CharacterStateType>(
+            from: CharacterStateType.Throw,
+            to: CharacterStateType.Idle,
+            condition: _ => this.IsThrowFinished()
+        ));
+        fsm.AddTransition(new Transition<CharacterStateType>(
+            from: CharacterStateType.Throw,
+            to: CharacterStateType.Move,
+            condition: _ => this.IsThrowFinished()
+        ));
+        fsm.AddTransition(new Transition<CharacterStateType>(
+            from: CharacterStateType.Throw,
+            to: CharacterStateType.Fall,
+            condition: _ => this.IsThrowFinished()
+        ));
+        fsm.AddTransition(new Transition<CharacterStateType>(
+            from: CharacterStateType.Throw,
+            to: CharacterStateType.Jump,
+            condition: _ => this.IsThrowFinished()
+        ));
     }
 
     protected override void CacheComponents()

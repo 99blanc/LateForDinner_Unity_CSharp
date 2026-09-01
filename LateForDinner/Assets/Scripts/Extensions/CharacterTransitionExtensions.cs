@@ -180,6 +180,13 @@ public static class CharacterTransitionExtensions
         return false;
     }
 
+    public static bool IsThrowFinished(this Character character)
+    {
+        if (character.CharacterAnimator != null && character.CharacterAnimator.GetCurrentAnimatorNormalizedTime() >= 1f)
+            return true;
+        
+        return false;
+    }
     public static void AddJumpActionForClimb(this Character character)
     {
         if (character is IJumpableCharacter jumpable)
