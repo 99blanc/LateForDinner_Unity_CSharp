@@ -5,6 +5,7 @@
 # Foreign ID: Scene.csv(SceneID/ToSceneID),,
 SceneID,Type,ToSceneID
 # Index: SceneTransition,,
+2,Portal,3
 # Index: Tutorial,,
 3,Boundary,4
 4,Boundary,3

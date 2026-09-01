@@ -1,5 +1,5 @@
 public enum SceneTransitionType
 {
-    Boundary,
     Portal  ,
+    Boundary,
 }

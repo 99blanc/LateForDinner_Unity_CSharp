@@ -47,13 +47,13 @@ public class GameManager
             Managers.Save.SetDebugDefaultData();
             Managers.Save.CurrentData.CurrentSceneID = targetSceneID;
             await load.LoadAsync(0.7f, LocalizationKey.Log_Game_Loading_PlayerSpawn);
-            await PrepareAndSpawnPlayerAsync();
+            await PrepareAndSpawnPlayerAsync(forceTransition: true);
             await load.LoadAsync(1.0f, LocalizationKey.Log_Game_Loading_ResourcePackaging);
             await Managers.Preload.Release_GameAsync();
         })).Load();
     }
 
-    private async UniTask PrepareAndSpawnPlayerAsync()
+    private async UniTask PrepareAndSpawnPlayerAsync(bool forceTransition = false)
     {
         var saveData = Managers.Save.CurrentData;
         await Managers.Scene.LoadSceneAsync(saveData.CurrentSceneID);
@@ -142,7 +142,7 @@ public class GameManager
         {
             await load.LoadAsync(0.5f, LocalizationKey.Log_Game_Loading_Title);
             DespawnExistingPlayer();
-            await Managers.Scene.LoadSceneAsync(SceneID.Bootstrap);
+            await Managers.Scene.LoadSceneAsync(SceneID.Bootstrap, forceTransition: true);
             await load.LoadAsync(1.0f, LocalizationKey.Log_Game_Loading_ResourcePackaging);
         })).Load();
         Managers.UI.OpenDisplay<UITitleDisplay>();

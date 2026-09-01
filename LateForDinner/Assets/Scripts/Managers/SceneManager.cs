@@ -3,7 +3,6 @@ using LateForDinner.Data;
 using R3;
 using R3.Triggers;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class SceneManager
@@ -22,21 +21,16 @@ public class SceneManager
         CurrentSceneID = ParseSceneID(activeSceneName);
     }
 
-    public async UniTask LoadSceneAsync(SceneID targetSceneID)
+    public async UniTask LoadSceneAsync(SceneID targetSceneID, bool forceTransition = false)
     {
+        if (!ValidateSceneTransition(targetSceneID) && !forceTransition)
+            return;
+
         if (!TryGetSceneData(targetSceneID, out var sceneData))
             return;
 
         PrepareSceneTransition(targetSceneID);
         await ExecuteUnitySceneLoadAsync(sceneData.Tag);
-    }
-
-    public async UniTask MoveToTransitionAsync(SceneID targetSceneID)
-    {
-        if (!ValidateSceneTransition(targetSceneID))
-            return;
-
-        await LoadSceneAsync(targetSceneID);
     }
 
     public void RegisterSpawnpoint(Spawnpoint spawn)
