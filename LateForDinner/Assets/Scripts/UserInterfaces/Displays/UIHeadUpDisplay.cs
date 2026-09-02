@@ -37,7 +37,7 @@ public class UIHeadUpDisplay : UIDisplay
         BindPanel(typeof(Panels));
         InitDashSlots();
         InitHealthSlots();
-        InitTempHealthSlots();
+        InitTemporaryHealthSlots();
     }
 
     private void InitDashSlots()
@@ -74,7 +74,7 @@ public class UIHeadUpDisplay : UIDisplay
         }).RegisterToPool(this);
     }
 
-    private void InitTempHealthSlots()
+    private void InitTemporaryHealthSlots()
     {
         var player = Managers.Game.Player;
 
@@ -83,13 +83,13 @@ public class UIHeadUpDisplay : UIDisplay
 
         var maxTempHealthAttribute = player.Attributes.GetBase<int>(AttributeType.TemporaryHealth);
         int initialSlotCount = Mathf.CeilToInt(maxTempHealthAttribute.CurrentValue / 2f);
-        UpdateTempHealthSlots(initialSlotCount, player);
+        UpdateTemporaryHealthSlots(initialSlotCount, player);
         maxTempHealthAttribute.AsObservable()
         .Skip(1)
         .Subscribe(this, (maxTempHealth, hud) =>
         {
             int totalSlotCount = Mathf.CeilToInt(maxTempHealth / 2f);
-            hud.UpdateTempHealthSlots(totalSlotCount, player);
+            hud.UpdateTemporaryHealthSlots(totalSlotCount, player);
         }).RegisterToPool(this);
     }
 
@@ -151,7 +151,7 @@ public class UIHeadUpDisplay : UIDisplay
         GetRectTransform(RectTransforms.TemporaryHealthContent).SetAsLastSibling();
     }
 
-    private void UpdateTempHealthSlots(int maxTemporaryHealthCount, PlayableCharacter player)
+    private void UpdateTemporaryHealthSlots(int maxTemporaryHealthCount, PlayableCharacter player)
     {
         var content = GetRectTransform(RectTransforms.TemporaryHealthContent).transform;
 
