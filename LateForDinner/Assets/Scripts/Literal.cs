@@ -119,11 +119,12 @@ public class Literal
 
     public class Objects
     {
+        public const string Cursor = "&Cursor";
         public const string BackTransform = "BackTransform";
         public const string CameraTransform = "CameraTransform";
         public const string FrontTransform = "FrontTransform";
         public const string HitboxTransform = "HitboxTransform";
-        public const string InteractTransform = "@Interact";
+        public const string InteractTransform = "&Interact";
     }
 
     public class Paths
@@ -142,6 +143,7 @@ public class Literal
     public class Roots
     {
         public const string Camera = "-Camera";
+        public const string Cursor = "@Cursor";
         public const string Graphics = "@Graphics";
         public const string Events = "-Event";
         public const string Layers = "-Layer: ";

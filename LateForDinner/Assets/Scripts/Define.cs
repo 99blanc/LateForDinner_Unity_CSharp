@@ -63,6 +63,7 @@ public class Define
     public class Cursor
     {
         public static readonly UnityEngine.Vector2 Hotspot = new UnityEngine.Vector2(26f, 36f);
+        public static readonly UnityEngine.Vector2 Size = new UnityEngine.Vector2(200f, 160f);
         public const float Duration = 5f;
     }
 

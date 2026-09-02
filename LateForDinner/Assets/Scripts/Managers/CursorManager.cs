@@ -1,33 +1,72 @@
 using R3;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class CursorManager
 {
-    private Texture2D _normalCursorTexture;
-    private Texture2D _pressCursorTexture;
-    private readonly Vector2 _cursorHotspot = Define.Cursor.Hotspot;
+    private RectTransform _cursorRectTransform; 
+    private GameObject _root;
+    public GameObject Root
+    {
+        get
+        {
+            if (_root == null)
+                InitRoot();
+
+            return _root;
+        }
+    }
+    private Image _cursorImage;
+    private Canvas _canvas;
+    private Sprite _normalCursorSprite;
+    private Sprite _pressCursorSprite;
     private Vector2 _lastMousePosition = Vector2.negativeInfinity;
     private float _lastMouseMovedTime;
     private bool _isCursorVisible = true;
 
+    public GameObject InitRoot()
+    {
+        _root = new GameObject(Literal.Roots.Cursor, typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
+        _root.transform.SetParent(Managers.Instance.transform, false);
+        return _root;
+    }
+
     public void Setup()
     {
-        CacheCursorTextures();
+        var _ = Root;
+        CacheCursorSprites();
+        CreateCursorUI();
         StartCursorUpdateLoop();
         _lastMouseMovedTime = Time.unscaledTime;
     }
 
-    private void CacheCursorTextures()
+    private void CacheCursorSprites()
     {
-        var normalSprite = Managers.Resource.GetSprite(Define.Atlas.Common, Define.Sprite.Cursor_Normal);
-        var pressSprite = Managers.Resource.GetSprite(Define.Atlas.Common, Define.Sprite.Cursor_Press);
-
-        if (HasAnySpriteMissing(normalSprite, pressSprite))
-            return;
-
-        _normalCursorTexture = Managers.Resource.GetTextureFromSprite(normalSprite);
-        _pressCursorTexture = Managers.Resource.GetTextureFromSprite(pressSprite);
+        _normalCursorSprite = Managers.Resource.GetSprite(Define.Atlas.Common, Define.Sprite.Cursor_Normal);
+        _pressCursorSprite = Managers.Resource.GetSprite(Define.Atlas.Common, Define.Sprite.Cursor_Press);
+    }
+    private void CreateCursorUI()
+    {
+        _canvas = _root.GetComponentAssert<Canvas>();
+        _canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        _canvas.sortingOrder = 999;
+        var scaler = _root.GetComponentAssert<CanvasScaler>();
+        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = Define.Scaler.Resolution;
+        scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
+        scaler.matchWidthOrHeight = 0.5f;
+        var cursor = new GameObject(Literal.Objects.Cursor, typeof(Image));
+        cursor.transform.SetParent(_root.transform, false);
+        _cursorRectTransform = cursor.GetComponent<RectTransform>();
+        _cursorRectTransform.sizeDelta = Define.Cursor.Size;
+        Vector2 size = Define.Cursor.Size;
+        Vector2 hotspot = Define.Cursor.Hotspot;
+        _cursorRectTransform.pivot = new Vector2(hotspot.x / size.x, 1f - (hotspot.y / size.y));
+        _cursorImage = cursor.GetComponent<Image>();
+        _cursorImage.sprite = _normalCursorSprite;
+        _cursorImage.raycastTarget = false;
+        Cursor.visible = false;
     }
 
     private void StartCursorUpdateLoop()
@@ -38,14 +77,15 @@ public class CursorManager
 
     private void UpdateCursorState()
     {
-        if (!CanUpdateCursorVisual())
+        Cursor.visible = false;
+        if (!Application.isFocused || _cursorRectTransform == null)
             return;
 
         Vector2 mousePosition = GetCurrentMousePosition();
 
         if (IsMouseUnavailableOrOutOfBounds(mousePosition))
         {
-            SetDefaultCursor();
+            SetCursorVisibility(false);
             return;
         }
 
@@ -54,7 +94,17 @@ public class CursorManager
         if (!IsCursorVisibleState())
             return;
 
+        UpdateCursorPosition(mousePosition);
         SetCursorVisual(IsLeftMousePressed());
+    }
+
+    private void UpdateCursorPosition(Vector2 mousePosition)
+    {
+        if (_canvas == null) 
+            return;
+
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(_canvas.transform as RectTransform, mousePosition, _canvas.worldCamera, out Vector2 localPoint);
+        _cursorRectTransform.anchoredPosition = localPoint;
     }
 
     private void HandleCursorVisibility(Vector2 currentMousePosition)
@@ -70,17 +120,14 @@ public class CursorManager
             UpdateLastMousePosition(currentMousePosition);
 
             if (!IsCursorVisibleState())
-                ShowCursor();
+                SetCursorVisibility(true);
 
             return;
         }
 
         if (IsCursorVisibleState() && HasCursorInactivityTimeoutExceeded())
-            HideCursor();
+            SetCursorVisibility(false);
     }
-
-    private bool CanUpdateCursorVisual()
-        => Application.isFocused && _normalCursorTexture != null && _pressCursorTexture != null;
 
     private Vector2 GetCurrentMousePosition()
         => Mouse.current?.position.ReadValue() ?? Vector2.negativeInfinity;
@@ -88,17 +135,21 @@ public class CursorManager
     private bool IsMouseUnavailableOrOutOfBounds(Vector2 pos)
         => Mouse.current == null || pos.x < 0 || pos.x > Screen.width || pos.y < 0 || pos.y > Screen.height;
 
-    private void SetDefaultCursor()
-        => Cursor.SetCursor(null, Vector2.zero, CursorMode.ForceSoftware);
-
     private void SetCursorVisual(bool isPressed)
     {
-        var targetTexture = isPressed ? _pressCursorTexture : _normalCursorTexture;
-        Cursor.SetCursor(targetTexture, _cursorHotspot, CursorMode.ForceSoftware);
+        if (_cursorImage == null) 
+            return;
+
+        _cursorImage.sprite = isPressed ? _pressCursorSprite : _normalCursorSprite;
     }
 
-    private bool HasAnySpriteMissing(Sprite normal, Sprite press)
-        => normal == null || press == null;
+    private void SetCursorVisibility(bool isVisible)
+    {
+        _isCursorVisible = isVisible;
+
+        if (_cursorImage != null)
+            _cursorImage.gameObject.SetActive(isVisible);
+    }
 
     private bool IsCursorVisibleState()
         => _isCursorVisible;
@@ -124,18 +175,6 @@ public class CursorManager
         _lastMouseMovedTime = Time.unscaledTime;
     }
 
-    private void ShowCursor()
-    {
-        _isCursorVisible = true;
-        Cursor.visible = true;
-    }
-
     private bool HasCursorInactivityTimeoutExceeded()
         => (Time.unscaledTime - _lastMouseMovedTime) >= Define.Cursor.Duration;
-
-    private void HideCursor()
-    {
-        _isCursorVisible = false;
-        Cursor.visible = false;
-    }
 }
