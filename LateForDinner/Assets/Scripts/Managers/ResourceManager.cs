@@ -1,3 +1,4 @@
+using Cysharp.Text;
 using Cysharp.Threading.Tasks;
 using System.Collections.Generic;
 using UnityEngine;
@@ -80,8 +81,21 @@ public class ResourceManager
     public async UniTask<RuntimeAnimatorController> LoadAnimatorControllerAsync(string path)
         => await LoadAssetAsync<RuntimeAnimatorController>(path);
 
+    public async UniTask<RuntimeAnimatorController> LoadAnimatorControllerAsync<T>() where T : class
+    {
+        string path = ZString.Concat(typeof(T).Name, Literal.Assets.Animator);
+        return await LoadAssetAsync<RuntimeAnimatorController>(path);
+    }
+
     public async UniTask<AnimatorOverrideController> LoadAnimatorOverrideControllerAsync(string path)
     {
+        RuntimeAnimatorController controller = await LoadAssetAsync<RuntimeAnimatorController>(path);
+        return controller is AnimatorOverrideController overrideController ? overrideController : null;
+    }
+
+    public async UniTask<AnimatorOverrideController> LoadAnimatorOverrideControllerAsync<T>() where T : class
+    {
+        string path = ZString.Concat(typeof(T).Name, Literal.Assets.Animator);
         RuntimeAnimatorController controller = await LoadAssetAsync<RuntimeAnimatorController>(path);
         return controller is AnimatorOverrideController overrideController ? overrideController : null;
     }
@@ -109,8 +123,20 @@ public class ResourceManager
     public RuntimeAnimatorController GetAnimatorController(string path)
         => Get<RuntimeAnimatorController>(path);
 
+    public RuntimeAnimatorController GetAnimatorController<T>() where T : class
+    {
+        string path = ZString.Concat(typeof(T).Name, Literal.Assets.Animator);
+        return Get<RuntimeAnimatorController>(path);
+    }
+
     public AnimatorOverrideController GetAnimatorOverrideController(string path)
         => Get<AnimatorOverrideController>(path);
+
+    public AnimatorOverrideController GetAnimatorOverrideController<T>() where T : class
+    {
+        string path = ZString.Concat(typeof(T).Name, Literal.Assets.Animator);
+        return Get<AnimatorOverrideController>(path);
+    }
 
     public Texture2D GetTextureFromSprite(Sprite sprite)
     {

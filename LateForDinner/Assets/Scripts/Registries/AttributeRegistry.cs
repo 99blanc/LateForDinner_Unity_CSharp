@@ -49,17 +49,11 @@ public class AttributeRegistry
         return (AttributeView<T>)view;
     }
 
-    public ReadOnlyReactiveProperty<T> Stream<T>(AttributeType dataType) where T : struct
-        => GetView<T>(dataType).CurrentValue;
-
     public ReactiveProperty<T> Get<T>(AttributeType dataType, T value = default) where T : struct
         => GetView(dataType, value).CurrentValue;
 
     public void Set<T>(AttributeType dataType, T value) where T : struct
         => Get<T>(dataType).Value = value;
-
-    public ReadOnlyReactiveProperty<T> StreamBase<T>(AttributeType dataType) where T : struct
-        => GetView<T>(dataType).BaseValue;
 
     public ReactiveProperty<T> GetBase<T>(AttributeType dataType, T value = default) where T : struct
         => GetView(dataType, value).BaseValue;

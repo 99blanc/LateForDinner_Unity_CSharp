@@ -7,6 +7,12 @@ public interface IPoolable
         this.SetPooled(false);
         LoadState();
         OnInit();
+
+        if (this is IAnimatableUI animatable)
+        {
+            animatable.InitAnimatorController();
+            animatable.InitUpdateLoop();
+        }
     }
 
     public void ProtectedGet()

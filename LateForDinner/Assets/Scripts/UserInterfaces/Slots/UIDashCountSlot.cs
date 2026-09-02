@@ -1,6 +1,10 @@
+using Cysharp.Threading.Tasks;
+using R3;
+using System;
+using System.Threading;
 using UnityEngine;
 
-public class UIDashCountSlot : UISlot
+public class UIDashCountSlot : UISlot, IAnimatableUI
 {
     private enum Images
     {
@@ -9,63 +13,93 @@ public class UIDashCountSlot : UISlot
 
     private enum UI_DashState
     {
-        None,
-        Charged,
-        Used
+        Empty,
+        Full
     }
 
-    private Animator _animator;
-    private int _index;
-    private UI_DashState _currentState = UI_DashState.None;
+    private int _slotIndex;
+    private UI_DashState _currentState = UI_DashState.Full;
 
     public override void OnInit()
     {
         base.OnInit();
         BindImage(typeof(Images));
-        _animator = GetImage(Images.DashCountImage).AddAnimator();
     }
 
-    public void SetIndex(int index)
-        => _index = index;
-
-    public void UpdateState(int currentDashCount)
+    public void InitDashSlot(PlayableCharacter player, int index)
     {
-        bool isFilled = _index < currentDashCount;
-        UI_DashState nextState = isFilled ? UI_DashState.Charged : UI_DashState.Used;
-        ApplyState(nextState);
+        _slotIndex = index;
+        int initialCount = player.Attributes.Get<int>(AttributeType.DashCount).CurrentValue;
+
+        _currentState = GetStateFromDash(initialCount, _slotIndex);
+        ApplyStaticState(_currentState);
+
+        player.Attributes.Get<int>(AttributeType.DashCount)
+            .AsObservable()
+            .Skip(1)
+            .Subscribe(this, (currentCount, slot) =>
+            {
+                slot.UpdateDashState(currentCount);
+            })
+            .RegisterToPool(this);
     }
 
-    public void ForceSetState(int currentDashCount)
+    private void UpdateDashState(int currentCount)
     {
-        bool isFilled = _index < currentDashCount;
-        _currentState = isFilled ? UI_DashState.Charged : UI_DashState.Used;
-        GetImage(Images.DashCountImage).sprite = Managers.Resource.GetSprite(Define.Atlas.HeadUp, Define.Sprite.HUD_PlayerDashCount);
-    }
+        UI_DashState targetState = GetStateFromDash(currentCount, _slotIndex);
 
-    public void SetNoneState()
-        => ApplyState(UI_DashState.None);
-
-    private void ApplyState(UI_DashState nextState)
-    {
-        if (_currentState == nextState)
+        if (_currentState == targetState)
             return;
 
-        _currentState = nextState;
-        PlayDashAnimation(_currentState);
+        var oldState = _currentState;
+        _currentState = targetState;
+        PlayDashTransitionAsync(oldState, targetState).Forget();
     }
 
-    private void PlayDashAnimation(UI_DashState state)
+    private UI_DashState GetStateFromDash(int currentCount, int slotIndex)
+        => slotIndex < currentCount ? UI_DashState.Full : UI_DashState.Empty;
+
+    private async UniTaskVoid PlayDashTransitionAsync(UI_DashState oldState, UI_DashState newState)
     {
+        int hash = 0;
+
+        switch ((oldState, newState))
+        {
+            case (UI_DashState.Empty, UI_DashState.Full):
+                hash = Define.Animation.DashCharge;
+                break;
+            case (UI_DashState.Full, UI_DashState.Empty):
+                hash = Define.Animation.DashUse;
+                break;
+        }
+
+        if (hash != 0)
+        {
+            try
+            {
+                CancellationToken cts = this.GetNewCancellationToken();
+                await this.PlayClipAsync(hash);
+            }
+            catch (OperationCanceledException)
+            {
+                // DESC ::: 연속 대시로 인해 기존 애니메이션이 끊겼을 경우 (정상)
+            }
+        }
+
+        ApplyStaticState(newState);
+    }
+
+    private void ApplyStaticState(UI_DashState state)
+    {
+        var image = GetImage(Images.DashCountImage);
+
         switch (state)
         {
-            case UI_DashState.None:
-                _animator.Play(Define.Animation.None);
+            case UI_DashState.Empty:
+                image.sprite = Managers.Resource.GetSprite(Define.Atlas.Common, Define.Sprite.Empty);
                 break;
-            case UI_DashState.Charged:
-                _animator.Play(Define.Animation.HeadUpDashCharge);
-                break;
-            case UI_DashState.Used:
-                _animator.Play(Define.Animation.HeadUpDashUse);
+            case UI_DashState.Full:
+                image.sprite = Managers.Resource.GetSprite(Define.Atlas.HeadUp, Define.Sprite.DashCount);
                 break;
         }
     }

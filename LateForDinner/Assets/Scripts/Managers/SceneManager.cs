@@ -61,7 +61,7 @@ public class SceneManager
 
         if (TryGetTargetSpawnpoint(out var targetSpawn))
         {
-            Managers.Game.Character.RelocateTo(targetSpawn);
+            Managers.Game.Player.RelocateTo(targetSpawn);
             Log.System(LocalizationKey.Log_Scene_NormalizedSpawn, targetSpawn.transform.position.ToString());
         }
         else
@@ -121,7 +121,7 @@ public class SceneManager
         => spawn != null;
 
     private bool IsCharacterNull()
-        => Managers.Game.Character == null;
+        => Managers.Game.Player == null;
 
     private bool IsPreviousSceneBeforeHospital()
         => _previousID < SceneID.Hospital1;

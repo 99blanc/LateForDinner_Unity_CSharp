@@ -10,11 +10,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 778250825985672984, guid: 8c2665e69dc9fae4ca4b97a83de49ccf, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -4.01864
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 778250825985672984, guid: 8c2665e69dc9fae4ca4b97a83de49ccf, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -2.56364
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 778250825985672984, guid: 8c2665e69dc9fae4ca4b97a83de49ccf, type: 3}
       propertyPath: m_LocalPosition.z
@@ -59,6 +59,18 @@ PrefabInstance:
     - target: {fileID: 1816891047004181672, guid: 8c2665e69dc9fae4ca4b97a83de49ccf, type: 3}
       propertyPath: m_Name
       value: ProtagonistObject
+      objectReference: {fileID: 0}
+    - target: {fileID: 3307580917015449097, guid: 8c2665e69dc9fae4ca4b97a83de49ccf, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 4432544761538405072, guid: 8c2665e69dc9fae4ca4b97a83de49ccf, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 4432544761538405072, guid: 8c2665e69dc9fae4ca4b97a83de49ccf, type: 3}
+      propertyPath: m_CullingMode
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5521085977429679974, guid: 8c2665e69dc9fae4ca4b97a83de49ccf, type: 3}
       propertyPath: m_Controller

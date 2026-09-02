@@ -6,9 +6,9 @@
 # IJumpableCharacter: JumpCount. JumpForce,,
 Key,MaxValue,DataType
 # Index: AttributeRegistry,,
-# Property: 체력. Description: 체력은 HUD 반 칸 기준으로 가산,,
-Health,56,int
-# Property: 임시 체력. Description: 임시 체력은 HUD 반 칸 기준으로 가산,,
+"# Property: 체력. Description: 체력은 HUD 반 칸 기준으로 가산, 체력과 임시체력의 MaxValue는 합산 값  56",,
+Health,54,int
+"# Property: 임시체력. Description: 임시 체력은 HUD 반 칸 기준으로 가산, 체력과 임시체력의 MaxValue는 합산 값  56",,
 TemporaryHealth,2,int
 # Property: 이동속도,,
 MoveSpeed,0,float

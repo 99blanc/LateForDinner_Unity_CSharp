@@ -1,10 +1,38 @@
 using Cysharp.Threading.Tasks;
 using System.Threading;
 using UnityEngine;
-using UnityEngine.UI;
 
 public static class AnimatorExtensions
 {
+    public static async UniTask<T> PlayAsync<T>(this UniTask<T> task) where T : UserInterface, IAnimatableUI
+    {
+        var display = await task;
+
+        if (display != null)
+            await display.PlayAsync();
+
+        return display;
+    }
+
+    public static async UniTask<T> PlayClipAsync<T>(this UniTask<T> task, int hash, int layer = 0, float normalizedTime = 0f) where T : UserInterface, IAnimatableUI
+    {
+        var display = await task;
+
+        if (display != null)
+            await display.PlayClipAsync(hash, layer, normalizedTime);
+
+        return display;
+    }
+
+    public static async UniTask PlayClipAsync(this IAnimatableUI animatable, int hash, int layer = 0, float normalizedTime = 0f)
+        => await animatable.PlayClipAsync(hash, layer, normalizedTime);
+
+    public static Animator GetAnimator(this IAnimatableUI animatable)
+        => animatable.Animator;
+
+    public static CancellationToken GetNewCancellationToken(this IAnimatableUI animatable)
+        => animatable.GetNewCancellationToken();
+
     public static float GetCurrentAnimatorNormalizedTime(this Animator animator, int layerIndex = 0)
     {
         if (animator == null)
@@ -25,21 +53,6 @@ public static class AnimatorExtensions
 
     public static void SetAnimatorSpeed(this CharacterAnimator animator, float speed)
         => animator.Animator.SetAnimatorSpeed(speed);
-
-    public static Animator AddAnimator(this GameObject gameObject)
-    {
-        if (gameObject == null)
-            return null;
-
-        if (!gameObject.TryGetComponent<Animator>(out var animator))
-            animator = gameObject.AddComponent<Animator>();
-
-        animator.runtimeAnimatorController = Managers.Resource.GetAnimatorController(Define.Animator.UIAnimator);
-        return animator;
-    }
-
-    public static Animator AddAnimator(this Image component)
-        => AddAnimator(component.gameObject);
 
     public static async UniTask AwaitForComplete(this Animator animator, int stateNameHash, int layerIndex = 0, CancellationToken cancellationToken = default)
     {

@@ -191,7 +191,7 @@ public class CommandRegistry
         if (!CheckIsDebugMode()) 
             return;
 
-        var character = Managers.Game.Character;
+        var character = Managers.Game.Player;
 
         if (args.Length < 2 || args[0].Equals("help", StringComparison.OrdinalIgnoreCase) || args[0].Equals("list", StringComparison.OrdinalIgnoreCase))
         {
@@ -216,7 +216,7 @@ public class CommandRegistry
         if (!CheckIsDebugMode()) 
             return;
 
-        var character = Managers.Game.Character;
+        var character = Managers.Game.Player;
 
         if (args.Length < 2 || args[0].Equals("help", StringComparison.OrdinalIgnoreCase) || args[0].Equals("list", StringComparison.OrdinalIgnoreCase))
         {
@@ -231,6 +231,7 @@ public class CommandRegistry
             return;
         }
 
+        character.Attributes.SetParsedValue(attributeType, args[1]);
         character.Attributes.SetBaseParsedValue(attributeType, args[1]);
         Log.Info(LocalizationKey.Console_SetBase_Success, args[0], args[1]);
         Managers.UI.RefreshDisplay();
@@ -241,7 +242,7 @@ public class CommandRegistry
         if (!CheckIsDebugMode()) 
             return;
 
-        var character = Managers.Game.Character;
+        var character = Managers.Game.Player;
 
         if (args.Length < 1 || args[0].Equals("help", StringComparison.OrdinalIgnoreCase) || args[0].Equals("list", StringComparison.OrdinalIgnoreCase))
         {
@@ -306,7 +307,7 @@ public class CommandRegistry
         {
             Log.Info(Managers.Localization.Get(LocalizationKey.Console_Scene_MovingProcess, targetSceneID));
 
-            if (Managers.Game.Character == null)
+            if (Managers.Game.Player == null)
                 await Managers.Game.DebugGameAsync(targetSceneID);
             else
                 await Managers.Scene.LoadSceneAsync(targetSceneID, forceTransition: true);
@@ -349,14 +350,14 @@ public class CommandRegistry
 
         if (isPlayable)
         {
-            if (Managers.Game.Character == null)
+            if (Managers.Game.Player == null)
                 Log.Info(LocalizationKey.Console_Spawn_NotFoundPlayableCharacter, targetCharacterID.ToString());
 
             await Managers.Game.SpawnPlayerAsync(targetCharacterID);
             return;
         }
 
-        if (Managers.Game.Character == null)
+        if (Managers.Game.Player == null)
         {
             Log.Info(LocalizationKey.Console_Spawn_NotFoundPlayableCharacter, CharacterID.Protagonist.ToString());
             await Managers.Game.SpawnPlayerAsync(CharacterID.Protagonist);
@@ -367,8 +368,8 @@ public class CommandRegistry
 
     private void SpawnGeneralCharacter(CharacterID characterID)
     {
-        Vector2 lookDir = Managers.Game.Character.GetLookDirection();
-        Vector3 spawnPosition = Managers.Game.Character.transform.position + (Vector3)(lookDir * 2f);
+        Vector2 lookDir = Managers.Game.Player.GetLookDirection();
+        Vector3 spawnPosition = Managers.Game.Player.transform.position + (Vector3)(lookDir * 2f);
         Managers.Game.SpawnCharacterAsync<Character>(characterID, spawnPosition).Forget();
         Log.Info(LocalizationKey.Console_Spawn_Success, characterID);
     }

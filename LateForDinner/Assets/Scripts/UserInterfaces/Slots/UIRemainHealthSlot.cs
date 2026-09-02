@@ -1,116 +1,208 @@
+using Cysharp.Threading.Tasks;
+using R3;
+using System;
+using System.Threading;
 using UnityEngine;
 
-public class UIRemainHealthSlot : UISlot
+public class UIRemainHealthSlot : UISlot, IAnimatableUI
 {
     private enum Images
     {
         RemainHealthImage
     }
 
-    public enum UI_HealthState
+    private enum UI_HealthState
     {
-        Full,
-        Half,
         Empty,
-        TemporaryFull,
-        TemporaryHalf,
-        TemporaryEmpty
+        Half,
+        Full
     }
 
-    private Animator _animator;
-    private int _index;
-    private UI_HealthState _currentState;
+    public enum UI_HealthSlotType
+    {
+        Normal,
+        Temporary
+    }
+
+    private int _slotIndex;
+    private UI_HealthSlotType _slotType;
+    private UI_HealthState _currentState = UI_HealthState.Full;
 
     public override void OnInit()
     {
         base.OnInit();
         BindImage(typeof(Images));
-        _animator = GetImage(Images.RemainHealthImage).AddAnimator();
     }
 
-    public void SetIndex(int index)
-        => _index = index;
-
-    public void UpdateHealthState(int currentHealth)
+    public void InitHealthSlot(PlayableCharacter player, int index, UI_HealthSlotType slotType)
     {
-        int slotHealthValue = currentHealth - (_index * 2);
-        UI_HealthState nextState;
+        _slotIndex = index;
+        _slotType = slotType;
+        var image = GetImage(Images.RemainHealthImage);
 
-        if (slotHealthValue >= 2)
-            nextState = UI_HealthState.Full;
-        else if (slotHealthValue == 1)
-            nextState = UI_HealthState.Half;
+        if (_slotType == UI_HealthSlotType.Normal)
+            image.sprite = Managers.Resource.GetSprite(Define.Atlas.HeadUp, Define.Sprite.HealthFull);
         else
-            nextState = UI_HealthState.Empty;
+            image.sprite = Managers.Resource.GetSprite(Define.Atlas.HeadUp, Define.Sprite.TemporaryHealthFull);
 
-        ApplyState(nextState);
+        AttributeType currentAttrType = (_slotType == UI_HealthSlotType.Temporary) ? AttributeType.TemporaryHealth : AttributeType.Health;
+        var healthAttr = player.Attributes.Get<int>(currentAttrType);
+        var maxHealthAttr = player.Attributes.GetBase<int>(currentAttrType);
+        UpdateHealthState(healthAttr.CurrentValue, maxHealthAttr.CurrentValue);
+        Observable.CombineLatest(healthAttr.AsObservable(), maxHealthAttr.AsObservable(), (health, maxHealth) => (health, maxHealth))
+        .Skip(1)
+        .Subscribe(this, (tuple, slot) =>
+        {
+            slot.UpdateHealthState(tuple.health, tuple.maxHealth);
+        })
+        .RegisterToPool(this);
     }
 
-    public void UpdateTempHealthState(int currentTempHealth)
+    private void UpdateHealthState(int currentHealth, int maxHealth)
     {
-        int slotHealthValue = currentTempHealth - (_index * 2);
-        UI_HealthState nextState;
+        int slotThreshold = _slotIndex * 2;
+        UI_HealthState targetState = GetStateFromHealth(currentHealth, slotThreshold);
 
-        if (slotHealthValue >= 2)
-            nextState = UI_HealthState.TemporaryFull;
-        else if (slotHealthValue == 1)
-            nextState = UI_HealthState.TemporaryHalf;
-        else
-            nextState = UI_HealthState.TemporaryEmpty;
-
-        ApplyState(nextState);
-    }
-
-    public void ForceSetState(UI_HealthState nextState)
-        => ApplyState(nextState);
-
-    private void ApplyState(UI_HealthState nextState)
-    {
-        if (_currentState == nextState)
+        if (_currentState == targetState)
             return;
 
-        _currentState = nextState;
-        ChangeSprite(_currentState);
-        PlayHealthAnimation(_currentState);
+        var oldState = _currentState;
+        _currentState = targetState;
+        PlayHealthTransitionAsync(oldState, targetState).Forget();
     }
 
-    private void ChangeSprite(UI_HealthState state)
+    private UI_HealthState GetStateFromHealth(int health, int slotThreshold)
     {
-        string spriteName = state switch
-        {
-            UI_HealthState.Full => Define.Sprite.HUD_PlayerHealth_Full,
-            UI_HealthState.Half => Define.Sprite.HUD_PlayerHealth_Half,
-            UI_HealthState.Empty => Define.Sprite.HUD_PlayerHealth_Empty,
-            UI_HealthState.TemporaryFull => Define.Sprite.HUD_PlayerTemporaryHealth_Full,
-            UI_HealthState.TemporaryHalf => Define.Sprite.HUD_PlayerTemporaryHealth_Half,
-            UI_HealthState.TemporaryEmpty => Define.Sprite.HUD_PlayerHealth_Empty,
-            _ => Define.Sprite.HUD_PlayerHealth_Empty
-        };
-        GetImage(Images.RemainHealthImage).sprite = Managers.Resource.GetSprite(Define.Atlas.HeadUp, spriteName);
+        int slotHealth = health - slotThreshold;
+
+        if (slotHealth >= 2)
+            return UI_HealthState.Full;
+        if (slotHealth == 1)
+            return UI_HealthState.Half;
+
+        return UI_HealthState.Empty;
     }
 
-    private void PlayHealthAnimation(UI_HealthState state)
+    private async UniTaskVoid PlayHealthTransitionAsync(UI_HealthState oldState, UI_HealthState newState)
     {
-        switch (state)
+        int hash = 0;
+
+        if (_slotType == UI_HealthSlotType.Normal)
         {
-            case UI_HealthState.Full:
-                _animator.Play(Define.Animation.None);
-                break;
-            case UI_HealthState.Half:
-                _animator.Play(Define.Animation.HeadUpHealthFull);
-                break;
-            case UI_HealthState.Empty:
-                _animator.Play(Define.Animation.HeadUpHealthHalf);
-                break;
-            case UI_HealthState.TemporaryFull:
-                _animator.Play(Define.Animation.None);
-                break;
-            case UI_HealthState.TemporaryHalf:
-                _animator.Play(Define.Animation.HeadUpTemporaryHealthFull);
-                break;
-            case UI_HealthState.TemporaryEmpty:
-                _animator.Play(Define.Animation.HeadUpTemporaryHealthHalf);
-                break;
+            switch ((oldState, newState))
+            {
+                case (UI_HealthState.Empty, UI_HealthState.Half):
+                    hash = Define.Animation.HealthHalfCharge;
+                    break;
+                case (UI_HealthState.Half, UI_HealthState.Full):
+                    hash = Define.Animation.HealthFullCharge;
+                    break;
+                case (UI_HealthState.Full, UI_HealthState.Half):
+                    hash = Define.Animation.HealthFull;
+                    break;
+                case (UI_HealthState.Half, UI_HealthState.Empty):
+                    hash = Define.Animation.HealthHalf;
+                    break;
+                case (UI_HealthState.Full, UI_HealthState.Empty):
+                    hash = Define.Animation.HealthAllEmpty;
+                    break;
+                case (UI_HealthState.Empty, UI_HealthState.Full):
+                    hash = Define.Animation.HealthAllFullCharge;
+                    break;
+            }
+        }
+        else
+        {
+            switch ((oldState, newState))
+            {
+                case (UI_HealthState.Empty, UI_HealthState.Half):
+                    hash = Define.Animation.TemporaryHealthHalfCharge;
+                    break;
+                case (UI_HealthState.Half, UI_HealthState.Full):
+                    hash = Define.Animation.TemporaryHealthFullCharge;
+                    break;
+                case (UI_HealthState.Full, UI_HealthState.Half):
+                    hash = Define.Animation.TemporaryHealthFull;
+                    break;
+                case (UI_HealthState.Half, UI_HealthState.Empty):
+                    hash = Define.Animation.TemporaryHealthHalf;
+                    break;
+                case (UI_HealthState.Full, UI_HealthState.Empty):
+                    hash = Define.Animation.TemporaryHealthAllEmpty;
+                    break;
+                case (UI_HealthState.Empty, UI_HealthState.Full):
+                    hash = Define.Animation.TemporaryHealthAllFullCharge;
+                    break;
+            }
+        }
+
+        if (hash != 0)
+        {
+            try
+            {
+                CancellationToken cts = this.GetNewCancellationToken();
+                await this.PlayClipAsync(hash);
+            }
+            catch (OperationCanceledException)
+            {
+                // DESC ::: 연속 데미지나 힐로 인해 기존 애니메이션이 끊겼을 경우 (정상)
+            }
+        }
+
+        ApplyStaticState(oldState, newState);
+    }
+
+    private void ApplyStaticState(UI_HealthState oldState, UI_HealthState newState)
+    {
+        var image = GetImage(Images.RemainHealthImage);
+
+        if (_slotType == UI_HealthSlotType.Normal)
+        {
+            switch ((oldState, newState))
+            {
+                case (UI_HealthState.Empty, UI_HealthState.Half):
+                    image.sprite = Managers.Resource.GetSprite(Define.Atlas.HeadUp, Define.Sprite.HealthHalf);
+                    break;
+                case (UI_HealthState.Half, UI_HealthState.Full):
+                    image.sprite = Managers.Resource.GetSprite(Define.Atlas.HeadUp, Define.Sprite.HealthFull);
+                    break;
+                case (UI_HealthState.Full, UI_HealthState.Half):
+                    image.sprite = Managers.Resource.GetSprite(Define.Atlas.HeadUp, Define.Sprite.HealthHalf);
+                    break;
+                case (UI_HealthState.Half, UI_HealthState.Empty):
+                    image.sprite = Managers.Resource.GetSprite(Define.Atlas.HeadUp, Define.Sprite.HealthEmpty);
+                    break;
+                case (UI_HealthState.Full, UI_HealthState.Empty):
+                    image.sprite = Managers.Resource.GetSprite(Define.Atlas.HeadUp, Define.Sprite.HealthEmpty);
+                    break;
+                case (UI_HealthState.Empty, UI_HealthState.Full):
+                    image.sprite = Managers.Resource.GetSprite(Define.Atlas.HeadUp, Define.Sprite.HealthFull);
+                    break;
+            }
+        }
+        else
+        {
+            switch ((oldState, newState))
+            {
+                case (UI_HealthState.Empty, UI_HealthState.Half):
+                    image.sprite = Managers.Resource.GetSprite(Define.Atlas.HeadUp, Define.Sprite.TemporaryHealthHalf);
+                    break;
+                case (UI_HealthState.Half, UI_HealthState.Full):
+                    image.sprite = Managers.Resource.GetSprite(Define.Atlas.HeadUp, Define.Sprite.TemporaryHealthFull);
+                    break;
+                case (UI_HealthState.Full, UI_HealthState.Half):
+                    image.sprite = Managers.Resource.GetSprite(Define.Atlas.HeadUp, Define.Sprite.TemporaryHealthHalf);
+                    break;
+                case (UI_HealthState.Half, UI_HealthState.Empty):
+                    image.sprite = Managers.Resource.GetSprite(Define.Atlas.Common, Define.Sprite.Empty);
+                    break;
+                case (UI_HealthState.Full, UI_HealthState.Empty):
+                    image.sprite = Managers.Resource.GetSprite(Define.Atlas.Common, Define.Sprite.Empty);
+                    break;
+                case (UI_HealthState.Empty, UI_HealthState.Full):
+                    image.sprite = Managers.Resource.GetSprite(Define.Atlas.HeadUp, Define.Sprite.TemporaryHealthFull);
+                    break;
+            }
         }
     }
 }

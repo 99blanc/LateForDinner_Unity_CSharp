@@ -192,6 +192,14 @@ PrefabInstance:
       propertyPath: m_WasSpriteAssigned
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2602002430908275099, guid: a0b312019afb2fd43bbb0de7c26125c5, type: 3}
+      propertyPath: m_CullingMode
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3781132272597431618, guid: a0b312019afb2fd43bbb0de7c26125c5, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     - target: {fileID: 3883847981280408184, guid: a0b312019afb2fd43bbb0de7c26125c5, type: 3}
       propertyPath: m_Layer
       value: 6

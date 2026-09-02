@@ -17,7 +17,6 @@ public class PreloadManager
         await Managers.Resource.LoadAssetAsync<SpriteAtlas>(Define.Atlas.Common);
         await Managers.Resource.LoadAssetAsync<SpriteAtlas>(Define.Atlas.Title);
         await Managers.Resource.LoadAssetAsync<SpriteAtlas>(Define.Atlas.Load);
-        await Managers.Resource.LoadAnimatorControllerAsync(Define.Animator.UIAnimator);
         Log.System(LocalizationKey.Log_Preload_Boot_Object);
         await Managers.Resource.LoadPrefabAsync(Literal.Assets.EventSystem);
         Log.System(LocalizationKey.Log_Preload_Boot_UI);
@@ -56,11 +55,13 @@ public class PreloadManager
     public async UniTask Release_Game1Async()
     {
         Log.System(LocalizationKey.Log_Preload_BootStarted);
-        var attributes = Managers.Game.Character.Attributes;
+        var attributes = Managers.Game.Player.Attributes;
         Log.System(LocalizationKey.Log_Preload_Boot_Data);
         Log.System(LocalizationKey.Log_Preload_Boot_Asset);
         await Managers.Resource.LoadAssetAsync<SpriteAtlas>(Define.Atlas.PlayableCharacter);
         await Managers.Resource.LoadAssetAsync<SpriteAtlas>(Define.Atlas.HeadUp);
+        await Managers.Resource.LoadAnimatorControllerAsync<UIDashCountSlot>();
+        await Managers.Resource.LoadAnimatorControllerAsync<UIRemainHealthSlot>();
         Log.System(LocalizationKey.Log_Preload_Boot_Object);
         Log.System(LocalizationKey.Log_Preload_Boot_UI);
         Managers.Pool.DestroyByKey<UISplashDisplay>();

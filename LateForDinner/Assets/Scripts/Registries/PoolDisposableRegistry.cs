@@ -8,6 +8,9 @@ internal static class PoolDisposableRegistry
 
     public static void Register(IPoolable owner, IDisposable disposable)
     {
+        if (owner == null || disposable == null)
+            return;
+
         if (!_bags.TryGetValue(owner, out var bag))
         {
             bag = new DisposableBag();

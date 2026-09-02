@@ -78,7 +78,7 @@ public abstract class Character : MonoBehaviour, IPoolable
     protected virtual void CacheComponents()
     {
         Renderer = this.FindChildAssert<SpriteRenderer>(recursive: true);
-        Animator = Renderer?.GetComponentAssert<Animator>();
+        Animator = this.FindChildAssert<Animator>(recursive: true);
         Collider = this.GetComponentAssert<Collider2D>();
     }
 

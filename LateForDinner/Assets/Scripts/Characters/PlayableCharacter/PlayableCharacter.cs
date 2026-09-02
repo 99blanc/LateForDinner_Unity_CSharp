@@ -48,7 +48,6 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
     protected override void RegisterStates(StateMachine<CharacterStateType> fsm)
     {
         base.RegisterStates(fsm);
-
         fsm.AddState(CharacterStateType.Move, new MoveState(this, GetPlayerMoveInput));
         fsm.AddState(CharacterStateType.Fall, new FallState(this, GetPlayerMoveInput));
         fsm.AddState(CharacterStateType.Crouch, new PlayableCharacterCrouchState(this));

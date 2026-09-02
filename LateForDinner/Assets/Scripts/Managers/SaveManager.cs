@@ -214,7 +214,7 @@ public class SaveManager
         if (Managers.Scene.CurrentSceneID >= SceneID.Hospital1)
             CurrentData.CurrentSceneID = Managers.Scene.CurrentSceneID;
 
-        var player = Managers.Game.Character;
+        var player = Managers.Game.Player;
 
         if (player != null)
         {

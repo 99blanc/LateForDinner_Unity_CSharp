@@ -28,19 +28,22 @@ public class Define
         public static readonly int PickupTrayJump = UnityEngine.Animator.StringToHash("PickupTrayJump");
         public static readonly int ThrowTray = UnityEngine.Animator.StringToHash("ThrowTray");
         // DESC ::: HeadUpDisplay Animator ÇØ½Ã
-        public static readonly int HeadUpHealthFull = UnityEngine.Animator.StringToHash("HeadUpDisplay_HealthFull");
-        public static readonly int HeadUpHealthHalf = UnityEngine.Animator.StringToHash("HeadUpDisplay_HealthHalf");
-        public static readonly int HeadUpHealthHelp = UnityEngine.Animator.StringToHash("HeadUpDisplay_HealthHelp");
-        public static readonly int HeadUpTemporaryHealthFull = UnityEngine.Animator.StringToHash("HeadUpDisplay_TemporaryHealthFull");
-        public static readonly int HeadUpTemporaryHealthHalf = UnityEngine.Animator.StringToHash("HeadUpDisplay_TemporaryHealthHalf");
-        public static readonly int HeadUpDashCharge = UnityEngine.Animator.StringToHash("HeadUpDisplay_DashCharge");
-        public static readonly int HeadUpDashUse = UnityEngine.Animator.StringToHash("HeadUpDisplay_DashUse");
+        public static readonly int HealthFull = UnityEngine.Animator.StringToHash("HealthFull");
+        public static readonly int HealthHalf = UnityEngine.Animator.StringToHash("HealthHalf");
+        public static readonly int HealthHelp = UnityEngine.Animator.StringToHash("HealthHelp");
+        public static readonly int HealthFullCharge = UnityEngine.Animator.StringToHash("HealthFullCharge");
+        public static readonly int HealthHalfCharge = UnityEngine.Animator.StringToHash("HealthHalfCharge");
+        public static readonly int HealthAllFullCharge = UnityEngine.Animator.StringToHash("HealthAllFullCharge");
+        public static readonly int HealthAllEmpty = UnityEngine.Animator.StringToHash("HealthAllEmpty");
+        public static readonly int TemporaryHealthFull = UnityEngine.Animator.StringToHash("TemporaryHealthFull");
+        public static readonly int TemporaryHealthHalf = UnityEngine.Animator.StringToHash("TemporaryHealthHalf");
+        public static readonly int TemporaryHealthFullCharge = UnityEngine.Animator.StringToHash("TemporaryHealthFullCharge");
+        public static readonly int TemporaryHealthHalfCharge = UnityEngine.Animator.StringToHash("TemporaryHealthHalfCharge");
+        public static readonly int TemporaryHealthAllFullCharge = UnityEngine.Animator.StringToHash("TemporaryHealthAllFullCharge");
+        public static readonly int TemporaryHealthAllEmpty = UnityEngine.Animator.StringToHash("TemporaryHealthAllEmpty");
+        public static readonly int DashCharge = UnityEngine.Animator.StringToHash("DashCharge");
+        public static readonly int DashUse = UnityEngine.Animator.StringToHash("DashUse");
         public const float NormalizedTime = 0.95f;
-    }
-
-    public class Animator
-    {
-        public const string UIAnimator = "UIAnimator";
     }
 
     public class Atlas
@@ -120,12 +123,12 @@ public class Define
         public const string Slot_Normal = "ui_common_image_slot_normal";
         public const string Empty = "ui_common_empty";
 
-        public const string HUD_PlayerDashCount = "ui_headup_player_dash_count";
-        public const string HUD_PlayerHealth_Empty = "ui_headup_player_health_empty";
-        public const string HUD_PlayerHealth_Half = "ui_headup_player_health_half";
-        public const string HUD_PlayerHealth_Full = "ui_headup_player_health_full";
-        public const string HUD_PlayerTemporaryHealth_Half = "ui_headup_player_temporary_health_half";
-        public const string HUD_PlayerTemporaryHealth_Full = "ui_headup_player_temporary_health_full";
+        public const string DashCount = "ui_headup_player_dash_count";
+        public const string HealthEmpty = "ui_headup_player_health_empty";
+        public const string HealthHalf = "ui_headup_player_health_half";
+        public const string HealthFull = "ui_headup_player_health_full";
+        public const string TemporaryHealthHalf = "ui_headup_player_temporary_health_half";
+        public const string TemporaryHealthFull = "ui_headup_player_temporary_health_full";
     }
 
     public class Toast

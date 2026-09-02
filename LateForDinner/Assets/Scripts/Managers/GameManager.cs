@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class GameManager
 {
-    public PlayableCharacter Character { get; private set; }
+    public PlayableCharacter Player { get; private set; }
 
     public async UniTask OldgameAsync(int slotIndex)
     {
@@ -50,7 +50,7 @@ public class GameManager
         {
             await load.LoadAsync(0.3f, LocalizationKey.Log_Game_Loading_DebugData);
 
-            if (Managers.Game.Character == null)
+            if (Managers.Game.Player == null)
                 Managers.Save.SetDebugDefaultData();
 
             Managers.Save.CurrentData.CurrentSceneID = targetSceneID;
@@ -78,9 +78,9 @@ public class GameManager
 
         if (character != null)
         {
-            Character = character;
+            Player = character;
             UnityEngine.Object.DontDestroyOnLoad(character.gameObject);
-            Managers.Camera.SetTarget(Character);
+            Managers.Camera.SetTarget(Player);
         }
 
         return character;
@@ -137,8 +137,8 @@ public class GameManager
         if (IsCharacterNull())
             return;
 
-        Managers.Pool.Destroy(Character.gameObject);
-        Character = null;
+        Managers.Pool.Destroy(Player.gameObject);
+        Player = null;
     }
 
     public async UniTask TitleGameAsync()
@@ -159,7 +159,7 @@ public class GameManager
     }
 
     private bool IsCharacterNull()
-        => Character == null;
+        => Player == null;
 
     public void Pause()
         => Time.timeScale = 0f;
