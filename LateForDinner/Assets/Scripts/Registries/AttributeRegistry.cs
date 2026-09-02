@@ -53,13 +53,33 @@ public class AttributeRegistry
         => GetView(dataType, value).CurrentValue;
 
     public void Set<T>(AttributeType dataType, T value) where T : struct
-        => Get<T>(dataType).Value = value;
+    {
+        var clampedValue = ClampToBasePath(dataType, value);
+        Get<T>(dataType).Value = clampedValue;
+    }
 
     public ReactiveProperty<T> GetBase<T>(AttributeType dataType, T value = default) where T : struct
         => GetView(dataType, value).BaseValue;
 
     public void SetBase<T>(AttributeType dataType, T baseValue) where T : struct
         => GetBase<T>(dataType).Value = baseValue;
+
+    private T ClampToBasePath<T>(AttributeType dataType, T value) where T : struct
+    {
+        if (!_attributes.TryGetValue(dataType, out var view))
+            return value;
+
+        object clamped = view switch
+        {
+            AttributeView<short> sView => Math.Clamp(Convert.ToInt16(value), (short)0, sView.BaseValue.Value),
+            AttributeView<int> iView => Math.Clamp(Convert.ToInt32(value), (int)0, iView.BaseValue.Value),
+            AttributeView<long> lView => Math.Clamp(Convert.ToInt64(value), (long)0, lView.BaseValue.Value),
+            AttributeView<float> fView => Math.Clamp(Convert.ToSingle(value), (float)0, fView.BaseValue.Value),
+            AttributeView<double> dView => Math.Clamp(Convert.ToDouble(value), (double)0, dView.BaseValue.Value),
+            _ => value
+        };
+        return (T)clamped;
+    }
 
     public List<AttributeSaveData> ExportSaveData()
     {

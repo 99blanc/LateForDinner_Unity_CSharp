@@ -1,5 +1,6 @@
 using R3;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class UIHeadUpDisplay : UIDisplay
 {
@@ -46,7 +47,7 @@ public class UIHeadUpDisplay : UIDisplay
         if (player == null)
             return;
 
-        var dashAttribute = player.Attributes.Get<int>(AttributeType.DashCount);
+        var dashAttribute = player.Attributes.GetBase<int>(AttributeType.DashCount);
         UpdateDashSlots(dashAttribute.CurrentValue, player);
         dashAttribute.AsObservable()
         .Skip(1)
@@ -62,13 +63,13 @@ public class UIHeadUpDisplay : UIDisplay
         if (player == null) return;
 
         var maxHealthAttribute = player.Attributes.GetBase<int>(AttributeType.Health);
-        int initialSlotCount = maxHealthAttribute.CurrentValue / 2;
+        int initialSlotCount = Mathf.CeilToInt(maxHealthAttribute.CurrentValue / 2f);
         UpdateHealthSlots(initialSlotCount, player);
         maxHealthAttribute.AsObservable()
         .Skip(1)
         .Subscribe(this, (maxHealth, hud) =>
         {
-            int totalSlotCount = maxHealth / 2;
+            int totalSlotCount = Mathf.CeilToInt(maxHealth / 2f);
             hud.UpdateHealthSlots(totalSlotCount, player);
         }).RegisterToPool(this);
     }
@@ -81,13 +82,13 @@ public class UIHeadUpDisplay : UIDisplay
             return;
 
         var maxTempHealthAttribute = player.Attributes.GetBase<int>(AttributeType.TemporaryHealth);
-        int initialSlotCount = maxTempHealthAttribute.CurrentValue / 2;
+        int initialSlotCount = Mathf.CeilToInt(maxTempHealthAttribute.CurrentValue / 2f);
         UpdateTempHealthSlots(initialSlotCount, player);
         maxTempHealthAttribute.AsObservable()
         .Skip(1)
         .Subscribe(this, (maxTempHealth, hud) =>
         {
-            int totalSlotCount = maxTempHealth / 2;
+            int totalSlotCount = Mathf.CeilToInt(maxTempHealth / 2f);
             hud.UpdateTempHealthSlots(totalSlotCount, player);
         }).RegisterToPool(this);
     }
@@ -116,9 +117,7 @@ public class UIHeadUpDisplay : UIDisplay
             _dashSlots.RemoveAt(lastIndex);
 
             if (slot != null)
-            {
                 Managers.Pool.Push(slot);
-            }
         }
     }
 
@@ -131,7 +130,10 @@ public class UIHeadUpDisplay : UIDisplay
             var (slot, _) = Managers.Pool.Pop<UIRemainHealthSlot>(content);
 
             if (slot != null)
+            {
                 slot.InitHealthSlot(player, _healthSlots.Count, UIRemainHealthSlot.UI_HealthSlotType.Normal);
+                _healthSlots.Add(slot);
+            }
             else
                 break;
         }
@@ -158,7 +160,10 @@ public class UIHeadUpDisplay : UIDisplay
             var (slot, _) = Managers.Pool.Pop<UIRemainHealthSlot>(content);
 
             if (slot != null)
+            {
                 slot.InitHealthSlot(player, _temporaryHealthSlots.Count, UIRemainHealthSlot.UI_HealthSlotType.Temporary);
+                _temporaryHealthSlots.Add(slot);
+            }
             else
                 break;
         }

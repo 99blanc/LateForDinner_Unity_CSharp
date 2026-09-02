@@ -30,18 +30,15 @@ public class UIDashCountSlot : UISlot, IAnimatableUI
     {
         _slotIndex = index;
         int initialCount = player.Attributes.Get<int>(AttributeType.DashCount).CurrentValue;
-
         _currentState = GetStateFromDash(initialCount, _slotIndex);
         ApplyStaticState(_currentState);
-
         player.Attributes.Get<int>(AttributeType.DashCount)
-            .AsObservable()
-            .Skip(1)
-            .Subscribe(this, (currentCount, slot) =>
-            {
-                slot.UpdateDashState(currentCount);
-            })
-            .RegisterToPool(this);
+        .AsObservable()
+        .Skip(1)
+        .Subscribe(this, (currentCount, slot) =>
+        {
+            slot.UpdateDashState(currentCount);
+        }).RegisterToPool(this);
     }
 
     private void UpdateDashState(int currentCount)

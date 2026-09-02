@@ -2,7 +2,6 @@ using Cysharp.Threading.Tasks;
 using R3;
 using System;
 using System.Threading;
-using UnityEngine;
 
 public class UIRemainHealthSlot : UISlot, IAnimatableUI
 {
@@ -39,23 +38,30 @@ public class UIRemainHealthSlot : UISlot, IAnimatableUI
         _slotIndex = index;
         _slotType = slotType;
         var image = GetImage(Images.RemainHealthImage);
-
-        if (_slotType == UI_HealthSlotType.Normal)
-            image.sprite = Managers.Resource.GetSprite(Define.Atlas.HeadUp, Define.Sprite.HealthFull);
-        else
-            image.sprite = Managers.Resource.GetSprite(Define.Atlas.HeadUp, Define.Sprite.TemporaryHealthFull);
-
         AttributeType currentAttrType = (_slotType == UI_HealthSlotType.Temporary) ? AttributeType.TemporaryHealth : AttributeType.Health;
         var healthAttr = player.Attributes.Get<int>(currentAttrType);
         var maxHealthAttr = player.Attributes.GetBase<int>(currentAttrType);
-        UpdateHealthState(healthAttr.CurrentValue, maxHealthAttr.CurrentValue);
+        int slotThreshold = _slotIndex * 2;
+        UI_HealthState targetState = GetStateFromHealth(healthAttr.CurrentValue, slotThreshold);
+
+        if (targetState != UI_HealthState.Empty)
+        {
+            _currentState = UI_HealthState.Empty;
+            ApplyStaticState(_currentState, _currentState);
+            PlayHealthTransitionAsync(UI_HealthState.Empty, targetState).Forget();
+        }
+        else
+        {
+            _currentState = UI_HealthState.Empty;
+            ApplyStaticState(_currentState, _currentState);
+        }
+
         Observable.CombineLatest(healthAttr.AsObservable(), maxHealthAttr.AsObservable(), (health, maxHealth) => (health, maxHealth))
         .Skip(1)
         .Subscribe(this, (tuple, slot) =>
         {
             slot.UpdateHealthState(tuple.health, tuple.maxHealth);
-        })
-        .RegisterToPool(this);
+        }).RegisterToPool(this);
     }
 
     private void UpdateHealthState(int currentHealth, int maxHealth)
