@@ -130,6 +130,7 @@ public enum LocalizationKey
     Log_Game_Loading_Title                             , // [GameManager] 타이틀 화면으로 이동합니다.
     Log_Game_CharacterSpawnFailed                      , // [GameManager] 캐릭터('{0}') 생성에 실패했습니다.
     Log_Game_CharacterSpawnSuccess                     , // [GameManager] 캐릭터('{0}')를 성공적으로 생성했습니다.
+    Log_Graphic_RootInitialized                        , // [UIManager] 그래픽 볼륨 구조가 성공적으로 초기화되었습니다.
     Log_Interact_NotRegistered                         , // [InteractManager] 등록되지 않은 상호작용 타입입니다: '{0}'
     Log_Localization_LoadedSuccessfully                , // [LocalizationManager] 현지화 시스템을 성공적으로 불러왔습니다.
     Log_Localization_FileReadFailed                    , // [LocalizationManager] 현지화 파일('{0}')을 읽는 중 오류가 발생했습니다.
@@ -212,7 +213,9 @@ public enum LocalizationKey
     UI_Option_Popup_Text_Vsync                         , // 수직 동기화
     UI_Option_Popup_Text_Antialiasing                  , // 안티 앨리어싱
     UI_Option_Popup_Text_Bloom                         , // 블룸
-    UI_Option_Popup_Text_AO                            , // 앰비언트 오클루전
+    UI_Option_Popup_Text_Vignette                      , // 비네트
+    UI_Option_Popup_Text_MotionBlur                    , // 모션 블러
+    UI_Option_Popup_Text_Contrast                      , // 대조비
     UI_Option_Popup_Text_Keybind                       , // 키보드 조작 설정
     UI_Option_Popup_Text_Bind                          , // >설정할 키 입력<
     UI_Option_Popup_Text_Modifier                      , // 대시키+방향키

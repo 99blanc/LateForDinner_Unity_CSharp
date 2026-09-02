@@ -109,10 +109,8 @@ public class ConfigManager
 
         var graphic = Option.Graphic;
         var sound = Option.Sound;
-        Screen.SetResolution(graphic.rWidth, graphic.rHeight, graphic.screenMode, graphic.Resolution.refreshRateRatio);
-        QualitySettings.vSyncCount = graphic.vSync ? 1 : 0;
+        Managers.Graphic.ApplyGraphicOptions(graphic);
         Application.targetFrameRate = graphic.rRefreshRate;
-        QualitySettings.SetQualityLevel((int)graphic.quality);
         Application.runInBackground = !sound.mute;
     }
 

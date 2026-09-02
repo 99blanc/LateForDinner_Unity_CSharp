@@ -28,7 +28,7 @@ public class UIManager
 
     private GameObject InitRoot()
     {
-        _root = new GameObject { name = Literal.Roots.UserInterfaces };
+        _root = new GameObject { name = Literal.Roots.UI };
         _root.transform.SetParent(Managers.Instance.transform, false);
         CreateLayer(LayerType.Display);
         CreateLayer(LayerType.Popup);
@@ -68,6 +68,7 @@ public class UIManager
 
     public void Setup()
     {
+        var _ = Root;
         var system = Managers.Resource.Instantiate(Literal.Assets.EventSystem, Managers.Instance.transform, false);
         system.name = Literal.Roots.Events;
     }
@@ -78,7 +79,6 @@ public class UIManager
             return existingDisplay;
 
         CloseCurrentDisplayIfExist();
-        var _ = Root;
         var (instance, rentHandle) = await Managers.Pool.PopAsync<T>(_layer[LayerType.Display]);
 
         if (IsInstanceInvalid(instance, out var logKey, typeof(T).Name))
@@ -97,7 +97,6 @@ public class UIManager
             return existingDisplay;
 
         CloseCurrentDisplayIfExist();
-        var _ = Root;
         var (instance, rentHandle) = Managers.Pool.Pop<T>(_layer[LayerType.Display]);
 
         if (IsInstanceInvalid(instance, out var logKey, typeof(T).Name))
@@ -115,7 +114,6 @@ public class UIManager
         if (!allowMultiple && HasExistingPopup<T>(out var targetPopup))
             return targetPopup;
 
-        var _ = Root;
         var (instance, rentHandle) = await Managers.Pool.PopAsync<T>(_layer[LayerType.Popup]);
 
         if (IsInstanceInvalid(instance, out var logKey, typeof(T).Name))
@@ -133,7 +131,6 @@ public class UIManager
         if (HasExistingPopup<T>(out var targetPopup))
             return targetPopup;
 
-        var _ = Root;
         var (instance, rentHandle) = Managers.Pool.Pop<T>(_layer[LayerType.Popup]);
 
         if (IsInstanceInvalid(instance, out var logKey, typeof(T).Name))
@@ -151,7 +148,6 @@ public class UIManager
         if (HasExistingSystem<T>(out var existingSystem))
             return existingSystem;
 
-        var _ = Root;
         var (instance, rentHandle) = await Managers.Pool.PopAsync<T>(_layer[layer]);
 
         if (IsInstanceInvalid(instance, out var logKey, typeof(T).Name))
@@ -169,7 +165,6 @@ public class UIManager
         if (HasExistingSystem<T>(out var existingSystem))
             return existingSystem;
 
-        var _ = Root;
         var (instance, rentHandle) = Managers.Pool.Pop<T>(_layer[layer]);
 
         if (IsInstanceInvalid(instance, out var logKey, typeof(T).Name))

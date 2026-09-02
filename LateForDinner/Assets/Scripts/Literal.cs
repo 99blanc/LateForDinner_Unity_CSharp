@@ -4,6 +4,7 @@ public class Literal
     {
         public const string Animator = "Animator";
         public const string EventSystem = "EventSystem";
+        public const string GlobalVolume = "GlobalVolume";
         public const string InputActionAsset = "InputSystem_Actions";
     }
 
@@ -141,14 +142,17 @@ public class Literal
     public class Roots
     {
         public const string Camera = "-Camera";
+        public const string Graphics = "@Graphics";
         public const string Events = "-Event";
-        public const string Layers = "Layer: ";
+        public const string Layers = "-Layer: ";
         public const string Managers = "@Managers";
-        public const string Objects = "Objects";
-        public const string Props = "Props";
-        public const string Pools = "Pools";
-        public const string UserInterfaces = "UserInterfaces";
+        public const string Objects = "-Objects";
+        public const string Props = "-Props";
+        public const string Pools = "@Pools";
+        public const string UI = "@UI's";
+        public const string UserInterfaces = "-UserInterfaces";
         public const string Virtual = "-Virtual";
+        public const string Volume = "-Volume";
     }
 
     public class Schemes

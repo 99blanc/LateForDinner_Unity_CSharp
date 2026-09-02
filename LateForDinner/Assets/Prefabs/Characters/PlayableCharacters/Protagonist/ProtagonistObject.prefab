@@ -72,6 +72,10 @@ PrefabInstance:
       propertyPath: m_CullingMode
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4635381678975819418, guid: 8c2665e69dc9fae4ca4b97a83de49ccf, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.4
+      objectReference: {fileID: 0}
     - target: {fileID: 5521085977429679974, guid: 8c2665e69dc9fae4ca4b97a83de49ccf, type: 3}
       propertyPath: m_Controller
       value: 

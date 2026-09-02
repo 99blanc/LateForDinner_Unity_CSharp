@@ -19,6 +19,7 @@ public class PreloadManager
         await Managers.Resource.LoadAssetAsync<SpriteAtlas>(Define.Atlas.Load);
         Log.System(LocalizationKey.Log_Preload_Boot_Object);
         await Managers.Resource.LoadPrefabAsync(Literal.Assets.EventSystem);
+        await Managers.Resource.LoadPrefabAsync(Literal.Assets.GlobalVolume);
         Log.System(LocalizationKey.Log_Preload_Boot_UI);
         await Managers.Pool.PrewarmAsync<UILockSystem>(1);
         await Managers.Pool.PrewarmAsync<UIToastSlot>(Define.Toast.Count);

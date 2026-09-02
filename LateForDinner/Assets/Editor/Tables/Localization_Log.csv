@@ -40,6 +40,8 @@ Log_Game_Loading_ResourcePackaging,[GameManager] 리소스를 불러오는 중�
 Log_Game_Loading_Title,[GameManager] 타이틀 화면으로 이동합니다.
 Log_Game_CharacterSpawnFailed,[GameManager] 캐릭터('{0}') 생성에 실패했습니다.
 Log_Game_CharacterSpawnSuccess,[GameManager] 캐릭터('{0}')를 성공적으로 생성했습니다.
+# Index: GraphicManager,
+Log_Graphic_RootInitialized,[UIManager] 그래픽 볼륨 구조가 성공적으로 초기화되었습니다.
 # Index: InteractManager,
 Log_Interact_NotRegistered,[InteractManager] 등록되지 않은 상호작용 타입입니다: '{0}'
 # Index: LocalizationManager,

@@ -14,6 +14,7 @@ public class Bootstrapper
         Managers.Console.Setup();
         Managers.Camera.Setup();
         await Managers.Preload.Release_BootAsync();
+        Managers.Graphic.Setup();
         Managers.Cursor.Setup();
         Managers.UI.Setup();
         Managers.Control.Setup();

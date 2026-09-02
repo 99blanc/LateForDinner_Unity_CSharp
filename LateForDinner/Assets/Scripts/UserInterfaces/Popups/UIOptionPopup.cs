@@ -52,8 +52,12 @@ public class UIOptionPopup : UIPopup, IDraggablePopup, IFocusablePopup
         AntialiasingCheckmarkImage,
         BloomToggleImage,
         BloomCheckmarkImage,
-        AOToggleImage,
-        AOCheckmarkImage,
+        VignetteToggleImage,
+        VignetteCheckmarkImage,
+        MotionBlurToggleImage,
+        MotionBlurCheckmarkImage,
+        ContrastToggleImage,
+        ContrastCheckmarkImage,
         LanguageArrowImage
     }
 
@@ -83,7 +87,9 @@ public class UIOptionPopup : UIPopup, IDraggablePopup, IFocusablePopup
         VsyncText,
         AntialiasingText,
         BloomText,
-        AOText
+        VignetteText,
+        MotionBlurText,
+        ContrastText
     }
 
     private enum InputFields
@@ -124,7 +130,9 @@ public class UIOptionPopup : UIPopup, IDraggablePopup, IFocusablePopup
         VsyncToggle,
         AntialiasingToggle,
         BloomToggle,
-        AOToggle
+        VignetteToggle,
+        MotionBlurToggle,
+        ContrastToggle
     }
 
     private enum ScrollRects
@@ -297,14 +305,18 @@ public class UIOptionPopup : UIPopup, IDraggablePopup, IFocusablePopup
         BindGraphicToggle(Toggles.VsyncToggle, Images.VsyncCheckmarkImage, Images.VsyncToggleImage);
         BindGraphicToggle(Toggles.AntialiasingToggle, Images.AntialiasingCheckmarkImage, Images.AntialiasingToggleImage);
         BindGraphicToggle(Toggles.BloomToggle, Images.BloomCheckmarkImage, Images.BloomToggleImage);
-        BindGraphicToggle(Toggles.AOToggle, Images.AOCheckmarkImage, Images.AOToggleImage);
+        BindGraphicToggle(Toggles.VignetteToggle, Images.VignetteCheckmarkImage, Images.VignetteToggleImage);
+        BindGraphicToggle(Toggles.MotionBlurToggle, Images.MotionBlurCheckmarkImage, Images.MotionBlurToggleImage);
+        BindGraphicToggle(Toggles.ContrastToggle, Images.ContrastCheckmarkImage, Images.ContrastToggleImage);
         SetText(Texts.ResolutionText, LocalizationKey.UI_Option_Popup_Text_Resolution);
         SetText(Texts.FullscreenText, LocalizationKey.UI_Option_Popup_Text_Fullscreen);
         SetText(Texts.QualityText, LocalizationKey.UI_Option_Popup_Text_Quality);
         SetText(Texts.VsyncText, LocalizationKey.UI_Option_Popup_Text_Vsync);
         SetText(Texts.AntialiasingText, LocalizationKey.UI_Option_Popup_Text_Antialiasing);
         SetText(Texts.BloomText, LocalizationKey.UI_Option_Popup_Text_Bloom);
-        SetText(Texts.AOText, LocalizationKey.UI_Option_Popup_Text_AO);
+        SetText(Texts.VignetteText, LocalizationKey.UI_Option_Popup_Text_Vignette);
+        SetText(Texts.MotionBlurText, LocalizationKey.UI_Option_Popup_Text_MotionBlur);
+        SetText(Texts.ContrastText, LocalizationKey.UI_Option_Popup_Text_Contrast);
     }
 
     private void BindArrowDropdownButton(Buttons button, ReactiveProperty<ButtonState> state) =>
@@ -461,7 +473,9 @@ public class UIOptionPopup : UIPopup, IDraggablePopup, IFocusablePopup
         SetGraphicToggleAndVisual(Toggles.VsyncToggle, Images.VsyncToggleImage, Images.VsyncCheckmarkImage, graphic.vSync);
         SetGraphicToggleAndVisual(Toggles.AntialiasingToggle, Images.AntialiasingToggleImage, Images.AntialiasingCheckmarkImage, graphic.antiAliasing);
         SetGraphicToggleAndVisual(Toggles.BloomToggle, Images.BloomToggleImage, Images.BloomCheckmarkImage, graphic.bloom);
-        SetGraphicToggleAndVisual(Toggles.AOToggle, Images.AOCheckmarkImage, Images.AOCheckmarkImage, graphic.ambientOccusion);
+        SetGraphicToggleAndVisual(Toggles.VignetteToggle, Images.VignetteToggleImage, Images.VignetteCheckmarkImage, graphic.vignette);
+        SetGraphicToggleAndVisual(Toggles.MotionBlurToggle, Images.MotionBlurToggleImage, Images.MotionBlurCheckmarkImage, graphic.mblur);
+        SetGraphicToggleAndVisual(Toggles.ContrastToggle, Images.ContrastToggleImage, Images.ContrastCheckmarkImage, graphic.contrast);
     }
 
     private void SetGraphicToggleAndVisual(Toggles toggle, Images toggleImage, Images checkmark, bool isOn)
@@ -474,7 +488,7 @@ public class UIOptionPopup : UIPopup, IDraggablePopup, IFocusablePopup
     private void RefreshAccessPanel()
     {
         var languageLocales = Managers.Localization.GetLanguages();
-        string currentLocale = Managers.Config?.Option?.Access?.language ?? Literal.Languages.Korean;
+        string currentLocale = Managers.Config.Option.Access?.language ?? Literal.Languages.Korean;
 
         for (int index = 0; index < languageLocales.Count; index++)
         {
@@ -657,7 +671,9 @@ public class UIOptionPopup : UIPopup, IDraggablePopup, IFocusablePopup
         graphic.vSync = GetToggle(Toggles.VsyncToggle).isOn;
         graphic.antiAliasing = GetToggle(Toggles.AntialiasingToggle).isOn;
         graphic.bloom = GetToggle(Toggles.BloomToggle).isOn;
-        graphic.ambientOccusion = GetToggle(Toggles.AOToggle).isOn;
+        graphic.vignette = GetToggle(Toggles.VignetteToggle).isOn;
+        graphic.mblur = GetToggle(Toggles.MotionBlurToggle).isOn;
+        graphic.contrast = GetToggle(Toggles.ContrastToggle).isOn;
     }
 
     private void SyncAccessPanel()

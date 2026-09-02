@@ -31,6 +31,7 @@ public class Managers : MonoBehaviour
     public static GameManager Game { get; private set; }
     public static CooldownManager Cooldown { get; private set; }
     public static CameraManager Camera { get; private set; }
+    public static GraphicManager Graphic { get; private set; }
 
     public async UniTask LoadAsync()
     {
@@ -65,6 +66,7 @@ public class Managers : MonoBehaviour
         Game = new GameManager();
         Cooldown = new CooldownManager();
         Camera = new CameraManager();
+        Graphic = new GraphicManager();
     }
 
     private async UniTask InitializeManagersAsync()

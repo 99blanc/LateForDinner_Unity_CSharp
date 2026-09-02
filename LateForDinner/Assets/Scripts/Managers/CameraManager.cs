@@ -1,5 +1,6 @@
 using Unity.Cinemachine;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 public class CameraManager
 {
@@ -27,6 +28,8 @@ public class CameraManager
         _mainCamera.tag = Literal.Tags.Camera;
         _mainCamera.clearFlags = CameraClearFlags.SolidColor;
         _mainCamera.orthographic = true;
+        var data = _root.AddComponent<UniversalAdditionalCameraData>();
+        data.renderPostProcessing = true;
         _root.AddComponent<CinemachineBrain>();
         GameObject vcamObject = new GameObject { name = Literal.Roots.Virtual };
         vcamObject.transform.SetParent(Managers.Instance.transform, false);
@@ -53,6 +56,14 @@ public class CameraManager
             return;
 
         _vcam.Follow = character.CameraTransform;
+    }
+
+    public void SetAntialiasing(bool isOn)
+    {
+        var cameraData = _mainCamera.GetUniversalAdditionalCameraData();
+
+        if (cameraData != null)
+            cameraData.antialiasing = isOn ? AntialiasingMode.SubpixelMorphologicalAntiAliasing : AntialiasingMode.None;
     }
 
     public void SetCameraMode(CameraWorkMode mode)

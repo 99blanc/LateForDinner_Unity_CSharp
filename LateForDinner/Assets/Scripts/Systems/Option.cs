@@ -62,7 +62,9 @@ public partial class GraphicOption
     public bool antiAliasing;
     public TextureQuality quality;
     public bool bloom;
-    public bool ambientOccusion;
+    public bool vignette;
+    public bool mblur;
+    public bool contrast;
 
     [MemoryPackIgnore]
     public Resolution Resolution
@@ -95,10 +97,12 @@ public partial class GraphicOption
                 rRefreshRate = targetRefreshRate,
                 screenMode = FullScreenMode.FullScreenWindow,
                 vSync = true,
-                antiAliasing = false,
+                antiAliasing = true,
                 quality = TextureQuality.High,
                 bloom = true,
-                ambientOccusion = true
+                vignette = true,
+                mblur = true,
+                contrast = true,
             };
         }
     }
