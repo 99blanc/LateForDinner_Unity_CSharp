@@ -27,7 +27,7 @@ public interface IInteractable
         get => _interactValue.GetOrCreateValue(this).Priority;
         set => _interactValue.GetOrCreateValue(this).Priority = value;
     }
-    private static readonly ConditionalWeakTable<IInteractable, ReactiveProperty<bool>> _interactCaches = new();
+    private static readonly ConditionalWeakTable<IInteractable, ReactiveProperty<bool>> _interactCaches = new ConditionalWeakTable<IInteractable, ReactiveProperty<bool>>();
     public ReactiveProperty<bool> CanInteract
     {
         get => _interactCaches.GetValue(this, _ => new ReactiveProperty<bool>(false));

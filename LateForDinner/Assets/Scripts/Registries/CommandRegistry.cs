@@ -231,8 +231,8 @@ public class CommandRegistry
             return;
         }
 
-        character.Attributes.SetParsedValue(attributeType, args[1]);
         character.Attributes.SetBaseParsedValue(attributeType, args[1]);
+        character.Attributes.SetParsedValue(attributeType, args[1]);
         Log.Info(LocalizationKey.Console_SetBase_Success, args[0], args[1]);
         Managers.UI.RefreshDisplay();
     }
