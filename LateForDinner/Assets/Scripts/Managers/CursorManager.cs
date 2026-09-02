@@ -77,7 +77,9 @@ public class CursorManager
 
     private void UpdateCursorState()
     {
-        Cursor.visible = false;
+        if (Cursor.visible)
+            Cursor.visible = false;
+
         if (!Application.isFocused || _cursorRectTransform == null)
             return;
 
@@ -89,13 +91,23 @@ public class CursorManager
             return;
         }
 
+        bool isClicked = IsLeftMousePressed();
+
+        if (HasMouseMoved(mousePosition) || isClicked)
+        {
+            UpdateLastMousePosition(mousePosition);
+
+            if (!IsCursorVisibleState())
+                SetCursorVisibility(true);
+        }
+
         HandleCursorVisibility(mousePosition);
 
         if (!IsCursorVisibleState())
             return;
 
         UpdateCursorPosition(mousePosition);
-        SetCursorVisual(IsLeftMousePressed());
+        SetCursorVisual(isClicked);
     }
 
     private void UpdateCursorPosition(Vector2 mousePosition)
