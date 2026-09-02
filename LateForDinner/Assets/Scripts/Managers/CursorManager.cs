@@ -50,7 +50,7 @@ public class CursorManager
     {
         _canvas = _root.GetComponentAssert<Canvas>();
         _canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        _canvas.sortingOrder = 999;
+        _canvas.sortingOrder = (int)LayerType.Cursor;
         var scaler = _root.GetComponentAssert<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
         scaler.referenceResolution = Define.Scaler.Resolution;
