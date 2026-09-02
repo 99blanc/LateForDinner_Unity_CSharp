@@ -1,6 +1,5 @@
 using R3;
 using UnityEngine;
-using System;
 
 public class UIFPSSystem : UISystem
 {
@@ -10,7 +9,6 @@ public class UIFPSSystem : UISystem
     }
 
     private float _pollingTime = Define.Framerate.PollingTime;
-    private IDisposable _fpsSubscription;
 
     public override void OnInit()
     {
@@ -21,30 +19,21 @@ public class UIFPSSystem : UISystem
     public override void OnGet()
     {
         base.OnGet();
-        _fpsSubscription?.Dispose();
-        _fpsSubscription = Observable.EveryUpdate()
-        .Scan((Accumulator: 0f, FrameCount: 0), (state, _) =>
-        {
-            var newTime = state.Accumulator + Time.unscaledDeltaTime;
-            var newCount = state.FrameCount + 1;
-
-            if (newTime >= _pollingTime)
-                return (0f, 0);
-
-            return (newTime, newCount);
-        })
-        .Where(state => state.Accumulator == 0f && state.FrameCount == 0)
+        float accumTime = 0f;
+        int frameCount = 0;
+        Observable.EveryUpdate()
         .Subscribe(_ =>
         {
-            int fps = Mathf.RoundToInt(1f / Time.unscaledDeltaTime);
-            GetText(Texts.FPSText).text = Managers.Localization.Get(LocalizationKey.UI_FPS_System_Indicator, fps);
-        }).RegisterToPool(this);
-    }
+            accumTime += Time.unscaledDeltaTime;
+            frameCount++;
 
-    public override void OnRelease()
-    {
-        base.OnRelease();
-        _fpsSubscription?.Dispose();
-        _fpsSubscription = null;
+            if (accumTime >= _pollingTime)
+            {
+                int fps = Mathf.RoundToInt(frameCount / accumTime);
+                GetText(Texts.FPSText).text = Managers.Localization.Get(LocalizationKey.UI_FPS_System_Indicator, fps);
+                accumTime = 0f;
+                frameCount = 0;
+            }
+        }).RegisterToPool(this);
     }
 }

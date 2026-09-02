@@ -112,6 +112,7 @@ public class ConfigManager
         Managers.Graphic.ApplyGraphicOptions(graphic);
         Application.targetFrameRate = graphic.rRefreshRate;
         Application.runInBackground = !sound.mute;
+        Debug.Log(graphic.rRefreshRate);
     }
 
     private bool HasNoArguments(string[] args)
