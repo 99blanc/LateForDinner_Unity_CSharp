@@ -38,9 +38,10 @@ public class GraphicManager
 
     public void ApplyGraphicOptions(GraphicOption graphic)
     {
-        Screen.SetResolution(graphic.rWidth, graphic.rHeight, graphic.screenMode, graphic.Resolution.refreshRateRatio);
-        QualitySettings.vSyncCount = graphic.vSync ? 1 : 0;
         QualitySettings.SetQualityLevel((int)graphic.quality);
+        QualitySettings.vSyncCount = graphic.vSync ? 1 : 0;
+        Screen.SetResolution(graphic.rWidth, graphic.rHeight, graphic.screenMode, graphic.Resolution.refreshRateRatio);
+        Application.targetFrameRate = graphic.rRefreshRate;
         ApplyPostProcessing(graphic);
         ApplyCameraSettings(graphic);
     }
