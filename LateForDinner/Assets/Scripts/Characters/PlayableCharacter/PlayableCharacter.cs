@@ -1,6 +1,7 @@
 using Cysharp.Threading.Tasks;
 using System;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityHFSM;
 using ZLinq;
@@ -25,7 +26,7 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
 
         Rigidbody.position = data.PlayerPosition;
         Rigidbody.rotation = data.PlayerRotation;
-        Managers.Control.Subscribe(Literal.Hotkeys.Interact, () => TryExecuteInteraction()).RegisterToPool(this);
+        RegisterInputSubscriptions();
     }
 
     private void InitAttributes()
@@ -43,6 +44,17 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
             Attributes.SetParsedValue(attributeType, template.Value);
             Attributes.SetBaseParsedValue(attributeType, template.Value);
         }
+    }
+
+    private void RegisterInputSubscriptions()
+    {
+        this.BindKey(Literal.Hotkeys.Interact, InputEventType.Triggered, TryExecuteInteraction).RegisterToPool(this);
+        this.BindKey(Literal.Hotkeys.Left, InputEventType.Pressed).RegisterToPool(this);
+        this.BindKey(Literal.Hotkeys.Right, InputEventType.Pressed).RegisterToPool(this);
+        this.BindKey(Literal.Hotkeys.UpUtility, InputEventType.Pressed).RegisterToPool(this);
+        this.BindKey(Literal.Hotkeys.DownUtility, InputEventType.Pressed).RegisterToPool(this);
+        this.BindKey(Literal.Hotkeys.Jump, InputEventType.Triggered).RegisterToPool(this);
+        this.BindKey(Literal.Hotkeys.Dash, InputEventType.Pressed).RegisterToPool(this);
     }
 
     protected override void RegisterStates(StateMachine<CharacterStateType> fsm)
@@ -327,10 +339,10 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
 
     protected float GetPlayerMoveInput()
     {
-        if (Managers.Control.IsPressed(Literal.Hotkeys.Right))
+        if (this.IsKeyPressed(Literal.Hotkeys.Right))
             return 1f;
 
-        if (Managers.Control.IsPressed(Literal.Hotkeys.Left))
+        if (this.IsKeyPressed(Literal.Hotkeys.Left))
             return -1f;
 
         return 0f;
@@ -340,13 +352,13 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
     {
         Vector2 input = Vector2.zero;
 
-        if (Managers.Control.IsPressed(Literal.Hotkeys.Right))
+        if (this.IsKeyPressed(Literal.Hotkeys.Right))
             input.x += 1f;
 
-        if (Managers.Control.IsPressed(Literal.Hotkeys.Left))
+        if (this.IsKeyPressed(Literal.Hotkeys.Left))
             input.x -= 1f;
 
-        if (Managers.Control.IsPressed(Literal.Hotkeys.DownUtility))
+        if (this.IsKeyPressed(Literal.Hotkeys.DownUtility))
             input.y -= 1f;
 
         if (input == Vector2.zero)
@@ -357,10 +369,10 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
 
     protected float GetPlayerClimbInput()
     {
-        if (Managers.Control.IsPressed(Literal.Hotkeys.UpUtility))
+        if (this.IsKeyPressed(Literal.Hotkeys.UpUtility))
             return 1f;
 
-        if (Managers.Control.IsPressed(Literal.Hotkeys.DownUtility))
+        if (this.IsKeyPressed(Literal.Hotkeys.DownUtility))
             return -1f;
 
         return 0f;
@@ -370,48 +382,48 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
     {
         Vector2 input = Vector2.zero;
 
-        if (Managers.Control.IsPressed(Literal.Hotkeys.UpUtility))
+        if (this.IsKeyPressed(Literal.Hotkeys.UpUtility))
             input.y += 1f;
 
-        if (Managers.Control.IsPressed(Literal.Hotkeys.DownUtility))
+        if (this.IsKeyPressed(Literal.Hotkeys.DownUtility))
             input.y -= 1f;
 
         return input;
     }
 
     public bool IsPlayerJumpInput()
-        => Managers.Control.IsTriggered(Literal.Hotkeys.Jump);
+        => this.IsKeyTriggered(Literal.Hotkeys.Jump);
 
     public bool IsPlayerDashInput()
         => CheckDashInput(Managers.Config.Option.Access.modifierDash, !this.IsGrounded());
 
     protected bool IsPlayerCrouchInput()
-        => Managers.Control.IsPressed(Literal.Hotkeys.DownUtility);
+        => this.IsKeyPressed(Literal.Hotkeys.DownUtility);
 
     private bool CheckDashInput(bool isModifierDash, bool allowDownUtility)
     {
         if (isModifierDash)
         {
-            bool isDashPressed = Managers.Control.IsPressed(Literal.Hotkeys.Dash);
+            bool isDashPressed = this.IsKeyPressed(Literal.Hotkeys.Dash);
 
             if (!isDashPressed)
                 return false;
 
-            bool isLeftPressed = Managers.Control.IsPressed(Literal.Hotkeys.Left);
-            bool isRightPressed = Managers.Control.IsPressed(Literal.Hotkeys.Right);
-            bool isDownPressed = allowDownUtility && Managers.Control.IsPressed(Literal.Hotkeys.DownUtility);
+            bool isLeftPressed = this.IsKeyPressed(Literal.Hotkeys.Left);
+            bool isRightPressed = this.IsKeyPressed(Literal.Hotkeys.Right);
+            bool isDownPressed = allowDownUtility && this.IsKeyPressed(Literal.Hotkeys.DownUtility);
 
             if (isLeftPressed || isRightPressed || isDownPressed)
-                return Managers.Control.IsHoldRepeated(Literal.Hotkeys.Dash);
+                return this.IsKeyHoldRepeated(Literal.Hotkeys.Dash);
 
             return false;
         }
         else
         {
-            bool triggered = Managers.Control.IsDoubleTriggered(Literal.Hotkeys.Left) || Managers.Control.IsDoubleTriggered(Literal.Hotkeys.Right);
+            bool triggered = this.IsKeyDoubleTriggered(Literal.Hotkeys.Left) || this.IsKeyDoubleTriggered(Literal.Hotkeys.Right);
 
             if (allowDownUtility)
-                triggered |= Managers.Control.IsDoubleTriggered(Literal.Hotkeys.DownUtility);
+                triggered |= this.IsKeyDoubleTriggered(Literal.Hotkeys.DownUtility);
 
             return triggered;
         }
@@ -421,7 +433,10 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
     {
         if (this is ICarriableCharacter carriable && carriable.IsHoldingProp)
         {
-            bool isDownPressed = Managers.Control.IsPressed(Literal.Hotkeys.DownUtility);
+            if (carriable.HasThrown)
+                return;
+
+            bool isDownPressed = this.IsKeyPressed(Literal.Hotkeys.DownUtility);
 
             if (isDownPressed)
             {

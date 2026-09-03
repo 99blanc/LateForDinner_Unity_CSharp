@@ -33,7 +33,7 @@ public class UIAlertPopup : UIPopup, IDraggablePopup, IFocusablePopup
         BindButton(typeof(Buttons));
         GetImage(Images.ConfirmButtonImage).BindState(_confirmButtonState, Define.Atlas.Common, this);
         GetButton(Buttons.ConfirmButton).BindViewAsButton(_ => OnClickConfirm(), ViewEvent.LeftClick, this, _confirmButtonState);
-        Managers.Control.Subscribe(Literal.Hotkeys.Submit, OnClickConfirm).RegisterToPool(this);
+        this.BindKey(Literal.Hotkeys.Submit, InputEventType.Triggered, OnClickConfirm).RegisterToPool(this);
     }
 
     public override void Refresh()

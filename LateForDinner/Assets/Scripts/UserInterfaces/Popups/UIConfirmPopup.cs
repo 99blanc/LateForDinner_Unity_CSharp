@@ -40,7 +40,7 @@ public class UIConfirmPopup : UIPopup, IDraggablePopup, IFocusablePopup
         GetImage(Images.CancelButtonImage).BindState(_cancelButtonState, Define.Atlas.Common, this);
         GetButton(Buttons.ConfirmButton).BindViewAsButton(_ => OnClickConfirm(), ViewEvent.LeftClick, this, _confirmButtonState);
         GetButton(Buttons.CancelButton).BindViewAsButton(_ => OnClickCancel(), ViewEvent.LeftClick, this, _cancelButtonState);
-        Managers.Control.Subscribe(Literal.Hotkeys.Cancel, OnClickCancel).RegisterToPool(this);
+        this.BindKey(Literal.Hotkeys.Cancel, InputEventType.Triggered, OnClickCancel).RegisterToPool(this);
     }
 
     public override void Refresh()

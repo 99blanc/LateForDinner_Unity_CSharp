@@ -7,14 +7,20 @@ using UnityEngine.InputSystem;
 
 public class ControlManager
 {
+    private struct DoubleTapState
+    {
+        public float FirstTapTime;
+        public bool IsPending;
+    }
+    private readonly Dictionary<string, HashSet<IPoolable>> _subscribers = new Dictionary<string, HashSet<IPoolable>>();
     private readonly Dictionary<string, InputAction> _actionCaches = new Dictionary<string, InputAction>();
-    private readonly Dictionary<string, float> _lastFirstTapTimes = new Dictionary<string, float>();
+    private readonly Dictionary<string, DoubleTapState> _doubleTapStates = new Dictionary<string, DoubleTapState>();
     private readonly Dictionary<string, float> _repeatTimers = new Dictionary<string, float>();
-    private readonly HashSet<string> _triggeredCaches = new HashSet<string>();
+    private readonly Dictionary<string, float> _triggeredCaches = new Dictionary<string, float>();
     private readonly HashSet<string> _pressedCaches = new HashSet<string>();
     private readonly Dictionary<string, float> _doubleTriggeredCaches = new Dictionary<string, float>();
+    private readonly Dictionary<string, Subject<Unit>> _actionSubjects = new Dictionary<string, Subject<Unit>>();
     private InputActionAsset _actionAsset;
-    private string _pendingDoubleActionName;
 
     public void Setup()
     {
@@ -158,17 +164,15 @@ public class ControlManager
     private void ProcessActionPerformed(string actionName)
     {
         float currentTime = Time.unscaledTime;
-        _triggeredCaches.Add(actionName);
+        _triggeredCaches[actionName] = currentTime;
+
+        if (_actionSubjects.TryGetValue(actionName, out var subject))
+            subject.OnNext(Unit.Default);
 
         if (!IsUserAction(actionName))
             return;
 
-        ResetPendingDoubleTapIfDifferentKey(actionName);
-
-        if (TryEvaluateDoubleTap(actionName, currentTime))
-            RegisterSuccessfulDoubleTap(actionName);
-        else
-            RegisterFirstTap(actionName, currentTime);
+        EvaluateDoubleTap(actionName, currentTime);
     }
 
     private bool IsUserAction(string actionName)
@@ -177,43 +181,22 @@ public class ControlManager
         return userMap != null && userMap.FindAction(actionName) != null;
     }
 
-    private void ResetPendingDoubleTapIfDifferentKey(string currentActionName)
+    private void EvaluateDoubleTap(string actionName, float currentTime)
     {
-        if (HasPendingDifferentDoubleTap(currentActionName))
-            _pendingDoubleActionName = null;
-    }
+        if (!_doubleTapStates.TryGetValue(actionName, out var state))
+            state = new DoubleTapState { IsPending = false, FirstTapTime = 0f };
 
-    private bool HasPendingDifferentDoubleTap(string currentActionName)
-        => !string.IsNullOrEmpty(_pendingDoubleActionName) && _pendingDoubleActionName != currentActionName;
+        if (state.IsPending)
+        {
+            if ((currentTime - state.FirstTapTime) <= Define.Scaler.Threshold)
+            {
+                _doubleTriggeredCaches[actionName] = currentTime;
+                _doubleTapStates[actionName] = new DoubleTapState { IsPending = false, FirstTapTime = 0f };
+                return;
+            }
+        }
 
-    private bool TryEvaluateDoubleTap(string actionName, float currentTime)
-    {
-        if (_pendingDoubleActionName != actionName)
-            return false;
-
-        if (_lastFirstTapTimes.TryGetValue(actionName, out float firstTime))
-            return IsWithinDoubleTapThreshold(currentTime, firstTime);
-
-        return false;
-    }
-
-    private bool IsWithinDoubleTapThreshold(float currentTime, float firstTime)
-    {
-        float threshold = Define.Scaler.Threshold;
-        return (currentTime - firstTime) <= threshold;
-    }
-
-    private void RegisterSuccessfulDoubleTap(string actionName)
-    {
-        _doubleTriggeredCaches[actionName] = Time.unscaledTime;
-        _pendingDoubleActionName = null;
-        _lastFirstTapTimes.Remove(actionName);
-    }
-
-    private void RegisterFirstTap(string actionName, float currentTime)
-    {
-        _pendingDoubleActionName = actionName;
-        _lastFirstTapTimes[actionName] = currentTime;
+        _doubleTapStates[actionName] = new DoubleTapState { IsPending = true, FirstTapTime = currentTime };
     }
 
     public void EnableActionMap(string mapName)
@@ -239,37 +222,57 @@ public class ControlManager
 
         _actionAsset?.FindActionMap(mapName)?.Disable();
     }
-
-    public bool IsPressed(string actionName)
-        => _pressedCaches.Contains(actionName);
-
-    public bool IsTriggered(string actionName)
+    private bool IsAuthorized(IPoolable owner, string actionName)
     {
-        if (_triggeredCaches.Contains(actionName))
+        if (owner == null) 
+            return false;
+
+        return _subscribers.TryGetValue(actionName, out var set) && set.Contains(owner);
+    }
+
+    public bool IsPressed(IPoolable owner, string actionName)
+    {
+        if (!IsAuthorized(owner, actionName))
+            return false;
+
+        return _pressedCaches.Contains(actionName);
+    }
+
+    public bool IsTriggered(IPoolable owner, string actionName, float bufferWindow = Define.Scaler.Threshold)
+    {
+        if (!IsAuthorized(owner, actionName))
+            return false;
+
+        if (_triggeredCaches.TryGetValue(actionName, out float timestamp))
         {
             _triggeredCaches.Remove(actionName);
-            return true;
+
+            if (Time.unscaledTime - timestamp <= bufferWindow)
+                return true;
         }
 
         return false;
     }
 
-    public bool IsDoubleTriggered(string actionName, float threshold = Define.Scaler.Threshold)
+    public bool IsDoubleTriggered(IPoolable owner, string actionName, float threshold = Define.Scaler.Threshold)
     {
-        if (ConsumeDoubleTriggerCache(actionName))
+        if (!IsAuthorized(owner, actionName))
+            return false;
+
+        if (ConsumeDoubleTriggerCache(actionName, threshold))
             return true;
 
         CheckDoubleTapTimeout(actionName, threshold);
         return false;
     }
 
-    private bool ConsumeDoubleTriggerCache(string actionName)
+    private bool ConsumeDoubleTriggerCache(string actionName, float threshold)
     {
         if (_doubleTriggeredCaches.TryGetValue(actionName, out float timestamp))
         {
             _doubleTriggeredCaches.Remove(actionName);
 
-            if (Time.unscaledTime - timestamp <= Define.Scaler.Threshold)
+            if (Time.unscaledTime - timestamp <= threshold)
                 return true;
         }
 
@@ -278,31 +281,22 @@ public class ControlManager
 
     private void CheckDoubleTapTimeout(string actionName, float threshold)
     {
-        if (_pendingDoubleActionName != actionName)
-            return;
-
-        if (_lastFirstTapTimes.TryGetValue(actionName, out float firstTime))
+        if (_doubleTapStates.TryGetValue(actionName, out var state))
         {
-            if (HasDoubleTapTimedOut(firstTime, threshold))
-                ClearPendingDoubleTap(actionName);
+            if (state.IsPending && (Time.unscaledTime - state.FirstTapTime > threshold))
+                _doubleTapStates[actionName] = new DoubleTapState { IsPending = false, FirstTapTime = 0f };
         }
     }
 
-    private bool HasDoubleTapTimedOut(float firstTime, float threshold)
-        => Time.unscaledTime - firstTime > threshold;
-
-    private void ClearPendingDoubleTap(string actionName)
+    public bool IsHoldRepeated(IPoolable owner, string actionName, float interval = Define.Scaler.Threshold)
     {
-        _pendingDoubleActionName = null;
-        _lastFirstTapTimes.Remove(actionName);
-    }
+        if (!IsAuthorized(owner, actionName))
+        {
+            _repeatTimers.Remove(actionName);
+            return false;
+        }
 
-    public bool IsModifierTriggered(string modifierActionName, string mainActionName)
-        => IsPressed(modifierActionName) && IsTriggered(mainActionName);
-
-    public bool IsHoldRepeated(string actionName, float interval = Define.Scaler.Threshold)
-    {
-        if (!IsPressed(actionName))
+        if (!IsPressed(owner, actionName))
         {
             _repeatTimers.Remove(actionName);
             return false;
@@ -323,16 +317,63 @@ public class ControlManager
         return true;
     }
 
+    public bool IsModifierTriggered(IPoolable owner, string modifierActionName, string mainActionName)
+        => IsPressed(owner, modifierActionName) && IsTriggered(owner, mainActionName);
+
     public Observable<Unit> AsObservable(string actionName)
     {
-        if (!_actionCaches.TryGetValue(actionName, out var action) || action == null)
+        if (!_actionCaches.ContainsKey(actionName))
             return Observable.Empty<Unit>();
 
-        return Observable.FromEvent<InputAction.CallbackContext>(h => action.performed += h, h => action.performed -= h).Select(_ => Unit.Default);
+        if (!_actionSubjects.TryGetValue(actionName, out var subject))
+        {
+            subject = new Subject<Unit>();
+            _actionSubjects[actionName] = subject;
+        }
+
+        return subject;
     }
 
-    public IDisposable Subscribe(string actionName, Action onPerformed)
-        => AsObservable(actionName).Subscribe(_ => onPerformed());
+    public IDisposable Subscribe(IPoolable owner, string actionName, InputEventType inputType = InputEventType.Triggered, Action onPerformed = null, float optionValue = Define.Scaler.Threshold)
+    {
+        RegisterSubscriber(owner, actionName);
+        IDisposable innerDisposable = inputType switch
+        {
+            InputEventType.Triggered => AsObservable(actionName).Subscribe(_ => onPerformed?.Invoke()),
+            InputEventType.Pressed => Observable.EveryUpdate().Where(_ => IsPressed(owner, actionName)).Subscribe(_ => onPerformed?.Invoke()),
+            InputEventType.DoubleTriggered => Observable.EveryUpdate().Where(_ => IsDoubleTriggered(owner, actionName, optionValue)).Subscribe(_ => onPerformed?.Invoke()),
+            InputEventType.HoldRepeated => Observable.EveryUpdate().Where(_ => IsHoldRepeated(owner, actionName, optionValue)).Subscribe(_ => onPerformed?.Invoke()),
+            _ => Disposable.Empty
+        };
+        return Disposable.Create(() =>
+        {
+            innerDisposable?.Dispose();
+            UnregisterSubscriber(owner, actionName);
+        });
+    }
+
+    private void RegisterSubscriber(IPoolable owner, string actionName)
+    {
+        if (owner == null) 
+            return;
+
+        if (!_subscribers.TryGetValue(actionName, out var set))
+        {
+            set = new HashSet<IPoolable>();
+            _subscribers[actionName] = set;
+        }
+
+        set.Add(owner);
+    }
+
+    private void UnregisterSubscriber(IPoolable owner, string actionName)
+    {
+        if (owner == null) 
+            return;
+
+        if (_subscribers.TryGetValue(actionName, out var set))
+            set.Remove(owner);
+    }
 
     public IEnumerable<KeyValuePair<string, InputAction>> GetActions()
         => _actionCaches;
@@ -342,11 +383,8 @@ public class ControlManager
         _triggeredCaches.Clear();
         _pressedCaches.Clear();
         _doubleTriggeredCaches.Clear();
-        _lastFirstTapTimes.Clear();
-        _pendingDoubleActionName = null;
-
-        if (_actionAsset == null)
-            return;
+        _doubleTapStates.Clear();
+        _repeatTimers.Clear();
     }
 
     public void LoadBindingFromJson(string json)

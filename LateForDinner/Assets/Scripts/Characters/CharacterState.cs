@@ -1,7 +1,6 @@
 using System;
 using UnityEngine;
 using UnityHFSM;
-using static UnityEditor.Experimental.GraphView.GraphView;
 
 public abstract class CharacterState : StateBase<CharacterStateType>
 {
@@ -263,7 +262,7 @@ public class ThrowState : CharacterState
         if (Owner is not ICarriableCharacter carriable)
             return;
 
-        carriable.HasThrown = false;
+        carriable.HasThrown = true;
         Owner?.CharacterAnimator?.PlayState(CharacterStateType.Throw);
     }
 
@@ -274,12 +273,21 @@ public class ThrowState : CharacterState
         if (Owner is not ICarriableCharacter carriable)
             return;
 
-        if (!carriable.HasThrown && Owner?.CharacterAnimator?.GetCurrentAnimatorNormalizedTime() >= 0.65f)
+        if (Owner?.CharacterAnimator?.GetCurrentAnimatorNormalizedTime() >= 0.65f)
         {
-            carriable.HasThrown = true;
             Vector2 inputDir = _inputProvider?.Invoke() ?? Vector2.zero;
             bool isUpPressed = inputDir.y > 0f;
             carriable.ExecuteThrow(isUpPressed);
         }
+    }
+
+    public override void OnExit()
+    {
+        base.OnExit();
+
+        if (Owner is not ICarriableCharacter carriable)
+            return;
+
+        carriable.HasThrown = false;
     }
 }

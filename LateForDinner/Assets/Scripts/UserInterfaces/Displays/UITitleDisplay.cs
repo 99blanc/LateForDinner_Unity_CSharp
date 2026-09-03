@@ -43,8 +43,8 @@ public class UITitleDisplay : UIDisplay
         BindPanel(typeof(Panels));
         InitButtons();
         InitSaveSlots();
-        Managers.Control.Subscribe(Literal.Hotkeys.Cancel, Application.Quit).RegisterToPool(this);
-        Managers.Control.Subscribe(Literal.Hotkeys.Any, OnAnyPressed).RegisterToPool(this);
+        this.BindKey(Literal.Hotkeys.Cancel, InputEventType.Triggered, Application.Quit).RegisterToPool(this);
+        this.BindKey(Literal.Hotkeys.Any, InputEventType.Triggered, OnAnyPressed).RegisterToPool(this);
         Switch(UI_TitleState.Main);
     }
 
