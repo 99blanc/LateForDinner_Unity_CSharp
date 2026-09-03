@@ -37,7 +37,9 @@ public static class TweenExtensions
 
         while (elapsedTime < duration)
         {
-            token.ThrowIfCancellationRequested();
+            if (token.IsCancellationRequested)
+                return;
+
             elapsedTime += Time.unscaledDeltaTime;
             float normalizedTime = CalculateNormalizedTime(elapsedTime, duration, power);
             canvas.alpha = Mathf.Lerp(start, end, normalizedTime);
