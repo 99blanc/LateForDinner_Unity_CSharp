@@ -77,11 +77,11 @@ public class CursorManager
 
     private void UpdateCursorState()
     {
-        if (Cursor.visible)
-            Cursor.visible = false;
-
         if (!Application.isFocused || _cursorRectTransform == null)
+        {
+            SetCursorVisibility(false);
             return;
+        }
 
         Vector2 mousePosition = GetCurrentMousePosition();
 
@@ -92,6 +92,13 @@ public class CursorManager
         }
 
         bool isClicked = IsLeftMousePressed();
+
+        if (IsInitialMousePosition())
+        {
+            _lastMousePosition = mousePosition;
+            SetCursorVisibility(false);
+            return;
+        }
 
         if (HasMouseMoved(mousePosition) || isClicked)
         {
@@ -144,8 +151,16 @@ public class CursorManager
     private Vector2 GetCurrentMousePosition()
         => Mouse.current?.position.ReadValue() ?? Vector2.negativeInfinity;
 
-    private bool IsMouseUnavailableOrOutOfBounds(Vector2 pos)
-        => Mouse.current == null || pos.x < 0 || pos.x > Screen.width || pos.y < 0 || pos.y > Screen.height;
+    private bool IsMouseUnavailableOrOutOfBounds(Vector2 position)
+    {
+        if (Mouse.current == null)
+            return true;
+
+        if (position.x < 0 || position.x > Screen.width || position.y < 0 || position.y > Screen.height)
+            return true;
+
+        return false;
+    }
 
     private void SetCursorVisual(bool isPressed)
     {
