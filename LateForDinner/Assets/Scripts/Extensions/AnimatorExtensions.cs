@@ -45,6 +45,18 @@ public static class AnimatorExtensions
     public static float GetCurrentAnimatorNormalizedTime(this CharacterAnimator animator, int layerIndex = 0)
         => animator.Animator.GetCurrentAnimatorNormalizedTime(layerIndex);
 
+    public static float GetCurrentAnimatorStateLength(this Animator animator, int layerIndex = 0)
+    {
+        if (animator == null)
+            return 0.2f;
+
+        AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(layerIndex);
+        return stateInfo.length;
+    }
+
+    public static float GetCurrentAnimatorStateLength(this CharacterAnimator animator, int layerIndex = 0)
+        => animator.Animator.GetCurrentAnimatorStateLength(layerIndex);
+
     public static void SetAnimatorSpeed(this Animator animator, float speed)
     {
         if (animator != null)

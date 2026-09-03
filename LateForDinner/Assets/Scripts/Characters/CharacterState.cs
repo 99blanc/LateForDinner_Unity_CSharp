@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using UnityHFSM;
+using static UnityEditor.Experimental.GraphView.GraphView;
 
 public abstract class CharacterState : StateBase<CharacterStateType>
 {
@@ -155,6 +156,7 @@ public class DashState : CharacterState
         Vector2 inputDir = _inputProvider?.Invoke() ?? Vector2.right;
         Owner?.CharacterAnimator?.PlayState(CharacterStateType.Dash);
         dashable.StartDashing(inputDir);
+        AdjustAnimatorSpeedForDash(dashable);
     }
 
     public override void OnLogic()
@@ -174,7 +176,20 @@ public class DashState : CharacterState
         if (Owner is not IDashableCharacter dashable)
             return;
 
+        Owner?.CharacterAnimator.SetAnimatorSpeed(1f);
         dashable.StopDashing();
+    }
+
+    private void AdjustAnimatorSpeedForDash(IDashableCharacter dashable)
+    {
+        float actualDuration = dashable.DurationTimer;
+
+        if (actualDuration <= 0f)
+            return;
+
+        float defaultAnimationClipDuration = Owner?.Animator.GetCurrentAnimatorStateLength() ?? 0.2f;
+        float animSpeed = defaultAnimationClipDuration / actualDuration;
+        Owner?.Animator?.SetAnimatorSpeed(animSpeed);
     }
 }
 

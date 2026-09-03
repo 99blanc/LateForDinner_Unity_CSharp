@@ -1,7 +1,6 @@
 using R3;
 using System.Runtime.CompilerServices;
 using UnityEngine;
-using UnityEngine.TextCore.Text;
 
 public interface IDashableCharacter
 {
@@ -23,6 +22,7 @@ public interface IDashableCharacter
         get => Attributes.Get<int>(AttributeType.DashCount).Value;
         set => Attributes.Set(AttributeType.DashCount, value);
     }
+    public float DurationTimer => _dashValue.GetOrCreateValue(this).DurationTimer;
     public bool IsOnCooldown
     {
         get
