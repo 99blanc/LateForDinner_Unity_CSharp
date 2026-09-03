@@ -32,6 +32,7 @@ public class Managers : MonoBehaviour
     public static CooldownManager Cooldown { get; private set; }
     public static CameraManager Camera { get; private set; }
     public static GraphicManager Graphic { get; private set; }
+    public static InventoryManager Inventory { get; private set; }
 
     public async UniTask LoadAsync()
     {
@@ -67,6 +68,7 @@ public class Managers : MonoBehaviour
         Cooldown = new CooldownManager();
         Camera = new CameraManager();
         Graphic = new GraphicManager();
+        Inventory = new InventoryManager();
     }
 
     private async UniTask InitializeManagersAsync()

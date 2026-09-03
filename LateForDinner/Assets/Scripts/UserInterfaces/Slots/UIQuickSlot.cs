@@ -7,6 +7,11 @@ public class UIQuickSlot : UISlot
         QuickSlotImage
     }
 
+    private enum Texts
+    {
+        QuickSlotText
+    }
+
     private int _index;
 
     public override void OnInit()
