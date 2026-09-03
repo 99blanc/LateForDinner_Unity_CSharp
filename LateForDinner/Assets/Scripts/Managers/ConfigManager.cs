@@ -109,6 +109,7 @@ public class ConfigManager
 
         var graphic = Option.Graphic;
         var sound = Option.Sound;
+        Managers.Cursor.UpdateCursorLockState(graphic.screenMode);
         Managers.Graphic.ApplyGraphicOptions(graphic);
         Application.runInBackground = !sound.mute;
     }

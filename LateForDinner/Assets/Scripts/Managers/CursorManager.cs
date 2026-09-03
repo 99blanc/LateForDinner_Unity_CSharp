@@ -70,6 +70,21 @@ public class CursorManager
         Cursor.visible = false;
     }
 
+    public void UpdateCursorLockState(FullScreenMode screenMode)
+    {
+        switch (screenMode)
+        {
+            case FullScreenMode.ExclusiveFullScreen:
+                Cursor.lockState = CursorLockMode.Confined;
+                break;
+
+            case FullScreenMode.FullScreenWindow:
+            case FullScreenMode.Windowed:
+                Cursor.lockState = CursorLockMode.None;
+                break;
+        }
+    }
+
     private void StartCursorUpdateLoop()
     {
         Observable.EveryUpdate()

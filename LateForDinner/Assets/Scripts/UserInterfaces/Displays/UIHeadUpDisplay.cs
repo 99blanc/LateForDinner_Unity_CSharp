@@ -25,6 +25,7 @@ public class UIHeadUpDisplay : UIDisplay
         AttributePanel
     }
 
+    private readonly List<UIQuickSlot> _quickSlots = new List<UIQuickSlot>();
     private readonly List<UIDashCountSlot> _dashSlots = new List<UIDashCountSlot>();
     private readonly List<UIRemainHealthSlot> _healthSlots = new List<UIRemainHealthSlot>();
     private readonly List<UIRemainHealthSlot> _temporaryHealthSlots = new List<UIRemainHealthSlot>();
@@ -35,9 +36,26 @@ public class UIHeadUpDisplay : UIDisplay
         BindRectTransform(typeof(RectTransforms));
         BindImage(typeof(Images));
         BindPanel(typeof(Panels));
+        InitQuickSlots();
         InitDashSlots();
         InitHealthSlots();
         InitTemporaryHealthSlots();
+    }
+
+    private void InitQuickSlots()
+    {
+        var content = GetRectTransform(RectTransforms.SlotContent).transform;
+
+        for (int index = 0; index < Define.Amount.MaxQuickSlot; index++)
+        {
+            var (slot, _) = Managers.Pool.Pop<UIQuickSlot>(content);
+
+            if (slot != null)
+            {
+                slot.SetIndex(index);
+                _quickSlots.Add(slot);
+            }
+        }
     }
 
     private void InitDashSlots()

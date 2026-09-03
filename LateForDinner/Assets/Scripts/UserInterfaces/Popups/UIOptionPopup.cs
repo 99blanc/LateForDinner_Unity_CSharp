@@ -379,11 +379,10 @@ public class UIOptionPopup : UIPopup, IDraggablePopup, IFocusablePopup
         resolutionDropdown.ClearOptions();
         _resolutions = Screen.resolutions
         .Select(r => new Resolution { width = r.width, height = r.height, refreshRateRatio = r.refreshRateRatio })
-        .GroupBy(r => new { r.width, r.height, hz = Math.Round((double)r.refreshRateRatio.numerator / r.refreshRateRatio.denominator, 1) })
-        .Select(g => g.First())
+        .GroupBy(r => new { r.width, r.height })
+        .Select(g => g.OrderByDescending(r => (double)r.refreshRateRatio.numerator / r.refreshRateRatio.denominator).First())
         .OrderBy(r => r.width)
         .ThenBy(r => r.height)
-        .ThenBy(r => (double)r.refreshRateRatio.numerator / r.refreshRateRatio.denominator)
         .ToArray();
         var resolutionOptions = _resolutions
         .Select(res => Managers.Localization.Get(LocalizationKey.UI_Option_Popup_Text_Resolution_Dropdown, res.width, res.height, Mathf.RoundToInt((float)res.refreshRateRatio.numerator / res.refreshRateRatio.denominator)))
@@ -814,6 +813,7 @@ public class UIOptionPopup : UIPopup, IDraggablePopup, IFocusablePopup
                 Refresh();
                 Managers.UI.RefreshAll();
             })).Lock();
+            Close();
         }
         catch
         {
