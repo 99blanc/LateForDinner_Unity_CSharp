@@ -94,7 +94,11 @@ public interface IDashableCharacter
         if (val.DashDirection.x != 0)
             Renderer.FlipX(val.DashDirection.x);
 
-        float dashSpeed = Attributes.Get<float>(AttributeType.DashDistance).CurrentValue / Define.Scaler.Duration;
+        float moveSpeed = Attributes.Get<float>(AttributeType.MoveSpeed).CurrentValue;
+        float dashMultiplier = Attributes.Get<float>(AttributeType.DashMultiplier).CurrentValue;
+        float dashSpeed = moveSpeed * dashMultiplier;
+        float dashDistance = Attributes.Get<float>(AttributeType.DashDistance).CurrentValue;
+        val.DurationTimer = dashDistance / dashSpeed;
         Rigidbody.gravityScale = 0f;
         Rigidbody.linearVelocity = val.DashDirection.normalized * dashSpeed;
         RemainDashCount--;

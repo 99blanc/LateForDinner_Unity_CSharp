@@ -13,6 +13,7 @@ public enum AttributeType
     ChargeMultiplier       , // float
     PierceCount            , // int
     DashCount              , // int
+    DashMultiplier         , // float
     DashCooldown           , // float
     DashDistance           , // float
     JumpCount              , // int

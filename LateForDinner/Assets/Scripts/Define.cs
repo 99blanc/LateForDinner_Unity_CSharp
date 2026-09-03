@@ -94,7 +94,7 @@ public class Define
     {
         public const float Buffer = 0.4f;
         public const float Threshold = 0.2f;
-        public const float Duration = 0.15f;
+        public const float Duration = 1f;
         public const float Margin = 0.975f;
         public const float PixelsPerUnit = 200f;
         public static readonly UnityEngine.Vector2 Resolution = new UnityEngine.Vector2(3840f, 2160f);

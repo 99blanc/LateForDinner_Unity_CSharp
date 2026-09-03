@@ -32,6 +32,8 @@ ChargeMultiplier,0,float
 PierceCount,0,int
 # Property: 대시횟수,,
 DashCount,28,int
+# Property: 대시배수. Prority MoveSpeed. Description: 이동속도의 배율 계산,,
+DashMultiplier,10,float
 # Property: 대시쿨타임. Priority: DashCount,,
 DashCooldown,0,float
 # Property: 대시거리. Priority: DashCount,,
