@@ -26,10 +26,9 @@ UI_Option_Popup_Text_UI,UI 볼륨
 UI_Option_Popup_Text_Mute,프로그램 백그라운드 시 음소거
 UI_Option_Popup_Text_Resolution,해상도
 UI_Option_Popup_Text_Resolution_Dropdown,{0} x {1} ({2}hz)
-UI_Option_Popup_Text_Fullscreen,창모드
-UI_Option_Popup_Text_Fullscreen_FullscreenWindow,전체화면
 UI_Option_Popup_Text_Fullscreen_Windowed,창모드
-UI_Option_Popup_Text_Fullscreen_ExclusiveFullscreen,테두리 없는 창모드
+UI_Option_Popup_Text_Fullscreen_FullscreenWindow,테두리 없는 창모드
+UI_Option_Popup_Text_Fullscreen_ExclusiveFullscreen,전체화면
 UI_Option_Popup_Text_Quality,텍스쳐
 UI_Option_Popup_Text_Quality_High,높음
 UI_Option_Popup_Text_Quality_Medium,중간

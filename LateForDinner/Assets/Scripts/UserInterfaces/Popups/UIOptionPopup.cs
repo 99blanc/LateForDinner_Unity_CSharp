@@ -309,7 +309,7 @@ public class UIOptionPopup : UIPopup, IDraggablePopup, IFocusablePopup
         BindGraphicToggle(Toggles.MotionBlurToggle, Images.MotionBlurCheckmarkImage, Images.MotionBlurToggleImage);
         BindGraphicToggle(Toggles.ContrastToggle, Images.ContrastCheckmarkImage, Images.ContrastToggleImage);
         SetText(Texts.ResolutionText, LocalizationKey.UI_Option_Popup_Text_Resolution);
-        SetText(Texts.FullscreenText, LocalizationKey.UI_Option_Popup_Text_Fullscreen);
+        SetText(Texts.FullscreenText, LocalizationKey.UI_Option_Popup_Text_Fullscreen_Windowed);
         SetText(Texts.QualityText, LocalizationKey.UI_Option_Popup_Text_Quality);
         SetText(Texts.VsyncText, LocalizationKey.UI_Option_Popup_Text_Vsync);
         SetText(Texts.AntialiasingText, LocalizationKey.UI_Option_Popup_Text_Antialiasing);
@@ -463,8 +463,8 @@ public class UIOptionPopup : UIPopup, IDraggablePopup, IFocusablePopup
 
         GetDropdown(Dropdowns.FullscreenDropdown).value = graphic.screenMode switch
         {
-            FullScreenMode.FullScreenWindow => 0,
-            FullScreenMode.Windowed => 1,
+            FullScreenMode.Windowed => 0,
+            FullScreenMode.FullScreenWindow => 1,
             FullScreenMode.ExclusiveFullScreen => 2,
             _ => 0
         };
@@ -661,10 +661,10 @@ public class UIOptionPopup : UIPopup, IDraggablePopup, IFocusablePopup
 
         graphic.screenMode = GetDropdown(Dropdowns.FullscreenDropdown).value switch
         {
-            0 => FullScreenMode.FullScreenWindow,
-            1 => FullScreenMode.Windowed,
+            0 => FullScreenMode.Windowed,
+            1 => FullScreenMode.FullScreenWindow,
             2 => FullScreenMode.ExclusiveFullScreen,
-            _ => FullScreenMode.FullScreenWindow
+            _ => FullScreenMode.ExclusiveFullScreen
         };
         graphic.quality = (TextureQuality)GetDropdown(Dropdowns.QualityDropdown).value;
         graphic.vSync = GetToggle(Toggles.VsyncToggle).isOn;
