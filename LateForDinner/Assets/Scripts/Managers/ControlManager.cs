@@ -172,6 +172,17 @@ public class ControlManager
         if (!IsUserAction(actionName))
             return;
 
+        foreach (var key in new List<string>(_doubleTapStates.Keys))
+        {
+            if (key != actionName)
+            {
+                var otherState = _doubleTapStates[key];
+
+                if (otherState.IsPending)
+                    _doubleTapStates[key] = new DoubleTapState { IsPending = false, FirstTapTime = 0f };
+            }
+        }
+
         EvaluateDoubleTap(actionName, currentTime);
     }
 
