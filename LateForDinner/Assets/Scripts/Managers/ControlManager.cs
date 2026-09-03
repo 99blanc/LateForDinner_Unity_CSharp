@@ -407,8 +407,6 @@ public class ControlManager
             _actionAsset.RemoveAllBindingOverrides();
         else
             _actionAsset.LoadBindingOverridesFromJson(json);
-
-        CacheAllActions();
     }
 
     public List<InputAction> GetBindableActions()

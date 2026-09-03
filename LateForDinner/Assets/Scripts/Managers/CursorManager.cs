@@ -93,7 +93,7 @@ public class CursorManager
 
     private void UpdateCursorState()
     {
-        if (!Application.isFocused || _rectTransform == null)
+        if (!Application.isFocused || Mouse.current == null || _rectTransform == null)
         {
             SetCursorVisibility(false);
             return;
@@ -101,7 +101,7 @@ public class CursorManager
 
         Vector2 mousePosition = GetCurrentMousePosition();
 
-        if (IsMouseUnavailableOrOutOfBounds(mousePosition))
+        if (IsMouseOutOfBounds(mousePosition))
         {
             SetCursorVisibility(false);
             return;
@@ -167,12 +167,12 @@ public class CursorManager
     private Vector2 GetCurrentMousePosition()
         => Mouse.current?.position.ReadValue() ?? Vector2.negativeInfinity;
 
-    private bool IsMouseUnavailableOrOutOfBounds(Vector2 position)
+    private bool IsMouseOutOfBounds(Vector2 position)
     {
-        if (Mouse.current == null)
+        if (position.x < 0 || position.y < 0)
             return true;
 
-        if (position.x < 0 || position.x > Screen.width || position.y < 0 || position.y > Screen.height)
+        if (position.x >= Screen.width || position.y >= Screen.height)
             return true;
 
         return false;

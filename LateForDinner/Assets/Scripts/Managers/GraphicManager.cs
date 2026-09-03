@@ -1,6 +1,8 @@
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
+using ZLinq;
 
 public class GraphicManager
 {
@@ -16,6 +18,7 @@ public class GraphicManager
         }
     }
     private VolumeProfile _volumeProfile;
+    private Resolution[] _cachedResolutions;
 
     public GameObject InitRoot()
     {
@@ -34,6 +37,23 @@ public class GraphicManager
 
         if (asset != null)
             _volumeProfile = asset.volumeProfile;
+
+        GetCachedResolutions();
+    }
+
+    public Resolution[] GetCachedResolutions()
+    {
+        if (_cachedResolutions != null)
+            return _cachedResolutions;
+
+        _cachedResolutions = Screen.resolutions
+        .Select(r => new Resolution { width = r.width, height = r.height, refreshRateRatio = r.refreshRateRatio })
+        .GroupBy(r => new { r.width, r.height })
+        .Select(g => g.OrderByDescending(r => (double)r.refreshRateRatio.numerator / r.refreshRateRatio.denominator).First())
+        .OrderBy(r => r.width)
+        .ThenBy(r => r.height)
+        .ToArray();
+        return _cachedResolutions;
     }
 
     public void ApplyGraphicOptions(GraphicOption graphic)

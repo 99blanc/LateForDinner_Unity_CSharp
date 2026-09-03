@@ -377,13 +377,7 @@ public class UIOptionPopup : UIPopup, IDraggablePopup, IFocusablePopup
     {
         var resolutionDropdown = GetDropdown(Dropdowns.ResolutionDropdown);
         resolutionDropdown.ClearOptions();
-        _resolutions = Screen.resolutions
-        .Select(r => new Resolution { width = r.width, height = r.height, refreshRateRatio = r.refreshRateRatio })
-        .GroupBy(r => new { r.width, r.height })
-        .Select(g => g.OrderByDescending(r => (double)r.refreshRateRatio.numerator / r.refreshRateRatio.denominator).First())
-        .OrderBy(r => r.width)
-        .ThenBy(r => r.height)
-        .ToArray();
+        _resolutions = Managers.Graphic.GetCachedResolutions();
         var resolutionOptions = _resolutions
         .Select(res => Managers.Localization.Get(LocalizationKey.UI_Option_Popup_Text_Resolution_Dropdown, res.width, res.height, Mathf.RoundToInt((float)res.refreshRateRatio.numerator / res.refreshRateRatio.denominator)))
         .ToList();
@@ -463,8 +457,8 @@ public class UIOptionPopup : UIPopup, IDraggablePopup, IFocusablePopup
 
         GetDropdown(Dropdowns.FullscreenDropdown).value = graphic.screenMode switch
         {
-            FullScreenMode.FullScreenWindow => 0,
-            FullScreenMode.Windowed => 1,
+            FullScreenMode.Windowed => 0,
+            FullScreenMode.FullScreenWindow => 1,
             FullScreenMode.ExclusiveFullScreen => 2,
             _ => 0
         };
@@ -661,8 +655,8 @@ public class UIOptionPopup : UIPopup, IDraggablePopup, IFocusablePopup
 
         graphic.screenMode = GetDropdown(Dropdowns.FullscreenDropdown).value switch
         {
-            0 => FullScreenMode.FullScreenWindow,
-            1 => FullScreenMode.Windowed,
+            0 => FullScreenMode.Windowed,
+            1 => FullScreenMode.FullScreenWindow,
             2 => FullScreenMode.ExclusiveFullScreen,
             _ => FullScreenMode.ExclusiveFullScreen
         };
