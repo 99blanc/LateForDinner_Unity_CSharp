@@ -50,12 +50,13 @@ public class CursorManager
     {
         _canvas = _root.GetComponentAssert<Canvas>();
         _canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        _canvas.overrideSorting = true;
         _canvas.sortingOrder = (int)LayerType.Cursor;
         var scaler = _root.GetComponentAssert<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
         scaler.referenceResolution = Define.Scaler.Resolution;
-        scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
-        scaler.matchWidthOrHeight = 0.5f;
+        scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.Shrink;
+        scaler.referencePixelsPerUnit = Define.Scaler.PixelsPerUnit;
         var cursor = new GameObject(Literal.Objects.Cursor, typeof(Image));
         cursor.transform.SetParent(_root.transform, false);
         _cursorRectTransform = cursor.GetComponent<RectTransform>();
