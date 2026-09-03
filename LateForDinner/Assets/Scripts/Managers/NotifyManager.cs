@@ -31,7 +31,7 @@ public class NotifyManager
     public async UniTask LoadAsync(Func<UILoadDisplay, UniTask> task)
     {
         Managers.UI.CloseAll();
-        var load = await Managers.UI.OpenDisplayAsync<UILoadDisplay>();
+        var load = Managers.UI.OpenDisplay<UILoadDisplay>();
         load?.PlayAsync().Forget();
 
         try

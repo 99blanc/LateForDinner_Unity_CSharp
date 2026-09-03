@@ -22,6 +22,7 @@ public class PreloadManager
         await Managers.Resource.LoadPrefabAsync(Literal.Assets.GlobalVolume);
         Log.System(LocalizationKey.Log_Preload_Boot_UI);
         await Managers.Pool.PrewarmAsync<UILockSystem>(1);
+        await Managers.Pool.PrewarmAsync<UILoadDisplay>(1);
         await Managers.Pool.PrewarmAsync<UIToastSlot>(Define.Toast.Count);
         await Managers.Pool.PrewarmAsync<UIPausePopup>(1);
         await Managers.Pool.PrewarmAsync<UIKeybindSlot>(Managers.Control.GetBindableActions().Count + 1);

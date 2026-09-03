@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class CursorManager
 {
-    private RectTransform _cursorRectTransform; 
+    private RectTransform _rectTransform; 
     private GameObject _root;
     public GameObject Root
     {
@@ -59,11 +59,11 @@ public class CursorManager
         scaler.referencePixelsPerUnit = Define.Scaler.PixelsPerUnit;
         var cursor = new GameObject(Literal.Objects.Cursor, typeof(Image));
         cursor.transform.SetParent(_root.transform, false);
-        _cursorRectTransform = cursor.GetComponent<RectTransform>();
-        _cursorRectTransform.sizeDelta = Define.Cursor.Size;
+        _rectTransform = cursor.GetComponent<RectTransform>();
+        _rectTransform.sizeDelta = Define.Cursor.Size;
         Vector2 size = Define.Cursor.Size;
         Vector2 hotspot = Define.Cursor.Hotspot;
-        _cursorRectTransform.pivot = new Vector2(hotspot.x / size.x, 1f - (hotspot.y / size.y));
+        _rectTransform.pivot = new Vector2(hotspot.x / size.x, 1f - (hotspot.y / size.y));
         _cursorImage = cursor.GetComponent<Image>();
         _cursorImage.sprite = _normalCursorSprite;
         _cursorImage.raycastTarget = false;
@@ -78,7 +78,7 @@ public class CursorManager
 
     private void UpdateCursorState()
     {
-        if (!Application.isFocused || _cursorRectTransform == null)
+        if (!Application.isFocused || _rectTransform == null)
         {
             SetCursorVisibility(false);
             return;
@@ -124,7 +124,7 @@ public class CursorManager
             return;
 
         RectTransformUtility.ScreenPointToLocalPointInRectangle(_canvas.transform as RectTransform, mousePosition, _canvas.worldCamera, out Vector2 localPoint);
-        _cursorRectTransform.anchoredPosition = localPoint;
+        _rectTransform.anchoredPosition = localPoint;
     }
 
     private void HandleCursorVisibility(Vector2 currentMousePosition)
