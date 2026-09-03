@@ -95,7 +95,7 @@ public partial class GraphicOption
                 rWidth = targetWidth,
                 rHeight = targetHeight,
                 rRefreshRate = targetRefreshRate,
-                screenMode = FullScreenMode.FullScreenWindow,
+                screenMode = FullScreenMode.ExclusiveFullScreen,
                 vSync = true,
                 antiAliasing = true,
                 quality = TextureQuality.High,

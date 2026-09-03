@@ -292,8 +292,8 @@ public class UIOptionPopup : UIPopup, IDraggablePopup, IFocusablePopup
         BindArrowDropdownButton(Buttons.QualityButton, _qualityArrowButton);
         InitDropdownOptions(Dropdowns.FullscreenDropdown, new[]
         {
-            LocalizationKey.UI_Option_Popup_Text_Fullscreen_FullscreenWindow,
             LocalizationKey.UI_Option_Popup_Text_Fullscreen_Windowed,
+            LocalizationKey.UI_Option_Popup_Text_Fullscreen_FullscreenWindow,
             LocalizationKey.UI_Option_Popup_Text_Fullscreen_ExclusiveFullscreen
         });
         InitDropdownOptions(Dropdowns.QualityDropdown, new[]
@@ -463,8 +463,8 @@ public class UIOptionPopup : UIPopup, IDraggablePopup, IFocusablePopup
 
         GetDropdown(Dropdowns.FullscreenDropdown).value = graphic.screenMode switch
         {
-            FullScreenMode.Windowed => 0,
-            FullScreenMode.FullScreenWindow => 1,
+            FullScreenMode.FullScreenWindow => 0,
+            FullScreenMode.Windowed => 1,
             FullScreenMode.ExclusiveFullScreen => 2,
             _ => 0
         };
@@ -661,8 +661,8 @@ public class UIOptionPopup : UIPopup, IDraggablePopup, IFocusablePopup
 
         graphic.screenMode = GetDropdown(Dropdowns.FullscreenDropdown).value switch
         {
-            0 => FullScreenMode.Windowed,
-            1 => FullScreenMode.FullScreenWindow,
+            0 => FullScreenMode.FullScreenWindow,
+            1 => FullScreenMode.Windowed,
             2 => FullScreenMode.ExclusiveFullScreen,
             _ => FullScreenMode.ExclusiveFullScreen
         };
