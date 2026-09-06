@@ -50,7 +50,7 @@ public class InventoryManager
             _ => 0
         };
 
-        return _slots.Skip(startIndex).Take(20);
+        return _slots.Skip(startIndex).Take(tabSize);
     }
 
     public IReadOnlyList<InventorySlot> GetQuickSlots() 

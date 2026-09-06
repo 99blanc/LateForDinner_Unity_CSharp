@@ -7,36 +7,6 @@ public class AttributeRegistry
 {
     private readonly Dictionary<AttributeType, IAttributeView> _attributes = new Dictionary<AttributeType, IAttributeView>();
 
-    public void InitAttribute(List<AttributeData> attributes)
-    {
-        foreach (var data in attributes)
-        {
-            if (!Enum.TryParse<AttributeType>(data.Key, out var attributeType))
-                continue;
-
-            switch (data.DataType?.ToLowerInvariant())
-            {
-                case Literal.Types.Short:
-                    Get<short>(attributeType, default);
-                    break;
-                case Literal.Types.Int:
-                    Get<int>(attributeType, default);
-                    break;
-                case Literal.Types.Long:
-                    Get<long>(attributeType, default);
-                    break;
-                case Literal.Types.Float:
-                    Get<float>(attributeType, default);
-                    break;
-                case Literal.Types.Double:
-                    Get<double>(attributeType, default);
-                    break;
-                default:
-                    Log.Warning(Managers.Localization.Get(LocalizationKey.Log_Attribute_Registry_Unsupported, data.Key, data.DataType));
-                    break;
-            }
-        }
-    }
     private AttributeView<T> GetView<T>(AttributeType dataType, T value = default) where T : struct
     {
         if (!_attributes.TryGetValue(dataType, out var view))
@@ -69,16 +39,15 @@ public class AttributeRegistry
         if (!_attributes.TryGetValue(dataType, out var view))
             return value;
 
-        object clamped = view switch
+        return view switch
         {
-            AttributeView<short> sView => Math.Clamp(Convert.ToInt16(value), (short)0, sView.BaseValue.Value),
-            AttributeView<int> iView => Math.Clamp(Convert.ToInt32(value), (int)0, iView.BaseValue.Value),
-            AttributeView<long> lView => Math.Clamp(Convert.ToInt64(value), (long)0, lView.BaseValue.Value),
-            AttributeView<float> fView => Math.Clamp(Convert.ToSingle(value), (float)0, fView.BaseValue.Value),
-            AttributeView<double> dView => Math.Clamp(Convert.ToDouble(value), (double)0, dView.BaseValue.Value),
+            AttributeView<short> sView => (T)(object)Math.Clamp((short)(object)value, (short)0, sView.BaseValue.Value),
+            AttributeView<int> iView => (T)(object)Math.Clamp((int)(object)value, (int)0, iView.BaseValue.Value),
+            AttributeView<long> lView => (T)(object)Math.Clamp((long)(object)value, (long)0, lView.BaseValue.Value),
+            AttributeView<float> fView => (T)(object)Math.Clamp((float)(object)value, (float)0, fView.BaseValue.Value),
+            AttributeView<double> dView => (T)(object)Math.Clamp((double)(object)value, (double)0, dView.BaseValue.Value),
             _ => value
         };
-        return (T)clamped;
     }
 
     public List<AttributeSaveData> ExportSaveData()
@@ -87,14 +56,14 @@ public class AttributeRegistry
 
         foreach (var pair in _attributes)
         {
-            string keyStr = pair.Key.ToString();
+            string key = pair.Key.ToString();
             AttributeSaveData saveData = pair.Value switch
             {
-                AttributeView<short> sView => new AttributeSaveData { Key = keyStr, DataType = Literal.Types.Short, Value = sView.CurrentValue.Value },
-                AttributeView<int> iView => new AttributeSaveData { Key = keyStr, DataType = Literal.Types.Int, Value = iView.CurrentValue.Value },
-                AttributeView<long> lView => new AttributeSaveData { Key = keyStr, DataType = Literal.Types.Long, Value = lView.CurrentValue.Value },
-                AttributeView<float> fView => new AttributeSaveData { Key = keyStr, DataType = Literal.Types.Float, Value = fView.CurrentValue.Value },
-                AttributeView<double> dView => new AttributeSaveData { Key = keyStr, DataType = Literal.Types.Double, Value = dView.CurrentValue.Value },
+                AttributeView<short> sView => new AttributeSaveData { Key = key, DataType = Literal.Types.Short, Value = sView.CurrentValue.Value.ToString() },
+                AttributeView<int> iView => new AttributeSaveData { Key = key, DataType = Literal.Types.Int, Value = iView.CurrentValue.Value.ToString() },
+                AttributeView<long> lView => new AttributeSaveData { Key = key, DataType = Literal.Types.Long, Value = lView.CurrentValue.Value.ToString() },
+                AttributeView<float> fView => new AttributeSaveData { Key = key, DataType = Literal.Types.Float, Value = fView.CurrentValue.Value.ToString() },
+                AttributeView<double> dView => new AttributeSaveData { Key = key, DataType = Literal.Types.Double, Value = dView.CurrentValue.Value.ToString() },
                 _ => null
             };
 
@@ -118,19 +87,39 @@ public class AttributeRegistry
             switch (data.DataType?.ToLowerInvariant())
             {
                 case Literal.Types.Short:
-                    Set(attributeType, (short)data.Value);
+                    if (short.TryParse(data.Value, out var sVal))
+                    {
+                        SetBase(attributeType, sVal);
+                        Set(attributeType, sVal);
+                    }
                     break;
                 case Literal.Types.Int:
-                    Set(attributeType, (int)data.Value);
+                    if (int.TryParse(data.Value, out var iVal))
+                    {
+                        SetBase(attributeType, iVal);
+                        Set(attributeType, iVal);
+                    }
                     break;
                 case Literal.Types.Long:
-                    Set(attributeType, (long)data.Value);
+                    if (long.TryParse(data.Value, out var lVal))
+                    {
+                        SetBase(attributeType, lVal);
+                        Set(attributeType, lVal);
+                    }
                     break;
                 case Literal.Types.Float:
-                    Set(attributeType, (float)data.Value);
+                    if (float.TryParse(data.Value, out var fVal))
+                    {
+                        SetBase(attributeType, fVal);
+                        Set(attributeType, fVal);
+                    }
                     break;
                 case Literal.Types.Double:
-                    Set(attributeType, data.Value);
+                    if (double.TryParse(data.Value, out var dVal))
+                    {
+                        SetBase(attributeType, dVal);
+                        Set(attributeType, dVal);
+                    }
                     break;
                 default:
                     Log.Warning(Managers.Localization.Get(LocalizationKey.Log_Attribute_Registry_Unsupported, data.Key, data.DataType));

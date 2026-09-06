@@ -229,6 +229,7 @@ public class SaveManager
         {
             CurrentData.InventorySlots = Managers.Inventory.ExportSaveData();
             CurrentData.QuickSlots = Managers.Inventory.ExportQuickSlotSaveData();
+            CurrentData.EquipmentSlots = Managers.Inventory.ExportEquipmentSlotSaveData();
         }
     }
 

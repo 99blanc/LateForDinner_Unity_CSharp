@@ -1,10 +1,8 @@
 using Cysharp.Threading.Tasks;
 using System;
-using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityHFSM;
-using ZLinq;
 
 public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovableCharacter, IFallableCharacter, ICrouchableCharacter, IJumpableCharacter, IRollableCharacter, IDashableCharacter, IClimbableCharacter, ICarriableCharacter
 {
@@ -17,33 +15,10 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
     {
         await base.InitAsync();
         var data = Managers.Save.CurrentData;
-        var attributes = data.SavedAttributes;
-
-        if (attributes != null && attributes.Count > 0)
-            Attributes.ImportSaveData(attributes);
-        else
-            InitAttributes();
-
+        Attributes.ImportSaveData(data.SavedAttributes);
         Rigidbody.position = data.PlayerPosition;
         Rigidbody.rotation = data.PlayerRotation;
         RegisterInputSubscriptions();
-    }
-
-    private void InitAttributes()
-    {
-        var templateGroup = Managers.Data.PlayableCharacterTemplates[(int)CharacterID];
-
-        if (templateGroup == null || !templateGroup.Any())
-            return;
-
-        foreach (var template in templateGroup)
-        {
-            if (Enum.TryParse<AttributeType>(template.AttributeKey, out var attributeType) == false)
-                continue;
-
-            Attributes.SetParsedValue(attributeType, template.Value);
-            Attributes.SetBaseParsedValue(attributeType, template.Value);
-        }
     }
 
     private void RegisterInputSubscriptions()

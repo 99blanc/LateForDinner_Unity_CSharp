@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public class UIQuestInventoryPopup : UIPopup
 {
@@ -88,6 +90,7 @@ public class UIQuestInventoryPopup : UIPopup
         for (int index = 0; index < Define.Amount.MaxInventorySlot; index++)
         {
             var (slot, _) = Managers.Pool.Pop<UIInventorySlot>(content);
+
             if (slot != null)
             {
                 slot.SetActive(false);
@@ -103,6 +106,7 @@ public class UIQuestInventoryPopup : UIPopup
         for (int index = 0; index < Define.Amount.MaxEquipmentSlot; index++)
         {
             var (slot, _) = Managers.Pool.Pop<UIInventorySlot>(equipmentContent);
+
             if (slot != null)
             {
                 slot.SetActive(false);

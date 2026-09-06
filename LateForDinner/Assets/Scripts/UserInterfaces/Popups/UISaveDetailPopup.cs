@@ -1,8 +1,9 @@
 using Cysharp.Threading.Tasks;
-using R3;
-using UnityEngine.EventSystems;
 using LateForDinner.Data;
+using R3;
+using System;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class UISaveDetailPopup : UIPopup, IFocusablePopup
 {
@@ -111,9 +112,10 @@ public class UISaveDetailPopup : UIPopup, IFocusablePopup
         if (!_selectedSlotIndex.HasValue)
             return;
 
+        int index = _selectedSlotIndex.Value;
+
         try
         {
-            int index = _selectedSlotIndex.Value;
             SlotMeta meta = Managers.Save.MetaData.Slots[index];
 
             if (meta.IsActive)
@@ -129,7 +131,7 @@ public class UISaveDetailPopup : UIPopup, IFocusablePopup
         }
         catch
         {
-            Log.Error(LocalizationKey.Log_Save_Slot_SlotClickFailed, _selectedSlotIndex.Value);
+            Log.Error(LocalizationKey.Log_Save_Slot_SlotClickFailed, index);
         }
     }
 

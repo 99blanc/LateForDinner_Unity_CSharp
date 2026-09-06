@@ -81,10 +81,11 @@ public interface IAnimatableUI
 
     public virtual async UniTask PlayClipAsync(int hash, int layer = 0, float normalizedTime = 0f)
     {
-        if (Animator != null)
+        bool CanPlay() => Animator != null && Animator.IsActive();
+
+        if (CanPlay())
         {
             Animator.enabled = true;
-            Animator.SetActive(true);
             CancellationToken cts = GetNewCancellationToken();
             Animator.Play(hash, layer, normalizedTime);
 
@@ -95,12 +96,16 @@ public interface IAnimatableUI
             catch (OperationCanceledException)
             {
                 // DESC ::: 인터럽트 발생 시 정상 탈출
-                Animator.Play(Define.Animation.None);
+                if (CanPlay())
+                    Animator.Play(Define.Animation.None);
             }
             finally
             {
-                Animator.Play(Define.Animation.None);
-                Animator.enabled = false;
+                if (CanPlay())
+                {
+                    Animator.Play(Define.Animation.None);
+                    Animator.enabled = false;
+                }
             }
         }
     }

@@ -218,8 +218,8 @@ public static class UIExtensions
     }
 
     public static bool IsActive(this Component component)
-        => component != null && component.gameObject != null && component.gameObject.activeSelf;
+        => component != null && component.gameObject != null && component.gameObject.activeInHierarchy;
 
     public static bool IsActive(this GameObject gameObject)
-        => gameObject != null && gameObject.activeSelf;
+        => gameObject != null && gameObject.activeInHierarchy;
 }

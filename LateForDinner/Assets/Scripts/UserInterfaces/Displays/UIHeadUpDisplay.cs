@@ -81,7 +81,9 @@ public class UIHeadUpDisplay : UIDisplay
     private void InitHealthSlots()
     {
         var player = Managers.Game.Player;
-        if (player == null) return;
+
+        if (player == null) 
+            return;
 
         var maxHealthAttribute = player.Attributes.GetBase<int>(AttributeType.Health);
         int initialSlotCount = Mathf.CeilToInt(maxHealthAttribute.CurrentValue / 2f);

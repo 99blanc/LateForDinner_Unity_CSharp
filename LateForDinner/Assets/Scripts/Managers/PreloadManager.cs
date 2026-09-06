@@ -57,7 +57,6 @@ public class PreloadManager
     public async UniTask Release_Game1Async()
     {
         Log.System(LocalizationKey.Log_Preload_BootStarted);
-        var attributes = Managers.Game.Player.Attributes;
         Log.System(LocalizationKey.Log_Preload_Boot_Data);
         Log.System(LocalizationKey.Log_Preload_Boot_Asset);
         await Managers.Resource.LoadAssetAsync<SpriteAtlas>(Define.Atlas.PlayableCharacter);
@@ -70,10 +69,10 @@ public class PreloadManager
         await Managers.Pool.PrewarmAsync<UIQuickSlot>(Define.Amount.MaxQuickSlot);
         await Managers.Pool.PrewarmAsync<UIDashCountSlot>(Define.Amount.MaxDashCount);
         await Managers.Pool.PrewarmAsync<UIRemainHealthSlot>(Define.Amount.MaxHealthCount);
-        await Managers.Pool.PrewarmAsync<UIHeadUpDisplay>(1);
         await Managers.Pool.PrewarmAsync<UIQuickSlot>(Define.Amount.MaxQuickSlot);
-        await Managers.Pool.PrewarmAsync<UIInventorySlot>(Define.Amount.MaxInventorySlot);
-        await Managers.Pool.PrewarmAsync<UIQuestInventoryPopup>(1);
+        await Managers.Pool.PrewarmAsync<UIInventorySlot>(Define.Amount.MaxInventorySlot + Define.Amount.MaxEquipmentSlot);
+        await Managers.Pool.PrewarmAsync<UIHeadUpDisplay>(1);
+        //await Managers.Pool.PrewarmAsync<UIQuestInventoryPopup>(1);
         Log.System(LocalizationKey.Log_Preload_BootFinished);
     }
 }

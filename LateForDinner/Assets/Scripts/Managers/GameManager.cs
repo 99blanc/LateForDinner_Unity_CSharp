@@ -1,5 +1,4 @@
 using Cysharp.Threading.Tasks;
-using LateForDinner.Data;
 using System;
 using UnityEngine;
 
@@ -13,12 +12,16 @@ public class GameManager
 
         await ((Func<UILoadDisplay, UniTask>)(async load =>
         {
-            await load.LoadAsync(0.3f, LocalizationKey.Log_Game_Loading_SaveData);
+            await load.LoadAsync(0.2f, LocalizationKey.Log_Game_Loading_SaveData);
+            var data = Managers.Save.CurrentData;
+            Managers.Inventory.InitInventory(data.InventorySlots, data.QuickSlots, data.EquipmentSlots);
             await Managers.Save.LoadAsync(slotIndex);
-            await load.LoadAsync(0.7f, LocalizationKey.Log_Game_Loading_PlayerSpawn);
+            await load.LoadAsync(0.5f, LocalizationKey.Log_Game_Loading_PlayerSpawn);
             await PrepareAndSpawnPlayerAsync();
-            await load.LoadAsync(1.0f, LocalizationKey.Log_Game_Loading_ResourcePackaging);
-            await Managers.Preload.Release_GameAsync(Managers.Save.CurrentData.Day);
+            await load.LoadAsync(0.7f, LocalizationKey.Log_Game_Loading_ResourcePackaging);
+            int day = (data != null) ? data.Day : 1;
+            await Managers.Preload.Release_GameAsync(day);
+            await load.LoadAsync(1.0f, LocalizationKey.Log_Game_Loading_SaveData);
         })).Load();
 
         Managers.UI.OpenDisplay<UIHeadUpDisplay>();
@@ -30,13 +33,17 @@ public class GameManager
 
         await ((Func<UILoadDisplay, UniTask>)(async load =>
         {
-            await load.LoadAsync(0.3f, LocalizationKey.Log_Game_Loading_NewData);
+            await load.LoadAsync(0.2f, LocalizationKey.Log_Game_Loading_NewData);
+            var data = Managers.Save.CurrentData;
+            Managers.Inventory.InitInventory(data.InventorySlots, data.QuickSlots, data.EquipmentSlots);
             Managers.Save.Newgame(slotIndex);
             await Managers.Save.SaveAsync();
-            await load.LoadAsync(0.7f, LocalizationKey.Log_Game_Loading_PlayerSpawn);
+            await load.LoadAsync(0.5f, LocalizationKey.Log_Game_Loading_PlayerSpawn);
             await PrepareAndSpawnPlayerAsync();
-            await load.LoadAsync(1.0f, LocalizationKey.Log_Game_Loading_ResourcePackaging);
-            await Managers.Preload.Release_GameAsync(Managers.Save.CurrentData.Day);
+            await load.LoadAsync(0.7f, LocalizationKey.Log_Game_Loading_ResourcePackaging);
+            int day = (data != null) ? data.Day : 1;
+            await Managers.Preload.Release_GameAsync(day);
+            await load.LoadAsync(1.0f, LocalizationKey.Log_Game_Loading_NewData);
         })).Load();
 
         Managers.UI.OpenDisplay<UIHeadUpDisplay>();
@@ -48,16 +55,20 @@ public class GameManager
 
         await ((Func<UILoadDisplay, UniTask>)(async load =>
         {
-            await load.LoadAsync(0.3f, LocalizationKey.Log_Game_Loading_DebugData);
+            await load.LoadAsync(0.2f, LocalizationKey.Log_Game_Loading_DebugData);
+            var data = Managers.Save.CurrentData;
+            Managers.Inventory.InitInventory(data.InventorySlots, data.QuickSlots, data.EquipmentSlots);
 
-            if (Managers.Game.Player == null)
+            if (Managers.Game.Player == null || Managers.Save.CurrentSlot < 0)
                 Managers.Save.SetDebugDefaultData();
 
             Managers.Save.CurrentData.CurrentSceneID = targetSceneID;
-            await load.LoadAsync(0.7f, LocalizationKey.Log_Game_Loading_PlayerSpawn);
+            await load.LoadAsync(0.5f, LocalizationKey.Log_Game_Loading_PlayerSpawn);
             await PrepareAndSpawnPlayerAsync(forceTransition: true);
-            await load.LoadAsync(1.0f, LocalizationKey.Log_Game_Loading_ResourcePackaging);
-            await Managers.Preload.Release_GameAsync();
+            await load.LoadAsync(0.7f, LocalizationKey.Log_Game_Loading_ResourcePackaging);
+            int day = (data != null) ? data.Day : 1;
+            await Managers.Preload.Release_GameAsync(day);
+            await load.LoadAsync(1.0f, LocalizationKey.Log_Game_Loading_DebugData);
         })).Load();
 
         Managers.UI.OpenDisplay<UIHeadUpDisplay>();

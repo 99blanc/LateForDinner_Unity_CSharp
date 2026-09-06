@@ -131,14 +131,22 @@ public class PoolManager
 
         for (int index = 0; index < needed; index++)
         {
-            Transform targetParent = parent == null ? GetFolder(key) : parent;
+            bool isParentInactive = parent != null && !parent.gameObject.activeInHierarchy;
+            Transform targetParent = isParentInactive ? GetFolder(key) : parent;
             var instance = await Managers.Resource.InstantiateAsync(key, targetParent, false);
 
             if (IsInstanceNull(instance))
                 continue;
 
             instance.name = key;
-            _parents[instance] = targetParent;
+
+            if (isParentInactive && parent != null)
+            {
+                instance.transform.SetParent(parent, false);
+                _parents[instance] = parent;
+            }
+            else
+                _parents[instance] = targetParent;
 
             if (instance.TryGetComponent<IPoolable>(out var poolable))
                 poolable.ProtectedInit();
@@ -160,7 +168,8 @@ public class PoolManager
             return (cachedInstance, false);
         }
 
-        Transform newParent = parent == null ? GetFolder(key) : parent;
+        bool isParentInactive = parent != null && !parent.gameObject.activeInHierarchy;
+        Transform newParent = isParentInactive ? GetFolder(key) : parent;
         var newInstance = await Managers.Resource.InstantiateAsync(key, newParent, false);
 
         if (IsInstanceNull(newInstance))
@@ -170,7 +179,15 @@ public class PoolManager
         }
 
         newInstance.name = key;
-        _parents[newInstance] = newParent;
+
+        if (isParentInactive && parent != null)
+        {
+            newInstance.transform.SetParent(parent, false);
+            _parents[newInstance] = parent;
+        }
+        else
+            _parents[newInstance] = newParent;
+
         return (newInstance, true);
     }
 
@@ -182,7 +199,8 @@ public class PoolManager
             return (cachedInstance, false);
         }
 
-        Transform newParent = parent == null ? GetFolder(key) : parent;
+        bool isParentInactive = parent != null && !parent.gameObject.activeInHierarchy;
+        Transform newParent = isParentInactive ? GetFolder(key) : parent;
         var newInstance = Managers.Resource.Instantiate(key, newParent, false);
 
         if (IsInstanceNull(newInstance))
@@ -192,15 +210,33 @@ public class PoolManager
         }
 
         newInstance.name = key;
-        _parents[newInstance] = newParent;
+
+        if (isParentInactive && parent != null)
+        {
+            newInstance.transform.SetParent(parent, false);
+            _parents[newInstance] = parent;
+        }
+        else
+            _parents[newInstance] = newParent;
+
         return (newInstance, true);
     }
 
     private void PrepareCachedInstance(GameObject instance, Transform parent, string key)
     {
-        Transform original = parent != null ? parent : (_parents.TryGetValue(instance, out var p) ? p : GetFolder(key));
-        instance.transform.SetParent(original, false);
-        instance.SetActive(true);
+        Transform targetParent = parent != null ? parent : (_parents.TryGetValue(instance, out var p) ? p : GetFolder(key));
+
+        if (targetParent != null && !targetParent.gameObject.activeInHierarchy)
+        {
+            instance.transform.SetParent(GetFolder(key), false);
+            instance.SetActive(true);
+            instance.transform.SetParent(targetParent, false);
+        }
+        else
+        {
+            instance.transform.SetParent(targetParent, false);
+            instance.SetActive(true);
+        }
     }
 
     private void InitializePoolable(GameObject instance, bool isNew)
