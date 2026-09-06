@@ -116,7 +116,7 @@ namespace LateForDinner.Data
             SelectedPlayerID = CharacterID.Protagonist,
             CurrentSceneID = SceneID.Hospital1,
             InteractableStates = new Dictionary<string, bool>(),
-            SavedAttributes = CreateDefaultAttributes(CharacterID.Protagonist),
+            SavedAttributes = CharacterID.Protagonist.CreateDefaultAttributes(),
             PlayerPosition = Vector2.zero,
             PlayerRotation = 0f,
             InventorySlots = Enumerable.Range(0, Define.Amount.MaxInventorySlot).Select(i => new InventorySlot { SlotIndex = i, ItemID = 0, Quantity = 0 }).ToList(),
@@ -125,30 +125,6 @@ namespace LateForDinner.Data
             QuickSlots = Enumerable.Range(0, Define.Amount.MaxQuickSlot).Select(i => new InventorySlot { SlotIndex = i, ItemID = 0, Quantity = 0 }).ToList(),
             Gold = 0f
         };
-
-        private static List<AttributeSaveData> CreateDefaultAttributes(CharacterID characterID)
-        {
-            var list = new List<AttributeSaveData>();
-
-            if (Managers.Data?.PlayableCharacterTemplates is { } templates && templates.Contains((int)characterID))
-            {
-                foreach (var template in templates[(int)characterID])
-                {
-                    if (!Enum.TryParse<AttributeType>(template.AttributeKey, out _))
-                        continue;
-
-                    string dataType = Literal.Types.Float;
-
-                    if (Managers.Data.Attributes != null && Managers.Data.Attributes.TryGetValue(template.AttributeKey, out var data))
-                        dataType = data.DataType;
-
-                    string stringValue = template.Value ?? "0";
-                    list.Add(new AttributeSaveData() { Key = template.AttributeKey, DataType = dataType, Value = stringValue });
-                }
-            }
-
-            return list;
-        }
     }
 
     [MemoryPackable]

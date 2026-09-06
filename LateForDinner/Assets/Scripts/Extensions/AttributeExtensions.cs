@@ -206,4 +206,29 @@ public static class AttributeExtensions
 
         return null;
     }
+
+    public static List<AttributeSaveData> CreateDefaultAttributes(this CharacterID characterID)
+    {
+        var list = new List<AttributeSaveData>();
+        int charIndex = (int)characterID;
+
+        if (Managers.Data?.PlayableCharacterTemplates is { } templates && templates.Contains(charIndex))
+        {
+            foreach (var template in templates[charIndex])
+            {
+                if (!Enum.TryParse<AttributeType>(template.AttributeKey, out _))
+                    continue;
+
+                string dataType = Literal.Types.Float;
+
+                if (Managers.Data.Attributes != null && Managers.Data.Attributes.TryGetValue(template.AttributeKey, out var data))
+                    dataType = data.DataType;
+
+                string stringValue = template.Value ?? "0";
+                list.Add(new AttributeSaveData() { Key = template.AttributeKey, DataType = dataType, Value = stringValue });
+            }
+        }
+
+        return list;
+    }
 }

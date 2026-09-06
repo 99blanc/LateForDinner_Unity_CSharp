@@ -192,6 +192,8 @@ public class CursorManager
 
         if (_cursorImage != null)
             _cursorImage.SetActive(isVisible);
+
+        Cursor.visible = !isVisible;
     }
 
     private bool IsCursorVisibleState()
