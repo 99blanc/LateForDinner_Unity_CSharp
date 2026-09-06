@@ -10,4 +10,17 @@ public static class EnumExtensions
             _ => Define.Sprite.MealTime_Breakfast
         };
     }
+
+    public static string ToSpriteAsEquipmentCover(this EquipmentSlotType slotType)
+    {
+        return slotType switch
+        {
+            EquipmentSlotType.Head => Define.Sprite.InventoryHead,
+            EquipmentSlotType.Chest => Define.Sprite.InventoryChest,
+            EquipmentSlotType.Pants => Define.Sprite.InventoryPants,
+            EquipmentSlotType.Boots => Define.Sprite.InventoryBoots,
+            EquipmentSlotType.Weapon => Define.Sprite.InventoryWeapon,
+            _ => string.Empty
+        };
+    }
 }

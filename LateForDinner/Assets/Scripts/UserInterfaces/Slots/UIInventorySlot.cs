@@ -1,6 +1,7 @@
 using LateForDinner.Data;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.TestTools;
 
 public class UIInventorySlot : UISlot
 {
@@ -47,10 +48,17 @@ public class UIInventorySlot : UISlot
     {
         base.Refresh();
 
-        var coverImage = GetImage(Images.SlotCoverImage);
+        if (_isEquipmentSlot && (_data == null || _data.ItemID <= 0))
+        {
+            GetImage(Images.SlotCoverImage).SetActive(true);
+            EquipmentSlotType slotType = (EquipmentSlotType)_slotIndex;
+            string coverSpriteName = slotType.ToSpriteAsEquipmentCover();
 
-        if (coverImage != null)
-            coverImage.SetActive(_isEquipmentSlot);
+            if (!string.IsNullOrEmpty(coverSpriteName))
+                SetEquipmentImageSprite(coverSpriteName);
+        }
+        else
+            GetImage(Images.SlotCoverImage).SetActive(false);
 
         if (_data == null || _data.ItemID <= 0)
         {
@@ -80,8 +88,25 @@ public class UIInventorySlot : UISlot
             GetText(Texts.SlotQuantityText).SetActive(false);
     }
 
+    public void Clear()
+    {
+        _data = null;
+        _slotIndex = -1;
+        GetImage(Images.SlotItemImage).SetActive(false);
+        GetText(Texts.SlotQuantityText).text = string.Empty;
+        GetImage(Images.SlotCooldownImage).SetActive(false);
+    }
+
     private void OnClickSlot(PointerEventData data)
     {
         Debug.Log($"Clicked Slot Index: {_slotIndex}");
+    }
+
+    private void SetEquipmentImageSprite(string spriteName)
+    {
+        var image = GetImage(Images.SlotCoverImage);
+
+        if (image != null)
+            image.sprite = Managers.Resource.GetSprite(Define.Atlas.Common, spriteName);
     }
 }

@@ -133,6 +133,11 @@ public class Define
         public const string HealthFull = "ui_headup_player_health_full";
         public const string TemporaryHealthHalf = "ui_headup_player_temporary_health_half";
         public const string TemporaryHealthFull = "ui_headup_player_temporary_health_full";
+        public const string InventoryHead = "ui_inventory_head_image";
+        public const string InventoryChest = "ui_inventory_chest_image";
+        public const string InventoryPants = "ui_inventory_pants_image";
+        public const string InventoryBoots = "ui_inventory_boots_image";
+        public const string InventoryWeapon = "ui_inventory_weapon_image";
     }
 
     public class Toast

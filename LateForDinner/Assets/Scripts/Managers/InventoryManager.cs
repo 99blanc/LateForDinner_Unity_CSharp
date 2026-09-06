@@ -36,6 +36,53 @@ public class InventoryManager
         }
     }
 
+    public void SortInventory(ItemType? type)
+    {
+        int startIndex = 0;
+        int targetSize = Define.Amount.MaxInventorySlot;
+
+        if (type.HasValue)
+        {
+            int tabSize = Define.Amount.InventoryTabSize;
+            startIndex = type.Value switch
+            {
+                ItemType.Equipment => tabSize * 0,
+                ItemType.Consumption => tabSize * 1,
+                ItemType.Etc => tabSize * 2,
+                _ => 0
+            };
+            targetSize = tabSize;
+        }
+
+        var validItems = _slots
+        .Skip(startIndex)
+        .Take(targetSize)
+        .Where(slot => slot.ItemID != 0 && slot.Quantity > 0)
+        .ToList();
+
+        for (int index = 0; index < targetSize; index++)
+        {
+            int currentIndex = startIndex + index;
+            _slots[currentIndex] = new InventorySlot
+            {
+                SlotIndex = currentIndex,
+                ItemID = 0,
+                Quantity = 0
+            };
+        }
+
+        for (int index = 0; index < validItems.Count; index++)
+        {
+            int currentIndex = startIndex + index;
+            _slots[currentIndex] = new InventorySlot
+            {
+                SlotIndex = currentIndex,
+                ItemID = validItems[index].ItemID,
+                Quantity = validItems[index].Quantity,
+            };
+        }
+    }
+
     public IEnumerable<InventorySlot> GetSlotsByType(ItemType? type)
     {
         if (!type.HasValue)

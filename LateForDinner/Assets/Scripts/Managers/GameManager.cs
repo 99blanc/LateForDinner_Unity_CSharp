@@ -13,9 +13,9 @@ public class GameManager
         await ((Func<UILoadDisplay, UniTask>)(async load =>
         {
             await load.LoadAsync(0.2f, LocalizationKey.Log_Game_Loading_SaveData);
+            await Managers.Save.LoadAsync(slotIndex);
             var data = Managers.Save.CurrentData;
             Managers.Inventory.InitInventory(data.InventorySlots, data.QuickSlots, data.EquipmentSlots);
-            await Managers.Save.LoadAsync(slotIndex);
             await load.LoadAsync(0.5f, LocalizationKey.Log_Game_Loading_PlayerSpawn);
             await PrepareAndSpawnPlayerAsync();
             await load.LoadAsync(0.7f, LocalizationKey.Log_Game_Loading_ResourcePackaging);
@@ -34,9 +34,9 @@ public class GameManager
         await ((Func<UILoadDisplay, UniTask>)(async load =>
         {
             await load.LoadAsync(0.2f, LocalizationKey.Log_Game_Loading_NewData);
+            Managers.Save.Newgame(slotIndex);
             var data = Managers.Save.CurrentData;
             Managers.Inventory.InitInventory(data.InventorySlots, data.QuickSlots, data.EquipmentSlots);
-            Managers.Save.Newgame(slotIndex);
             await Managers.Save.SaveAsync();
             await load.LoadAsync(0.5f, LocalizationKey.Log_Game_Loading_PlayerSpawn);
             await PrepareAndSpawnPlayerAsync();
@@ -56,12 +56,12 @@ public class GameManager
         await ((Func<UILoadDisplay, UniTask>)(async load =>
         {
             await load.LoadAsync(0.2f, LocalizationKey.Log_Game_Loading_DebugData);
-            var data = Managers.Save.CurrentData;
-            Managers.Inventory.InitInventory(data.InventorySlots, data.QuickSlots, data.EquipmentSlots);
 
             if (Managers.Game.Player == null || Managers.Save.CurrentSlot < 0)
                 Managers.Save.SetDebugDefaultData();
 
+            var data = Managers.Save.CurrentData;
+            Managers.Inventory.InitInventory(data.InventorySlots, data.QuickSlots, data.EquipmentSlots);
             Managers.Save.CurrentData.CurrentSceneID = targetSceneID;
             await load.LoadAsync(0.5f, LocalizationKey.Log_Game_Loading_PlayerSpawn);
             await PrepareAndSpawnPlayerAsync(forceTransition: true);

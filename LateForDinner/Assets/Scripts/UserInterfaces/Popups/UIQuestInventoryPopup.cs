@@ -1,10 +1,12 @@
+using LateForDinner.Data;
+using R3;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.UI;
+using ZLinq;
 
-public class UIQuestInventoryPopup : UIPopup
+public class UIQuestInventoryPopup : UIPopup, IDraggablePopup, IFocusablePopup
 {
     private enum RectTransforms
     {
@@ -52,7 +54,7 @@ public class UIQuestInventoryPopup : UIPopup
 
     private enum ScrollRects
     {
-        InventoryScrollRects
+        InventoryScrollRect
     }
 
     private enum Panels
@@ -60,10 +62,18 @@ public class UIQuestInventoryPopup : UIPopup
         AttributePanel
     }
 
+    private readonly ReactiveProperty<ButtonState> _attributeButtonState = new ReactiveProperty<ButtonState>(ButtonState.Normal);
+    private readonly ReactiveProperty<ButtonState> _totalButtonState = new ReactiveProperty<ButtonState>(ButtonState.Normal);
+    private readonly ReactiveProperty<ButtonState> _equipmentButtonState = new ReactiveProperty<ButtonState>(ButtonState.Normal);
+    private readonly ReactiveProperty<ButtonState> _consumptionButtonState = new ReactiveProperty<ButtonState>(ButtonState.Normal);
+    private readonly ReactiveProperty<ButtonState> _etcButtonState = new ReactiveProperty<ButtonState>(ButtonState.Normal);
+    private readonly ReactiveProperty<ButtonState> _sortButtonState = new ReactiveProperty<ButtonState>(ButtonState.Normal);
+    private readonly ReactiveProperty<ButtonState> _scrollUpButtonState = new ReactiveProperty<ButtonState>(ButtonState.Normal);
+    private readonly ReactiveProperty<ButtonState> _scrollDownButtonState = new ReactiveProperty<ButtonState>(ButtonState.Normal);
     private readonly List<UIInventorySlot> _createdSlots = new List<UIInventorySlot>();
     private readonly List<UIInventorySlot> _equipmentCreatedSlots = new List<UIInventorySlot>();
     private ItemType? _currentTabType = null;
-    private bool _isAttributePanelOpen = false;
+    private bool _isAttributePanelOpen = true;
 
     public override void OnInit()
     {
@@ -74,28 +84,47 @@ public class UIQuestInventoryPopup : UIPopup
         BindButton(typeof(Buttons));
         BindScrollRect(typeof(ScrollRects));
         BindPanel(typeof(Panels));
-        GetButton(Buttons.TotalButton).BindView(OnClickTotalTab, ViewEvent.LeftClick, this);
-        GetButton(Buttons.EquipmentButton).BindView(OnClickEquipmentTab, ViewEvent.LeftClick, this);
-        GetButton(Buttons.ConsumptionButton).BindView(OnClickConsumptionTab, ViewEvent.LeftClick, this);
-        GetButton(Buttons.EtcButton).BindView(OnClickEtcTab, ViewEvent.LeftClick, this);
-        GetButton(Buttons.AttributeButton).BindView(OnClickAttributeTab, ViewEvent.LeftClick, this);
+        BindButtonStates();
+        BindButtonActions();
         InitInventorySlots();
         InitEquipmentSlots();
+        Refresh();
+    }
+
+    private void BindButtonStates()
+    {
+        GetImage(Images.AttributeButtonImage).BindState(_attributeButtonState, Define.Atlas.Common, this);
+        GetImage(Images.TotalButtonImage).BindState(_totalButtonState, Define.Atlas.Common, this);
+        GetImage(Images.EquipmentButtonImage).BindState(_equipmentButtonState, Define.Atlas.Common, this);
+        GetImage(Images.ConsumptionButtonImage).BindState(_consumptionButtonState, Define.Atlas.Common, this);
+        GetImage(Images.EtcButtonImage).BindState(_etcButtonState, Define.Atlas.Common, this);
+        GetImage(Images.SortButtonImage).BindState(_sortButtonState, Define.Atlas.Common, this);
+        GetImage(Images.ScrollUpArrowImage).BindStateAsArrow(_scrollUpButtonState, Define.Atlas.Common, this);
+        GetImage(Images.ScrollDownArrowImage).BindStateAsArrow(_scrollDownButtonState, Define.Atlas.Common, this);
+    }
+
+    private void BindButtonActions()
+    {
+        GetButton(Buttons.AttributeButton).BindViewAsButton(OnClickAttributeTab, ViewEvent.LeftClick, this, _attributeButtonState);
+        GetButton(Buttons.TotalButton).BindViewAsButton(OnClickTotalTab, ViewEvent.LeftClick, this, _totalButtonState);
+        GetButton(Buttons.EquipmentButton).BindViewAsButton(OnClickEquipmentTab, ViewEvent.LeftClick, this, _equipmentButtonState);
+        GetButton(Buttons.ConsumptionButton).BindViewAsButton(OnClickConsumptionTab, ViewEvent.LeftClick, this, _consumptionButtonState);
+        GetButton(Buttons.EtcButton).BindViewAsButton(OnClickEtcTab, ViewEvent.LeftClick, this, _etcButtonState);
+        GetButton(Buttons.SortButton).BindViewAsButton(OnClickSortTab, ViewEvent.LeftClick, this, _sortButtonState);
+        GetButton(Buttons.ScrollUpButton).BindViewAsButton(OnClickScrollUp, ViewEvent.LeftClick, this, _scrollUpButtonState);
+        GetButton(Buttons.ScrollDownButton).BindViewAsButton(OnClickScrollDown, ViewEvent.LeftClick, this, _scrollDownButtonState);
     }
 
     private void InitInventorySlots()
     {
-        var content = GetScrollRect(ScrollRects.InventoryScrollRects).content;
+        var content = GetScrollRect(ScrollRects.InventoryScrollRect).content;
 
         for (int index = 0; index < Define.Amount.MaxInventorySlot; index++)
         {
             var (slot, _) = Managers.Pool.Pop<UIInventorySlot>(content);
 
             if (slot != null)
-            {
-                slot.SetActive(false);
                 _createdSlots.Add(slot);
-            }
         }
     }
 
@@ -108,10 +137,7 @@ public class UIQuestInventoryPopup : UIPopup
             var (slot, _) = Managers.Pool.Pop<UIInventorySlot>(equipmentContent);
 
             if (slot != null)
-            {
-                slot.SetActive(false);
                 _equipmentCreatedSlots.Add(slot);
-            }
         }
     }
 
@@ -121,7 +147,6 @@ public class UIQuestInventoryPopup : UIPopup
         RefreshInventory(_currentTabType);
         RefreshEquipmentSlots();
         RefreshPlayerInfo();
-        GetPanel(Panels.AttributePanel).SetActive(_isAttributePanelOpen);
 
         if (_isAttributePanelOpen)
             RefreshPlayerInfo();
@@ -130,13 +155,18 @@ public class UIQuestInventoryPopup : UIPopup
     private void RefreshInventory(ItemType? type)
     {
         var slotDataList = Managers.Inventory.GetSlotsByType(type).ToList();
+        int maxDisplayCount = type == null ? Define.Amount.MaxInventorySlot : Define.Amount.InventoryTabSize;
 
         for (int index = 0; index < _createdSlots.Count; index++)
         {
-            if (index < slotDataList.Count)
+            if (index < maxDisplayCount)
             {
                 _createdSlots[index].SetActive(true);
-                _createdSlots[index].Setup(slotDataList[index].SlotIndex, slotDataList[index], false);
+
+                if (index < slotDataList.Count)
+                    _createdSlots[index].Setup(slotDataList[index].SlotIndex, slotDataList[index], false);
+                else
+                    _createdSlots[index].Clear();
             }
             else
                 _createdSlots[index].SetActive(false);
@@ -149,15 +179,8 @@ public class UIQuestInventoryPopup : UIPopup
 
         for (int index = 0; index < _equipmentCreatedSlots.Count; index++)
         {
-            if (index < equipmentDataList.Count)
-            {
-                _equipmentCreatedSlots[index].SetActive(true);
-                _equipmentCreatedSlots[index].Setup(equipmentDataList[index].SlotIndex, equipmentDataList[index], true);
-            }
-            else
-            {
-                _equipmentCreatedSlots[index].SetActive(false);
-            }
+            InventorySlot targetData = equipmentDataList.FirstOrDefault(x => x.SlotIndex == index);
+            _equipmentCreatedSlots[index].Setup(index, targetData, true);
         }
     }
 
@@ -169,15 +192,8 @@ public class UIQuestInventoryPopup : UIPopup
         {
             GetText(Texts.GoldText).text = Managers.Save.CurrentData.Gold.ToString("N0");
             GetText(Texts.DayText).text = Managers.Localization.Get(LocalizationKey.Slot_Day_Format, Managers.Save.CurrentData.Day);
-
-            var mealImage = GetImage(Images.MealTimeImage);
-
-            if (mealImage != null)
-            {
-                mealImage.SetActive(true);
-                string spriteName = saveData.Meal.ToSpriteAsMealTime();
-                mealImage.sprite = Managers.Resource.GetSprite(Define.Atlas.Common, spriteName);
-            }
+            string spriteName = saveData.Meal.ToSpriteAsMealTime();
+            GetImage(Images.MealTimeImage).sprite = Managers.Resource.GetSprite(Define.Atlas.Common, spriteName);
         }
 
         var player = Managers.Game.Player;
@@ -199,6 +215,15 @@ public class UIQuestInventoryPopup : UIPopup
             float dashDistance = player.Attributes.Get<float>(AttributeType.DashDistance).Value;
             GetText(Texts.DashDistanceTabText).text = dashDistance.ToString("F1");
         }
+    }
+
+    private void OnClickAttributeTab(PointerEventData data)
+    {
+        _isAttributePanelOpen = !GetPanel(Panels.AttributePanel).IsActive();
+        GetPanel(Panels.AttributePanel).SetActive(_isAttributePanelOpen);
+
+        if (_isAttributePanelOpen)
+            RefreshPlayerInfo();
     }
 
     private void OnClickTotalTab(PointerEventData data)
@@ -225,12 +250,15 @@ public class UIQuestInventoryPopup : UIPopup
         RefreshInventory(_currentTabType);
     }
 
-    private void OnClickAttributeTab(PointerEventData data)
+    private void OnClickSortTab(PointerEventData data)
     {
-        bool isOpen = !GetPanel(Panels.AttributePanel).IsActive();
-        GetPanel(Panels.AttributePanel).SetActive(isOpen);
-
-        if (isOpen)
-            RefreshPlayerInfo();
+        Managers.Inventory.SortInventory(_currentTabType);
+        Refresh();
     }
+
+    private void OnClickScrollUp(PointerEventData data)
+        => GetScrollRect(ScrollRects.InventoryScrollRect).verticalNormalizedPosition = 1f;
+
+    private void OnClickScrollDown(PointerEventData data)
+        => GetScrollRect(ScrollRects.InventoryScrollRect).verticalNormalizedPosition = 0f;
 }
