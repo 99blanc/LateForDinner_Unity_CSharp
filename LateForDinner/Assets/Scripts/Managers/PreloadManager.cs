@@ -61,6 +61,7 @@ public class PreloadManager
         Log.System(LocalizationKey.Log_Preload_Boot_Asset);
         await Managers.Resource.LoadAssetAsync<SpriteAtlas>(Define.Atlas.PlayableCharacter);
         await Managers.Resource.LoadAssetAsync<SpriteAtlas>(Define.Atlas.HeadUp);
+        await Managers.Resource.LoadAssetAsync<SpriteAtlas>(Define.Atlas.Item);
         await Managers.Resource.LoadAnimatorControllerAsync<UIDashCountSlot>();
         await Managers.Resource.LoadAnimatorControllerAsync<UIRemainHealthSlot>();
         Log.System(LocalizationKey.Log_Preload_Boot_Object);
