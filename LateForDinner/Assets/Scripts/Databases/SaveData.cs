@@ -96,6 +96,7 @@ namespace LateForDinner.Data
         public List<AttributeSaveData> SavedAttributes;
         public Vector2 PlayerPosition;
         public float PlayerRotation;
+        public bool PlayerFlipX;
         public List<InventorySlot> InventorySlots;
         public List<InventorySlot> EquipmentSlots;
         public List<WeaponSave> UnlockedWeapons;
@@ -119,6 +120,7 @@ namespace LateForDinner.Data
             SavedAttributes = CharacterID.Protagonist.CreateDefaultAttributes(),
             PlayerPosition = Vector2.zero,
             PlayerRotation = 0f,
+            PlayerFlipX = false,
             InventorySlots = Enumerable.Range(0, Define.Amount.MaxInventorySlot).Select(i => new InventorySlot { SlotIndex = i, ItemID = 0, Quantity = 0 }).ToList(),
             EquipmentSlots = Enumerable.Range(0, Define.Amount.MaxEquipmentSlot).Select(i => new InventorySlot { SlotIndex = i, ItemID = 0, Quantity = 0 }).ToList(),
             UnlockedWeapons = new List<WeaponSave>(),

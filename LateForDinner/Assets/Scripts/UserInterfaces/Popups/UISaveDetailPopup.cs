@@ -119,9 +119,7 @@ public class UISaveDetailPopup : UIPopup, IFocusablePopup
             SlotMeta meta = Managers.Save.MetaData.Slots[index];
 
             if (meta.IsActive)
-            {
                 await Managers.Game.OldgameAsync(index);
-            }
             else
             {
                 await Managers.Game.NewgameAsync(index);

@@ -429,4 +429,10 @@ public class UIManager
         if (_display != null)
             _display.Refresh();
     }
+
+    public void RefreshDisplay<T>() where T : UIDisplay
+    {
+        if (_display is T)
+            _display.Refresh();
+    }
 }

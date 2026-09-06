@@ -32,6 +32,8 @@ public class CommandRegistry
             _console.RegisterCommand("ground_debug", OnCommandToggleGroundDebug, Managers.Localization.Get(LocalizationKey.Console_Desc_Ground));
             _console.RegisterCommand("scene", async (args) => await OnCommandScene(args), Managers.Localization.Get(LocalizationKey.Console_Desc_Scene));
             _console.RegisterCommand("spawn", async (args) => await OnCommandSpawnCharacter(args), Managers.Localization.Get(LocalizationKey.Console_Desc_Spawn));
+            _console.RegisterCommand("item", OnCommandSpawnItem, Managers.Localization.Get(LocalizationKey.Console_Desc_Item));
+            _console.RegisterCommand("save", async (args) => await OnCommandSaveGame(args), Managers.Localization.Get(LocalizationKey.Console_Desc_Save));
         }
         else
         {
@@ -43,6 +45,8 @@ public class CommandRegistry
             _console.UnregisterCommand("ground_debug");
             _console.UnregisterCommand("scene");
             _console.UnregisterCommand("spawn");
+            _console.UnregisterCommand("item");
+            _console.UnregisterCommand("save");
         }
     }
 
@@ -208,7 +212,7 @@ public class CommandRegistry
 
         character.Attributes.SetParsedValue(attributeType, args[1]);
         Log.Info(LocalizationKey.Console_Set_Success, args[0], args[1]);
-        Managers.UI.RefreshDisplay();
+        Managers.UI.RefreshDisplay<UIHeadUpDisplay>();
     }
 
     private void OnCommandSetBaseVariable(string[] args)
@@ -234,7 +238,7 @@ public class CommandRegistry
         character.Attributes.SetBaseParsedValue(attributeType, args[1]);
         character.Attributes.SetParsedValue(attributeType, args[1]);
         Log.Info(LocalizationKey.Console_SetBase_Success, args[0], args[1]);
-        Managers.UI.RefreshDisplay();
+        Managers.UI.RefreshDisplay<UIHeadUpDisplay>();
     }
 
     private void OnCommandGetVariable(string[] args)
@@ -372,6 +376,121 @@ public class CommandRegistry
         Vector3 spawnPosition = Managers.Game.Player.transform.position + (Vector3)(lookDir * 2f);
         Managers.Game.SpawnCharacterAsync<Character>(characterID, spawnPosition).Forget();
         Log.Info(LocalizationKey.Console_Spawn_Success, characterID);
+    }
+
+    private void OnCommandSpawnItem(string[] args)
+    {
+        if (!CheckIsDebugMode())
+            return;
+
+        if (args.Length < 1 || args[0].Equals("help", StringComparison.OrdinalIgnoreCase) || args[0].Equals("list", StringComparison.OrdinalIgnoreCase))
+        {
+            Log.Warning(LocalizationKey.Console_Item_Usage);
+            Log.Info(LocalizationKey.Console_Item_Available);
+
+            foreach (var kvp in Managers.Data.Items)
+                Log.Info(LocalizationKey.Console_Parameter_Format, kvp.Key, kvp.Value.NameKey);
+
+            return;
+        }
+
+        string subCommand = args[0].ToLower();
+
+        if (subCommand.Equals("clear"))
+        {
+            Managers.Inventory.ClearInventory();
+            Log.Info(LocalizationKey.Console_Item_ClearSuccess);
+            var inventoryPopup = Managers.UI.GetPopup<UIQuestInventoryPopup>();
+            inventoryPopup?.Refresh();
+            Managers.UI.RefreshDisplay<UIHeadUpDisplay>();
+            return;
+        }
+
+        if (subCommand.Equals("remove"))
+        {
+            if (args.Length < 2 || !int.TryParse(args[1], out int removeItemID))
+            {
+                Log.Warning(LocalizationKey.Console_Item_RemoveUsage);
+                return;
+            }
+
+            int removeQty = 1;
+
+            if (args.Length > 2 && int.TryParse(args[2], out int parsedRemoveQty))
+                removeQty = Mathf.Max(1, parsedRemoveQty);
+
+            bool removeSuccess = Managers.Inventory.RemoveItem(removeItemID, removeQty);
+
+            if (removeSuccess)
+            {
+                Log.Info(LocalizationKey.Console_Item_RemoveSuccess, removeItemID, removeQty);
+                var inventoryPopup = Managers.UI.GetPopup<UIQuestInventoryPopup>();
+                inventoryPopup?.Refresh();
+                Managers.UI.RefreshDisplay<UIHeadUpDisplay>();
+            }
+            else
+                Log.Warning(LocalizationKey.Console_Item_RemoveFailed, removeItemID);
+
+            return;
+        }
+
+        if (!int.TryParse(args[0], out int itemID) || !Managers.Data.Items.ContainsKey(itemID))
+        {
+            Log.Warning(LocalizationKey.Console_Item_InvalidID, args[0]);
+            return;
+        }
+
+        int quantity = 1;
+
+        if (args.Length > 1 && int.TryParse(args[1], out int parsedQuantity))
+            quantity = Mathf.Max(1, parsedQuantity);
+
+        var itemData = Managers.Data.Items[itemID];
+        bool success = Managers.Inventory.AddItem(itemID, quantity);
+
+        if (success)
+        {
+            Log.Info(LocalizationKey.Console_Item_Success, itemID, itemData.NameKey, quantity);
+            var inventoryPopup = Managers.UI.GetPopup<UIQuestInventoryPopup>();
+            inventoryPopup?.Refresh();
+            Managers.UI.RefreshDisplay<UIHeadUpDisplay>();
+        }
+        else
+            Log.Warning(LocalizationKey.Console_Item_InventoryFull);
+    }
+
+    private async UniTask OnCommandSaveGame(string[] args)
+    {
+        if (!CheckIsDebugMode())
+            return;
+
+        if (args.Length > 0 && int.TryParse(args[0], out int targetSlot))
+        {
+            if (targetSlot < 0 || targetSlot >= Define.Amount.MaxSaveSlot)
+            {
+                Log.Warning(LocalizationKey.Console_Save_InvalidSlot, targetSlot);
+                return;
+            }
+
+            Managers.Save.Select(targetSlot);
+            await ExecuteSaveAsync();
+            return;
+        }
+
+        if (Managers.Save.CurrentSlot < 0)
+        {
+            int defaultSlot = Mathf.Clamp(1, 1, Define.Amount.MaxSaveSlot - 1);
+            Managers.Save.Select(defaultSlot);
+            Log.Info(LocalizationKey.Console_Save_DefaultSlotSelected, defaultSlot);
+        }
+
+        await ExecuteSaveAsync();
+    }
+
+    private async UniTask ExecuteSaveAsync()
+    {
+        await Managers.Save.SaveAsync();
+        Log.Info(LocalizationKey.Console_Save_Success, Managers.Save.CurrentSlot);
     }
 
     private bool CheckIsDebugMode()

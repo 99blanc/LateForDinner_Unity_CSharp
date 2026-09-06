@@ -218,11 +218,10 @@ public class SaveManager
 
         if (player != null)
         {
-            if (player.Attributes != null)
-                CurrentData.SavedAttributes = player.Attributes.ExportSaveData();
-
+            CurrentData.SavedAttributes = player.Attributes.ExportSaveData();
             CurrentData.PlayerPosition = player.transform.position;
             CurrentData.PlayerRotation = player.transform.rotation.z;
+            CurrentData.PlayerFlipX = player.Renderer.flipX;
         }
 
         if (Managers.Inventory != null)

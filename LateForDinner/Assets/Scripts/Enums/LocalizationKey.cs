@@ -66,6 +66,8 @@ public enum LocalizationKey
     Console_Desc_Ground                                , // 땅 감지 박스 디버그 표시를 토글합니다.
     Console_Desc_Scene                                 , // 지정한 맵으로 즉시 이동합니다.
     Console_Desc_Spawn                                 , // 지정한 캐릭터를 Demo 맵에 소환합니다.
+    Console_Desc_Item                                  , // 지정한 아이템을 생성, 제거하거나 인벤토리를 비웁니다.
+    Console_Desc_Save                                  , // 현재 게임 상태를 저장합니다.
     Console_Debug_Toggle                               , // 디버그 모드: {0}
     Console_Clear_Success                              , // 콘솔 로그를 초기화했습니다.
     Console_Clear_NotOpen                              , // 콘솔 UI가 열려있지 않습니다.
@@ -98,6 +100,18 @@ public enum LocalizationKey
     Console_Spawn_NotFoundPlayableCharacter            , // 활성화된 플레이어 캐릭터가 없어 기본 '{0}' 캐릭터를 먼저 생성합니다.
     Console_Spawn_Success                              , // 캐릭터 [{0}] 소환 완료!
     Console_Spawn_Invalid                              , // 유효하지 않은 CharacterID입니다: '{0}'. 캐릭터 목록을 보려면 'spawn list'를 입력하세요.
+    Console_Item_Available                             , // --- 소환 가능한 아이템 목록 ---
+    Console_Item_Usage                                 , // 사용법: item [ItemID] [Quantity]
+    Console_Item_InvalidID                             , // 유효하지 않은 ItemID입니다: '{0}'.
+    Console_Item_InventoryFull                         , // 인벤토리가 가득 차서 아이템을 소환할 수 없습니다.
+    Console_Item_Success                               , // [{0}] {1} 아이템을 {2}개 소환했습니다.
+    Console_Item_RemoveUsage                           , // 사용법: item remove [ItemID] [Quantity]
+    Console_Item_RemoveSuccess                         , // [{0}] 아이템 {1}개 제거했습니다.
+    Console_Item_RemoveFailed                          , // 인벤토리에 제거할 아이템([{0}])이 없거나 잘못되었습니다.
+    Console_Item_ClearSuccess                          , // 인벤토리를 비웠습니다.
+    Console_Save_DefaultSlotSelected                   , // 기본 슬롯({0}번)에 저장합니다.
+    Console_Save_Success                               , // 게임 저장을 완료했습니다.
+    Console_Save_InvalidSlot                           , // 유효하지 않은 세이브 슬롯 번호입니다: '{0}'.
     Interaction_Ladder                                 , // 사다리 진입
     Interaction_Tray                                   , // 식판 획득/내려놓기/던지기/식탁 배치
     Item_Name_1                                        , // 대검

@@ -18,6 +18,7 @@ public abstract class PlayableCharacter : Character, IIdleableCharacter, IMovabl
         Attributes.ImportSaveData(data.SavedAttributes);
         Rigidbody.position = data.PlayerPosition;
         Rigidbody.rotation = data.PlayerRotation;
+        Renderer.flipX = data.PlayerFlipX;
         RegisterInputSubscriptions();
     }
 

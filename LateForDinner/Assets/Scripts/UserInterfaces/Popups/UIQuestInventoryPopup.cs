@@ -128,6 +128,12 @@ public class UIQuestInventoryPopup : UIPopup, IDraggablePopup, IFocusablePopup
         }
     }
 
+    public override void OnGet()
+    {
+        base.OnGet();
+        Refresh();
+    }
+
     private void InitEquipmentSlots()
     {
         var equipmentContent = GetRectTransform(RectTransforms.EquipmentContent);

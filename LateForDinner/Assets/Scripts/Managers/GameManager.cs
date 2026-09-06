@@ -17,7 +17,7 @@ public class GameManager
             var data = Managers.Save.CurrentData;
             Managers.Inventory.InitInventory(data.InventorySlots, data.QuickSlots, data.EquipmentSlots);
             await load.LoadAsync(0.5f, LocalizationKey.Log_Game_Loading_PlayerSpawn);
-            await PrepareAndSpawnPlayerAsync();
+            await PrepareAndSpawnPlayerAsync(forceTransition: true);
             await load.LoadAsync(0.7f, LocalizationKey.Log_Game_Loading_ResourcePackaging);
             int day = (data != null) ? data.Day : 1;
             await Managers.Preload.Release_GameAsync(day);
