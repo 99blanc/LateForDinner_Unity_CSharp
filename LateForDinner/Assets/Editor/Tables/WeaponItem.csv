@@ -1,0 +1,8 @@
+# Table Type: WeaponItem,
+# Description: 무기 아이템 속성 정의 테이블,
+# Rule: 콤마 사용 불가. ID는 고유 값이어야 하며 중복 불가. WeaponCategory은 Greatsword. Dagger. Blunt. Bow. Throw,
+# Foreign ID: Item.csv,
+# Foreign Key: WeaponCategory.csv,
+ID,WeaponCategory
+# Index: WeaponItem,
+1,Greatsword

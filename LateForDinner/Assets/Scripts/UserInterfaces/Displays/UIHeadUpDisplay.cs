@@ -1,3 +1,4 @@
+using LateForDinner.Data;
 using R3;
 using System.Collections.Generic;
 using UnityEngine;
@@ -45,6 +46,7 @@ public class UIHeadUpDisplay : UIDisplay
     private void InitQuickSlots()
     {
         var content = GetRectTransform(RectTransforms.SlotContent).transform;
+        var quickSlotsData = Managers.Inventory?.GetQuickSlots();
 
         for (int index = 0; index < Define.Amount.MaxQuickSlot; index++)
         {
@@ -52,7 +54,8 @@ public class UIHeadUpDisplay : UIDisplay
 
             if (slot != null)
             {
-                slot.SetIndex(index);
+                InventorySlot slotData = (quickSlotsData != null && index < quickSlotsData.Count) ? quickSlotsData[index] : null;
+                slot.Setup(index, slotData);
                 _quickSlots.Add(slot);
             }
         }

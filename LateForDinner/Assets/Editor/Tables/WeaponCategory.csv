@@ -1,0 +1,11 @@
+# Table Type: WeaponCategory,
+# Description: 무기 카테고리 비트 플래그 정의 테이블,
+# Rule: 콤마 사용 불가. WeaponCategory은 Greatsword. Dagger. Blunt. Bow. Throw. Bitmask는 1. 2. 4 이진 비트 순서,
+# Foreign Key: WeaponItem.csv,
+WeaponCategory,Bitmask
+# Index: WeaponCategory,
+Greatsword,1
+Dagger,2
+Blunt,4
+Bow,8
+Thorw,16

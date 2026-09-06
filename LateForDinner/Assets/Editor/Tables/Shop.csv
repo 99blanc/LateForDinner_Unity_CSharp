@@ -1,0 +1,8 @@
+# Table Type: Shop,,,
+# Description: 상점 정의 테이블,,,
+# Rule: 콤마 사용 불가. ID는 고유 값이어야 하며 중복 불가.,,,
+# Foreign ID: Character.csv,,,
+# Foreign Key: Localization.csv,,,
+ID,NameKey,DescriptionKey,CharacterID
+# Index: Item,,,
+1,Shop_Name_1,Shop_Description_1,0

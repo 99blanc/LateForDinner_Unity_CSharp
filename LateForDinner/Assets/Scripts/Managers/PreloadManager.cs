@@ -71,6 +71,9 @@ public class PreloadManager
         await Managers.Pool.PrewarmAsync<UIDashCountSlot>(Define.Amount.MaxDashCount);
         await Managers.Pool.PrewarmAsync<UIRemainHealthSlot>(Define.Amount.MaxHealthCount);
         await Managers.Pool.PrewarmAsync<UIHeadUpDisplay>(1);
+        await Managers.Pool.PrewarmAsync<UIQuickSlot>(Define.Amount.MaxQuickSlot);
+        await Managers.Pool.PrewarmAsync<UIInventorySlot>(Define.Amount.MaxInventorySlot);
+        await Managers.Pool.PrewarmAsync<UIQuestInventoryPopup>(1);
         Log.System(LocalizationKey.Log_Preload_BootFinished);
     }
 }

@@ -53,15 +53,15 @@ public interface IClimbableCharacter
         Rigidbody.gravityScale = 1f;
     }
 
-    public void Climb(float verticalInput)
+    public void Climb(float directionY)
     {
         if (this is not Character || Rigidbody == null || Attributes == null || !IsClimbing)
             return;
 
-        ApplyClimbMovement(verticalInput);
+        ApplyClimbMovement(directionY);
     }
 
-    private void ApplyClimbMovement(float verticalInput)
+    private void ApplyClimbMovement(float directionY)
     {
         var val = _climbValue.GetOrCreateValue(this);
         float targetVelocityX = 0f;
@@ -75,7 +75,7 @@ public interface IClimbableCharacter
         }
 
         float maxClimbSpeed = Attributes.Get<float>(AttributeType.MoveSpeed).CurrentValue * 0.5f;
-        float targetVelocityY = verticalInput * maxClimbSpeed;
+        float targetVelocityY = directionY * maxClimbSpeed;
         Rigidbody.linearVelocity = new Vector2(targetVelocityX, targetVelocityY);
     }
 }

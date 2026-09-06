@@ -1,9 +1,8 @@
 # Table Type: SceneTransition,,
 # Description: 맵(Scene) 이동 규칙. 연결 관계(From/To) 및 이동 정의 테이블,,
-# Rule: 콤마 사용 불가. ID는 현재 맵 번호. Type은 이동 방식의 정의. ,,
-# ID: Scene.csv,,
+# Rule: 콤마 사용 불가. ID는 Scene 문서 내 맵(Scene) ID와 연결. TransitionType은 Portal. Boundary 이동 방식 ,,
 # Foreign ID: Scene.csv(SceneID/ToSceneID),,
-SceneID,Type,ToSceneID
+SceneID,TransitionType,ToSceneID
 # Index: SceneTransition,,
 2,Portal,3
 # Index: Tutorial,,

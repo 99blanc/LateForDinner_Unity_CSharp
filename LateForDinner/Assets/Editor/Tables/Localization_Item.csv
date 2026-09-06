@@ -1,0 +1,11 @@
+# Table Type: Localization,
+# Description: 아이템 이름 및 설명 현지화 데이터 관리 테이블,
+# Rule: 콤마 사용 불가. Key는 고유 값이어야 하며 중복 불가. 각 Key별 Text에 포맷팅 파라미터({0}/{2} 등) 사용 가능,
+Key,Text
+# Index: Item,
+# Index: Name,
+Item_Name_1,대검
+# Index: Description,
+Item_Description_1,공격력: 1\n공격속도: 1
+# Index: Flavor,
+Item_Flavor_1,테스트용 대검이다.

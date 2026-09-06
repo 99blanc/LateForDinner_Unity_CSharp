@@ -120,6 +120,7 @@ public class Literal
     public class Objects
     {
         public const string Cursor = "&Cursor";
+        public const string BackgroundImage = "BackgroundImage";
         public const string BackTransform = "BackTransform";
         public const string CameraTransform = "CameraTransform";
         public const string FrontTransform = "FrontTransform";
@@ -165,14 +166,24 @@ public class Literal
 
     public class Tables
     {
+        public const string Localization = "Localization";
         public const string Attribute = "Attribute";
         public const string Character = "Character";
-        public const string Localization = "Localization";
-        public const string Scene = "Scene";
-        public const string Prop = "Prop";
-        public const string SceneTransition = "SceneTransition";
         public const string PlayableCharacter = "PlayableCharacter";
         public const string PlayableCharacterTemplate = "PlayableCharacterTemplate";
+        public const string Item = "Item";
+        public const string ArmorItem = "ArmorItem";
+        public const string WeaponItem = "WeaponItem";
+        public const string ConsumptionItem = "ConsumptionItem";
+        public const string EtcItem = "EtcItem";
+        public const string ItemTemplate = "ItemTemplate";
+        public const string ArmorCategory = "ArmorCategory";
+        public const string WeaponCategory = "WeaponCategory";
+        public const string Shop = "Shop";
+        public const string ShopItem = "ShopItem";
+        public const string Scene = "Scene";
+        public const string SceneTransition = "SceneTransition";
+        public const string Prop = "Prop";
     }
 
     public class Tags

@@ -84,7 +84,7 @@ public interface IAnimatableUI
         if (Animator != null)
         {
             Animator.enabled = true;
-            Animator.gameObject.SetActive(true);
+            Animator.SetActive(true);
             CancellationToken cts = GetNewCancellationToken();
             Animator.Play(hash, layer, normalizedTime);
 

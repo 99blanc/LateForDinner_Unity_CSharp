@@ -100,6 +100,9 @@ public enum LocalizationKey
     Console_Spawn_Invalid                              , // 유효하지 않은 CharacterID입니다: '{0}'. 캐릭터 목록을 보려면 'spawn list'를 입력하세요.
     Interaction_Ladder                                 , // 사다리 진입
     Interaction_Tray                                   , // 식판 획득/내려놓기/던지기/식탁 배치
+    Item_Name_1                                        , // 대검
+    Item_Description_1                                 , // 공격력: 1\n공격속도: 1
+    Item_Flavor_1                                      , // 테스트용 대검이다.
     Log_Attribute_Registry_Unsupported                 , // [AttributeRegistry] 지원하지 않는 데이터 타입입니다: {0}('{1}')
     Log_Camera_LoadSuccess                             , // [CameraManager] 카메라 로드에 성공했습니다.
     Log_Camera_LoadFailed                              , // [CameraManager] 카메라 로드에 실패했습니다.
@@ -183,6 +186,8 @@ public enum LocalizationKey
     Log_Load_Display_AnimationFailed                   , // [UILoadDisplay] 로딩 애니메이션 진행 중 예외가 발생했습니다.
     Log_Load_Display_RotateFailed                      , // [UILoadDisplay] 로딩 회전 애니메이션 중 예외가 발생했습니다.
     Log_Splash_Display_Skip                            , // [UISplashScreen] 스플래시 이미지를 건너뛰었습니다.
+    Shop_Name_1                                        , // 무기 상점
+    Shop_Description_1                                 , // 무기 상점이다.
     UI_Console_System_AutoComplete_Candidates          , // 자동 완성 후보: {0}
     UI_FPS_System_Indicator                            , // FPS: {0}
     UI_Pause_Popup_Text_Continue                       , // 계속하기

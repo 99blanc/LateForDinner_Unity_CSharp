@@ -6,7 +6,7 @@ namespace LateForDinner.Data
     public partial class SceneTransitionData
     {
         public int SceneID { get; set; }
-        public string Type { get; set; }
+        public string TransitionType { get; set; }
         public int ToSceneID { get; set; }
     }
 }

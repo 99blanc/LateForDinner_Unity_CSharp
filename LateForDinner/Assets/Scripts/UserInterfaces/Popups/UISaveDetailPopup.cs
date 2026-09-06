@@ -168,7 +168,7 @@ public class UISaveDetailPopup : UIPopup, IFocusablePopup
         var image = GetImage(Images.MealTimeImage);
 
         if (image != null) 
-            image.gameObject.SetActive(isActive);
+            image.SetActive(isActive);
     }
 
     private void SetMealImageSprite(string spriteName)
@@ -184,6 +184,6 @@ public class UISaveDetailPopup : UIPopup, IFocusablePopup
         var image = GetImage(Images.CharacterImage);
 
         if (image != null)
-            image.gameObject.SetActive(isActive);
+            image.SetActive(isActive);
     }
 }

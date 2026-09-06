@@ -247,11 +247,11 @@ public class UIOptionPopup : UIPopup, IDraggablePopup, IFocusablePopup
 
     private void InitSoundPanel()
     {
-        BindToggleAction(Toggles.MasterToggle, Images.MasterCheckmarkImage, Images.MasterInputImage, Toggles.MasterToggle, Scrollbars.MasterScrollbar);
-        BindToggleAction(Toggles.BGMToggle, Images.BGMCheckmarkImage, Images.BGMInputImage, Toggles.BGMToggle, Scrollbars.BGMScrollbar);
-        BindToggleAction(Toggles.AmbientToggle, Images.AmbientCheckmarkImage, Images.AmbientInputImage, Toggles.AmbientToggle, Scrollbars.AmbientScrollbar);
-        BindToggleAction(Toggles.SFXToggle, Images.SFXCheckmarkImage, Images.SFXInputImage, Toggles.SFXToggle, Scrollbars.SFXScrollbar);
-        BindToggleAction(Toggles.UIToggle, Images.UICheckmarkImage, Images.UIInputImage, Toggles.UIToggle, Scrollbars.UIScrollbar);
+        BindToggleAction(Toggles.MasterToggle, Images.MasterCheckmarkImage, Images.MasterInputImage, Images.MasterToggleImage, Scrollbars.MasterScrollbar);
+        BindToggleAction(Toggles.BGMToggle, Images.BGMCheckmarkImage, Images.BGMInputImage, Images.BGMToggleImage, Scrollbars.BGMScrollbar);
+        BindToggleAction(Toggles.AmbientToggle, Images.AmbientCheckmarkImage, Images.AmbientInputImage, Images.AmbientToggleImage, Scrollbars.AmbientScrollbar);
+        BindToggleAction(Toggles.SFXToggle, Images.SFXCheckmarkImage, Images.SFXInputImage, Images.SFXToggleImage, Scrollbars.SFXScrollbar);
+        BindToggleAction(Toggles.UIToggle, Images.UICheckmarkImage, Images.UIInputImage, Images.UIToggleImage, Scrollbars.UIScrollbar);
         GetToggle(Toggles.MuteToggle).BindView(_ =>
         {
             bool isOn = GetToggle(Toggles.MuteToggle).isOn;
@@ -271,7 +271,7 @@ public class UIOptionPopup : UIPopup, IDraggablePopup, IFocusablePopup
         SetText(Texts.MuteText, LocalizationKey.UI_Option_Popup_Text_Mute);
     }
 
-    private void BindToggleAction(Toggles toggleEnum, Images checkmarkEnum, Images inputImageEnum, Toggles toggleImageEnum, Scrollbars scrollbarEnum)
+    private void BindToggleAction(Toggles toggleEnum, Images checkmarkEnum, Images inputImageEnum, Images toggleImageEnum, Scrollbars scrollbarEnum)
     {
         GetToggle(toggleEnum).BindView(_ =>
         {
@@ -523,14 +523,6 @@ public class UIOptionPopup : UIPopup, IDraggablePopup, IFocusablePopup
         GetPanel(Panels.SoundPanel).SetActivePanel(_state == UI_OptionState.Sound);
         GetPanel(Panels.GraphicPanel).SetActivePanel(_state == UI_OptionState.Graphic);
         GetPanel(Panels.AccessPanel).SetActivePanel(_state == UI_OptionState.Access);
-        UpdateTab();
-    }
-
-    private void UpdateTab()
-    {
-        _soundButton.Value = _state == UI_OptionState.Sound ? ButtonState.Disable : ButtonState.Normal;
-        _graphicButton.Value = _state == UI_OptionState.Graphic ? ButtonState.Disable : ButtonState.Normal;
-        _accessButton.Value = _state == UI_OptionState.Access ? ButtonState.Disable : ButtonState.Normal;
     }
 
     private void UpdateVolume(TMP_InputField inputField, float value)

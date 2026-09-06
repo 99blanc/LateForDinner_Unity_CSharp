@@ -1,11 +1,35 @@
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
-public interface IDraggablePopup : IDragHandler, IEndDragHandler
+public interface IDraggablePopup : IBeginDragHandler, IDragHandler, IEndDragHandler
 {
+    private static readonly ConditionalWeakTable<IDraggablePopup, DragStateValue> _dragValues = new ConditionalWeakTable<IDraggablePopup, DragStateValue>();
+    private class DragStateValue
+    {
+        public bool CanDrag = true;
+    }
+
+    void IBeginDragHandler.OnBeginDrag(PointerEventData data) 
+    {
+        if (this is not UIPopup popup || popup.RectTransform == null)
+            return;
+
+        var val = _dragValues.GetOrCreateValue(this);
+        bool isOverInteractive = IsPointerOverInteractiveElement(popup, data);
+        val.CanDrag = !isOverInteractive;
+    }
+
     void IDragHandler.OnDrag(PointerEventData data)
     {
         if (this is not UIPopup popup || popup.RectTransform == null)
+            return;
+
+        var val = _dragValues.GetOrCreateValue(this);
+
+        if (!val.CanDrag)
             return;
 
         float scaleFactor = Managers.UI.ScaleFactor;
@@ -14,7 +38,33 @@ public interface IDraggablePopup : IDragHandler, IEndDragHandler
         popup.RectTransform.anchoredPosition = nextPosition;
     }
 
-    void IEndDragHandler.OnEndDrag(PointerEventData data) { }
+    void IEndDragHandler.OnEndDrag(PointerEventData data) 
+    {
+        var val = _dragValues.GetOrCreateValue(this);
+        val.CanDrag = true;
+    }
+
+    private bool IsPointerOverInteractiveElement(UIPopup popup, PointerEventData data)
+    {
+        var raycastResults = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(data, raycastResults);
+
+        foreach (var result in raycastResults)
+        {
+            if (!result.gameObject.transform.IsChildOf(popup.transform))
+                continue;
+
+            if (result.gameObject == popup.gameObject || result.gameObject.name == Literal.Objects.BackgroundImage)
+                continue;
+
+            if (result.gameObject.GetComponentInParent<Selectable>() != null)
+                return true;
+
+            if (result.gameObject.GetComponentInParent<ScrollRect>() != null)
+                return true;
+        }
+        return false;
+    }
 
     private Vector2 ClampWithMargin(RectTransform rectTransform, Vector2 targetPosition)
     {

@@ -19,5 +19,7 @@ public enum AttributeType
     JumpCount              , // int
     JumpForce              , // float
     GravityReduction       , // float
-    InvulnerabilityDuration, // float
+    InvulnerabilityTime    , // float
+    IgnoreArmorRestriction , // int
+    IgnoreWeaponRestriction, // int
 }

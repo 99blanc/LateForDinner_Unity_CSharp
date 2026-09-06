@@ -1,0 +1,10 @@
+# Table Type: ItemTemplate,,,,
+# Description: 아이템 능력치 값 정의 테이블,,,,
+# Rule: 콤마 사용 불가. ID는 Item 문서 내 아이템 ID와 연결. ApplyType은 Active. Passive. Duration. Value와 Duration 미적용은 값 0으로 선언,,,,
+# Foreign ID: Item.csv,,,,
+# Foreign Key: Attribute.csv,,,,
+ItemID,ApplyType,AttributeKey,Value,Duration
+# Index: ItemTemplate,,,,
+1,Passive,Damage,1,0
+1,Passive,AttackSpeed,1,0
+1,Passive,AttackInterval,0.2,0

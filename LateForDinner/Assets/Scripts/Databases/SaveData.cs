@@ -1,9 +1,28 @@
 using MemoryPack;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using ZLinq;
 
 namespace LateForDinner.Data
 {
+    [MemoryPackable]
+    public partial class WeaponSave
+    {
+        public int WeaponItemID;
+        public int UpgradeLevel;
+        public bool HasSpecialUpgrade;
+        public int SelectedSpecialIndex;
+    }
+
+    [MemoryPackable]
+    public partial class InventorySlot
+    {
+        public int SlotIndex;
+        public int ItemID;
+        public int Quantity;
+    }
+
     [MemoryPackable]
     public partial class Slot
     {
@@ -76,6 +95,11 @@ namespace LateForDinner.Data
         public List<AttributeSaveData> SavedAttributes;
         public Vector2 PlayerPosition;
         public float PlayerRotation;
+        public List<InventorySlot> InventorySlots;
+        public List<InventorySlot> EquipmentSlots;
+        public List<WeaponSave> UnlockedWeapons;
+        public List<InventorySlot> QuickSlots;
+        public float Gold;
 
         [MemoryPackIgnore]
         public new static SaveData Default => new SaveData()
@@ -93,7 +117,12 @@ namespace LateForDinner.Data
             InteractableStates = new Dictionary<string, bool>(),
             SavedAttributes= new List<AttributeSaveData>(),
             PlayerPosition = Vector2.zero,
-            PlayerRotation = 0f
+            PlayerRotation = 0f,
+            InventorySlots = Enumerable.Range(0, Define.Amount.MaxInventorySlot).Select(i => new InventorySlot { SlotIndex = i, ItemID = 0, Quantity = 0 }).ToList(),
+            EquipmentSlots = Enumerable.Range(0, Define.Amount.MaxEquipmentSlot).Select(i => new InventorySlot { SlotIndex = i, ItemID = 0, Quantity = 0 }).ToList(),
+            UnlockedWeapons = new List<WeaponSave>(),
+            QuickSlots = Enumerable.Range(0, Define.Amount.MaxQuickSlot).Select(i => new InventorySlot { SlotIndex = i, ItemID = 0, Quantity = 0 }).ToList(),
+            Gold = 0f
         };
     }
 

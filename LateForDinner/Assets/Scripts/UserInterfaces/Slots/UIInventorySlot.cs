@@ -1,4 +1,6 @@
+using LateForDinner.Data;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class UIInventorySlot : UISlot
 {
@@ -6,16 +8,80 @@ public class UIInventorySlot : UISlot
     {
         SlotBackgroundImage,
         SlotCoverImage,
-        SlotItemImage
+        SlotItemImage,
+        SlotCooldownImage
     }
 
     private enum Texts
     {
-        SlotCountText
+        SlotQuantityText
     }
 
     private enum Buttons
     {
         SlotButton
+    }
+
+    private InventorySlot _data;
+    private int _slotIndex;
+    private bool _isEquipmentSlot;
+
+    public override void OnInit()
+    {
+        base.OnInit();
+        BindImage(typeof(Images));
+        BindText(typeof(Texts));
+        BindButton(typeof(Buttons));
+        GetButton(Buttons.SlotButton).BindView(OnClickSlot, ViewEvent.LeftClick, this);
+    }
+
+    public void Setup(int slotIndex, InventorySlot slotData, bool isEquipmentSlot = false)
+    {
+        _slotIndex = slotIndex;
+        _data = slotData;
+        _isEquipmentSlot = isEquipmentSlot;
+        Refresh();
+    }
+
+    public override void Refresh()
+    {
+        base.Refresh();
+
+        var coverImage = GetImage(Images.SlotCoverImage);
+
+        if (coverImage != null)
+            coverImage.SetActive(_isEquipmentSlot);
+
+        if (_data == null || _data.ItemID <= 0)
+        {
+            GetImage(Images.SlotItemImage).SetActive(false);
+            GetText(Texts.SlotQuantityText).text = string.Empty;
+            GetImage(Images.SlotCooldownImage).SetActive(false);
+            return;
+        }
+
+        if (Managers.Data.Items.TryGetValue(_data.ItemID, out ItemData itemData))
+        {
+            GetImage(Images.SlotItemImage).SetActive(true);
+            GetImage(Images.SlotItemImage).sprite = Managers.Resource.GetSprite(Define.Atlas.Item, itemData.AddressableKey);
+        }
+        else
+        {
+            GetImage(Images.SlotItemImage).SetActive(false);
+            return;
+        }
+
+        if (_data.Quantity > 1)
+        {
+            GetText(Texts.SlotQuantityText).SetActive(true);
+            GetText(Texts.SlotQuantityText).text = _data.Quantity.ToString();
+        }
+        else
+            GetText(Texts.SlotQuantityText).SetActive(false);
+    }
+
+    private void OnClickSlot(PointerEventData data)
+    {
+        Debug.Log($"Clicked Slot Index: {_slotIndex}");
     }
 }

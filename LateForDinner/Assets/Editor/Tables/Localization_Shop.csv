@@ -1,0 +1,9 @@
+# Table Type: Localization,
+# Description: 상점 이름 및 설명 현지화 데이터 관리 테이블,
+# Rule: 콤마 사용 불가. Key는 고유 값이어야 하며 중복 불가. 각 Key별 Text에 포맷팅 파라미터({0}/{2} 등) 사용 가능,
+Key,Text
+# Index: Shop,
+# Index: Name,
+Shop_Name_1,무기 상점
+# Index: Description,
+Shop_Description_1,무기 상점이다.

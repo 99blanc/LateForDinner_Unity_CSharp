@@ -1,0 +1,11 @@
+# Table Type: Item,,,,,,
+# Description: 아이템 속성 정의 테이블,,,,,,
+# Rule: 콤마 사용 불가. ID는 고유 값이어야 하며 중복 불가. ItemType은 Equipment. Consumption. Etc. AddressableKey는 해당 오브젝트의 실제 스프라이트 이름. MaxStack은 슬롯에 쌓을 수 있는 계수,,,,,,
+# Foreign Key: Localization.csv,,,,,,
+ID,ItemType,NameKey,DescriptionKey,FlavorKey,AddressableKey,MaxStack
+# Index: ArmorItem,,,,,,
+# Index: WeaponItem,,,,,,
+1,Equipment,Item_Name_1,Item_Description_1,Item_Flavor_1,item_weapon_greatsword,1
+# Index: ConsumptionItem,,,,,,
+# Index: EtcItem,,,,,,
+# Index: WeaponItem,,,,,,

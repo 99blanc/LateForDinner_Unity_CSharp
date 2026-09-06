@@ -1,0 +1,10 @@
+# Table Type: ArmorCategory,
+# Description: 방어구 카테고리 비트 플래그 정의 테이블,
+# Rule: 콤마 사용 불가. ArmorCategory은 Head. Chest. Pants. Boots. Bitmask는 1. 2. 4 이진 비트 순서,
+# Foreign Key: ArmorItem.csv,
+ArmorCategory,Bitmask
+# Index: ArmorCategory,
+Head,1
+Chest,2
+Pants,4
+Boots,8

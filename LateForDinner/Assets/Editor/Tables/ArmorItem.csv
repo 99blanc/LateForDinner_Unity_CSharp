@@ -1,0 +1,6 @@
+# Table Type: ArmorItem,
+# Description: 장비 아이템 속성 정의 테이블,
+# Rule: 콤마 사용 불가. ID는 고유 값이어야 하며 중복 불가. ArmorCategory은 Head. Chest. Pants. Boots,
+# Foreign ID: Item.csv,
+ID,ArmorCategory
+# Index: ArmorItem,

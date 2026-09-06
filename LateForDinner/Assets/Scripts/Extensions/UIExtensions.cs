@@ -198,4 +198,28 @@ public static class UIExtensions
                 handleImage.color = targetColor;
         }
     }
+
+    public static void SetActive(this Graphic component, bool isActive)
+    {
+        if (component != null && component.gameObject != null)
+            component.gameObject.SetActive(isActive);
+    }
+
+    public static void SetActive(this TMP_Text component, bool isActive)
+    {
+        if (component != null && component.gameObject != null)
+            component.gameObject.SetActive(isActive);
+    }
+
+    public static void SetActive(this Component component, bool isActive)
+    {
+        if (component != null && component.gameObject != null)
+            component.gameObject.SetActive(isActive);
+    }
+
+    public static bool IsActive(this Component component)
+        => component != null && component.gameObject != null && component.gameObject.activeSelf;
+
+    public static bool IsActive(this GameObject gameObject)
+        => gameObject != null && gameObject.activeSelf;
 }

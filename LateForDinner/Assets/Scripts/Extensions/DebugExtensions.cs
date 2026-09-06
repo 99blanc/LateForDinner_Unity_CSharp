@@ -30,7 +30,7 @@ public static class DebugExtensions
             _debugLine.sortingOrder = 999;
         }
 
-        _debugLine.gameObject.SetActive(isEnabled);
+        _debugLine.SetActive(isEnabled);
 
         if (!isEnabled)
             return;

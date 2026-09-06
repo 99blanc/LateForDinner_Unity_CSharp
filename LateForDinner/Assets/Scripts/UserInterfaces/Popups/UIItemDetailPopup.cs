@@ -12,6 +12,6 @@ public class UIItemDetailPopup : UIPopup
         ItemNameText,
         ItemTypeText,
         DescriptionText,
-        PlayverText
+        FlavorText
     }
 }

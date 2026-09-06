@@ -1,4 +1,4 @@
-public enum SceneTransitionType
+public enum TransitionType
 {
     Portal  ,
     Boundary,

@@ -4,6 +4,9 @@ public class Define
     {
         public const int MaxSaveSlot = 4;
         public const int MaxQuickSlot = 4;
+        public const int MaxEquipmentSlot = 5;
+        public const int MaxInventorySlot = 60;
+        public const int InventoryTabSize = 20;
         public const int MaxDashCount = 28;
         public const int MaxHealthCount = 56;
     }
@@ -49,10 +52,11 @@ public class Define
     public class Atlas
     {
         public const string Common = "common_atlas";
-        public const string Title = "splash_title_atlas";
+        public const string HeadUp = "headup_atlas";
+        public const string Item = "item_atlas";
         public const string Load = "load_atlas";
         public const string PlayableCharacter = "playablecharacter_atlas";
-        public const string HeadUp = "headup_atlas";
+        public const string Title = "splash_title_atlas";
     }
 
     public class Command
@@ -62,7 +66,7 @@ public class Define
 
     public class Cursor
     {
-        public static readonly UnityEngine.Vector2 Hotspot = new UnityEngine.Vector2(30f, 18f);
+        public static readonly UnityEngine.Vector2 Hotspot = new UnityEngine.Vector2(35f, 21f);
         public static readonly UnityEngine.Vector2 Size = new UnityEngine.Vector2(200f, 160f);
         public const float Duration = 5f;
     }
@@ -123,7 +127,6 @@ public class Define
         public const string Slot_New = "ui_common_image_slot_new";
         public const string Slot_Normal = "ui_common_image_slot_normal";
         public const string Empty = "ui_common_empty";
-
         public const string DashCount = "ui_headup_player_dash_count";
         public const string HealthEmpty = "ui_headup_player_health_empty";
         public const string HealthHalf = "ui_headup_player_health_half";

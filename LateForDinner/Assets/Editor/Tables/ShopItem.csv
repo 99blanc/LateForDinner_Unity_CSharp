@@ -1,0 +1,7 @@
+# Table Type: ShopItem,,,,,,,
+# Description: 상점 아이템 배치 정의 테이블,,,,,,,
+# Rule: 콤마 사용 불가. ID는 고유 값이어야 하며 중복 불가. ShopID는 Shop 문서 내 상점 ID와 연결. ID는 Item 문서 내 아이템 ID와 연결. CurrencyID은 EtcItem 문서 내 Currency 지정 아이템. Stock은 판매 수량 제한. Condition은 구매 조건,,,,,,,
+# Foreign ID: Item.csv(Shop.csv),,,,,,,
+# Foreign Key: Localization.csv,,,,,,,
+ID,ShopID,ItemID,BuyPrice,SellPrice,CurrencyID,Stock,Condition
+# Index: ShopItem,,,,,,,

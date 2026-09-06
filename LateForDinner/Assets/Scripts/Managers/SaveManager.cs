@@ -224,6 +224,12 @@ public class SaveManager
             CurrentData.PlayerPosition = player.transform.position;
             CurrentData.PlayerRotation = player.transform.rotation.z;
         }
+
+        if (Managers.Inventory != null)
+        {
+            CurrentData.InventorySlots = Managers.Inventory.ExportSaveData();
+            CurrentData.QuickSlots = Managers.Inventory.ExportQuickSlotSaveData();
+        }
     }
 
     private string GetPath(int slot)

@@ -1,0 +1,6 @@
+# Table Type: ConsumptionItem,,,
+# Description: 소비 아이템 속성 정의 테이블,,,
+# Rule: 콤마 사용 불가. ID는 고유 값이어야 하며 중복 불가. ConsumptionType은 Potion. Buff. Scroll. Cooldown은 사용 대기 시간. TargetType은 Self. Target. Area,,,
+# Foreign ID: Item.csv,,,
+ID,ConsumptionType,Cooldown,TargetType
+# Index: ConsumptionItem,,,

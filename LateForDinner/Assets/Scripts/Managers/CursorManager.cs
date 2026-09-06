@@ -191,7 +191,7 @@ public class CursorManager
         _isCursorVisible = isVisible;
 
         if (_cursorImage != null)
-            _cursorImage.gameObject.SetActive(isVisible);
+            _cursorImage.SetActive(isVisible);
     }
 
     private bool IsCursorVisibleState()
