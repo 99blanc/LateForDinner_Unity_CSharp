@@ -213,15 +213,15 @@ public class NotifyManager
     private bool IsPopupNotPooled(UserInterface popup)
         => !popup.IsPooled();
 
-    public void ClosePopup(UserInterface owner)
+    public void Close(UserInterface owner)
     {
         if (owner == null)
             return;
 
-        if (_processingPopups.TryGetValue(owner, out var popup))
+        if (_processingPopups.TryGetValue(owner, out var userInterface))
         {
-            if (popup != null && IsPopupNotPooled(popup))
-                Managers.UI.Close(popup);
+            if (userInterface != null && IsPopupNotPooled(userInterface))
+                Managers.UI.Close(userInterface);
 
             _processingPopups.Remove(owner);
         }

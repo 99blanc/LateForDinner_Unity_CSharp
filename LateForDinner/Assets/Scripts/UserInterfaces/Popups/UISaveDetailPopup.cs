@@ -82,7 +82,7 @@ public class UISaveDetailPopup : UIPopup, IFocusablePopup
     public void Setup(int slotIndex)
     {
         if (_selectedSlotIndex.HasValue && _selectedSlotIndex.Value != slotIndex)
-            Managers.Notify.ClosePopup(this);
+            Managers.Notify.Close(this);
 
         _selectedSlotIndex = slotIndex;
         SlotMeta meta = Managers.Save.MetaData.Slots[slotIndex];
