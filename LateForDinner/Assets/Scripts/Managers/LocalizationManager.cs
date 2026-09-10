@@ -175,6 +175,9 @@ public class LocalizationManager
 
     public string Get(string id)
     {
+        if (string.IsNullOrEmpty(id))
+            return string.Empty;
+
         if (_overrides.TryGetValue(id, out var text))
             return text;
 
@@ -187,16 +190,16 @@ public class LocalizationManager
     public string Get(LocalizationKey id)
         => Get(id.ToString());
 
-    public string Get<T1>(LocalizationKey id, T1 arg1)
-        => FormatText(id, text => ZString.Format(text, arg1));
+    public string Get<T1>(string id, T1 arg1)
+        => FormatText(id, text => ZString.Format(text, GetLocalizedArg(arg1)));
 
-    public string Get<T1, T2>(LocalizationKey id, T1 arg1, T2 arg2)
-        => FormatText(id, text => ZString.Format(text, arg1, arg2));
+    public string Get<T1, T2>(string id, T1 arg1, T2 arg2)
+        => FormatText(id, text => ZString.Format(text, GetLocalizedArg(arg1), GetLocalizedArg(arg2)));
 
-    public string Get<T1, T2, T3>(LocalizationKey id, T1 arg1, T2 arg2, T3 arg3)
-        => FormatText(id, text => ZString.Format(text, arg1, arg2, arg3));
+    public string Get<T1, T2, T3>(string id, T1 arg1, T2 arg2, T3 arg3)
+        => FormatText(id, text => ZString.Format(text, GetLocalizedArg(arg1), GetLocalizedArg(arg2), GetLocalizedArg(arg3)));
 
-    public string Get(LocalizationKey id, params object[] args)
+    public string Get(string id, params object[] args)
     {
         string text = Get(id);
 
@@ -205,7 +208,12 @@ public class LocalizationManager
 
         try
         {
-            return ZString.Format(text, args);
+            object[] localizedArgs = new object[args.Length];
+
+            for (int index = 0; index < args.Length; index++)
+                localizedArgs[index] = GetLocalizedArg(args[index]);
+
+            return ZString.Format(text, localizedArgs);
         }
         catch
         {
@@ -213,7 +221,35 @@ public class LocalizationManager
         }
     }
 
-    private string FormatText(LocalizationKey id, Func<string, string> formatAction)
+    public string Get<T1>(LocalizationKey id, T1 arg1)
+        => Get(id.ToString(), arg1);
+
+    public string Get<T1, T2>(LocalizationKey id, T1 arg1, T2 arg2)
+        => Get(id.ToString(), arg1, arg2);
+
+    public string Get<T1, T2, T3>(LocalizationKey id, T1 arg1, T2 arg2, T3 arg3)
+        => Get(id.ToString(), arg1, arg2, arg3);
+
+    public string Get(LocalizationKey id, params object[] args)
+        => Get(id.ToString(), args);
+
+    private object GetLocalizedArg<T>(T arg)
+    {
+        if (arg is LocalizationKey locKey)
+            return Get(locKey);
+
+        if (arg is string strArg)
+        {
+            if (_overrides.ContainsKey(strArg) || _caches.ContainsKey(strArg))
+                return Get(strArg);
+
+            return strArg;
+        }
+
+        return arg;
+    }
+
+    private string FormatText(string id, Func<string, string> formatAction)
     {
         string text = Get(id);
 

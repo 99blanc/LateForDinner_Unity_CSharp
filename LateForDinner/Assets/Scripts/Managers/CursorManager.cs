@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class CursorManager
 {
-    private RectTransform _rectTransform; 
+    private RectTransform _rectTransform;
     private GameObject _root;
     public GameObject Root
     {
@@ -21,8 +21,6 @@ public class CursorManager
     private Canvas _canvas;
     private Sprite _normalCursorSprite;
     private Sprite _pressCursorSprite;
-    private Vector2 _lastMousePosition = Vector2.negativeInfinity;
-    private float _lastMouseMovedTime;
     private bool _isCursorVisible = true;
 
     public GameObject InitRoot()
@@ -38,7 +36,6 @@ public class CursorManager
         CacheCursorSprites();
         CreateCursorUI();
         StartCursorUpdateLoop();
-        _lastMouseMovedTime = Time.unscaledTime;
     }
 
     private void CacheCursorSprites()
@@ -46,6 +43,7 @@ public class CursorManager
         _normalCursorSprite = Managers.Resource.GetSprite(Define.Atlas.Common, Define.Sprite.Cursor_Normal);
         _pressCursorSprite = Managers.Resource.GetSprite(Define.Atlas.Common, Define.Sprite.Cursor_Press);
     }
+
     private void CreateCursorUI()
     {
         _canvas = _root.GetComponentAssert<Canvas>();
@@ -107,61 +105,21 @@ public class CursorManager
             return;
         }
 
-        bool isClicked = Mouse.current != null && Mouse.current.leftButton.isPressed;
-
-        if (_lastMousePosition == Vector2.negativeInfinity)
-        {
-            _lastMousePosition = mousePosition;
-            SetCursorVisibility(false);
-            return;
-        }
-
-        if (HasMouseMoved(mousePosition) || isClicked)
-        {
-            UpdateLastMousePosition(mousePosition);
-
-            if (!_isCursorVisible)
-                SetCursorVisibility(true);
-        }
-
-        HandleCursorVisibility(mousePosition);
-
         if (!_isCursorVisible)
-            return;
+            SetCursorVisibility(true);
 
+        bool isClicked = Mouse.current.leftButton.isPressed;
         UpdateCursorPosition(mousePosition);
         SetCursorVisual(isClicked);
     }
 
     private void UpdateCursorPosition(Vector2 mousePosition)
     {
-        if (_canvas == null) 
+        if (_canvas == null)
             return;
 
         RectTransformUtility.ScreenPointToLocalPointInRectangle(_canvas.transform as RectTransform, mousePosition, _canvas.worldCamera, out Vector2 localPoint);
         _rectTransform.anchoredPosition = localPoint;
-    }
-
-    private void HandleCursorVisibility(Vector2 currentMousePosition)
-    {
-        if (_lastMousePosition == Vector2.negativeInfinity)
-        {
-            InitializeMousePositionState(currentMousePosition);
-            return;
-        }
-
-        if (HasMouseMoved(currentMousePosition))
-        {
-            UpdateLastMousePosition(currentMousePosition);
-
-            if (!_isCursorVisible)
-                SetCursorVisibility(true);
-
-            return;
-        }
-
-        if (_isCursorVisible && HasCursorInactivityTimeoutExceeded())
-            SetCursorVisibility(false);
     }
 
     private Vector2 GetCurrentMousePosition()
@@ -180,7 +138,7 @@ public class CursorManager
 
     private void SetCursorVisual(bool isPressed)
     {
-        if (_cursorImage == null) 
+        if (_cursorImage == null)
             return;
 
         _cursorImage.sprite = isPressed ? _pressCursorSprite : _normalCursorSprite;
@@ -191,26 +149,8 @@ public class CursorManager
         _isCursorVisible = isVisible;
 
         if (_cursorImage != null)
-            _cursorImage.SetActive(isVisible);
+            _cursorImage.gameObject.SetActive(isVisible);
 
         Cursor.visible = !isVisible;
     }
-
-    private void InitializeMousePositionState(Vector2 currentMousePosition)
-    {
-        _lastMousePosition = currentMousePosition;
-        _lastMouseMovedTime = Time.unscaledTime;
-    }
-
-    private bool HasMouseMoved(Vector2 currentMousePosition)
-        => currentMousePosition != _lastMousePosition;
-
-    private void UpdateLastMousePosition(Vector2 currentMousePosition)
-    {
-        _lastMousePosition = currentMousePosition;
-        _lastMouseMovedTime = Time.unscaledTime;
-    }
-
-    private bool HasCursorInactivityTimeoutExceeded()
-        => (Time.unscaledTime - _lastMouseMovedTime) >= Define.Cursor.Duration;
 }

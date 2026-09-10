@@ -1,6 +1,5 @@
 using R3;
 using System;
-using UnityEngine.EventSystems;
 
 public class UIAlertPopup : UIPopup, IDraggablePopup, IFocusablePopup
 {
@@ -23,7 +22,7 @@ public class UIAlertPopup : UIPopup, IDraggablePopup, IFocusablePopup
 
     private readonly ReactiveProperty<ButtonState> _confirmButtonState = new ReactiveProperty<ButtonState>(ButtonState.Normal);
     private Action _onConfirm;
-    private LocalizationKey _cachedTitleKey;
+    private Func<string> _titleProvider;
     private Func<string> _messageProvider;
 
     public override void OnInit()
@@ -45,21 +44,22 @@ public class UIAlertPopup : UIPopup, IDraggablePopup, IFocusablePopup
     public override void Refresh()
     {
         base.Refresh();
-        GetText(Texts.AlertText).text = Managers.Localization.Get(_cachedTitleKey);
-        GetText(Texts.MessageText).text = _messageProvider();
+        GetText(Texts.AlertText).text = _titleProvider?.Invoke() ?? string.Empty;
+        GetText(Texts.MessageText).text = _messageProvider?.Invoke() ?? string.Empty;
     }
 
     public override void OnRelease()
     {
         base.OnRelease();
-        _cachedTitleKey = LocalizationKey.None;
+        _titleProvider = null;
         _messageProvider = null;
+        _onConfirm = null;
     }
 
     public void Setup(LocalizationKey titleKey, LocalizationKey messageKey, Action onConfirm = null)
     {
         _onConfirm = onConfirm;
-        _cachedTitleKey = titleKey;
+        _titleProvider = () => Managers.Localization.Get(titleKey);
         _messageProvider = () => Managers.Localization.Get(messageKey);
         Refresh();
     }
@@ -67,7 +67,7 @@ public class UIAlertPopup : UIPopup, IDraggablePopup, IFocusablePopup
     public void Setup<T1>(LocalizationKey titleKey, LocalizationKey messageKey, Action onConfirm, T1 arg1)
     {
         _onConfirm = onConfirm;
-        _cachedTitleKey = titleKey;
+        _titleProvider = () => Managers.Localization.Get(titleKey);
         _messageProvider = () => Managers.Localization.Get(messageKey, arg1);
         Refresh();
     }
@@ -75,7 +75,7 @@ public class UIAlertPopup : UIPopup, IDraggablePopup, IFocusablePopup
     public void Setup<T1, T2>(LocalizationKey titleKey, LocalizationKey messageKey, Action onConfirm, T1 arg1, T2 arg2)
     {
         _onConfirm = onConfirm;
-        _cachedTitleKey = titleKey;
+        _titleProvider = () => Managers.Localization.Get(titleKey);
         _messageProvider = () => Managers.Localization.Get(messageKey, arg1, arg2);
         Refresh();
     }
@@ -83,7 +83,7 @@ public class UIAlertPopup : UIPopup, IDraggablePopup, IFocusablePopup
     public void Setup<T1, T2, T3>(LocalizationKey titleKey, LocalizationKey messageKey, Action onConfirm, T1 arg1, T2 arg2, T3 arg3)
     {
         _onConfirm = onConfirm;
-        _cachedTitleKey = titleKey;
+        _titleProvider = () => Managers.Localization.Get(titleKey);
         _messageProvider = () => Managers.Localization.Get(messageKey, arg1, arg2, arg3);
         Refresh();
     }
@@ -91,7 +91,7 @@ public class UIAlertPopup : UIPopup, IDraggablePopup, IFocusablePopup
     public void Setup(LocalizationKey titleKey, LocalizationKey messageKey, Action onConfirm, params object[] args)
     {
         _onConfirm = onConfirm;
-        _cachedTitleKey = titleKey;
+        _titleProvider = () => Managers.Localization.Get(titleKey);
         _messageProvider = () => (args != null && args.Length > 0) ? Managers.Localization.Get(messageKey, args) : Managers.Localization.Get(messageKey);
         Refresh();
     }

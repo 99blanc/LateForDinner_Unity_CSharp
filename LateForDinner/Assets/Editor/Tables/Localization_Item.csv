@@ -17,7 +17,7 @@ Item_Description_2,임시체력: +1
 Item_Description_3,이동속도: +1
 Item_Description_4,점프력: +1\n점프횟수: +1
 Item_Description_5,공격력: +1\n공격속도: +1\n공격간격: +0.2
-Item_Description_6,체력: +1\재사용 대기시간: 2초
+Item_Description_6,체력: +1\n재사용 대기시간: 2초
 Item_Description_7,레포디 테스트용 포션
 # Index: Flavor,
 Item_Flavor_1,테스트하기 귀찮은 사람이 만든 모자다.

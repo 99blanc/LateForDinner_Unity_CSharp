@@ -137,7 +137,7 @@ public enum LocalizationKey
     Item_Description_3                                 , // 이동속도: +1
     Item_Description_4                                 , // 점프력: +1\n점프횟수: +1
     Item_Description_5                                 , // 공격력: +1\n공격속도: +1\n공격간격: +0.2
-    Item_Description_6                                 , // 체력: +1\재사용 대기시간: 2초
+    Item_Description_6                                 , // 체력: +1\n재사용 대기시간: 2초
     Item_Description_7                                 , // 레포디 테스트용 포션
     Item_Flavor_1                                      , // 테스트하기 귀찮은 사람이 만든 모자다.
     Item_Flavor_2                                      , // 테스트하기 귀찮은 사람이 만든 상의다.
@@ -272,4 +272,6 @@ public enum LocalizationKey
     UI_Option_Popup_Default_Confirm_Message            , // 모든 설정을 기본값으로 되돌리시겠습니까?
     UI_SaveDetail_Popup_Delete_Confirm_Title           , // 세이브 삭제
     UI_SaveDetail_Popup_Delete_Confirm_Message         , // 정말 이 세이브를 삭제하시겠습니까?
+    UI_Inventory_Slot_Drop_Confirm_Title               , // 아이템 드랍
+    UI_Inventory_Slot_Drop_Confirm_Message             , // 정말 '{0}' 아이템을 드랍하시겠습니까?
 }

@@ -37,8 +37,8 @@ public class UIKeybindSlot : UISlot
     private readonly ReactiveProperty<ButtonState> _resetButtonState = new ReactiveProperty<ButtonState>(ButtonState.Normal);
     private UI_KeybindMode _slotMode;
     private InputAction _targetAction;
-    private string _cachedActionLocalizationKey;
-    private LocalizationKey _cachedResetLocalizationKey;
+    private Func<string> _actionNameProvider;
+    private Func<string> _resetTextProvider;
     private string _previousPath;
     private Action<string, string> _onDuplicated;
     private InputActionRebindingExtensions.RebindingOperation _currentOperation;
@@ -66,7 +66,8 @@ public class UIKeybindSlot : UISlot
     public override void Refresh()
     {
         base.Refresh();
-        GetText(Texts.ActionNameText).text = Managers.Localization.Get(_cachedActionLocalizationKey);
+        GetText(Texts.ActionNameText).text = _actionNameProvider?.Invoke() ?? string.Empty;
+        GetText(Texts.ResetText).text = _resetTextProvider?.Invoke() ?? string.Empty;
 
         if (_slotMode == UI_KeybindMode.DashCommandToggle)
         {
@@ -80,14 +81,13 @@ public class UIKeybindSlot : UISlot
             if (_targetAction != null && index != -1)
                 SetRawKeybindText(_targetAction.GetBindingDisplayString(index));
         }
-
-        SetResetText(_cachedResetLocalizationKey);
     }
 
     public override void OnRelease()
     {
         base.OnRelease();
-        _cachedResetLocalizationKey = LocalizationKey.None;
+        _actionNameProvider = null;
+        _resetTextProvider = null;
     }
 
     public void Setup(string action, InputAction target, List<UIKeybindSlot> slots, Func<bool> locked, Action<bool> lockAction, Action<string, string> onDuplicated)
@@ -98,8 +98,8 @@ public class UIKeybindSlot : UISlot
         _isLocked = locked;
         _setLock = lockAction;
         _onDuplicated = onDuplicated;
-        _cachedActionLocalizationKey = ZString.Concat(Literal.Localizations.Action, action);
-        _cachedResetLocalizationKey = LocalizationKey.Reset;
+        _actionNameProvider = () => Managers.Localization.Get(ZString.Concat(Literal.Localizations.Action, action));
+        _resetTextProvider = () => Managers.Localization.Get(LocalizationKey.Reset);
         Refresh();
     }
 
@@ -109,8 +109,8 @@ public class UIKeybindSlot : UISlot
         _targetAction = null;
         _isLocked = locked;
         _setLock = lockAction;
-        _cachedActionLocalizationKey = Managers.Localization.Get(LocalizationKey.Action_DashCommand);
-        _cachedResetLocalizationKey = LocalizationKey.Switch;
+        _actionNameProvider = () => Managers.Localization.Get(LocalizationKey.Action_DashCommand);
+        _resetTextProvider = () => Managers.Localization.Get(LocalizationKey.Switch);
         Refresh();
     }
 
@@ -206,7 +206,7 @@ public class UIKeybindSlot : UISlot
         }
         catch
         {
-            Log.Error(LocalizationKey.Log_Keybind_Slot_RebindFailed, _cachedActionLocalizationKey);
+            Log.Error(LocalizationKey.Log_Keybind_Slot_RebindFailed, _actionNameProvider?.Invoke() ?? string.Empty);
             EndRebind(_currentOperation);
         }
     }
@@ -245,7 +245,7 @@ public class UIKeybindSlot : UISlot
 
             if (targetIndex != -1)
             {
-                duplicateActionName = Managers.Localization.Get(duplicatedSlot._cachedActionLocalizationKey);
+                duplicateActionName = duplicatedSlot._actionNameProvider?.Invoke() ?? string.Empty;
                 duplicateKeyName = duplicatedSlot._targetAction.GetBindingDisplayString(targetIndex);
             }
 
@@ -287,9 +287,6 @@ public class UIKeybindSlot : UISlot
         _targetAction.RemoveAllBindingOverrides();
         Refresh();
     }
-
-    private void SetResetText(LocalizationKey localizationKey)
-        => GetText(Texts.ResetText).text = Managers.Localization.Get(localizationKey);
 
     private void SetKeybindText(LocalizationKey localizationKey)
         => GetText(Texts.KeybindButtonText).text = Managers.Localization.Get(localizationKey);

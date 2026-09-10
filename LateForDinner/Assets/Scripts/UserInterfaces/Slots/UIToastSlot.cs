@@ -40,38 +40,35 @@ public class UIToastSlot : UISlot
     public void Setup(LocalizationKey messageKey, Action onExpire)
     {
         _messageProvider = () => Managers.Localization.Get(messageKey);
-        Refresh();
-        var token = GetToken("AlertExpireTask");
-        FadeAndExpireAsync(3f, onExpire, token).Forget();
+        ExecuteSetup(onExpire);
     }
 
     public void Setup<T1>(LocalizationKey messageKey, Action onExpire, T1 arg1)
     {
         _messageProvider = () => Managers.Localization.Get(messageKey, arg1);
-        Refresh();
-        var token = GetToken("AlertExpireTask");
-        FadeAndExpireAsync(3f, onExpire, token).Forget();
+        ExecuteSetup(onExpire);
     }
 
     public void Setup<T1, T2>(LocalizationKey messageKey, Action onExpire, T1 arg1, T2 arg2)
     {
         _messageProvider = () => Managers.Localization.Get(messageKey, arg1, arg2);
-        Refresh();
-        var token = GetToken("AlertExpireTask");
-        FadeAndExpireAsync(3f, onExpire, token).Forget();
+        ExecuteSetup(onExpire);
     }
 
     public void Setup<T1, T2, T3>(LocalizationKey messageKey, Action onExpire, T1 arg1, T2 arg2, T3 arg3)
     {
         _messageProvider = () => Managers.Localization.Get(messageKey, arg1, arg2, arg3);
-        Refresh();
-        var token = GetToken("AlertExpireTask");
-        FadeAndExpireAsync(3f, onExpire, token).Forget();
+        ExecuteSetup(onExpire);
     }
 
     public void Setup(LocalizationKey messageKey, Action onExpire, params object[] args)
     {
         _messageProvider = () => (args != null && args.Length > 0) ? Managers.Localization.Get(messageKey, args) : Managers.Localization.Get(messageKey);
+        ExecuteSetup(onExpire);
+    }
+
+    private void ExecuteSetup(Action onExpire)
+    {
         Refresh();
         var token = GetToken("AlertExpireTask");
         FadeAndExpireAsync(3f, onExpire, token).Forget();

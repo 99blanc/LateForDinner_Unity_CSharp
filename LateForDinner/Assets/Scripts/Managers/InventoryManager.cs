@@ -52,13 +52,13 @@ public class InventoryManager
 
     public bool AddItem(int itemID, int quantity)
     {
-        if (!TryGetValidItemData(itemID, out var itemData, out var itemType))
+        if (!TryGetValidItemData(itemID, out var itemData, out var itemCategory))
             return false;
 
         if (!HasEnoughSpaceInAll(_totalSlots, itemID, itemData.MaxStack, quantity))
             return false;
 
-        var tabSlots = GetSlotsByType(itemType);
+        var tabSlots = GetSlotsByType(itemCategory);
 
         if (tabSlots != _totalSlots && !HasEnoughSpaceInAll(tabSlots, itemID, itemData.MaxStack, quantity))
             return false;
@@ -73,10 +73,10 @@ public class InventoryManager
 
     private void SyncAddedItemToTab(int itemID, int quantity, int maxStack)
     {
-        if (!TryGetValidItemData(itemID, out _, out var itemType))
+        if (!TryGetValidItemData(itemID, out _, out var itemCategory))
             return;
 
-        var tabSlots = GetSlotsByType(itemType);
+        var tabSlots = GetSlotsByType(itemCategory);
 
         if (tabSlots == null)
             return;
@@ -88,7 +88,7 @@ public class InventoryManager
 
     public bool RemoveItem(int itemID, int quantity)
     {
-        if (!TryGetValidItemData(itemID, out var itemData, out var itemType))
+        if (!TryGetValidItemData(itemID, out var itemData, out var itemCategory))
             return false;
 
         int totalExistingQuantity = _totalSlots.Where(s => s.ItemID == itemID).Sum(s => s.Quantity);
@@ -124,10 +124,10 @@ public class InventoryManager
 
     private void SyncRemovedItemToTab(int itemID, int quantity)
     {
-        if (!TryGetValidItemData(itemID, out _, out var itemType)) 
+        if (!TryGetValidItemData(itemID, out _, out var itemCategory)) 
             return;
 
-        var tabSlots = GetSlotsByType(itemType);
+        var tabSlots = GetSlotsByType(itemCategory);
 
         if (tabSlots == null) 
             return;
@@ -225,16 +225,16 @@ public class InventoryManager
     public IReadOnlyList<InventorySlot> GetQuickSlots() 
         => _quickSlots;
 
-    private bool TryGetValidItemData(int itemID, out ItemData itemData, out ItemCategory itemType)
+    private bool TryGetValidItemData(int itemID, out ItemData itemData, out ItemCategory itemCategory)
     {
         itemData = null;
-        itemType = ItemCategory.Etc;
+        itemCategory = ItemCategory.Etc;
 
         if (!Managers.Data.Items.ContainsKey(itemID))
             return false;
 
         itemData = Managers.Data.Items[itemID];
-        Enum.TryParse(itemData.ItemCategory, true, out itemType);
+        Enum.TryParse(itemData.ItemCategory, true, out itemCategory);
         return true;
     }
 

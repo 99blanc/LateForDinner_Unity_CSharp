@@ -1,3 +1,5 @@
+using System.Numerics;
+
 public class Define
 {
     public class Amount
@@ -138,5 +140,11 @@ public class Define
     {
         public const int Count = 5;
         public const float Delay = 0.2f;
+    }
+
+    public class UI
+    {
+        public static readonly UnityEngine.Vector3 SaveDetailPopup = new UnityEngine.Vector3(-675f, 0f, 0f);
+        public static readonly UnityEngine.Vector2 ItemDetailPopup = new UnityEngine.Vector2(1f, 1f);
     }
 }

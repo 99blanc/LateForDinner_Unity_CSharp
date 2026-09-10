@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.EventSystems;
-using UnityEngine.UI;
 using ZLinq;
 
 public class UIQuestInventoryPopup : UIPopup, IDraggablePopup, IFocusablePopup
@@ -127,6 +126,13 @@ public class UIQuestInventoryPopup : UIPopup, IDraggablePopup, IFocusablePopup
         Refresh();
     }
 
+    public override void OnRelease()
+    {
+        base.OnRelease();
+        Managers.UI.Close<UIItemDetailPopup>();
+        Managers.UI.Close<UIItemDropPopup>();
+    }
+
     private void BindButtonStates()
     {
         GetImage(Images.AttributeButtonImage).BindState(_attributeButtonState, Define.Atlas.Common, this);
@@ -196,10 +202,10 @@ public class UIQuestInventoryPopup : UIPopup, IDraggablePopup, IFocusablePopup
         if (!Managers.Data.Items.TryGetValue(slotData.ItemID, out var itemData)) 
             return false;
 
-        if (!Enum.TryParse<ItemCategory>(itemData.ItemCategory, true, out var parsedItemType)) 
+        if (!Enum.TryParse<ItemCategory>(itemData.ItemCategory, true, out var parsedItemCategory)) 
             return false;
 
-        return parsedItemType != type.Value;
+        return parsedItemCategory != type.Value;
     }
 
     private void RefreshEquipmentSlots()

@@ -1,6 +1,7 @@
 using LateForDinner.Data;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 
 public class UIInventorySlot : UISlot, IDraggableSlot<UIInventorySlot>
 {
@@ -53,6 +54,8 @@ public class UIInventorySlot : UISlot, IDraggableSlot<UIInventorySlot>
     {
         base.OnGet();
         GetButton(Buttons.SlotButton).BindView(OnClickSlot, ViewEvent.RightClick, this);
+        GetButton(Buttons.SlotButton).BindView(OnPointerEnterSlot, ViewEvent.Enter, this);
+        GetButton(Buttons.SlotButton).BindView(OnPointerExitSlot, ViewEvent.Exit, this);
         Refresh();
     }
 
@@ -133,16 +136,44 @@ public class UIInventorySlot : UISlot, IDraggableSlot<UIInventorySlot>
         Managers.Inventory.HandleItemMoveByTab(currentTabType, CurrentSlotArea, ((IDraggableSlot<UIInventorySlot>)this).SlotIndex, targetSlot.CurrentSlotArea, ((IDraggableSlot<UIInventorySlot>)targetSlot).SlotIndex);
     }
 
+    public void OnDropOutside()
+    {
+        if (_data == null || _data.ItemID <= 0)
+            return;
+
+        if (!Managers.Data.Items.TryGetValue(_data.ItemID, out ItemData itemData))
+            return;
+
+        var dropPopup = Managers.UI.OpenPopup<UIItemDropPopup>();
+
+        if (dropPopup == null)
+            return;
+
+        dropPopup.Setup(LocalizationKey.UI_Inventory_Slot_Drop_Confirm_Title, LocalizationKey.UI_Inventory_Slot_Drop_Confirm_Message, _data.Quantity, arg1: itemData.NameKey,
+        onConfirm: (selectedCount) =>
+        {
+            Managers.Inventory.RemoveItem(itemData.ID, selectedCount);
+        },
+        onCancel: () => { });
+    }
+
     private void OnClickSlot(PointerEventData data)
     {
         Debug.Log($"Clicked Slot - GlobalIndex: {_data?.GlobalIndex}, ItemID: {_data?.ItemID}");
     }
 
-    private void SetEquipmentImageSprite(string spriteName)
+    private void OnPointerEnterSlot(PointerEventData data)
     {
-        var image = GetImage(Images.SlotCoverImage);
+        if (_data == null || _data.ItemID <= 0)
+            return;
 
-        if (image != null)
-            image.sprite = Managers.Resource.GetSprite(Define.Atlas.Common, spriteName);
+        var detailPopup = Managers.UI.OpenPopup<UIItemDetailPopup>();
+        detailPopup?.Setup(_data.ItemID, Mouse.current.position.ReadValue());
     }
+
+    private void OnPointerExitSlot(PointerEventData data)
+        => Managers.UI.Close<UIItemDetailPopup>();
+
+    private void SetEquipmentImageSprite(string spriteName)
+        => GetImage(Images.SlotCoverImage).sprite = Managers.Resource.GetSprite(Define.Atlas.Common, spriteName);
 }

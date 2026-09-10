@@ -114,6 +114,8 @@ public class UISaveDetailPopup : UIPopup, IFocusablePopup
             _trashButton.Value = ButtonState.Disable;
             _playButton.Value = isAutoSlot ? ButtonState.Disable : ButtonState.Normal;
         }
+
+        RectTransform.anchoredPosition = Define.UI.SaveDetailPopup;
     }
 
     private async UniTask OnClickPlay(PointerEventData data)
@@ -164,28 +166,13 @@ public class UISaveDetailPopup : UIPopup, IFocusablePopup
     }
 
     private void SetMealImageActive(bool isActive)
-    {
-        var image = GetImage(Images.MealTimeImage);
-
-        if (image != null) 
-            image.SetActive(isActive);
-    }
+        => GetImage(Images.MealTimeImage).SetActive(isActive);
 
     private void SetMealImageSprite(string spriteName)
-    {
-        var image = GetImage(Images.MealTimeImage);
-
-        if (image != null) 
-            image.sprite = Managers.Resource.GetSprite(Define.Atlas.Common, spriteName);
-    }
+        => GetImage(Images.MealTimeImage).sprite = Managers.Resource.GetSprite(Define.Atlas.Common, spriteName);
 
     private void SetCharacterImageActive(bool isActive)
-    {
-        var image = GetImage(Images.CharacterImage);
-
-        if (image != null)
-            image.SetActive(isActive);
-    }
+        => GetImage(Images.CharacterImage).SetActive(isActive);
 
     private void SetText(Texts textEnum, string text)
         => GetText(textEnum).text = text;

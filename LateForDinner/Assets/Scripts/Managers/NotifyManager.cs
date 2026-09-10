@@ -82,14 +82,14 @@ public class NotifyManager
         await toastSystem.PushToastAsync(key, args);
     }
 
+    private async UniTask<UIToastSystem> GetToastSystemAsync()
+    => await Managers.UI.OpenSystemAsync<UIToastSystem>(LayerType.System);
+
     private async UniTask<UIAlertPopup> OpenAlertPopupAsync()
         => await Managers.UI.OpenPopupAsync<UIAlertPopup>(true);
 
     private async UniTask<UIConfirmPopup> OpenConfirmPopupAsync()
         => await Managers.UI.OpenPopupAsync<UIConfirmPopup>(true);
-
-    private async UniTask<UIToastSystem> GetToastSystemAsync()
-        => await Managers.UI.OpenSystemAsync<UIToastSystem>(LayerType.System);
 
     private async UniTask AlertInternalAsync(UserInterface owner, LocalizationKey titleKey, LocalizationKey messageKey, params object[] messageArgs)
     {
@@ -105,7 +105,7 @@ public class NotifyManager
         {
             var popup = await OpenAlertPopupAsync();
 
-            if (IsPopupNull(popup))
+            if (popup == null)
                 return;
 
             if (owner != null)
@@ -163,7 +163,7 @@ public class NotifyManager
         {
             var popup = await OpenConfirmPopupAsync();
 
-            if (IsPopupNull(popup))
+            if (popup == null)
                 return false;
 
             if (owner != null)
@@ -209,9 +209,6 @@ public class NotifyManager
 
     public async UniTask<bool> ConfirmAsync(UserInterface owner, LocalizationKey titleKey, LocalizationKey messageKey, params object[] messageArgs)
         => await ConfirmInternalAsync(owner, titleKey, messageKey, messageArgs);
-
-    private bool IsPopupNull(UserInterface popup)
-        => popup == null;
 
     private bool IsPopupNotPooled(UserInterface popup)
         => !popup.IsPooled();

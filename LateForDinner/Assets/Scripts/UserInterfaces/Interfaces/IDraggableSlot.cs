@@ -23,6 +23,8 @@ public interface IDraggableSlot<TTarget> : IDraggableSlotVariant, IBeginDragHand
 
     void OnDropItem(TTarget targetSlot);
 
+    void OnDropOutside() { }
+
     void IBeginDragHandler.OnBeginDrag(PointerEventData data)
     {
         if (this is not Component component || data.button != PointerEventData.InputButton.Left)
@@ -81,6 +83,7 @@ public interface IDraggableSlot<TTarget> : IDraggableSlotVariant, IBeginDragHand
         foreach (var result in raycastResults)
         {
             var slot = result.gameObject.GetComponentInParent<TTarget>();
+
             if (slot != null && slot != (Component)this)
             {
                 targetSlot = slot;
@@ -96,6 +99,8 @@ public interface IDraggableSlot<TTarget> : IDraggableSlotVariant, IBeginDragHand
 
         if (targetSlot != null)
             OnDropItem(targetSlot);
+        else
+            OnDropOutside();
 
         state.IsDragging = false;
     }
@@ -118,6 +123,13 @@ public interface IDraggableSlot<TTarget> : IDraggableSlotVariant, IBeginDragHand
 
             state.IsDragging = false;
             state.SlotIndex = -1;
+            state.IsDragging = void_ResetState(state);
         }
+    }
+
+    private bool void_ResetState(SlotDragState state)
+    {
+        state.SlotIndex = -1;
+        return false;
     }
 }

@@ -27,7 +27,7 @@ public class UIConfirmPopup : UIPopup, IDraggablePopup, IFocusablePopup
     private readonly ReactiveProperty<ButtonState> _cancelButtonState = new ReactiveProperty<ButtonState>(ButtonState.Normal);
     private Action _onConfirm;
     private Action _onCancel;
-    private LocalizationKey _cachedTitleKey;
+    private Func<string> _titleProvider;
     private Func<string> _messageProvider;
 
     public override void OnInit()
@@ -51,22 +51,24 @@ public class UIConfirmPopup : UIPopup, IDraggablePopup, IFocusablePopup
     public override void Refresh()
     {
         base.Refresh();
-        GetText(Texts.AlertText).text = Managers.Localization.Get(_cachedTitleKey);
-        GetText(Texts.MessageText).text = _messageProvider();
+        GetText(Texts.AlertText).text = _titleProvider?.Invoke() ?? string.Empty;
+        GetText(Texts.MessageText).text = _messageProvider?.Invoke() ?? string.Empty;
     }
 
     public override void OnRelease()
     {
         base.OnRelease();
-        _cachedTitleKey = LocalizationKey.None;
+        _titleProvider = null;
         _messageProvider = null;
+        _onConfirm = null;
+        _onCancel = null;
     }
 
     public void Setup(LocalizationKey titleKey, LocalizationKey messageKey, Action onConfirm, Action onCancel = null)
     {
         _onConfirm = onConfirm;
         _onCancel = onCancel;
-        _cachedTitleKey = titleKey;
+        _titleProvider = () => Managers.Localization.Get(titleKey);
         _messageProvider = () => Managers.Localization.Get(messageKey);
         Refresh();
     }
@@ -75,7 +77,7 @@ public class UIConfirmPopup : UIPopup, IDraggablePopup, IFocusablePopup
     {
         _onConfirm = onConfirm;
         _onCancel = onCancel;
-        _cachedTitleKey = titleKey;
+        _titleProvider = () => Managers.Localization.Get(titleKey);
         _messageProvider = () => Managers.Localization.Get(messageKey, arg1);
         Refresh();
     }
@@ -84,7 +86,7 @@ public class UIConfirmPopup : UIPopup, IDraggablePopup, IFocusablePopup
     {
         _onConfirm = onConfirm;
         _onCancel = onCancel;
-        _cachedTitleKey = titleKey;
+        _titleProvider = () => Managers.Localization.Get(titleKey);
         _messageProvider = () => Managers.Localization.Get(messageKey, arg1, arg2);
         Refresh();
     }
@@ -93,7 +95,7 @@ public class UIConfirmPopup : UIPopup, IDraggablePopup, IFocusablePopup
     {
         _onConfirm = onConfirm;
         _onCancel = onCancel;
-        _cachedTitleKey = titleKey;
+        _titleProvider = () => Managers.Localization.Get(titleKey);
         _messageProvider = () => Managers.Localization.Get(messageKey, arg1, arg2, arg3);
         Refresh();
     }
@@ -102,7 +104,7 @@ public class UIConfirmPopup : UIPopup, IDraggablePopup, IFocusablePopup
     {
         _onConfirm = onConfirm;
         _onCancel = onCancel;
-        _cachedTitleKey = titleKey;
+        _titleProvider = () => Managers.Localization.Get(titleKey);
         _messageProvider = () => (args != null && args.Length > 0) ? Managers.Localization.Get(messageKey, args) : Managers.Localization.Get(messageKey);
         Refresh();
     }

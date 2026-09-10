@@ -48,3 +48,6 @@ UI_Option_Popup_Default_Confirm_Message,모든 설정을 기본값으로 되돌�
 # Index: UISaveDetailPopup,
 UI_SaveDetail_Popup_Delete_Confirm_Title,세이브 삭제
 UI_SaveDetail_Popup_Delete_Confirm_Message,정말 이 세이브를 삭제하시겠습니까?
+# Index: UIInventorySlot,
+UI_Inventory_Slot_Drop_Confirm_Title,아이템 드랍
+UI_Inventory_Slot_Drop_Confirm_Message,정말 '{0}' 아이템을 드랍하시겠습니까?
