@@ -74,7 +74,7 @@ public class UIQuestInventoryPopup : UIPopup, IDraggablePopup, IFocusablePopup
     private readonly ReactiveProperty<ButtonState> _scrollDownButtonState = new ReactiveProperty<ButtonState>(ButtonState.Normal);
     private readonly List<UIInventorySlot> _createdSlots = new List<UIInventorySlot>();
     private readonly List<UIInventorySlot> _equipmentCreatedSlots = new List<UIInventorySlot>();
-    private bool _isAttributePanelOpen = true;
+    private bool _isAttributePanelOpen = false;
 
     public override void OnInit()
     {
@@ -85,6 +85,7 @@ public class UIQuestInventoryPopup : UIPopup, IDraggablePopup, IFocusablePopup
         BindButton(typeof(Buttons));
         BindScrollRect(typeof(ScrollRects));
         BindPanel(typeof(Panels));
+        GetPanel(Panels.AttributePanel).SetActive(false);
         InitInventorySlots();
         InitEquipmentSlots();
     }
