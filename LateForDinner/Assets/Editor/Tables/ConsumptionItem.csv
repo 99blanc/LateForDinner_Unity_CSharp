@@ -4,4 +4,4 @@
 # Foreign ID: Item.csv,,,
 ID,ConsumptionType,Cooldown,TargetType
 # Index: ConsumptionItem,,,
-2,Potion,2,Self
+6,Potion,2,Self

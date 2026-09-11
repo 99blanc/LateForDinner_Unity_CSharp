@@ -1,4 +1,3 @@
-using Cysharp.Threading.Tasks;
 using LateForDinner.Data;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -54,7 +53,7 @@ public class UIInventorySlot : UISlot, IDraggableSlot<UIInventorySlot>
     public override void OnGet()
     {
         base.OnGet();
-        GetButton(Buttons.SlotButton).BindView(OnClickSlot, ViewEvent.RightClick, this);
+        GetButton(Buttons.SlotButton).BindView(OnClickSlot, ViewEvent.DoubleClick, this);
         GetButton(Buttons.SlotButton).BindView(OnPointerEnterSlot, ViewEvent.Enter, this);
         GetButton(Buttons.SlotButton).BindView(OnPointerExitSlot, ViewEvent.Exit, this);
         Refresh();
@@ -162,7 +161,13 @@ public class UIInventorySlot : UISlot, IDraggableSlot<UIInventorySlot>
 
     private void OnClickSlot(PointerEventData data)
     {
-        Debug.Log($"Clicked Slot - GlobalIndex: {_data?.GlobalIndex}, ItemID: {_data?.ItemID}");
+        if (_data == null || _data.ItemID <= 0)
+            return;
+
+        if (!Managers.Data.ConsumptionItems.TryGetValue(_data.ItemID, out var consumptionItemData))
+            return;
+
+
     }
 
     private void OnPointerEnterSlot(PointerEventData data)

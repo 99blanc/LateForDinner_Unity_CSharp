@@ -1,4 +1,5 @@
 using Cysharp.Threading.Tasks;
+using System;
 using UnityEngine;
 
 public class ItemProp : Prop, IPoolable, IInteractable
@@ -43,7 +44,11 @@ public class ItemProp : Prop, IPoolable, IInteractable
             return true;
         }
         else
+        {
+            // DESC ::: 인벤토리 공간 경고 토스트 출력
+            Managers.Notify.ToastAsync(LocalizationKey.Log_Item_Prop_NotEnoughInventory).Forget();
             return false;
+        }
     }
 
     public async UniTask Setup(int itemID, int quantity)

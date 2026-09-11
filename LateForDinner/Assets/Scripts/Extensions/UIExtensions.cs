@@ -15,8 +15,10 @@ public static class UIExtensions
             ViewEvent.Exit => view.OnPointerExitAsObservable(),
             ViewEvent.Press => view.OnPointerDownAsObservable(),
             ViewEvent.Release => view.OnPointerUpAsObservable(),
-            ViewEvent.LeftClick => view.OnPointerClickAsObservable().Where(data => data.button == PointerEventData.InputButton.Left),
             ViewEvent.RightClick => view.OnPointerClickAsObservable().Where(data => data.button == PointerEventData.InputButton.Right),
+            ViewEvent.LeftClick => view.OnPointerClickAsObservable().Where(data => data.button == PointerEventData.InputButton.Left),
+            ViewEvent.DoubleClick => view.OnPointerClickAsObservable().Where(data => data.button == PointerEventData.InputButton.Left).Chunk(TimeSpan.FromSeconds(0.25f), 2).Where(list => list.Length == 2).Select(list => list[1]),
+
             _ => Return(type)
         };
         observable.Where(_ => Disable(prop)).Subscribe(action).RegisterToPool(component);
@@ -30,8 +32,9 @@ public static class UIExtensions
             ViewEvent.Exit => view.OnPointerExitAsObservable(),
             ViewEvent.Press => view.OnPointerDownAsObservable(),
             ViewEvent.Release => view.OnPointerUpAsObservable(),
-            ViewEvent.LeftClick => view.OnPointerClickAsObservable().Where(data => data.button == PointerEventData.InputButton.Left),
             ViewEvent.RightClick => view.OnPointerClickAsObservable().Where(data => data.button == PointerEventData.InputButton.Right),
+            ViewEvent.LeftClick => view.OnPointerClickAsObservable().Where(data => data.button == PointerEventData.InputButton.Left),
+            ViewEvent.DoubleClick => view.OnPointerClickAsObservable().Where(data => data.button == PointerEventData.InputButton.Left).Chunk(TimeSpan.FromSeconds(0.25f), 2).Where(list => list.Length == 2).Select(list => list[1]),
             _ => Return(type)
         };
         observable.Subscribe(action).RegisterToPool(component);

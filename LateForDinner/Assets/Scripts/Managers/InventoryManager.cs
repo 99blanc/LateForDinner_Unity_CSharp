@@ -110,6 +110,31 @@ public class InventoryManager
         return true;
     }
 
+    public bool RemoveItem(InventorySlot targetSlot, int quantity)
+    {
+        if (targetSlot == null || targetSlot.ItemID <= 0 || targetSlot.Quantity < quantity)
+            return false;
+
+        int globalIndex = targetSlot.GlobalIndex;
+        var masterSlot = _totalSlots.FirstOrDefault(s => s.GlobalIndex == globalIndex);
+        var slotToModify = masterSlot ?? targetSlot;
+
+        if (slotToModify.Quantity < quantity)
+            return false;
+
+        slotToModify.Quantity -= quantity;
+
+        if (slotToModify.Quantity <= 0)
+        {
+            slotToModify.ItemID = 0;
+            slotToModify.Quantity = 0;
+        }
+
+        SyncAllTabsFromTotal();
+        _onInventoryChanged.OnNext(Unit.Default);
+        return true;
+    }
+
     public async UniTask<bool> DropItem(InventorySlot targetSlot, int quantity, Vector3 dropPosition)
     {
         if (targetSlot == null || targetSlot.ItemID <= 0 || targetSlot.Quantity < quantity)

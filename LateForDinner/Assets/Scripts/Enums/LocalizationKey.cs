@@ -232,6 +232,7 @@ public enum LocalizationKey
     Log_Load_Display_AnimationFailed                   , // [UILoadDisplay] 로딩 애니메이션 진행 중 예외가 발생했습니다.
     Log_Load_Display_RotateFailed                      , // [UILoadDisplay] 로딩 회전 애니메이션 중 예외가 발생했습니다.
     Log_Splash_Display_Skip                            , // [UISplashScreen] 스플래시 이미지를 건너뛰었습니다.
+    Log_Item_Prop_NotEnoughInventory                   , // [ItemProp] 충분한 인벤토리 공간이 없습니다.
     Shop_Name_1                                        , // 무기 상점
     Shop_Description_1                                 , // 무기 상점이다.
     UI_Console_System_AutoComplete_Candidates          , // 자동 완성 후보: {0}
