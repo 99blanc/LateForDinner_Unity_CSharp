@@ -189,7 +189,7 @@ public class CommandRegistry
 
     private void OnCommandSetVariable(string[] args)
     {
-        if (!CheckIsDebugMode())
+        if (!CheckIsDebugMode()) 
             return;
 
         var character = Managers.Game.Player;
@@ -212,9 +212,8 @@ public class CommandRegistry
 
         if (isBaseMode)
         {
-            character.Attributes.SetBaseParsedValue(attributeType, rawValue);
-            character.Attributes.SetParsedValue(attributeType, rawValue);
-            string appliedVal = character.Attributes.GetParsedValueString(attributeType);
+            character.Attributes.SetParsedBaseValue(attributeType, rawValue);
+            string appliedVal = character.Attributes.GetParsedBaseValueString(attributeType);
             Log.Info(LocalizationKey.Console_SetBase_Success, args[0], appliedVal);
         }
         else
@@ -229,7 +228,7 @@ public class CommandRegistry
 
     private void OnCommandGetVariable(string[] args)
     {
-        if (!CheckIsDebugMode())
+        if (!CheckIsDebugMode()) 
             return;
 
         var character = Managers.Game.Player;

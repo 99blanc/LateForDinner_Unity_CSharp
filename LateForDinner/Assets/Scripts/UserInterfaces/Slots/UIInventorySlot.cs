@@ -40,7 +40,7 @@ public class UIInventorySlot : UISlot, IDraggableSlot<UIInventorySlot>
         => _data;
     public SlotArea CurrentSlotArea 
         => _isEquipmentSlot ? SlotArea.Equipment : SlotArea.Inventory;
-    private IDisposable _cooldownDisposable;
+    private IDisposable _disposable;
 
     public override void OnInit()
     {
@@ -64,8 +64,8 @@ public class UIInventorySlot : UISlot, IDraggableSlot<UIInventorySlot>
 
     private void BindCooldown()
     {
-        _cooldownDisposable?.Dispose();
-        _cooldownDisposable = null;
+        _disposable?.Dispose();
+        _disposable = null;
 
         if (_data == null || _data.ItemID <= 0)
         {
@@ -78,7 +78,7 @@ public class UIInventorySlot : UISlot, IDraggableSlot<UIInventorySlot>
 
         if (cooldownRegistry != null && cooldownRegistry.IsOnCooldown)
         {
-            _cooldownDisposable = cooldownRegistry.CooldownProgress
+            _disposable = cooldownRegistry.CooldownProgress
             .Subscribe(SetCooldown)
             .RegisterToPool(this);
         }
@@ -117,8 +117,8 @@ public class UIInventorySlot : UISlot, IDraggableSlot<UIInventorySlot>
         _data = slotData;
         var draggable = (IDraggableSlot<UIInventorySlot>)this;
         draggable.SlotIndex = displayIndex;
-        _cooldownDisposable?.Dispose();
-        _cooldownDisposable = null;
+        _disposable?.Dispose();
+        _disposable = null;
         GetImage(Images.SlotCoverImage).SetActive(false);
         GetImage(Images.SlotItemImage).SetActive(false);
         GetText(Texts.SlotQuantityText).text = string.Empty;
