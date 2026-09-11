@@ -76,7 +76,7 @@ public class UIItemDetailPopup : UIPopup
     {
         Canvas canvas = GetComponentInParent<Canvas>();
 
-        if (canvas == null) 
+        if (canvas == null)
             return;
 
         RectTransform canvasRect = canvas.GetComponentAssert<RectTransform>();
@@ -84,9 +84,27 @@ public class UIItemDetailPopup : UIPopup
         Camera cam = canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera;
         RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect, mousePosition, cam, out Vector2 localPoint);
         Vector2 popupSize = popupRect.rect.size;
+        Vector2 pivot = popupRect.pivot;
         Rect canvasArea = canvasRect.rect;
-        float clampedX = Mathf.Clamp(localPoint.x, canvasArea.xMin, canvasArea.xMax - popupSize.x);
-        float clampedY = Mathf.Clamp(localPoint.y, canvasArea.yMin + popupSize.y, canvasArea.yMax);
-        popupRect.anchoredPosition = new Vector2(clampedX, clampedY);
+        float minX = localPoint.x - (popupSize.x * pivot.x);
+        float maxX = localPoint.x + (popupSize.x * (1f - pivot.x));
+        float minY = localPoint.y - (popupSize.y * pivot.y);
+        float maxY = localPoint.y + (popupSize.y * (1f - pivot.y));
+        float offsetX = 0f;
+        float offsetY = 0f;
+
+        if (minX < canvasArea.xMin)
+            offsetX = canvasArea.xMin - minX;
+
+        if (maxX > canvasArea.xMax)
+            offsetX = canvasArea.xMax - maxX;
+
+        if (minY < canvasArea.yMin)
+            offsetY = canvasArea.yMin - minY;
+
+        if (maxY > canvasArea.yMax)
+            offsetY = canvasArea.yMax - maxY;
+
+        popupRect.anchoredPosition = localPoint + new Vector2(offsetX, offsetY);
     }
 }

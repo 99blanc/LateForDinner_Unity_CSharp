@@ -64,7 +64,7 @@ public class UIInventorySlot : UISlot, IDraggableSlot<UIInventorySlot>
         _isEquipmentSlot = isEquipmentSlot;
         _data = slotData;
         var draggable = (IDraggableSlot<UIInventorySlot>)this;
-        draggable.SlotIndex = isEquipmentSlot ? displayIndex : slotData.GlobalIndex;
+        draggable.SlotIndex = displayIndex;
         Refresh();
     }
 

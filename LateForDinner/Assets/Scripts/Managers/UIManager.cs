@@ -319,7 +319,7 @@ public class UIManager
         var indicatorParent = _layer[LayerType.Indicator] as RectTransform;
         float myWidth = indicator.RectTransform.rect.width;
         float myHeight = indicator.RectTransform.rect.height;
-        var activeIndicators = new List<(UIIndicator indicator, Vector2 basePoint, float width)>();
+        var evaluated = new List<(UIIndicator ind, float x, float width, float height, float finalY)>();
 
         foreach (var other in _indicators)
         {
@@ -333,25 +333,34 @@ public class UIManager
 
             Vector3 screenPos = mainCamera.WorldToScreenPoint(worldPos.Value);
             RectTransformUtility.ScreenPointToLocalPointInRectangle(indicatorParent, screenPos, null, out Vector2 basePoint);
-            float otherWidth = other.RectTransform != null ? other.RectTransform.rect.width : myWidth;
-            activeIndicators.Add((other, basePoint, otherWidth));
+            float width = other.RectTransform != null ? other.RectTransform.rect.width : myWidth;
+            float height = other.RectTransform != null ? other.RectTransform.rect.height : myHeight;
+            float finalY = basePoint.y;
+
+            foreach (var prev in evaluated)
+            {
+                float prevLeft = prev.x - (prev.width * 0.5f);
+                float prevRight = prev.x + (prev.width * 0.5f);
+                float curLeft = basePoint.x - (width * 0.5f);
+                float curRight = basePoint.x + (width * 0.5f);
+                bool isXOverlapping = curRight > prevLeft && curLeft < prevRight;
+
+                if (isXOverlapping)
+                {
+                    float requiredY = prev.finalY + prev.height;
+
+                    if (finalY < requiredY)
+                        finalY = requiredY;
+                }
+            }
+
+            if (other == indicator)
+                return new Vector2(basePoint.x, finalY);
+
+            evaluated.Add((other, basePoint.x, width, height, finalY));
         }
 
-        activeIndicators.Sort((a, b) => a.basePoint.x.CompareTo(b.basePoint.x));
-        int stackIndex = 0;
-
-        foreach (var item in activeIndicators)
-        {
-            if (item.indicator == indicator)
-                break;
-
-            float collisionThreshold = (myWidth + item.width) * 0.5f;
-
-            if (Mathf.Abs(localPoint.x - item.basePoint.x) < collisionThreshold)
-                stackIndex++;
-        }
-
-        return localPoint + new Vector2(0f, stackIndex * myHeight);
+        return localPoint;
     }
 
     private bool HasExistingDisplay<T>(out T display) where T : UIDisplay

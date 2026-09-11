@@ -194,53 +194,69 @@ public class InventoryManager
         if (sourceArea != targetArea)
             return HandleCrossAreaMove(sourceArea, sourceIndex, targetArea, targetIndex);
 
-        var targetList = GetSlotsByType(currentTab);
-        if (targetList == null || sourceIndex < 0 || sourceIndex >= targetList.Count || targetIndex < 0 || targetIndex >= targetList.Count)
-            return false;
-
-        var sourceSlot = targetList[sourceIndex];
-        var targetSlot = targetList[targetIndex];
-
-        if (sourceSlot == targetSlot)
-            return false;
-
-        if (currentTab.HasValue)
+        if (!currentTab.HasValue)
         {
-            var masterSource = _totalSlots.FirstOrDefault(s => s.GlobalIndex == sourceSlot.GlobalIndex);
-            var masterTarget = _totalSlots.FirstOrDefault(s => s.GlobalIndex == targetSlot.GlobalIndex);
-
-            if (masterSource == null || masterTarget == null)
+            if (sourceIndex < 0 || sourceIndex >= _totalSlots.Count || targetIndex < 0 || targetIndex >= _totalSlots.Count)
                 return false;
 
-            if (TryMergeOrSwapSlots(masterSource, masterTarget))
-            {
-                SyncAllTabsFromTotal();
-                _onInventoryChanged.OnNext(Unit.Default);
-                return true;
-            }
-
-            int toIndex = _totalSlots.IndexOf(masterSource);
-            int fromIndex = _totalSlots.IndexOf(masterTarget);
-            (_totalSlots[toIndex], _totalSlots[fromIndex]) = (_totalSlots[fromIndex], _totalSlots[toIndex]);
-        }
-        else
-        {
             var sourceMaster = _totalSlots[sourceIndex];
             var targetMaster = _totalSlots[targetIndex];
 
+            if (sourceMaster == targetMaster)
+                return false;
+
             if (TryMergeOrSwapSlots(sourceMaster, targetMaster))
             {
-                SyncAllTabsFromTotal();
                 _onInventoryChanged.OnNext(Unit.Default);
                 return true;
             }
 
             (_totalSlots[sourceIndex], _totalSlots[targetIndex]) = (_totalSlots[targetIndex], _totalSlots[sourceIndex]);
         }
+        else
+        {
+            var targetList = GetSlotsByType(currentTab);
 
-        SyncAllTabsFromTotal();
+            if (targetList == null || sourceIndex < 0 || sourceIndex >= targetList.Count || targetIndex < 0 || targetIndex >= targetList.Count)
+                return false;
+
+            var sourceSlot = targetList[sourceIndex];
+            var targetSlot = targetList[targetIndex];
+
+            if (sourceSlot == targetSlot)
+                return false;
+
+            if (TryMergeOrSwapSlots(sourceSlot, targetSlot))
+            {
+                _onInventoryChanged.OnNext(Unit.Default);
+                return true;
+            }
+
+            (targetList[sourceIndex], targetList[targetIndex]) = (targetList[targetIndex], targetList[sourceIndex]);
+        }
+
         _onInventoryChanged.OnNext(Unit.Default);
         return true;
+    }
+
+    private InventorySlot GetNthCategoryOrEmptySlot(ItemCategory category, int tabIndex)
+    {
+        var categorySlots = _totalSlots
+        .Where(s => s.ItemID > 0 && TryGetValidItemData(s.ItemID, out _, out var cat) && cat == category)
+        .ToList();
+
+        if (tabIndex < categorySlots.Count)
+            return categorySlots[tabIndex];
+        else
+        {
+            var emptySlots = _totalSlots.Where(s => s.ItemID <= 0).ToList();
+            int emptyIndex = tabIndex - categorySlots.Count;
+
+            if (emptyIndex >= 0 && emptyIndex < emptySlots.Count)
+                return emptySlots[emptyIndex];
+        }
+
+        return null;
     }
 
     private bool HandleCrossAreaMove(SlotArea sourceArea, int sourceIndex, SlotArea targetArea, int targetIndex)
@@ -422,15 +438,26 @@ public class InventoryManager
 
         foreach (var masterSlot in matchedSlots)
         {
-            if (index >= tabSlots.Count) 
+            if (index >= tabSlots.Count)
                 break;
 
             tabSlots[index] = masterSlot;
             index++;
         }
 
+        var emptyMasterSlots = _totalSlots.Where(s => s.ItemID <= 0).ToList();
+        int emptyIndex = 0;
+
         for (int i = index; i < tabSlots.Count; i++)
-            tabSlots[i] = new InventorySlot { ItemID = 0, Quantity = 0 };
+        {
+            if (emptyIndex < emptyMasterSlots.Count)
+            {
+                tabSlots[i] = emptyMasterSlots[emptyIndex];
+                emptyIndex++;
+            }
+            else
+                tabSlots[i] = new InventorySlot { ItemID = 0, Quantity = 0, GlobalIndex = -1 };
+        }
     }
 
     public void SortInventory(ItemCategory? currentTabType)
