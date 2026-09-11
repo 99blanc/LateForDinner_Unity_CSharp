@@ -1,8 +1,10 @@
-﻿using LateForDinner.Data;
+﻿using Cysharp.Threading.Tasks;
+using LateForDinner.Data;
 using R3;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 using ZLinq;
 
 public class InventoryManager
@@ -20,16 +22,14 @@ public class InventoryManager
     {
         _totalSlots = savedTotalSlots ?? new List<InventorySlot>();
         EnsureSlotCapacity(_totalSlots, Define.Amount.MaxInventorySlot);
-        _equipmentTabSlots = savedEquipmentTabSlots ?? new List<InventorySlot>();
-        EnsureSlotCapacity(_equipmentTabSlots, Define.Amount.InventoryTabSize);
-        _consumptionTabSlots = savedConsumptionTabSlots ?? new List<InventorySlot>();
-        EnsureSlotCapacity(_consumptionTabSlots, Define.Amount.InventoryTabSize);
-        _etcTabSlots = savedEtcTabSlots ?? new List<InventorySlot>();
-        EnsureSlotCapacity(_etcTabSlots, Define.Amount.InventoryTabSize);
         _equipmentSlots = savedEquipmentSlots ?? new List<InventorySlot>();
         EnsureSlotCapacity(_equipmentSlots, Define.Amount.MaxEquipmentSlot);
         _quickSlots = savedQuickSlots ?? new List<InventorySlot>();
         EnsureSlotCapacity(_quickSlots, Define.Amount.MaxQuickSlot);
+        EnsureSlotCapacityOnly(_equipmentTabSlots, Define.Amount.InventoryTabSize);
+        EnsureSlotCapacityOnly(_consumptionTabSlots, Define.Amount.InventoryTabSize);
+        EnsureSlotCapacityOnly(_etcTabSlots, Define.Amount.InventoryTabSize);
+        SyncAllTabsFromTotal();
     }
 
     private void EnsureSlotCapacity(List<InventorySlot> slots, int maxCapacity)
@@ -47,7 +47,16 @@ public class InventoryManager
         }
 
         for (int index = 0; index < slots.Count; index++)
+        {
             slots[index].GlobalIndex = index;
+            slots[index].SlotIndex = index;
+        }
+    }
+
+    private void EnsureSlotCapacityOnly(List<InventorySlot> slots, int maxCapacity)
+    {
+        while (slots.Count < maxCapacity)
+            slots.Add(new InventorySlot { ItemID = 0, Quantity = 0 });
     }
 
     public bool AddItem(int itemID, int quantity)
@@ -55,35 +64,14 @@ public class InventoryManager
         if (!TryGetValidItemData(itemID, out var itemData, out var itemCategory))
             return false;
 
-        if (!HasEnoughSpaceInAll(_totalSlots, itemID, itemData.MaxStack, quantity))
+        if (!HasEnoughSpaceForCategory(_totalSlots, itemID, itemData.MaxStack, quantity, itemCategory))
             return false;
 
-        var tabSlots = GetSlotsByType(itemCategory);
-
-        if (tabSlots != _totalSlots && !HasEnoughSpaceInAll(tabSlots, itemID, itemData.MaxStack, quantity))
-            return false;
-
-        int addQuantity = quantity;
         FillExistingItemSlots(_totalSlots, itemID, itemData.MaxStack, ref quantity);
         FillEmptySlots(_totalSlots, itemID, itemData.MaxStack, ref quantity);
-        SyncAddedItemToTab(itemID, addQuantity, itemData.MaxStack);
+        SyncAllTabsFromTotal();
         _onInventoryChanged.OnNext(Unit.Default);
         return true;
-    }
-
-    private void SyncAddedItemToTab(int itemID, int quantity, int maxStack)
-    {
-        if (!TryGetValidItemData(itemID, out _, out var itemCategory))
-            return;
-
-        var tabSlots = GetSlotsByType(itemCategory);
-
-        if (tabSlots == null)
-            return;
-
-        int remaining = quantity;
-        FillExistingItemSlots(tabSlots, itemID, maxStack, ref remaining);
-        FillEmptySlots(tabSlots, itemID, maxStack, ref remaining);
     }
 
     public bool RemoveItem(int itemID, int quantity)
@@ -117,40 +105,48 @@ public class InventoryManager
             }
         }
 
-        SyncRemovedItemToTab(itemID, quantity);
+        SyncAllTabsFromTotal();
         _onInventoryChanged.OnNext(Unit.Default);
         return true;
     }
 
-    private void SyncRemovedItemToTab(int itemID, int quantity)
+    public async UniTask<bool> DropItem(InventorySlot targetSlot, int quantity, Vector3 dropPosition)
     {
-        if (!TryGetValidItemData(itemID, out _, out var itemCategory)) 
-            return;
+        if (targetSlot == null || targetSlot.ItemID <= 0 || targetSlot.Quantity < quantity)
+            return false;
 
-        var tabSlots = GetSlotsByType(itemCategory);
+        int itemID = targetSlot.ItemID;
+        int globalIndex = targetSlot.GlobalIndex;
+        var masterSlot = _totalSlots.FirstOrDefault(s => s.GlobalIndex == globalIndex);
 
-        if (tabSlots == null) 
-            return;
+        if (masterSlot == null || masterSlot.Quantity < quantity)
+            return false;
 
-        int remainingToRemove = quantity;
+        masterSlot.Quantity -= quantity;
 
-        foreach (var slot in tabSlots)
+        if (masterSlot.Quantity <= 0)
         {
-            if (remainingToRemove <= 0) 
-                break;
+            masterSlot.ItemID = 0;
+            masterSlot.Quantity = 0;
+        }
 
-            if (slot.ItemID == itemID)
-            {
-                int removeQty = Math.Min(remainingToRemove, slot.Quantity);
-                slot.Quantity -= removeQty;
-                remainingToRemove -= removeQty;
+        SyncAllTabsFromTotal();
+        await SpawnItemProp(itemID, quantity, dropPosition);
+        _onInventoryChanged.OnNext(Unit.Default);
+        return true;
+    }
 
-                if (slot.Quantity <= 0)
-                {
-                    slot.ItemID = 0;
-                    slot.Quantity = 0;
-                }
-            }
+    private async UniTask SpawnItemProp(int itemID, int quantity, Vector3 position)
+    {
+        if (!Managers.Data.Items.TryGetValue(itemID, out var itemData))
+            return;
+
+        var (propInstance, rentHandle) = await Managers.Pool.PopAsync<ItemProp>();
+
+        if (propInstance != null)
+        {
+            propInstance.transform.position = position;
+            await propInstance.Setup(itemID, quantity);
         }
     }
 
@@ -174,7 +170,6 @@ public class InventoryManager
             return HandleCrossAreaMove(sourceArea, sourceIndex, targetArea, targetIndex);
 
         var targetList = GetSlotsByType(currentTab);
-
         if (targetList == null || sourceIndex < 0 || sourceIndex >= targetList.Count || targetIndex < 0 || targetIndex >= targetList.Count)
             return false;
 
@@ -184,7 +179,41 @@ public class InventoryManager
         if (sourceSlot == targetSlot)
             return false;
 
-        SwapSlots(sourceSlot, targetSlot);
+        if (currentTab.HasValue)
+        {
+            var masterSource = _totalSlots.FirstOrDefault(s => s.GlobalIndex == sourceSlot.GlobalIndex);
+            var masterTarget = _totalSlots.FirstOrDefault(s => s.GlobalIndex == targetSlot.GlobalIndex);
+
+            if (masterSource == null || masterTarget == null)
+                return false;
+
+            if (TryMergeOrSwapSlots(masterSource, masterTarget))
+            {
+                SyncAllTabsFromTotal();
+                _onInventoryChanged.OnNext(Unit.Default);
+                return true;
+            }
+
+            int toIndex = _totalSlots.IndexOf(masterSource);
+            int fromIndex = _totalSlots.IndexOf(masterTarget);
+            (_totalSlots[toIndex], _totalSlots[fromIndex]) = (_totalSlots[fromIndex], _totalSlots[toIndex]);
+        }
+        else
+        {
+            var sourceMaster = _totalSlots[sourceIndex];
+            var targetMaster = _totalSlots[targetIndex];
+
+            if (TryMergeOrSwapSlots(sourceMaster, targetMaster))
+            {
+                SyncAllTabsFromTotal();
+                _onInventoryChanged.OnNext(Unit.Default);
+                return true;
+            }
+
+            (_totalSlots[sourceIndex], _totalSlots[targetIndex]) = (_totalSlots[targetIndex], _totalSlots[sourceIndex]);
+        }
+
+        SyncAllTabsFromTotal();
         _onInventoryChanged.OnNext(Unit.Default);
         return true;
     }
@@ -194,17 +223,57 @@ public class InventoryManager
         var sourceList = GetSlotList(sourceArea);
         var targetList = GetSlotList(targetArea);
 
-        if (sourceList == null || targetList == null) 
+        if (sourceList == null || targetList == null)
             return false;
 
         var sourceSlot = sourceList.FirstOrDefault(s => s.SlotIndex == sourceIndex || s.GlobalIndex == sourceIndex);
         var targetSlot = targetList.FirstOrDefault(s => s.SlotIndex == targetIndex || s.GlobalIndex == targetIndex);
 
-        if (sourceSlot == null || targetSlot == null) 
+        if (sourceSlot == null || targetSlot == null)
             return false;
 
-        SwapSlots(sourceSlot, targetSlot);
+        if (TryMergeOrSwapSlots(sourceSlot, targetSlot))
+        {
+            if (sourceArea == SlotArea.Inventory || targetArea == SlotArea.Inventory)
+                SyncAllTabsFromTotal();
+
+            _onInventoryChanged.OnNext(Unit.Default);
+            return true;
+        }
+
+        SwapSlotsValues(sourceSlot, targetSlot);
+
+        if (sourceArea == SlotArea.Inventory || targetArea == SlotArea.Inventory)
+            SyncAllTabsFromTotal();
+
         _onInventoryChanged.OnNext(Unit.Default);
+        return true;
+    }
+
+    private bool TryMergeOrSwapSlots(InventorySlot source, InventorySlot target)
+    {
+        if (source.ItemID <= 0 || source.ItemID != target.ItemID)
+            return false;
+
+        if (!TryGetValidItemData(source.ItemID, out var itemData, out _))
+            return false;
+
+        int maxStack = itemData.MaxStack;
+
+        if (target.Quantity >= maxStack)
+            return false;
+
+        int space = maxStack - target.Quantity;
+        int transfer = Math.Min(space, source.Quantity);
+        target.Quantity += transfer;
+        source.Quantity -= transfer;
+
+        if (source.Quantity <= 0)
+        {
+            source.ItemID = 0;
+            source.Quantity = 0;
+        }
+
         return true;
     }
 
@@ -219,10 +288,10 @@ public class InventoryManager
         };
     }
 
-    public IReadOnlyList<InventorySlot> GetEquipmentSlots() 
+    public IReadOnlyList<InventorySlot> GetEquipmentSlots()
         => _equipmentSlots;
 
-    public IReadOnlyList<InventorySlot> GetQuickSlots() 
+    public IReadOnlyList<InventorySlot> GetQuickSlots()
         => _quickSlots;
 
     private bool TryGetValidItemData(int itemID, out ItemData itemData, out ItemCategory itemCategory)
@@ -238,36 +307,48 @@ public class InventoryManager
         return true;
     }
 
-    private bool HasEnoughSpaceInAll(List<InventorySlot> slots, int itemID, int maxStack, int quantity)
+    private bool HasEnoughSpaceForCategory(List<InventorySlot> totalSlots, int itemID, int maxStack, int quantity, ItemCategory targetCategory)
     {
+        var categorySlots = totalSlots
+        .Where(s => s.ItemID > 0 && TryGetValidItemData(s.ItemID, out _, out var cat) && cat == targetCategory)
+        .ToList();
+        int usedCategorySlotsCount = categorySlots.Count;
+        int maxCategorySlots = Define.Amount.InventoryTabSize;
+        int emptyCategorySlotsCount = maxCategorySlots - usedCategorySlotsCount;
         int required = quantity;
 
-        foreach (var slot in slots)
+        foreach (var slot in categorySlots)
         {
-            if (required <= 0) 
-                break;
+            if (required <= 0) break;
 
             if (slot.ItemID == itemID && slot.Quantity < maxStack)
-            {
                 required -= (maxStack - slot.Quantity);
-                continue;
-            }
-
-            if (slot.ItemID == 0) 
-                required -= maxStack;
         }
 
-        return required <= 0;
+        if (required > 0)
+        {
+            int neededSlots = (int)Math.Ceiling((double)required / maxStack);
+
+            if (neededSlots > emptyCategorySlotsCount)
+                return false;
+
+            int totalEmptySlots = totalSlots.Count(s => s.ItemID == 0);
+
+            if (neededSlots > totalEmptySlots)
+                return false;
+        }
+
+        return true;
     }
 
     private void FillExistingItemSlots(List<InventorySlot> slots, int itemID, int maxStack, ref int remaining)
     {
         foreach (var slot in slots)
         {
-            if (remaining <= 0) 
+            if (remaining <= 0)
                 break;
 
-            if (slot.ItemID != itemID || slot.Quantity >= maxStack) 
+            if (slot.ItemID != itemID || slot.Quantity >= maxStack)
                 continue;
 
             int add = Math.Min(remaining, maxStack - slot.Quantity);
@@ -280,10 +361,10 @@ public class InventoryManager
     {
         foreach (var slot in slots)
         {
-            if (remaining <= 0) 
+            if (remaining <= 0)
                 break;
 
-            if (slot.ItemID != 0) 
+            if (slot.ItemID != 0)
                 continue;
 
             int add = Math.Min(remaining, maxStack);
@@ -293,20 +374,53 @@ public class InventoryManager
         }
     }
 
-    private void SwapSlots(InventorySlot a, InventorySlot b)
+    private void SwapSlotsValues(InventorySlot a, InventorySlot b)
     {
         (a.ItemID, b.ItemID) = (b.ItemID, a.ItemID);
         (a.Quantity, b.Quantity) = (b.Quantity, a.Quantity);
     }
 
+    private void SyncAllTabsFromTotal()
+    {
+        SyncSingleTabInstance(_equipmentTabSlots, ItemCategory.Equipment);
+        SyncSingleTabInstance(_consumptionTabSlots, ItemCategory.Consumption);
+        SyncSingleTabInstance(_etcTabSlots, ItemCategory.Etc);
+    }
+
+    private void SyncSingleTabInstance(List<InventorySlot> tabSlots, ItemCategory category)
+    {
+        EnsureSlotCapacityOnly(tabSlots, Define.Amount.InventoryTabSize);
+        var matchedSlots = _totalSlots
+        .Where(s => s.ItemID > 0 && TryGetValidItemData(s.ItemID, out _, out var cat) && cat == category)
+        .ToList();
+        int index = 0;
+
+        foreach (var masterSlot in matchedSlots)
+        {
+            if (index >= tabSlots.Count) 
+                break;
+
+            tabSlots[index] = masterSlot;
+            index++;
+        }
+
+        for (int i = index; i < tabSlots.Count; i++)
+            tabSlots[i] = new InventorySlot { ItemID = 0, Quantity = 0 };
+    }
+
     public void SortInventory(ItemCategory? currentTabType)
     {
-        var targetSlots = GetSlotsByType(currentTabType);
+        if (!currentTabType.HasValue)
+            SortSlotList(_totalSlots);
+        else
+        {
+            var targetSlots = GetSlotsByType(currentTabType);
 
-        if (targetSlots == null)
-            return;
+            if (targetSlots != null)
+                SortSlotList(targetSlots);
+        }
 
-        SortSlotList(targetSlots);
+        SyncAllTabsFromTotal();
         _onInventoryChanged.OnNext(Unit.Default);
     }
 
@@ -337,40 +451,24 @@ public class InventoryManager
 
     public void ClearInventory()
     {
-        foreach (var slot in _totalSlots) 
-        { 
-            slot.ItemID = 0; 
+        foreach (var slot in _totalSlots)
+        {
+            slot.ItemID = 0;
             slot.Quantity = 0;
         }
 
-        foreach (var slot in _equipmentTabSlots) 
-        { 
-            slot.ItemID = 0; 
-            slot.Quantity = 0; 
+        SyncAllTabsFromTotal();
+
+        foreach (var slot in _equipmentSlots)
+        {
+            slot.ItemID = 0;
+            slot.Quantity = 0;
         }
 
-        foreach (var slot in _consumptionTabSlots) 
-        { 
-            slot.ItemID = 0; 
-            slot.Quantity = 0; 
-        }
-
-        foreach (var slot in _etcTabSlots) 
-        { 
-            slot.ItemID = 0; 
-            slot.Quantity = 0; 
-        }
-
-        foreach (var slot in _equipmentSlots) 
-        { 
-            slot.ItemID = 0; 
-            slot.Quantity = 0; 
-        }
-
-        foreach (var slot in _quickSlots) 
-        { 
-            slot.ItemID = 0; 
-            slot.Quantity = 0; 
+        foreach (var slot in _quickSlots)
+        {
+            slot.ItemID = 0;
+            slot.Quantity = 0;
         }
 
         _onInventoryChanged.OnNext(Unit.Default);

@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &596100843813610454
+--- !u!1 &3120498384981051715
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,41 +8,43 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1963839474104552397}
-  - component: {fileID: 8048950408540577651}
-  - component: {fileID: 6864692541199033762}
-  - component: {fileID: 5023868183263524491}
-  - component: {fileID: 5132711214122179758}
+  - component: {fileID: 6064806323897275140}
+  - component: {fileID: 6737944221208188339}
+  - component: {fileID: 7890815064551884921}
+  - component: {fileID: 4385824622328394084}
+  - component: {fileID: 2745618545219569791}
+  - component: {fileID: 5854789466669937278}
+  - component: {fileID: 576399878141554514}
   m_Layer: 11
-  m_Name: TrayProp
+  m_Name: ItemProp
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &1963839474104552397
+--- !u!4 &6064806323897275140
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 596100843813610454}
+  m_GameObject: {fileID: 3120498384981051715}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.15, y: 0.2, z: 1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!212 &8048950408540577651
+--- !u!212 &6737944221208188339
 SpriteRenderer:
   serializedVersion: 2
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 596100843813610454}
+  m_GameObject: {fileID: 3120498384981051715}
   m_Enabled: 1
   m_CastShadows: 0
   m_ReceiveShadows: 0
@@ -61,7 +63,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  - {fileID: 2100000, guid: 9dfc825aed78fcd4ba02077103263b40, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -80,27 +82,27 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: -1558514079
+  m_SortingLayer: 1
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 21300000, guid: 627910d956d7c26439fe5f439c6d3dee, type: 3}
-  m_Color: {r: 0, g: 1, b: 0, a: 1}
+  m_Sprite: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
   m_Size: {x: 3, y: 2}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_SpriteSortPoint: 0
---- !u!61 &6864692541199033762
+--- !u!61 &7890815064551884921
 BoxCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 596100843813610454}
+  m_GameObject: {fileID: 3120498384981051715}
   m_Enabled: 1
   serializedVersion: 3
   m_Density: 1
@@ -130,24 +132,24 @@ BoxCollider2D:
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
   m_SpriteTilingProperty:
-    border: {x: 0.39999998, y: 0.39999998, z: 0.39999998, w: 0.39999998}
+    border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 3, y: 2}
+    oldSize: {x: 0.5, y: 0.5}
     newSize: {x: 3, y: 2}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 3, y: 2}
+  m_Size: {x: 0.5, y: 0.5}
   m_EdgeRadius: 0
---- !u!50 &5023868183263524491
+--- !u!50 &4385824622328394084
 Rigidbody2D:
   serializedVersion: 5
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 596100843813610454}
+  m_GameObject: {fileID: 3120498384981051715}
   m_BodyType: 0
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
@@ -167,23 +169,49 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
---- !u!114 &5132711214122179758
+--- !u!114 &2745618545219569791
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 596100843813610454}
+  m_GameObject: {fileID: 3120498384981051715}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d84417387fa9beb4480bce5415806195, type: 3}
+  m_Script: {fileID: 11500000, guid: 2ff2ad827c3f3f94685f0042b91297d1, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Tray
-  _propKey: 2
-  _guid: e789e32fffcf4be5a4b908ae5ca50a8e
-  Renderer: {fileID: 8048950408540577651}
+  m_EditorClassIdentifier: Assembly-CSharp::ItemProp
+  _propKey: 3
+  _guid: f7a020361ce94579a1d978d4225fa1a6
+  Renderer: {fileID: 6737944221208188339}
   _collider: {fileID: 0}
-  _interactionType: 2
-  _localizationPromptKey: 125
+  _interactionType: 3
+  _localizationPromptKey: 126
   _requireKeyInput: 1
   _triggerOnProximity: 0
+  _itemID: 6
+  _quantity: 1
+--- !u!114 &5854789466669937278
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3120498384981051715}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 189db14a1f1ffb342ae2727ca6ee2967, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: R3.Unity::R3.Triggers.ObservableEnableTrigger
+--- !u!114 &576399878141554514
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3120498384981051715}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49e9c678e8ad14d4094fc444a5148949, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: R3.Unity::R3.Triggers.ObservableDestroyTrigger

@@ -29,6 +29,7 @@ public class Managers : MonoBehaviour
     public static SaveManager Save { get; private set; }
     public static PreloadManager Preload { get; private set; }
     public static GameManager Game { get; private set; }
+    public static PropManager Prop { get; private set; }
     public static CooldownManager Cooldown { get; private set; }
     public static CameraManager Camera { get; private set; }
     public static GraphicManager Graphic { get; private set; }
@@ -65,6 +66,7 @@ public class Managers : MonoBehaviour
         Save = new SaveManager();
         Preload = new PreloadManager();
         Game = new GameManager();
+        Prop = new PropManager();
         Cooldown = new CooldownManager();
         Camera = new CameraManager();
         Graphic = new GraphicManager();

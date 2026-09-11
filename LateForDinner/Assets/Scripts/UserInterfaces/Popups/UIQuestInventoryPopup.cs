@@ -163,9 +163,7 @@ public class UIQuestInventoryPopup : UIPopup, IDraggablePopup, IFocusablePopup
         base.Refresh();
         RefreshInventory(_currentTabType);
         RefreshEquipmentSlots();
-
-        if (_isAttributePanelOpen)
-            RefreshPlayerInfo();
+        RefreshPlayerInfo();
     }
 
     private void RefreshInventory(ItemCategory? type)

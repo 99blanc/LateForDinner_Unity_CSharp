@@ -5,3 +5,4 @@ Key,Text
 # Index: Interaction,
 Interaction_Ladder,사다리 진입
 Interaction_Tray,식판 획득/내려놓기/던지기/식탁 배치
+Interaction_Item,아이템 획득

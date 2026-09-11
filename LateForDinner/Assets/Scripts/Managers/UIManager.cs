@@ -22,6 +22,7 @@ public class UIManager
     public float ScaleFactor
         => _canvas != null ? _canvas.scaleFactor : 1f;
     private readonly Dictionary<LayerType, Transform> _layer = new Dictionary<LayerType, Transform>();
+    private readonly List<UIIndicator> _indicators = new List<UIIndicator>();
     private readonly List<UIPopup> _popups = new List<UIPopup>();
     private readonly Dictionary<UserInterface, IDisposable> _handles = new Dictionary<UserInterface, IDisposable>();
     private UIDisplay _display;
@@ -31,6 +32,7 @@ public class UIManager
         _root = new GameObject { name = Literal.Roots.UI };
         _root.transform.SetParent(Managers.Instance.transform, false);
         CreateLayer(LayerType.Display);
+        CreateLayer(LayerType.Indicator);
         CreateLayer(LayerType.Popup);
         CreateLayer(LayerType.System);
         CreateLayer(LayerType.Lock);
@@ -106,6 +108,36 @@ public class UIManager
         }
 
         RegisterDisplay(instance, rentHandle);
+        return instance;
+    }
+
+    public async UniTask<T> OpenIndicatorAsync<T>() where T : UIIndicator
+    {
+        var (instance, rentHandle) = await Managers.Pool.PopAsync<T>(_layer[LayerType.Indicator]);
+
+        if (IsInstanceInvalid(instance, out var logKey, typeof(T).Name))
+        {
+            Log.Error(logKey, typeof(T).Name);
+            return null;
+        }
+
+        _indicators.Add(instance);
+        _handles[instance] = rentHandle;
+        return instance;
+    }
+
+    public T OpenIndicator<T>() where T : UIIndicator
+    {
+        var (instance, rentHandle) = Managers.Pool.Pop<T>(_layer[LayerType.Indicator]);
+
+        if (IsInstanceInvalid(instance, out var logKey, typeof(T).Name))
+        {
+            Log.Error(logKey, typeof(T).Name);
+            return null;
+        }
+
+        _indicators.Add(instance);
+        _handles[instance] = rentHandle;
         return instance;
     }
 
@@ -207,7 +239,8 @@ public class UIManager
         if (!IsUIValidAndManaged(ui))
             return;
 
-        HandleUIDisconnect(ui);
+        HandleUIDisplayDisconnect(ui);
+        HandleUIIndicatorDisconnect(ui);
         HandleUIPopupDisconnect(ui);
         HandleUIHandleDispose(ui);
     }
@@ -278,6 +311,49 @@ public class UIManager
         }
     }
 
+    public Vector2 GetStackedIndicatorPosition(UIIndicator indicator, Vector2 localPoint, Camera mainCamera)
+    {
+        if (indicator == null || indicator.RectTransform == null)
+            return localPoint;
+
+        var indicatorParent = _layer[LayerType.Indicator] as RectTransform;
+        float myWidth = indicator.RectTransform.rect.width;
+        float myHeight = indicator.RectTransform.rect.height;
+        var activeIndicators = new List<(UIIndicator indicator, Vector2 basePoint, float width)>();
+
+        foreach (var other in _indicators)
+        {
+            if (other == null || !other.gameObject.activeSelf)
+                continue;
+
+            Vector3? worldPos = other.GetTargetWorldPosition();
+
+            if (!worldPos.HasValue)
+                continue;
+
+            Vector3 screenPos = mainCamera.WorldToScreenPoint(worldPos.Value);
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(indicatorParent, screenPos, null, out Vector2 basePoint);
+            float otherWidth = other.RectTransform != null ? other.RectTransform.rect.width : myWidth;
+            activeIndicators.Add((other, basePoint, otherWidth));
+        }
+
+        activeIndicators.Sort((a, b) => a.basePoint.x.CompareTo(b.basePoint.x));
+        int stackIndex = 0;
+
+        foreach (var item in activeIndicators)
+        {
+            if (item.indicator == indicator)
+                break;
+
+            float collisionThreshold = (myWidth + item.width) * 0.5f;
+
+            if (Mathf.Abs(localPoint.x - item.basePoint.x) < collisionThreshold)
+                stackIndex++;
+        }
+
+        return localPoint + new Vector2(0f, stackIndex * myHeight);
+    }
+
     private bool HasExistingDisplay<T>(out T display) where T : UIDisplay
     {
         display = _display as T;
@@ -327,10 +403,16 @@ public class UIManager
     private bool IsUIValidAndManaged(UserInterface ui)
         => ui != null && _handles.ContainsKey(ui);
 
-    private void HandleUIDisconnect(UserInterface ui)
+    private void HandleUIDisplayDisconnect(UserInterface ui)
     {
-        if (_display == ui)
+        if (ui is UIDisplay display && _display == ui)
             _display = null;
+    }
+
+    private void HandleUIIndicatorDisconnect(UserInterface ui)
+    {
+        if (ui is UIIndicator indicator)
+            _indicators.Remove(indicator);
     }
 
     private void HandleUIPopupDisconnect(UserInterface ui)

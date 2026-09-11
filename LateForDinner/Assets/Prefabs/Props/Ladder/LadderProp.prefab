@@ -180,7 +180,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 2890677619805323147}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e684aab21f6d0cd4daf7ebad58828b41, type: 3}
+  m_Script: {fileID: 11500000, guid: 2fd479da796cb9346a9d4f04280166c0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Ladder
   _propKey: 1
@@ -188,7 +188,7 @@ MonoBehaviour:
   Renderer: {fileID: 7682468558932832268}
   _collider: {fileID: 1413046859792644861}
   _interactionType: 1
-  _promptKey: 15
+  _promptKey: 124
   _requireKeyInput: 0
   _triggerOnProximity: 1
   _interactRadius: 1

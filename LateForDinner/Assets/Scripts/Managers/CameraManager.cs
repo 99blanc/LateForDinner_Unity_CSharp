@@ -15,8 +15,10 @@ public class CameraManager
             return _root;
         }
     }
-    private CinemachineCamera _vcam;
+    public Camera Main
+        => _mainCamera;
     private Camera _mainCamera;
+    private CinemachineCamera _vcam;
     private CinemachineFollow _follow;
     private CameraWorkMode _currentMode;
 

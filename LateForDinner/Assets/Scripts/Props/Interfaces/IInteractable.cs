@@ -44,6 +44,7 @@ public interface IInteractable
             {
                 InteractionType.Ladder => new LadderInteractAction(),
                 InteractionType.Tray => new TrayInteractAction(),
+                InteractionType.Item => new ItemInteractAction(),
                 _ => null
             };
 
@@ -54,13 +55,17 @@ public interface IInteractable
         }
     }
 
-    public void ProtectedInteract(Character character)
+    public bool ProtectedInteract(Character character)
     {
-        Action?.Execute(character);
-        OnInteract(character);
+        bool actionSuccess = Action?.Execute(character) ?? true;
+
+        if (!actionSuccess) 
+            return false;
+
+        return OnInteract(character);
     }
 
-    virtual void OnInteract(Character character) { }
+    virtual bool OnInteract(Character character) { return true; }
 
     public void Reset()
     {

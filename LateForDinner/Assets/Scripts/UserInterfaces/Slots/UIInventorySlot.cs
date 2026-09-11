@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using LateForDinner.Data;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -150,9 +151,11 @@ public class UIInventorySlot : UISlot, IDraggableSlot<UIInventorySlot>
             return;
 
         dropPopup.Setup(LocalizationKey.UI_Inventory_Slot_Drop_Confirm_Title, LocalizationKey.UI_Inventory_Slot_Drop_Confirm_Message, _data.Quantity, arg1: itemData.NameKey,
-        onConfirm: (selectedCount) =>
+        onConfirm: async (selectedCount) =>
         {
-            Managers.Inventory.RemoveItem(itemData.ID, selectedCount);
+            var player = Managers.Game.Player;
+            Vector3 dropPosition = player != null ? player.transform.position + (player.Renderer.flipX ? Vector3.left : Vector3.right) : Vector3.zero;
+            await Managers.Inventory.DropItem(_data, selectedCount, dropPosition);
         },
         onCancel: () => { });
     }

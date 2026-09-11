@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Spawnpoint : Prop
+public class SpawnpointProp : Prop
 {
     [Header("Spawnpoint Settings")]
     [SerializeField] private SceneID _toSceneID;

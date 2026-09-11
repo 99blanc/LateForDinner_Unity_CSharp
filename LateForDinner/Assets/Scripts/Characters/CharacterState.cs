@@ -207,7 +207,7 @@ public class ClimbState : CharacterState
         if (Owner is not IClimbableCharacter climbable)
             return;
 
-        if (Owner.CurrentInteractable is Ladder ladder)
+        if (Owner.CurrentInteractable is LadderProp ladder)
             climbable.StartClimbing(ladder);
 
         Owner?.CharacterAnimator?.PlayState(CharacterStateType.Climb);

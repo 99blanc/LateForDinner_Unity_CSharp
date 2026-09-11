@@ -2,6 +2,16 @@
 # Description: 게임 내 공통 현지화 데이터 관리 테이블,
 # Rule: 콤마 사용 불가. Key는 고유 값이어야 하며 중복 불가. 각 Key별 Text에 포맷팅 파라미터({0}/{1} 등) 사용 가능,
 Key,Text
+# Index: Default,
+None,None
+Apply,적용
+Complete,완료
+Cancel,취소
+Default,기본값
+Language,언어
+Reset,초기화
+Switch,전환
+Play,플레이
 # Index: Action,
 Action_Right,이동(우)
 Action_Left,이동(좌)
@@ -20,16 +30,6 @@ Action_Active,액티브 스킬
 Action_Pause,일시정지 메뉴
 Action_Cancel,팝업 캔슬
 Action_DashCommand,대시 커맨드
-# Index: Default,
-None,None
-Apply,적용
-Complete,완료
-Cancel,취소
-Default,기본값
-Language,언어
-Reset,초기화
-Switch,전환
-Play,플레이
 # Index: Item,
 Item_Equipment,장비
 Item_Consumption,소비
@@ -44,6 +44,7 @@ Item_Blunt,둔기
 Item_Bow,활
 Item_Throw,투척
 Item_Equipment_Format,{0}: {1}
+Item_Drop_Format,{0} X {1}
 #Index: Scene,
 Scene_Bootstrap,진입점
 Scene_Hospital1,병원 입구 1

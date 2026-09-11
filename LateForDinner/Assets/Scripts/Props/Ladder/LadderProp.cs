@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Ladder : Prop, IInteractable
+public class LadderProp : Prop, IInteractable
 {
     [Header("Ladder Settings")]
     [SerializeField] private Collider2D _collider = default;
@@ -18,5 +18,11 @@ public class Ladder : Prop, IInteractable
     public float InteractRadius => _interactRadius;
     protected override bool UseSaveState => false;
 
-    public void OnInteract(Character character) { }
+    public bool OnInteract(Character character) 
+    {
+        if (character is not IClimbableCharacter climbable)
+            return false;
+
+        return true; 
+    }
 }

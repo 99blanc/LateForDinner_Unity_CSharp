@@ -6,14 +6,14 @@ public interface IClimbableCharacter
     private static readonly ConditionalWeakTable<IClimbableCharacter, ClimbStateValue> _climbValue = new ConditionalWeakTable<IClimbableCharacter, ClimbStateValue>();
     private class ClimbStateValue
     {
-        public Ladder CurrentLadder = null;
+        public LadderProp CurrentLadder = null;
         public bool IsClimbing = false;
         public CooldownRegistry ExitCooldown = new CooldownRegistry();
     }
     SpriteRenderer Renderer { get; }
     Rigidbody2D Rigidbody { get; }
     AttributeRegistry Attributes { get; }
-    public Ladder CurrentLadder
+    public LadderProp CurrentLadder
     {
         get => _climbValue.GetOrCreateValue(this).CurrentLadder;
         set => _climbValue.GetOrCreateValue(this).CurrentLadder = value;
@@ -26,7 +26,7 @@ public interface IClimbableCharacter
     public bool CanForceExit => this is Character character && character.IsGrounded();
     public bool IsExitLocked => _climbValue.GetOrCreateValue(this).ExitCooldown.IsOnCooldown && !CanForceExit;
 
-    public void StartClimbing(Ladder ladder)
+    public void StartClimbing(LadderProp ladder)
     {
         if (this is not Character || Rigidbody == null || ladder == null)
             return;

@@ -103,7 +103,7 @@ public class UIItemDropPopup : UIPopup, IDraggablePopup, IFocusablePopup
         _titleProvider = titleProvider;
         _messageProvider = messageProvider;
         Refresh();
-        BindItemCountControl(Scrollbars.ItemScrollbar, InputFields.ItemInputField, initialValue: _maxCount);
+        BindItemCountControl(Scrollbars.ItemScrollbar, InputFields.ItemInputField, initialValue: 1);
     }
 
     private void BindItemCountControl(Scrollbars scrollbarEnum, InputFields inputFieldEnum, int initialValue = 1)

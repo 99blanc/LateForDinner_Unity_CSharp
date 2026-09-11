@@ -41,7 +41,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 8096529172660027459}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 672741985ccb54f4e9b69579dcd0a886, type: 3}
+  m_Script: {fileID: 11500000, guid: aeac6e620a80e274ab60fb94560c13fc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spawnpoint
   _propKey: 0

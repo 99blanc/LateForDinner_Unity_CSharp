@@ -24,14 +24,14 @@ public abstract class Prop : MonoBehaviour
     {
         if (UseSaveState)
             GenerateUniqueKey();
-
-        Managers.Scene.RegisterProp(this);
     }
 
     protected virtual void Start()
     {
         if (UseSaveState)
             LoadState();
+
+        Managers.Prop.Register(this);
     }
 
     private void GenerateUniqueKey()
@@ -73,5 +73,5 @@ public abstract class Prop : MonoBehaviour
     protected virtual void ApplyState(bool state) { }
 
     protected virtual void OnDestroy()
-        => Managers.Scene.UnregisterProp(this);
+        => Managers.Prop.Unregister(this);
 }

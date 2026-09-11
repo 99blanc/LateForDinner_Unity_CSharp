@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Tray : Prop, IInteractable, IPoolable
+public class TrayProp : Prop, IInteractable, IPoolable
 {
     [Header("Tray Settings")]
     [SerializeField] private Collider2D _collider;
@@ -16,11 +16,13 @@ public class Tray : Prop, IInteractable, IPoolable
     public bool TriggerOnProximity => _triggerOnProximity;
     protected override bool UseSaveState => true;
 
-    public void OnInteract(Character character)
+    public bool OnInteract(Character character)
     {
         if (character is not ICarriableCharacter carriable)
-            return;
+            return false;
 
         carriable.PickupProp(this);
+        Managers.Pool.Push(this, UniqueKey);
+        return true;
     }
 }

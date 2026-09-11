@@ -33,7 +33,6 @@ public interface ICarriableCharacter
 
         character.CurrentHoldInteractionType = interactable.InteractionType;
         character?.StateMachine?.RequestStateChange(CharacterStateType.Idle, forceInstantly: true);
-        Managers.Pool.Push(prop, prop.UniqueKey);
         HeldProp = prop;
         IsHoldingProp = true;
         HasThrown = false;

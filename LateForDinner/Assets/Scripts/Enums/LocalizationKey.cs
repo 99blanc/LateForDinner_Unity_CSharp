@@ -1,5 +1,14 @@
 public enum LocalizationKey
 {
+    None                                               , // None
+    Apply                                              , // 적용
+    Complete                                           , // 완료
+    Cancel                                             , // 취소
+    Default                                            , // 기본값
+    Language                                           , // 언어
+    Reset                                              , // 초기화
+    Switch                                             , // 전환
+    Play                                               , // 플레이
     Action_Right                                       , // 이동(우)
     Action_Left                                        , // 이동(좌)
     Action_DownUtility                                 , // 하강/앉기/드랍
@@ -17,15 +26,6 @@ public enum LocalizationKey
     Action_Pause                                       , // 일시정지 메뉴
     Action_Cancel                                      , // 팝업 캔슬
     Action_DashCommand                                 , // 대시 커맨드
-    None                                               , // None
-    Apply                                              , // 적용
-    Complete                                           , // 완료
-    Cancel                                             , // 취소
-    Default                                            , // 기본값
-    Language                                           , // 언어
-    Reset                                              , // 초기화
-    Switch                                             , // 전환
-    Play                                               , // 플레이
     Item_Equipment                                     , // 장비
     Item_Consumption                                   , // 소비
     Item_Etc                                           , // 기타
@@ -39,6 +39,7 @@ public enum LocalizationKey
     Item_Bow                                           , // 활
     Item_Throw                                         , // 투척
     Item_Equipment_Format                              , // {0}: {1}
+    Item_Drop_Format                                   , // {0} X {1}
     Scene_Bootstrap                                    , // 진입점
     Scene_Hospital1                                    , // 병원 입구 1
     Scene_Hospital2                                    , // 병원 입구 2
@@ -125,6 +126,7 @@ public enum LocalizationKey
     Console_Save_InvalidSlot                           , // 유효하지 않은 세이브 슬롯 번호입니다: '{0}'.
     Interaction_Ladder                                 , // 사다리 진입
     Interaction_Tray                                   , // 식판 획득/내려놓기/던지기/식탁 배치
+    Interaction_Item                                   , // 아이템 획득
     Item_Name_1                                        , // 테스트용 모자
     Item_Name_2                                        , // 테스트용 상의
     Item_Name_3                                        , // 테스트용 하의

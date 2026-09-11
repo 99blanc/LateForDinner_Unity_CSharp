@@ -87,7 +87,7 @@ public abstract class Character : MonoBehaviour, IPoolable
         Collider = this.GetComponentAssert<Collider2D>();
     }
 
-    public virtual void RelocateTo(Spawnpoint targetSpawn)
+    public virtual void RelocateTo(SpawnpointProp targetSpawn)
     {
         if (targetSpawn == null || Collider == null) 
             return;
