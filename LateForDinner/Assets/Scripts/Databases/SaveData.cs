@@ -1,4 +1,5 @@
 using MemoryPack;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -7,12 +8,22 @@ using ZLinq;
 namespace LateForDinner.Data
 {
     [MemoryPackable]
-    public partial class WeaponSave
+    public partial class EquipmentInstance
     {
-        public int WeaponItemID;
+        public string InstanceID;
+        public int ItemID;
         public int UpgradeLevel;
-        public bool HasSpecialUpgrade;
-        public int SelectedSpecialIndex;
+        public int ExtraOptionValue;
+        public bool Flag;
+
+        public static EquipmentInstance Default => new EquipmentInstance()
+        {
+            InstanceID = Guid.NewGuid().ToString(),
+            ItemID = 0,
+            UpgradeLevel = 0,
+            ExtraOptionValue = 0,
+            Flag = false,
+        };
     }
 
     [MemoryPackable]
@@ -22,6 +33,7 @@ namespace LateForDinner.Data
         public int SlotIndex;
         public int ItemID;
         public int Quantity;
+        public string InstanceID;
     }
 
     [MemoryPackable]
@@ -102,7 +114,8 @@ namespace LateForDinner.Data
         public List<InventorySlot> EtcTabSlots;
         public List<InventorySlot> EquipmentSlots;
         public List<InventorySlot> QuickSlots;
-        public List<WeaponSave> UnlockedWeapons;
+        public List<EquipmentInstance> UnlockedEquipments;
+        public HashSet<string> AppliedFlagItems;
         public float Gold;
 
         [MemoryPackIgnore]
@@ -128,7 +141,8 @@ namespace LateForDinner.Data
             EtcTabSlots = Enumerable.Range(0, Define.Amount.InventoryTabSize).Select(i => new InventorySlot { SlotIndex = i, ItemID = 0, Quantity = 0 }).ToList(),
             EquipmentSlots = Enumerable.Range(0, Define.Amount.MaxEquipmentSlot).Select(i => new InventorySlot { SlotIndex = i, ItemID = 0, Quantity = 0 }).ToList(),
             QuickSlots = Enumerable.Range(0, Define.Amount.MaxQuickSlot).Select(i => new InventorySlot { SlotIndex = i, ItemID = 0, Quantity = 0 }).ToList(),
-            UnlockedWeapons = new List<WeaponSave>(),
+            UnlockedEquipments = new List<EquipmentInstance>(),
+            AppliedFlagItems = new HashSet<string>(),
             Gold = 0f
         };
     }

@@ -24,7 +24,7 @@ public interface IJumpableCharacter
             RemainJumpCount = MaxJumpCount;
 
         Renderer.FlipX(directionX);
-        float jumpForce = Attributes.Get<float>(AttributeType.JumpForce).Value;
+        float jumpForce = Attributes.GetBase<float>(AttributeType.JumpForce).Value;
         Vector2 velocity = Rigidbody.linearVelocity;
         velocity.y = jumpForce;
         Rigidbody.linearVelocity = velocity;

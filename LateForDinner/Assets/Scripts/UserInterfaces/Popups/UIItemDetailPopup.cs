@@ -37,37 +37,17 @@ public class UIItemDetailPopup : UIPopup
         }).RegisterToPool(this);
     }
 
-    public void Setup(int itemID, Vector2 mousePosition)
+    public void Setup(int itemID, Vector2 mousePosition, string instanceID = "")
     {
         if (!Managers.Data.Items.TryGetValue(itemID, out ItemData itemData))
             return;
 
         GetImage(Images.SlotItemImage).SetActive(true);
         GetImage(Images.SlotItemImage).sprite = Managers.Resource.GetSprite(Define.Atlas.Item, itemData.AddressableKey);
-        GetText(Texts.ItemNameText).text = Managers.Localization.Get(itemData.NameKey);
+        GetText(Texts.ItemNameText).text = Managers.Localization.Get(itemData.NameKey) + instanceID;
         GetText(Texts.DescriptionText).text = Managers.Localization.Get(itemData.DescriptionKey);
         GetText(Texts.FlavorText).text = Managers.Localization.Get(itemData.FlavorKey);
-
-        string categoryText = string.Empty;
-
-        if (Managers.Data.ItemCategories.TryGetValue(itemData.ItemCategory, out ItemCategoryData itemCategoryData))
-            categoryText = Managers.Localization.Get(itemCategoryData.LocalizationKey);
-
-        if (Managers.Data.ArmorItems.TryGetValue(itemID, out var armorItem) && Managers.Data.ArmorCategories.TryGetValue(armorItem.ArmorCategory, out ArmorCategoryData armorCategoryData))
-        {
-            string itemCategoryText = Managers.Localization.Get(itemCategoryData.LocalizationKey);
-            string armorCategoryText = Managers.Localization.Get(armorCategoryData.LocalizationKey);
-            categoryText = Managers.Localization.Get(LocalizationKey.Item_Equipment_Format, itemCategoryText, armorCategoryText);
-        }
-
-        if (Managers.Data.WeaponItems.TryGetValue(itemID, out var weaponItem) && Managers.Data.WeaponCategories.TryGetValue(weaponItem.WeaponCategory, out WeaponCategoryData weaponCategoryData))
-        {
-            string itemCategoryText = Managers.Localization.Get(itemCategoryData.LocalizationKey);
-            string weaponCategoryText = Managers.Localization.Get(weaponCategoryData.LocalizationKey);
-            categoryText = Managers.Localization.Get(LocalizationKey.Item_Equipment_Format, itemCategoryText, weaponCategoryText);
-        }
-
-        GetText(Texts.ItemCategoryText).text = categoryText;
+        GetText(Texts.ItemCategoryText).text = itemData.GetFormattedCategoryText();
         RectTransform.pivot = Define.UI.ItemDetailPopup;
         UpdatePopupPosition(mousePosition);
     }

@@ -51,7 +51,7 @@ public interface IDashableCharacter
             {
                 if (val.CooldownRegistry != null && !val.CooldownRegistry.IsOnCooldown)
                 {
-                    float cooldownTime = character.Attributes.Get<float>(AttributeType.DashCooldown).CurrentValue;
+                    float cooldownTime = character.Attributes.GetBase<float>(AttributeType.DashCooldown).CurrentValue;
                     val.CooldownRegistry.CooldownTime = cooldownTime;
                     val.CooldownRegistry.CurrentCooldown = cooldownTime;
                     val.CooldownRegistry.IsOnCooldown = true;
@@ -93,10 +93,10 @@ public interface IDashableCharacter
         if (val.DashDirection.x != 0)
             Renderer.FlipX(val.DashDirection.x);
 
-        float moveSpeed = Attributes.Get<float>(AttributeType.MoveSpeed).CurrentValue;
-        float dashMultiplier = Attributes.Get<float>(AttributeType.DashMultiplier).CurrentValue;
+        float moveSpeed = Attributes.GetBase<float>(AttributeType.MoveSpeed).CurrentValue;
+        float dashMultiplier = Attributes.GetBase<float>(AttributeType.DashMultiplier).CurrentValue;
         float dashSpeed = moveSpeed * dashMultiplier;
-        float dashDistance = Attributes.Get<float>(AttributeType.DashDistance).CurrentValue;
+        float dashDistance = Attributes.GetBase<float>(AttributeType.DashDistance).CurrentValue;
         val.DurationTimer = dashDistance / dashSpeed;
         Rigidbody.gravityScale = 0f;
         Rigidbody.linearVelocity = val.DashDirection.normalized * dashSpeed;

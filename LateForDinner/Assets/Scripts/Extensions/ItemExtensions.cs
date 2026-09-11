@@ -1,6 +1,5 @@
 using LateForDinner.Data;
 using System;
-using UnityEngine;
 
 public static class ItemExtensions
 {
@@ -59,5 +58,32 @@ public static class ItemExtensions
             return category == ItemCategory.Equipment;
 
         return false;
+    }
+
+    public static string GetFormattedCategoryText(this ItemData itemData)
+    {
+        if (itemData == null)
+            return string.Empty;
+
+        string categoryText = string.Empty;
+
+        if (Managers.Data.ItemCategories.TryGetValue(itemData.ItemCategory, out var itemCategoryData))
+            categoryText = Managers.Localization.Get(itemCategoryData.LocalizationKey);
+
+        if (Managers.Data.ArmorItems.TryGetValue(itemData.ID, out var armorItem) && Managers.Data.ArmorCategories.TryGetValue(armorItem.ArmorCategory, out var armorCategoryData))
+        {
+            string itemCategoryText = Managers.Localization.Get(itemCategoryData.LocalizationKey);
+            string armorCategoryText = Managers.Localization.Get(armorCategoryData.LocalizationKey);
+            return Managers.Localization.Get(LocalizationKey.Item_Equipment_Format, itemCategoryText, armorCategoryText);
+        }
+
+        if (Managers.Data.WeaponItems.TryGetValue(itemData.ID, out var weaponItem) && Managers.Data.WeaponCategories.TryGetValue(weaponItem.WeaponCategory, out var weaponCategoryData))
+        {
+            string itemCategoryText = Managers.Localization.Get(itemCategoryData.LocalizationKey);
+            string weaponCategoryText = Managers.Localization.Get(weaponCategoryData.LocalizationKey);
+            return Managers.Localization.Get(LocalizationKey.Item_Equipment_Format, itemCategoryText, weaponCategoryText);
+        }
+
+        return categoryText;
     }
 }

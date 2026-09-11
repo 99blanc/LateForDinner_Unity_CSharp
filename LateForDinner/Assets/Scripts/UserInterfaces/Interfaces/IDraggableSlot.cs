@@ -18,6 +18,7 @@ public interface IDraggableSlot<TTarget> : IDraggableSlotVariant, IBeginDragHand
         get => _dragValues.GetOrCreateValue(this).SlotIndex;
         set => _dragValues.GetOrCreateValue(this).SlotIndex = value;
     }
+
     Sprite DragSprite { get; }
     SlotArea CurrentSlotArea { get; }
 
@@ -123,13 +124,6 @@ public interface IDraggableSlot<TTarget> : IDraggableSlotVariant, IBeginDragHand
 
             state.IsDragging = false;
             state.SlotIndex = -1;
-            state.IsDragging = void_ResetState(state);
         }
-    }
-
-    private bool void_ResetState(SlotDragState state)
-    {
-        state.SlotIndex = -1;
-        return false;
     }
 }

@@ -12,10 +12,10 @@ public interface IMovableCharacter
             return;
 
         Renderer.FlipX(directionX);
-        float maxMoveSpeed = Attributes.Get<float>(AttributeType.MoveSpeed).CurrentValue;
-        float acceleration = Attributes.Get<float>(AttributeType.Acceleration).CurrentValue;
-        float deceleration = Attributes.Get<float>(AttributeType.Deceleration).CurrentValue;
-        float turnDeceleration = Attributes.Get<float>(AttributeType.TurnDeceleration).CurrentValue;
+        float maxMoveSpeed = Attributes.GetBase<float>(AttributeType.MoveSpeed).CurrentValue;
+        float acceleration = Attributes.GetBase<float>(AttributeType.Acceleration).CurrentValue;
+        float deceleration = Attributes.GetBase<float>(AttributeType.Deceleration).CurrentValue;
+        float turnDeceleration = Attributes.GetBase<float>(AttributeType.TurnDeceleration).CurrentValue;
         float targetVelocityX = directionX * maxMoveSpeed;
         float currentVelocityX = Rigidbody.linearVelocity.x;
         float rate = DetermineRate(currentVelocityX, directionX, acceleration, deceleration, turnDeceleration);

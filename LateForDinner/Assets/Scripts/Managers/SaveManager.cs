@@ -231,6 +231,7 @@ public class SaveManager
             CurrentData.EtcTabSlots = Managers.Inventory.ExportEtcTabSaveData();
             CurrentData.EquipmentSlots = Managers.Inventory.ExportEquipmentSlotSaveData();
             CurrentData.QuickSlots = Managers.Inventory.ExportQuickSlotSaveData();
+            CurrentData.UnlockedEquipments = Managers.Inventory.ExportUnlockedEquipmentsSaveData();
         }
     }
 

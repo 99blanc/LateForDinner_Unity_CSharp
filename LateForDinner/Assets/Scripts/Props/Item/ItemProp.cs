@@ -1,4 +1,5 @@
 using Cysharp.Threading.Tasks;
+using LateForDinner.Data;
 using System;
 using UnityEngine;
 
@@ -19,6 +20,7 @@ public class ItemProp : Prop, IPoolable, IInteractable
     protected override bool UseSaveState => true;
     [HideInInspector] public int _itemID;
     [HideInInspector] public int _quantity;
+    [HideInInspector] public string _instanceID = string.Empty;
     private UIItemIndicator _indicatorInstance;
 
 
@@ -31,11 +33,16 @@ public class ItemProp : Prop, IPoolable, IInteractable
     }
 
     public virtual void OnRelease()
-        => CleanupIndicator();
+    {
+        CleanupIndicator();
+        _itemID = 0;
+        _quantity = 0;
+        _instanceID = string.Empty;
+    }
 
     public bool OnInteract(Character character)
     {
-        bool success = Managers.Inventory.AddItem(_itemID, _quantity);
+        bool success = Managers.Inventory.AddItem(_itemID, _quantity, _instanceID);
 
         if (success)
         {
@@ -51,10 +58,11 @@ public class ItemProp : Prop, IPoolable, IInteractable
         }
     }
 
-    public async UniTask Setup(int itemID, int quantity)
+    public async UniTask Setup(int itemID, int quantity, string instanceID = "")
     {
         _itemID = itemID;
         _quantity = quantity;
+        _instanceID = instanceID;
 
         if (GetSprite(_itemID) != null)
             Renderer.sprite = GetSprite(_itemID);

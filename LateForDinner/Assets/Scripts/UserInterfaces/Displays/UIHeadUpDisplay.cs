@@ -59,13 +59,13 @@ public class UIHeadUpDisplay : UIDisplay
         Observable.CombineLatest(healthAttribute.AsObservable(), maxHealthAttribute.AsObservable(), (health, maxHealth) => (health, maxHealth))
        .Skip(1)
        .Subscribe(this, (tuple, hud) =>
-       {
-           int totalSlotCount = Mathf.CeilToInt(tuple.maxHealth / 2f);
-           hud.UpdateHealthSlots(totalSlotCount);
-       }).RegisterToPool(this);
-        var TemporaryHealthAttribute = player.Attributes.Get<int>(AttributeType.TemporaryHealth);
+        {
+            int totalSlotCount = Mathf.CeilToInt(tuple.maxHealth / 2f);
+            hud.UpdateHealthSlots(totalSlotCount);
+        }).RegisterToPool(this);
+        var temporaryHealthAttribute = player.Attributes.Get<int>(AttributeType.TemporaryHealth);
         var maxTemporaryHealthAttribute = player.Attributes.GetBase<int>(AttributeType.TemporaryHealth);
-        Observable.CombineLatest(TemporaryHealthAttribute.AsObservable(), maxTemporaryHealthAttribute.AsObservable(), (health, maxHealth) => (health, maxHealth))
+        Observable.CombineLatest(temporaryHealthAttribute.AsObservable(), maxTemporaryHealthAttribute.AsObservable(), (health, maxHealth) => (health, maxHealth))
         .Skip(1)
         .Subscribe(this, (tuple, hud) =>
         {

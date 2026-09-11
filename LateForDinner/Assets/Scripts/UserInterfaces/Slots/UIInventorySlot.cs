@@ -73,7 +73,7 @@ public class UIInventorySlot : UISlot, IDraggableSlot<UIInventorySlot>
         _isEquipmentSlot = false;
         _data = slotData;
         var draggable = (IDraggableSlot<UIInventorySlot>)this;
-        draggable.SlotIndex = slotData.GlobalIndex;
+        draggable.SlotIndex = displayIndex;
         GetImage(Images.SlotCoverImage).SetActive(false);
         GetImage(Images.SlotItemImage).SetActive(false);
         GetText(Texts.SlotQuantityText).text = string.Empty;
@@ -176,7 +176,7 @@ public class UIInventorySlot : UISlot, IDraggableSlot<UIInventorySlot>
             return;
 
         var detailPopup = Managers.UI.OpenPopup<UIItemDetailPopup>();
-        detailPopup?.Setup(_data.ItemID, Mouse.current.position.ReadValue());
+        detailPopup?.Setup(_data.ItemID, Mouse.current.position.ReadValue(), _data.InstanceID);
     }
 
     private void OnPointerExitSlot(PointerEventData data)

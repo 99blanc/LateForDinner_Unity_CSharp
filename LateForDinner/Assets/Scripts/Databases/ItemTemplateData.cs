@@ -10,5 +10,6 @@ namespace LateForDinner.Data
         public string AttributeKey { get; set; }
         public float Value { get; set; }
         public float Duration { get; set; }
+        public bool Flag { get; set; }
     }
 }

@@ -127,7 +127,85 @@ public class AttributeRegistry
             }
         }
     }
-    
+
+    public void AddBaseAttributeValue(AttributeType dataType, float delta)
+    {
+        if (!_attributes.TryGetValue(dataType, out var view))
+            return;
+
+        switch (view)
+        {
+            case AttributeView<float> fView:
+                float newBaseF = fView.BaseValue.Value + delta;
+                SetBase(dataType, newBaseF);
+
+                if (fView.CurrentValue.Value > newBaseF)
+                    Set(dataType, newBaseF);
+                break;
+            case AttributeView<int> iView:
+                int iDelta = (int)delta;
+                int newBaseI = iView.BaseValue.Value + iDelta;
+                SetBase(dataType, newBaseI);
+
+                if (iView.CurrentValue.Value > newBaseI)
+                    Set(dataType, newBaseI);
+                break;
+            case AttributeView<short> sView:
+                short sDelta = (short)delta;
+                short newBaseS = (short)(sView.BaseValue.Value + sDelta);
+                SetBase(dataType, newBaseS);
+
+                if (sView.CurrentValue.Value > newBaseS)
+                    Set(dataType, newBaseS);
+                break;
+            case AttributeView<long> lView:
+                long lDelta = (long)delta;
+                long newBaseL = lView.BaseValue.Value + lDelta;
+                SetBase(dataType, newBaseL);
+
+                if (lView.CurrentValue.Value > newBaseL)
+                    Set(dataType, newBaseL);
+                break;
+            case AttributeView<double> dView:
+                double dDelta = (double)delta;
+                double newBaseD = dView.BaseValue.Value + dDelta;
+                SetBase(dataType, newBaseD);
+
+                if (dView.CurrentValue.Value > newBaseD)
+                    Set(dataType, newBaseD);
+                break;
+        }
+    }
+
+    public void AddAttributeValue(AttributeType dataType, float delta)
+    {
+        if (!_attributes.TryGetValue(dataType, out var view))
+            return;
+
+        switch (view)
+        {
+            case AttributeView<float> fView:
+                Set(dataType, fView.CurrentValue.Value + delta);
+                break;
+            case AttributeView<int> iView:
+                int iDelta = (int)delta;
+                Set(dataType, iView.CurrentValue.Value + iDelta);
+                break;
+            case AttributeView<short> sView:
+                short sDelta = (short)delta;
+                Set(dataType, (short)(sView.CurrentValue.Value + sDelta));
+                break;
+            case AttributeView<long> lView:
+                long lDelta = (long)delta;
+                Set(dataType, lView.CurrentValue.Value + lDelta);
+                break;
+            case AttributeView<double> dView:
+                double dDelta = (double)delta;
+                Set(dataType, dView.CurrentValue.Value + dDelta);
+                break;
+        }
+    }
+
     public IEnumerable<AttributeType> GetRegisteredAttributeTypes()
         => _attributes.Keys;
 }

@@ -234,13 +234,13 @@ public class UIQuestInventoryPopup : UIPopup, IDraggablePopup, IFocusablePopup
 
         if (player != null && player.Attributes != null)
         {
-            GetText(Texts.HealthTabText).text = player.Attributes.Get<int>(AttributeType.Health).Value.ToString();
-            GetText(Texts.MoveSpeedTabText).text = player.Attributes.Get<float>(AttributeType.MoveSpeed).Value.ToString("F1");
-            GetText(Texts.DamageTabText).text = player.Attributes.Get<float>(AttributeType.Damage).Value.ToString("N0");
-            GetText(Texts.AttackSpeedTabText).text = player.Attributes.Get<float>(AttributeType.AttackSpeed).Value.ToString("F2");
-            GetText(Texts.JumpForceTabText).text = player.Attributes.Get<float>(AttributeType.JumpForce).Value.ToString("F1");
-            GetText(Texts.JumpCountTabText).text = player.Attributes.Get<int>(AttributeType.JumpCount).Value.ToString();
-            GetText(Texts.DashDistanceTabText).text = player.Attributes.Get<float>(AttributeType.DashDistance).Value.ToString("F1");
+            GetText(Texts.HealthTabText).text = player.Attributes.GetBase<int>(AttributeType.Health).Value.ToString();
+            GetText(Texts.MoveSpeedTabText).text = player.Attributes.GetBase<float>(AttributeType.MoveSpeed).Value.ToString("F1");
+            GetText(Texts.DamageTabText).text = player.Attributes.GetBase<float>(AttributeType.Damage).Value.ToString("N0");
+            GetText(Texts.AttackSpeedTabText).text = player.Attributes.GetBase<float>(AttributeType.AttackSpeed).Value.ToString("F2");
+            GetText(Texts.JumpForceTabText).text = player.Attributes.GetBase<float>(AttributeType.JumpForce).Value.ToString("F1");
+            GetText(Texts.JumpCountTabText).text = player.Attributes.GetBase<int>(AttributeType.JumpCount).Value.ToString();
+            GetText(Texts.DashDistanceTabText).text = player.Attributes.GetBase<float>(AttributeType.DashDistance).Value.ToString("F1");
         }
     }
 
