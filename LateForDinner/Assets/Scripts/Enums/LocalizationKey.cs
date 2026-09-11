@@ -124,9 +124,9 @@ public enum LocalizationKey
     Console_Save_DefaultSlotSelected                   , // 기본 슬롯({0}번)에 저장합니다.
     Console_Save_Success                               , // 게임 저장을 완료했습니다.
     Console_Save_InvalidSlot                           , // 유효하지 않은 세이브 슬롯 번호입니다: '{0}'.
-    Interaction_Ladder                                 , // 사다리 진입
-    Interaction_Tray                                   , // 식판 획득/내려놓기/던지기/식탁 배치
-    Interaction_Item                                   , // 아이템 획득
+    Interaction_Ladder                                 , // 사다리 진입 상호작용
+    Interaction_Tray                                   , // 식판 획득/내려놓기/던지기/식탁 배치 상호작용
+    Interaction_Item                                   , // 아이템 획득 상호작용
     Item_Name_1                                        , // 테스트용 모자
     Item_Name_2                                        , // 테스트용 상의
     Item_Name_3                                        , // 테스트용 하의
