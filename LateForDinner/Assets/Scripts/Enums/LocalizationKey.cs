@@ -222,6 +222,7 @@ public enum LocalizationKey
     Log_UI_NotFoundControlManager                      , // [UIManager] 컨트롤 매니저를 참조할 수 없습니다.
     Log_Console_System_ProcessFailed                   , // [UIConsoleSystem] 명령어('{0}') 처리 중 예외가 발생했습니다.
     Log_Keybind_Slot_RebindFailed                      , // [UIKeybindSlot] 액션('{0}') 키 리바인딩 시작 중 예외가 발생했습니다.
+    Log_Inventory_Slot_DropFailed                      , // [UIInventorySlot] 장착 중인 아이템은 버릴 수 없습니다.
     Log_Save_Slot_SlotClickFailed                      , // [UISaveSlot] 슬롯({0}) 클릭 처리 중 예외가 발생했습니다.
     Log_Save_Slot_MoveUpFailed                         , // [UISaveSlot] 슬롯({0}) 위로 이동 중 예외가 발생했습니다.
     Log_Save_Slot_MoveDownFailed                       , // [UISaveSlot] 슬롯({0}) 아래로 이동 중 예외가 발생했습니다.

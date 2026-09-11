@@ -355,75 +355,83 @@ public class InventoryManager
 
     private InventorySlot GetSourceSlot(ItemCategory? currentTabType, SlotArea sourceArea, int sourceIndex)
     {
-        if (sourceArea == SlotArea.Inventory)
+        if (sourceArea == SlotArea.Equipment)
         {
-            if (!currentTabType.HasValue)
-            {
-                if (sourceIndex < 0 || sourceIndex >= _totalSlots.Count)
-                    return null;
-
-                return _totalSlots[sourceIndex];
-            }
-            else
-            {
-                var sourceList = GetSlotsByType(currentTabType);
-
-                if (sourceList == null || sourceIndex < 0 || sourceIndex >= sourceList.Count)
-                    return null;
-
-                var tabSlot = sourceList[sourceIndex];
-
-                if (tabSlot.GlobalIndex >= 0 && tabSlot.GlobalIndex < _totalSlots.Count)
-                    return _totalSlots[tabSlot.GlobalIndex];
-
+            if (_equipmentSlots == null || sourceIndex < 0 || sourceIndex >= _equipmentSlots.Count)
                 return null;
-            }
+
+            return _equipmentSlots[sourceIndex];
+        }
+
+        if (sourceArea == SlotArea.Quick)
+        {
+            if (_quickSlots == null || sourceIndex < 0 || sourceIndex >= _quickSlots.Count)
+                return null;
+
+            return _quickSlots[sourceIndex];
+        }
+
+        if (!currentTabType.HasValue)
+        {
+            if (sourceIndex < 0 || sourceIndex >= _totalSlots.Count)
+                return null;
+
+            return _totalSlots[sourceIndex];
         }
         else
         {
-            var sourceList = GetSlotList(sourceArea);
+            var sourceList = GetSlotsByType(currentTabType);
 
             if (sourceList == null || sourceIndex < 0 || sourceIndex >= sourceList.Count)
                 return null;
 
-            return sourceList.FirstOrDefault(s => s.SlotIndex == sourceIndex || s.GlobalIndex == sourceIndex);
+            var tabSlot = sourceList[sourceIndex];
+
+            if (tabSlot.GlobalIndex >= 0 && tabSlot.GlobalIndex < _totalSlots.Count)
+                return _totalSlots[tabSlot.GlobalIndex];
+
+            return null;
         }
     }
 
     private InventorySlot GetTargetSlot(ItemCategory? currentTabType, SlotArea targetArea, int targetIndex)
     {
-        if (targetArea == SlotArea.Inventory)
+        if (targetArea == SlotArea.Equipment)
         {
-            if (!currentTabType.HasValue)
-            {
-                if (targetIndex < 0 || targetIndex >= _totalSlots.Count)
-                    return null;
+            if (_equipmentSlots == null || targetIndex < 0 || targetIndex >= _equipmentSlots.Count)
+                return null;
 
-                return _totalSlots[targetIndex];
-            }
-            else
-            {
-                var targetList = GetSlotsByType(currentTabType);
+            return _equipmentSlots[targetIndex];
+        }
 
-                if (targetList == null || targetIndex < 0 || targetIndex >= targetList.Count)
-                    return null;
+        if (targetArea == SlotArea.Quick)
+        {
+            if (_quickSlots == null || targetIndex < 0 || targetIndex >= _quickSlots.Count)
+                return null;
 
-                var tabSlot = targetList[targetIndex];
+            return _quickSlots[targetIndex];
+        }
 
-                if (tabSlot.GlobalIndex >= 0 && tabSlot.GlobalIndex < _totalSlots.Count)
-                    return _totalSlots[tabSlot.GlobalIndex];
+        if (!currentTabType.HasValue)
+        {
+            if (targetIndex < 0 || targetIndex >= _totalSlots.Count)
+                return null;
 
-                return _totalSlots.FirstOrDefault(s => s.ItemID == 0);
-            }
+            return _totalSlots[targetIndex];
         }
         else
         {
-            var targetList = GetSlotList(targetArea);
+            var targetList = GetSlotsByType(currentTabType);
 
             if (targetList == null || targetIndex < 0 || targetIndex >= targetList.Count)
                 return null;
 
-            return targetList.FirstOrDefault(s => s.SlotIndex == targetIndex || s.GlobalIndex == targetIndex);
+            var tabSlot = targetList[targetIndex];
+
+            if (tabSlot.GlobalIndex >= 0 && tabSlot.GlobalIndex < _totalSlots.Count)
+                return _totalSlots[tabSlot.GlobalIndex];
+
+            return _totalSlots.FirstOrDefault(s => s.ItemID == 0);
         }
     }
 
@@ -810,13 +818,13 @@ public class InventoryManager
 
     public List<EquipmentInstance> ExportUnlockedEquipmentsSaveData()
     {
-        return _unlockedEquipments.Select(eq => new EquipmentInstance
+        return _unlockedEquipments.Select(equip => new EquipmentInstance
         {
-            InstanceID = eq.InstanceID,
-            ItemID = eq.ItemID,
-            UpgradeLevel = eq.UpgradeLevel,
-            ExtraOptionValue = eq.ExtraOptionValue,
-            Flag = eq.Flag
+            InstanceID = equip.InstanceID,
+            ItemID = equip.ItemID,
+            UpgradeLevel = equip.UpgradeLevel,
+            ExtraOptionValue = equip.ExtraOptionValue,
+            Flag = equip.Flag
         }).ToList();
     }
 

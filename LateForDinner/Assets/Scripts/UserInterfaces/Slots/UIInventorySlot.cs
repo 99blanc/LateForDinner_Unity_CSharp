@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using LateForDinner.Data;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -138,6 +139,12 @@ public class UIInventorySlot : UISlot, IDraggableSlot<UIInventorySlot>
 
     public void OnDropOutside()
     {
+        if (_isEquipmentSlot)
+        {
+            Managers.Notify.ToastAsync(LocalizationKey.Log_Inventory_Slot_DropFailed).Forget();
+            return;
+        }
+
         if (_data == null || _data.ItemID <= 0)
             return;
 
@@ -166,8 +173,6 @@ public class UIInventorySlot : UISlot, IDraggableSlot<UIInventorySlot>
 
         if (!Managers.Data.ConsumptionItems.TryGetValue(_data.ItemID, out var consumptionItemData))
             return;
-
-
     }
 
     private void OnPointerEnterSlot(PointerEventData data)
