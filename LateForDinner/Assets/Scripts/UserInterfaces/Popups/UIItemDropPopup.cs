@@ -118,7 +118,7 @@ public class UIItemDropPopup : UIPopup, IDraggablePopup, IFocusablePopup
         int range = Mathf.Max(1, _maxCount - 1);
         int clampedInitial = Mathf.Clamp(initialValue, 1, _maxCount);
         _isUpdatingItemCount = true;
-        scrollbar.value = _maxCount == 1 ? 0f : (float)(clampedInitial - 1) / range;
+        scrollbar.value = _maxCount == 1 ? 1f : (float)(clampedInitial - 1) / range;
         inputField.text = clampedInitial.ToString();
         _isUpdatingItemCount = false;
         scrollbar.BindScrollbar(val =>
@@ -153,7 +153,7 @@ public class UIItemDropPopup : UIPopup, IDraggablePopup, IFocusablePopup
             }
 
             _isUpdatingItemCount = true;
-            scrollbar.value = _maxCount == 1 ? 0f : (float)(clampedCount - 1) / range;
+            scrollbar.value = _maxCount == 1 ? 1f : (float)(clampedCount - 1) / range;
             _isUpdatingItemCount = false;
         }, this);
         inputField.BindInputEndEdit(text =>
@@ -165,7 +165,7 @@ public class UIItemDropPopup : UIPopup, IDraggablePopup, IFocusablePopup
             count = Mathf.Clamp(count, 1, _maxCount);
             _isUpdatingItemCount = true;
             inputField.text = count.ToString();
-            scrollbar.value = _maxCount == 1 ? 0f : (float)(count - 1) / range;
+            scrollbar.value = _maxCount == 1 ? 1f : (float)(count - 1) / range;
             _isUpdatingItemCount = false;
         }, this);
     }
