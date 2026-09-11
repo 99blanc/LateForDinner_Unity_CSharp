@@ -59,7 +59,6 @@ public class UIInventorySlot : UISlot, IDraggableSlot<UIInventorySlot>
         GetButton(Buttons.SlotButton).BindView(OnClickSlot, ViewEvent.DoubleClick, this);
         GetButton(Buttons.SlotButton).BindView(OnPointerEnterSlot, ViewEvent.Enter, this);
         GetButton(Buttons.SlotButton).BindView(OnPointerExitSlot, ViewEvent.Exit, this);
-        BindCooldown();
         Refresh();
     }
 
