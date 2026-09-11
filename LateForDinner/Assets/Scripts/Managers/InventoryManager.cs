@@ -355,7 +355,31 @@ public class InventoryManager
 
     private InventorySlot GetSourceSlot(ItemCategory? currentTabType, SlotArea sourceArea, int sourceIndex)
     {
-        if (sourceArea != SlotArea.Equipment && sourceArea != SlotArea.Quick)
+        if (sourceArea == SlotArea.Inventory)
+        {
+            if (!currentTabType.HasValue)
+            {
+                if (sourceIndex < 0 || sourceIndex >= _totalSlots.Count)
+                    return null;
+
+                return _totalSlots[sourceIndex];
+            }
+            else
+            {
+                var sourceList = GetSlotsByType(currentTabType);
+
+                if (sourceList == null || sourceIndex < 0 || sourceIndex >= sourceList.Count)
+                    return null;
+
+                var tabSlot = sourceList[sourceIndex];
+
+                if (tabSlot.GlobalIndex >= 0 && tabSlot.GlobalIndex < _totalSlots.Count)
+                    return _totalSlots[tabSlot.GlobalIndex];
+
+                return null;
+            }
+        }
+        else
         {
             var sourceList = GetSlotList(sourceArea);
 
@@ -364,31 +388,35 @@ public class InventoryManager
 
             return sourceList.FirstOrDefault(s => s.SlotIndex == sourceIndex || s.GlobalIndex == sourceIndex);
         }
-
-        if (!currentTabType.HasValue)
-        {
-            if (sourceIndex < 0 || sourceIndex >= _totalSlots.Count)
-                return null;
-
-            return _totalSlots[sourceIndex];
-        }
-
-        var tabList = GetSlotsByType(currentTabType);
-
-        if (tabList == null || sourceIndex < 0 || sourceIndex >= tabList.Count)
-            return null;
-
-        int globalIndex = tabList[sourceIndex].GlobalIndex;
-
-        if (globalIndex >= 0 && globalIndex < _totalSlots.Count)
-            return _totalSlots[globalIndex];
-
-        return null;
     }
 
     private InventorySlot GetTargetSlot(ItemCategory? currentTabType, SlotArea targetArea, int targetIndex)
     {
-        if (targetArea != SlotArea.Inventory)
+        if (targetArea == SlotArea.Inventory)
+        {
+            if (!currentTabType.HasValue)
+            {
+                if (targetIndex < 0 || targetIndex >= _totalSlots.Count)
+                    return null;
+
+                return _totalSlots[targetIndex];
+            }
+            else
+            {
+                var targetList = GetSlotsByType(currentTabType);
+
+                if (targetList == null || targetIndex < 0 || targetIndex >= targetList.Count)
+                    return null;
+
+                var tabSlot = targetList[targetIndex];
+
+                if (tabSlot.GlobalIndex >= 0 && tabSlot.GlobalIndex < _totalSlots.Count)
+                    return _totalSlots[tabSlot.GlobalIndex];
+
+                return _totalSlots.FirstOrDefault(s => s.ItemID == 0);
+            }
+        }
+        else
         {
             var targetList = GetSlotList(targetArea);
 
@@ -397,26 +425,6 @@ public class InventoryManager
 
             return targetList.FirstOrDefault(s => s.SlotIndex == targetIndex || s.GlobalIndex == targetIndex);
         }
-
-        if (!currentTabType.HasValue)
-        {
-            if (targetIndex < 0 || targetIndex >= _totalSlots.Count)
-                return null;
-
-            return _totalSlots[targetIndex];
-        }
-
-        var categoryList = GetSlotsByType(currentTabType);
-
-        if (categoryList == null || targetIndex < 0 || targetIndex >= categoryList.Count)
-            return null;
-
-        var tabSlot = categoryList[targetIndex];
-
-        if (tabSlot.GlobalIndex >= 0 && tabSlot.GlobalIndex < _totalSlots.Count)
-            return _totalSlots[tabSlot.GlobalIndex];
-
-        return _totalSlots.FirstOrDefault(s => s.ItemID == 0);
     }
 
     private void PostProcessCrossMove(SlotArea sourceArea, SlotArea targetArea)
@@ -462,7 +470,6 @@ public class InventoryManager
             if (tabSlot.ItemID > 0 && (tabSlot.GlobalIndex < 0 || tabSlot.GlobalIndex >= _totalSlots.Count || _totalSlots[tabSlot.GlobalIndex].ItemID != tabSlot.ItemID))
             {
                 var emptyMaster = _totalSlots.FirstOrDefault(s => s.ItemID == 0);
-
                 if (emptyMaster != null)
                 {
                     emptyMaster.ItemID = tabSlot.ItemID;
