@@ -1,4 +1,5 @@
-using System.Numerics;
+using Cysharp.Text;
+using System;
 
 public class Define
 {
@@ -83,6 +84,18 @@ public class Define
         public const float PollingTime = 0.5f;
         public const int Start = 60;
         public const int Step = 20;
+    }
+
+    public class Key
+    {
+        public const string ConsumableFlagFormat = "{0}_{1}";
+        public const string ItemCooldownFormat = "Cooldown_Item_{0}";
+
+        public static string GetConsumableFlagKey(int itemID, string attributeKey)
+            => ZString.Format(ConsumableFlagFormat, itemID, attributeKey);
+
+        public static string GetItemCooldownKey(int itemID)
+            => ZString.Format(ItemCooldownFormat, itemID);
     }
 
     public class Log

@@ -12,6 +12,7 @@ public class UIItemDetailPopup : UIPopup
 
     private enum Texts
     {
+        InstanceIDText,
         ItemNameText,
         ItemCategoryText,
         DescriptionText,
@@ -44,7 +45,8 @@ public class UIItemDetailPopup : UIPopup
 
         GetImage(Images.SlotItemImage).SetActive(true);
         GetImage(Images.SlotItemImage).sprite = Managers.Resource.GetSprite(Define.Atlas.Item, itemData.AddressableKey);
-        GetText(Texts.ItemNameText).text = Managers.Localization.Get(itemData.NameKey) + instanceID;
+        GetText(Texts.InstanceIDText).text = instanceID;
+        GetText(Texts.ItemNameText).text = Managers.Localization.Get(itemData.NameKey);
         GetText(Texts.DescriptionText).text = Managers.Localization.Get(itemData.DescriptionKey);
         GetText(Texts.FlavorText).text = Managers.Localization.Get(itemData.FlavorKey);
         GetText(Texts.ItemCategoryText).text = itemData.GetFormattedCategoryText();

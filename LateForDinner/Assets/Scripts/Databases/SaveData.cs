@@ -8,6 +8,15 @@ using ZLinq;
 namespace LateForDinner.Data
 {
     [MemoryPackable]
+    public partial class AttributeSaveData
+    {
+        public string Key;
+        public string DataType;
+        public string BaseValue;
+        public string CurrentValue;
+    }
+
+    [MemoryPackable]
     public partial class EquipmentInstance
     {
         public string InstanceID;
@@ -34,6 +43,16 @@ namespace LateForDinner.Data
         public int ItemID;
         public int Quantity;
         public string InstanceID;
+    }
+
+    [MemoryPackable]
+    public partial class ActiveBuffSaveData
+    {
+        public int ItemID;
+        public string AttributeKey;
+        public string Value;
+        public float RemainingTime;
+        public int RemainingTicks;
     }
 
     [MemoryPackable]
@@ -116,6 +135,7 @@ namespace LateForDinner.Data
         public List<InventorySlot> QuickSlots;
         public List<EquipmentInstance> UnlockedEquipments;
         public HashSet<string> AppliedFlagItems;
+        public List<ActiveBuffSaveData> ActiveBuffs;
         public float Gold;
 
         [MemoryPackIgnore]
@@ -143,16 +163,8 @@ namespace LateForDinner.Data
             QuickSlots = Enumerable.Range(0, Define.Amount.MaxQuickSlot).Select(i => new InventorySlot { SlotIndex = i, ItemID = 0, Quantity = 0 }).ToList(),
             UnlockedEquipments = new List<EquipmentInstance>(),
             AppliedFlagItems = new HashSet<string>(),
+            ActiveBuffs = new List<ActiveBuffSaveData>(),
             Gold = 0f
         };
-    }
-
-    [MemoryPackable]
-    public partial class AttributeSaveData
-    {
-        public string Key;
-        public string DataType;
-        public string BaseValue;
-        public string CurrentValue;
     }
 }

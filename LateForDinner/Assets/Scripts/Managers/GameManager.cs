@@ -22,6 +22,7 @@ public class GameManager
             await Managers.Preload.Release_GameAsync(data);
             await load.LoadAsync(0.7f, LocalizationKey.Log_Game_Loading_PlayerSpawn);
             await PrepareAndSpawnPlayerAsync(false, forceTransition: true);
+            Managers.Cooldown.RestoreBuffs(data.ActiveBuffs, _player);
             await load.LoadAsync(1.0f, LocalizationKey.Log_Game_Loading_SaveData);
         })).Load();
 

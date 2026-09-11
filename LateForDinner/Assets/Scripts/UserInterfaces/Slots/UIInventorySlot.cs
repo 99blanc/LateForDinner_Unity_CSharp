@@ -1,5 +1,7 @@
 using Cysharp.Threading.Tasks;
 using LateForDinner.Data;
+using R3;
+using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -38,6 +40,7 @@ public class UIInventorySlot : UISlot, IDraggableSlot<UIInventorySlot>
         => _data;
     public SlotArea CurrentSlotArea 
         => _isEquipmentSlot ? SlotArea.Equipment : SlotArea.Inventory;
+    private IDisposable _cooldownDisposable;
 
     public override void OnInit()
     {
@@ -47,7 +50,6 @@ public class UIInventorySlot : UISlot, IDraggableSlot<UIInventorySlot>
         BindButton(typeof(Buttons));
         GetImage(Images.SlotCoverImage).raycastTarget = false;
         GetImage(Images.SlotItemImage).raycastTarget = false;
-        GetImage(Images.SlotCooldownImage).raycastTarget = false;
         GetText(Texts.SlotQuantityText).raycastTarget = false;
     }
 
@@ -57,7 +59,48 @@ public class UIInventorySlot : UISlot, IDraggableSlot<UIInventorySlot>
         GetButton(Buttons.SlotButton).BindView(OnClickSlot, ViewEvent.DoubleClick, this);
         GetButton(Buttons.SlotButton).BindView(OnPointerEnterSlot, ViewEvent.Enter, this);
         GetButton(Buttons.SlotButton).BindView(OnPointerExitSlot, ViewEvent.Exit, this);
+        BindCooldown();
         Refresh();
+    }
+
+    private void BindCooldown()
+    {
+        _cooldownDisposable?.Dispose();
+        _cooldownDisposable = null;
+
+        if (_data == null || _data.ItemID <= 0)
+        {
+            SetCooldown(0f);
+            return;
+        }
+
+        string itemKey = Define.Key.GetItemCooldownKey(_data.ItemID);
+        var cooldownRegistry = Managers.Cooldown.GetSlotCooldown(itemKey);
+
+        if (cooldownRegistry != null && cooldownRegistry.IsOnCooldown)
+        {
+            _cooldownDisposable = cooldownRegistry.CooldownProgress
+            .Subscribe(SetCooldown)
+            .RegisterToPool(this);
+        }
+        else
+            SetCooldown(0f);
+    }
+
+    public void SetCooldown(float fillAmount)
+    {
+        var cooldownImage = GetImage(Images.SlotCooldownImage);
+
+        if (fillAmount > 0f)
+        {
+            cooldownImage.SetActive(true);
+            cooldownImage.fillAmount = fillAmount;
+        }
+        else
+        {
+            cooldownImage.SetActive(false);
+            cooldownImage.fillAmount = 0f;
+        }
     }
 
     public void Setup(int displayIndex, InventorySlot slotData, bool isEquipmentSlot = false)
@@ -75,6 +118,8 @@ public class UIInventorySlot : UISlot, IDraggableSlot<UIInventorySlot>
         _data = slotData;
         var draggable = (IDraggableSlot<UIInventorySlot>)this;
         draggable.SlotIndex = displayIndex;
+        _cooldownDisposable?.Dispose();
+        _cooldownDisposable = null;
         GetImage(Images.SlotCoverImage).SetActive(false);
         GetImage(Images.SlotItemImage).SetActive(false);
         GetText(Texts.SlotQuantityText).text = string.Empty;
@@ -84,6 +129,7 @@ public class UIInventorySlot : UISlot, IDraggableSlot<UIInventorySlot>
     public override void Refresh()
     {
         base.Refresh();
+        BindCooldown();
 
         if (_isEquipmentSlot && (_data == null || _data.ItemID <= 0))
         {
@@ -171,8 +217,13 @@ public class UIInventorySlot : UISlot, IDraggableSlot<UIInventorySlot>
         if (_data == null || _data.ItemID <= 0)
             return;
 
-        if (!Managers.Data.ConsumptionItems.TryGetValue(_data.ItemID, out var consumptionItemData))
-            return;
+        bool success = Managers.Inventory.UseConsumableItem(_data);
+
+        if (success)
+        {
+            var popup = Managers.UI.GetPopup<UIQuestInventoryPopup>();
+            popup.Refresh();
+        }
     }
 
     private void OnPointerEnterSlot(PointerEventData data)

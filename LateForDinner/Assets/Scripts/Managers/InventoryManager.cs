@@ -215,6 +215,87 @@ public class InventoryManager
         }
     }
 
+    public bool UseConsumableItem(InventorySlot targetSlot, GameObject targetObject = null)
+    {
+        if (targetSlot == null || targetSlot.ItemID <= 0)
+            return false;
+
+        int itemID = targetSlot.ItemID;
+
+        if (!TryGetValidItemData(itemID, out var itemData, out var itemCategory))
+            return false;
+
+        if (itemCategory != ItemCategory.Consumption)
+            return false;
+
+        if (!itemData.TryGetConsumptionData(out var consumptionData))
+            return false;
+
+        float cooldownTime = consumptionData.Cooldown;
+        string itemCooldownKey = Define.Key.GetItemCooldownKey(itemID);
+
+        if (cooldownTime > 0f)
+        {
+            var existingCooldown = Managers.Cooldown.GetSlotCooldown(itemCooldownKey);
+
+            if (existingCooldown != null && existingCooldown.IsOnCooldown)
+                return false;
+        }
+
+        if (!Enum.TryParse<TargetType>(consumptionData.TargetType, true, out var targetType))
+            targetType = TargetType.Self;
+
+        Character myCharacter = Managers.Game?.Player;
+
+        if (myCharacter == null)
+            return false;
+
+        var saveData = Managers.Save.CurrentData;
+        List<ItemTemplateData> templates = null;
+
+        if (Managers.Data.ItemTemplates != null && Managers.Data.ItemTemplates.Contains(itemID))
+            templates = Managers.Data.ItemTemplates[itemID].ToList();
+
+        if (templates != null)
+        {
+            foreach (var template in templates)
+            {
+                if (template.Flag)
+                {
+                    string flagKey = Define.Key.GetConsumableFlagKey(itemID, template.AttributeKey);
+
+                    if (saveData?.AppliedFlagItems != null && saveData.AppliedFlagItems.Contains(flagKey))
+                        return false;
+                }
+            }
+        }
+
+        if (!RemoveItem(targetSlot, 1))
+            return false;
+
+        itemData.ApplyConsumptionEffects(myCharacter, targetObject);
+
+        if (cooldownTime > 0f)
+            Managers.Cooldown.RegisterSlotCooldown(itemCooldownKey, cooldownTime);
+
+        if (templates != null && saveData != null)
+        {
+            foreach (var template in templates)
+            {
+                if (template.Flag)
+                {
+                    if (saveData.AppliedFlagItems == null)
+                        saveData.AppliedFlagItems = new HashSet<string>();
+
+                    string flagKey = Define.Key.GetConsumableFlagKey(itemID, template.AttributeKey);
+                    saveData.AppliedFlagItems.Add(flagKey);
+                }
+            }
+        }
+
+        return true;
+    }
+
     public List<InventorySlot> GetSlotsByType(ItemCategory? type)
     {
         if (!type.HasValue)
@@ -347,6 +428,20 @@ public class InventoryManager
 
         if (sourceSlot == null || targetSlot == null)
             return false;
+
+        if (targetArea == SlotArea.Equipment)
+        {
+            if (sourceSlot.ItemID > 0)
+            {
+                if (!Managers.Data.Items.TryGetValue(sourceSlot.ItemID, out var itemData) || !itemData.IsEquipmentCategory())
+                    return false;
+
+                EquipmentSlotType targetSlotType = (EquipmentSlotType)targetIndex;
+
+                if (!itemData.CanEquipInSlot(targetSlotType))
+                    return false;
+            }
+        }
 
         SwapSlotsValues(sourceSlot, targetSlot);
         PostProcessCrossMove(sourceArea, targetArea);
@@ -518,17 +613,6 @@ public class InventoryManager
         }
 
         return true;
-    }
-
-    private List<InventorySlot> GetSlotList(SlotArea area)
-    {
-        return area switch
-        {
-            SlotArea.Inventory => _totalSlots,
-            SlotArea.Equipment => _equipmentSlots,
-            SlotArea.Quick => _quickSlots,
-            _ => null
-        };
     }
 
     public IReadOnlyList<InventorySlot> GetEquipmentSlots()

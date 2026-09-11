@@ -233,6 +233,9 @@ public class SaveManager
             CurrentData.QuickSlots = Managers.Inventory.ExportQuickSlotSaveData();
             CurrentData.UnlockedEquipments = Managers.Inventory.ExportUnlockedEquipmentsSaveData();
         }
+
+        if (Managers.Cooldown != null)
+            CurrentData.ActiveBuffs = Managers.Cooldown.ExportBuffSaveData();
     }
 
     private string GetPath(int slot)

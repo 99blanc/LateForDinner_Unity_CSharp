@@ -207,6 +207,145 @@ public static class AttributeExtensions
         return null;
     }
 
+    public static void AddValue(this AttributeRegistry attributes, AttributeType attributeType, string valueStr)
+    {
+        object parsedValue = attributeType.ParseValue(valueStr);
+
+        if (parsedValue == null) 
+            return;
+
+        double currentVal = attributeType.GetCurrentDoubleValue(attributes);
+        double addVal = Convert.ToDouble(parsedValue);
+        attributes.SetParsedValue(attributeType, (currentVal + addVal).ToString());
+    }
+
+    public static void SubValue(this AttributeRegistry attributes, AttributeType attributeType, string valueStr)
+    {
+        object parsedValue = attributeType.ParseValue(valueStr);
+
+        if (parsedValue == null) 
+            return;
+
+        double currentVal = attributeType.GetCurrentDoubleValue(attributes);
+        double subVal = Convert.ToDouble(parsedValue);
+        attributes.SetParsedValue(attributeType, (currentVal - subVal).ToString());
+    }
+
+    public static void AddBaseValue(this AttributeRegistry attributes, AttributeType attributeType, string valueStr)
+    {
+        object parsedValue = attributeType.ParseValue(valueStr);
+
+        if (parsedValue == null)
+            return;
+
+        double currentBaseVal = attributes.GetBaseDoubleValue(attributeType);
+        double addVal = Convert.ToDouble(parsedValue);
+        attributes.SetParsedBaseValue(attributeType, (currentBaseVal + addVal).ToString());
+    }
+
+    public static void SubBaseValue(this AttributeRegistry attributes, AttributeType attributeType, string valueStr)
+    {
+        object parsedValue = attributeType.ParseValue(valueStr);
+
+        if (parsedValue == null)
+            return;
+
+        double currentBaseVal = attributes.GetBaseDoubleValue(attributeType);
+        double subVal = Convert.ToDouble(parsedValue);
+        attributes.SetParsedBaseValue(attributeType, (currentBaseVal - subVal).ToString());
+    }
+
+    private static double GetCurrentDoubleValue(this AttributeType attributeType, AttributeRegistry attributes)
+    {
+        var targetType = attributeType.GetValueType();
+
+        if (targetType == typeof(int)) 
+            return attributes.Get(attributeType, (int)0).Value;
+
+        if (targetType == typeof(float)) 
+            return attributes.Get(attributeType, (float)0).Value;
+
+        if (targetType == typeof(short)) 
+            return attributes.Get(attributeType, (short)0).Value;
+
+        if (targetType == typeof(long)) 
+            return attributes.Get(attributeType, (long)0).Value;
+
+        if (targetType == typeof(double)) 
+            return attributes.Get(attributeType, (double)0).Value;
+
+        return 0.0;
+    }
+
+    public static void SetParsedBaseValue(this AttributeRegistry attributes, AttributeType attributeType, string value)
+    {
+        object parsedValue = attributeType.ParseValue(value);
+
+        if (parsedValue == null)
+            return;
+
+        string keyStr = attributeType.ToString();
+        double maxLimit = 0.0;
+        bool hasMaxLimit = Managers.Data.Attributes.TryGetValue(keyStr, out var attrData) && attrData.MaxValue > 0f;
+
+        if (hasMaxLimit)
+            maxLimit = attrData.MaxValue;
+
+        double finalValue = parsedValue switch
+        {
+            float val => hasMaxLimit ? Math.Clamp(val, 0.0, maxLimit) : Math.Max(0.0, val),
+            int val => hasMaxLimit ? Math.Clamp(val, 0.0, maxLimit) : Math.Max(0.0, val),
+            short val => hasMaxLimit ? Math.Clamp(val, 0.0, maxLimit) : Math.Max(0.0, val),
+            long val => hasMaxLimit ? Math.Clamp(val, 0.0, maxLimit) : Math.Max(0.0, val),
+            double val => hasMaxLimit ? Math.Clamp(val, 0.0, maxLimit) : Math.Max(0.0, val),
+            _ => 0.0
+        };
+
+        switch (parsedValue)
+        {
+            case float:
+                Set((float)finalValue);
+                break;
+            case int:
+                Set((int)finalValue);
+                break;
+            case short:
+                Set((short)finalValue);
+                break;
+            case long:
+                Set((long)finalValue);
+                break;
+            case double:
+                Set(finalValue);
+                break;
+        }
+
+        void Set<T>(T v) where T : struct
+            => attributes.SetBase(attributeType, v);
+    }
+
+    public static double GetBaseDoubleValue(this AttributeRegistry attributes, AttributeType attributeType)
+    {
+        var targetType = attributeType.GetValueType();
+
+        if (targetType == typeof(int)) 
+            return attributes.GetBase(attributeType, (int)0).Value;
+
+        if (targetType == typeof(float)) 
+            return attributes.GetBase(attributeType, (float)0).Value;
+
+        if (targetType == typeof(short)) 
+            return attributes.GetBase(attributeType, (short)0).Value;
+
+        if (targetType == typeof(long)) 
+            return attributes.GetBase(attributeType, (long)0).Value;
+
+        if (targetType == typeof(double)) 
+            return attributes.GetBase(attributeType, (double)0).Value;
+
+        return 0.0;
+    }
+
     public static List<AttributeSaveData> CreateDefaultAttributes(this CharacterID characterID)
     {
         var list = new List<AttributeSaveData>();
