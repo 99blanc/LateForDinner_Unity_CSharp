@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using ZLinq;
 
 public static class ItemExtensions
 {
@@ -14,6 +15,7 @@ public static class ItemExtensions
         if (Managers.Data.ItemTemplates == null || !Managers.Data.ItemTemplates.Contains(itemData.ID))
             return;
 
+        var saveData = Managers.Save.CurrentData;
         var templates = Managers.Data.ItemTemplates[itemData.ID];
 
         foreach (var template in templates)
@@ -27,13 +29,21 @@ public static class ItemExtensions
             bool isPassive = applyType == ApplyType.Passive;
             bool isOneTime = template.Flag;
 
-            if (isOneTime && equipInstance.Flag)
-                continue;
+            if (isOneTime)
+            {
+                string flagKey = (equipInstance.InstanceID).GetEquipableFlagKey(template.AttributeKey);
+
+                if (saveData.AppliedFlagItems.Contains(flagKey))
+                    continue;
+            }
 
             ApplyEffectInternal(character, attributeType, template.Value.ToString(), template.Duration, isPassive, itemData.ID);
 
             if (isOneTime)
-                equipInstance.Flag = true;
+            {
+                string flagKey = (equipInstance.InstanceID).GetEquipableFlagKey(template.AttributeKey);
+                saveData.AppliedFlagItems.Add(flagKey);
+            }
         }
     }
 
@@ -113,44 +123,38 @@ public static class ItemExtensions
             switch (consumptionType)
             {
                 case ConsumptionType.Potion:
-                    ApplyPotionTemplates(targetCharacter, templates);
+                    ApplyPotionTemplates(targetCharacter, templates, itemData.ID);
                     break;
                     // TODO ::: Buff, Scroll 등 추가 확장
             }
         }
     }
 
-    private static void ApplyPotionTemplates(Character character, List<ItemTemplateData> templates)
+    private static void ApplyPotionTemplates(Character character, List<ItemTemplateData> templates, int itemID)
     {
+        var saveData = Managers.Save.CurrentData;
+
         foreach (var template in templates)
         {
             if (!Enum.TryParse<AttributeType>(template.AttributeKey, out var attributeType))
                 continue;
+
+            bool isOneTime = template.Flag;
+
+            if (isOneTime)
+            {
+                string flagKey = itemID.GetConsumableFlagKey(template);
+
+                if (saveData.AppliedFlagItems.Contains(flagKey))
+                    continue;
+            }
 
             character.Attributes.AddValue(attributeType, template.Value.ToString());
-        }
-    }
 
-    private static void ApplyBuffTemplates(Character character, List<ItemTemplateData> templates, int itemID)
-    {
-        foreach (var template in templates)
-        {
-            if (!Enum.TryParse<AttributeType>(template.AttributeKey, out var attributeType))
-                continue;
-
-            int tickCount = Mathf.RoundToInt(template.Duration);
-
-            if (tickCount > 0)
+            if (isOneTime)
             {
-                var buffRegistry = new BuffCooldownRegistry(
-                id: Guid.NewGuid().ToString(),
-                itemID: itemID,
-                attributeKey: attributeType.ToString(),
-                value: template.Value.ToString(),
-                duration: template.Duration,
-                ticks: tickCount,
-                character: character);
-                Managers.Cooldown.Register(buffRegistry);
+                string flagKey = itemID.GetConsumableFlagKey(template);
+                saveData.AppliedFlagItems.Add(flagKey);
             }
         }
     }
@@ -256,4 +260,22 @@ public static class ItemExtensions
 
         return categoryText;
     }
+
+    public static string GetItemCooldownKey(this InventorySlot slot)
+        => slot == null || slot.ItemID <= 0 ? string.Empty : Define.Key.GetItemCooldownKey(slot.ItemID);
+
+    public static string GetConsumableFlagKey(this InventorySlot slot, ItemTemplateData template)
+        => slot == null || slot.ItemID <= 0 || template == null ? string.Empty : Define.Key.GetConsumableFlagKey(slot.ItemID, template.AttributeKey);
+
+    public static string GetConsumableFlagKey(this int itemID, ItemTemplateData template)
+        => itemID <= 0 || template == null ? string.Empty : Define.Key.GetConsumableFlagKey(itemID, template.AttributeKey);
+
+    public static string GetEquipableFlagKey(this InventorySlot slot, ItemTemplateData template)
+        => slot == null || slot.ItemID <= 0 || template == null ? string.Empty : Define.Key.GetEquipableFlagKey(slot.InstanceID, template.AttributeKey);
+
+    public static string GetEquipableFlagKey(this string instanceID, ItemTemplateData template)
+        => string.IsNullOrEmpty(instanceID) || template == null ? string.Empty : Define.Key.GetEquipableFlagKey(instanceID, template.AttributeKey);
+
+    public static string GetEquipableFlagKey(this string instanceID, string attributeKey)
+        => string.IsNullOrEmpty(instanceID) || string.IsNullOrEmpty(attributeKey) ? string.Empty : Define.Key.GetEquipableFlagKey(instanceID, attributeKey);
 }

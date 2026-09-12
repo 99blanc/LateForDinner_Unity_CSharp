@@ -89,7 +89,6 @@ public partial class GraphicOption
         get
         {
             var (targetWidth, targetHeight, targetRefreshRate) = GetBestResolution();
-
             return new GraphicOption()
             {
                 rWidth = targetWidth,
@@ -120,9 +119,9 @@ public partial class GraphicOption
         int maxWidth = GetMaxWidth(resolutions);
         double maxRefreshRate = 0;
 
-        for (int ndex = 0; ndex < resolutions.Length; ndex++)
+        for (int index = 0; index < resolutions.Length; index++)
         {
-            var res = resolutions[ndex];
+            var res = resolutions[index];
 
             if (res.width != maxWidth)
                 continue;

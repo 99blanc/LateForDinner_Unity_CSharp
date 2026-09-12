@@ -65,7 +65,7 @@ public static class AttributeExtensions
     private static double ClampAndConvertToType(object parsedValue, AttributeType attributeType)
     {
         string keyStr = attributeType.ToString();
-        double maxLimit = Managers.Data.Attributes.TryGetValue(keyStr, out var attrData) ? attrData.MaxValue : 0f;
+        double maxLimit = Managers.Data.Attributes.TryGetValue(keyStr, out var attrData) ? attrData.MaxValue : (double)0;
         double rawVal = Convert.ToDouble(parsedValue);
         return maxLimit > 0 ? Math.Clamp(rawVal, 0.0, maxLimit) : Math.Max(0.0, rawVal);
     }
@@ -239,6 +239,16 @@ public static class AttributeExtensions
     public static string GetParsedBaseValueString(this AttributeRegistry attributes, AttributeType attributeType)
         => attributes.GetBaseDoubleValue(attributeType).ToString();
 
+    public static bool IsUnify(this AttributeType attributeType)
+    {
+        string key = attributeType.ToString();
+
+        if (Managers.Data.Attributes.TryGetValue(key, out var attributeData))
+            return attributeData.Unify;
+
+        return false;
+    }
+
     public static List<AttributeSaveData> CreateDefaultAttributes(this CharacterID characterID)
     {
         var list = new List<AttributeSaveData>();
@@ -248,16 +258,26 @@ public static class AttributeExtensions
         {
             foreach (var template in templates[charIndex])
             {
-                if (!Enum.TryParse<AttributeType>(template.AttributeKey, out _))
+                if (!Enum.TryParse<AttributeType>(template.AttributeKey, out var attributeType))
                     continue;
 
                 string dataType = Literal.Types.Float;
+                bool isUnify = false;
 
-                if (Managers.Data.Attributes != null && Managers.Data.Attributes.TryGetValue(template.AttributeKey, out var data))
+                if (Managers.Data.Attributes.TryGetValue(template.AttributeKey, out var data))
+                {
                     dataType = data.DataType;
+                    isUnify = data.Unify;
+                }
 
                 string stringValue = template.Value ?? "0";
-                list.Add(new AttributeSaveData() { Key = template.AttributeKey, DataType = dataType, BaseValue = stringValue, CurrentValue = stringValue });
+                list.Add(new AttributeSaveData()
+                {
+                    Key = template.AttributeKey,
+                    DataType = dataType,
+                    BaseValue = stringValue,
+                    CurrentValue = stringValue
+                });
             }
         }
 

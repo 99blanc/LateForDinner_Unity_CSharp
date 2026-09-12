@@ -73,7 +73,7 @@ public class UIInventorySlot : UISlot, IDraggableSlot<UIInventorySlot>
             return;
         }
 
-        string itemKey = Define.Key.GetItemCooldownKey(_data.ItemID);
+        string itemKey = _data.GetItemCooldownKey();
         var cooldownRegistry = Managers.Cooldown.GetSlotCooldown(itemKey);
 
         if (cooldownRegistry != null && cooldownRegistry.IsOnCooldown)
@@ -187,6 +187,14 @@ public class UIInventorySlot : UISlot, IDraggableSlot<UIInventorySlot>
         if (_isEquipmentSlot)
         {
             Managers.Notify.ToastAsync(LocalizationKey.Log_Inventory_Slot_DropFailed).Forget();
+            return;
+        }
+
+        var rectTransform = Managers.UI.GetPopup<UIQuestInventoryPopup>().RectTransform;
+
+        if (rectTransform != null && RectTransformUtility.RectangleContainsScreenPoint(rectTransform, Mouse.current.position.ReadValue(), null))
+        {
+            Refresh();
             return;
         }
 

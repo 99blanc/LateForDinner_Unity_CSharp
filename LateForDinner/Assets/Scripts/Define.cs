@@ -88,14 +88,17 @@ public class Define
 
     public class Key
     {
-        public const string ConsumableFlagFormat = "{0}_{1}";
-        public const string ItemCooldownFormat = "Cooldown_Item_{0}";
-
-        public static string GetConsumableFlagKey(int itemID, string attributeKey)
-            => ZString.Format(ConsumableFlagFormat, itemID, attributeKey);
+        public const string ItemCooldownFormat = "Cooldownable_{0}";
+        public const string ConsumableFlagFormat = "Consumable_{0}_{1}";
+        public const string EquipableFlagFormat = "Equipable_{0}_{1}";
 
         public static string GetItemCooldownKey(int itemID)
             => ZString.Format(ItemCooldownFormat, itemID);
+        public static string GetConsumableFlagKey(int itemID, string attributeKey)
+            => ZString.Format(ConsumableFlagFormat, itemID, attributeKey);
+
+        public static string GetEquipableFlagKey(string instanceID, string attributeKey)
+            => ZString.Format(EquipableFlagFormat, instanceID, attributeKey);
     }
 
     public class Log

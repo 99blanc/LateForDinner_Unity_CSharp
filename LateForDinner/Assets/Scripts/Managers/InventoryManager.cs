@@ -221,8 +221,7 @@ public class InventoryManager
                 InstanceID = sourceSlot.InstanceID,
                 ItemID = sourceSlot.ItemID,
                 UpgradeLevel = 0,
-                ExtraOptionValue = 0,
-                Flag = false
+                ExtraOptionValue = 0
             };
             _unlockedEquipments.Add(equipInstance);
         }
@@ -296,7 +295,7 @@ public class InventoryManager
             return false;
 
         float cooldownTime = consumptionData.Cooldown;
-        string itemCooldownKey = Define.Key.GetItemCooldownKey(itemID);
+        string itemCooldownKey = targetSlot.GetItemCooldownKey();
 
         if (cooldownTime > 0f)
         {
@@ -314,16 +313,16 @@ public class InventoryManager
         var saveData = Managers.Save.CurrentData;
         List<ItemTemplateData> templates = null;
 
-        if (Managers.Data.ItemTemplates != null && Managers.Data.ItemTemplates.Contains(itemID))
+        if (Managers.Data.ItemTemplates.Contains(itemID))
             templates = Managers.Data.ItemTemplates[itemID].ToList();
 
-        if (templates != null)
+        if (templates != null && saveData?.AppliedFlagItems != null)
         {
             foreach (var template in templates)
             {
                 if (template.Flag)
                 {
-                    string flagKey = Define.Key.GetConsumableFlagKey(itemID, template.AttributeKey);
+                    string flagKey = targetSlot.GetConsumableFlagKey(template);
 
                     if (saveData?.AppliedFlagItems != null && saveData.AppliedFlagItems.Contains(flagKey))
                         return false;
@@ -348,7 +347,7 @@ public class InventoryManager
                     if (saveData.AppliedFlagItems == null)
                         saveData.AppliedFlagItems = new HashSet<string>();
 
-                    string flagKey = Define.Key.GetConsumableFlagKey(itemID, template.AttributeKey);
+                    string flagKey = targetSlot.GetConsumableFlagKey(template);
                     saveData.AppliedFlagItems.Add(flagKey);
                 }
             }
@@ -711,8 +710,7 @@ public class InventoryManager
                     InstanceID = targetInstanceID,
                     ItemID = itemID,
                     UpgradeLevel = 0,
-                    ExtraOptionValue = 0,
-                    Flag = false
+                    ExtraOptionValue = 0
                 });
             }
         }
@@ -901,8 +899,7 @@ public class InventoryManager
             InstanceID = equip.InstanceID,
             ItemID = equip.ItemID,
             UpgradeLevel = equip.UpgradeLevel,
-            ExtraOptionValue = equip.ExtraOptionValue,
-            Flag = equip.Flag
+            ExtraOptionValue = equip.ExtraOptionValue
         }).ToList();
     }
 

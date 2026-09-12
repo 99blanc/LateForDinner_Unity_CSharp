@@ -24,15 +24,48 @@ public class AttributeRegistry
 
     public void Set<T>(AttributeType dataType, T value) where T : struct
     {
-        var clampedValue = ClampToBasePath(dataType, value);
-        Get<T>(dataType).Value = clampedValue;
+        if (dataType.IsUnify())
+        {
+            string keyStr = dataType.ToString();
+            T finalValue = value;
+
+            if (Managers.Data.Attributes.TryGetValue(keyStr, out var attrData) && attrData.MaxValue > 0)
+            {
+                double rawVal = Convert.ToDouble(value);
+                double clamped = Math.Clamp(rawVal, 0.0, attrData.MaxValue);
+                finalValue = (T)Convert.ChangeType(clamped, typeof(T));
+            }
+
+            var view = GetView(dataType, finalValue);
+            view.CurrentValue.Value = finalValue;
+            view.BaseValue.Value = finalValue;
+        }
+        else
+        {
+            var clampedValue = ClampToBasePath(dataType, value);
+            Get<T>(dataType).Value = clampedValue;
+        }
     }
 
     public ReactiveProperty<T> GetBase<T>(AttributeType dataType, T value = default) where T : struct
-        => GetView(dataType, value).BaseValue;
+    {
+        var view = GetView(dataType, value);
+        return dataType.IsUnify() ? view.CurrentValue : view.BaseValue;
+    }
 
     public void SetBase<T>(AttributeType dataType, T baseValue) where T : struct
-        => GetBase<T>(dataType).Value = baseValue;
+    {
+        if (dataType.IsUnify())
+        {
+            Set(dataType, baseValue);
+            return;
+        }
+
+        var clampedBase = ClampToBaseMaxValue(dataType, baseValue);
+        GetBase<T>(dataType).Value = clampedBase;
+        var currentVal = Get<T>(dataType).Value;
+        Set(dataType, currentVal);
+    }
 
     private T ClampToBasePath<T>(AttributeType dataType, T value) where T : struct
     {
@@ -48,6 +81,20 @@ public class AttributeRegistry
             AttributeView<double> dView => (T)(object)Math.Clamp((double)(object)value, (double)0, dView.BaseValue.Value),
             _ => value
         };
+    }
+
+    private T ClampToBaseMaxValue<T>(AttributeType dataType, T value) where T : struct
+    {
+        string keyStr = dataType.ToString();
+
+        if (Managers.Data.Attributes.TryGetValue(keyStr, out var attrData) && attrData.MaxValue > 0)
+        {
+            double rawVal = Convert.ToDouble(value);
+            double clamped = Math.Clamp(rawVal, 0.0, attrData.MaxValue);
+            return (T)Convert.ChangeType(clamped, typeof(T));
+        }
+
+        return value;
     }
 
     public List<AttributeSaveData> ExportSaveData()

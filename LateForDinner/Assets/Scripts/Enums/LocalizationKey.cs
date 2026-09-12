@@ -40,6 +40,7 @@ public enum LocalizationKey
     Item_Throw                                         , // 투척
     Item_Equipment_Format                              , // {0}: {1}
     Item_Drop_Format                                   , // {0} X {1}
+    Scene_Demo                                         , // 테스트 구역
     Scene_Bootstrap                                    , // 진입점
     Scene_Hospital1                                    , // 병원 입구 1
     Scene_Hospital2                                    , // 병원 입구 2
@@ -234,8 +235,6 @@ public enum LocalizationKey
     Log_Load_Display_RotateFailed                      , // [UILoadDisplay] 로딩 회전 애니메이션 중 예외가 발생했습니다.
     Log_Splash_Display_Skip                            , // [UISplashScreen] 스플래시 이미지를 건너뛰었습니다.
     Log_Item_Prop_NotEnoughInventory                   , // [ItemProp] 충분한 인벤토리 공간이 없습니다.
-    Shop_Name_1                                        , // 무기 상점
-    Shop_Description_1                                 , // 무기 상점이다.
     UI_Console_System_AutoComplete_Candidates          , // 자동 완성 후보: {0}
     UI_FPS_System_Indicator                            , // FPS: {0}
     UI_Pause_Popup_Text_Continue                       , // 계속하기

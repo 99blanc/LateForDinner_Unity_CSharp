@@ -46,6 +46,7 @@ Item_Throw,투척
 Item_Equipment_Format,{0}: {1}
 Item_Drop_Format,{0} X {1}
 #Index: Scene,
+Scene_Demo,테스트 구역
 Scene_Bootstrap,진입점
 Scene_Hospital1,병원 입구 1
 Scene_Hospital2,병원 입구 2

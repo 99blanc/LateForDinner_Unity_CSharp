@@ -5,4 +5,3 @@
 # Foreign Key: Localization.csv,,,
 ID,NameKey,DescriptionKey,CharacterID
 # Index: Item,,,
-1,Shop_Name_1,Shop_Description_1,0

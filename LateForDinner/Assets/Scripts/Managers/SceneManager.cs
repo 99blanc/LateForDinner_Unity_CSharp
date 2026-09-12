@@ -69,7 +69,7 @@ public class SceneManager
         if (Managers.Data.Scenes.TryGetValue(id, out data) && data != null)
             return true;
 
-        Log.Error(LocalizationKey.Log_Scene_LoadFailed, id.ToString());
+        Log.Error(LocalizationKey.Log_Scene_LoadFailed, sceneID.ToString());
         data = null;
         return false;
     }
