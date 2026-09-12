@@ -291,68 +291,19 @@ public class InventoryManager
         if (!TryGetValidItemData(itemID, out var itemData, out var itemCategory) || itemCategory != ItemCategory.Consumption)
             return false;
 
-        if (!itemData.TryGetConsumptionData(out var consumptionData))
+        if (!itemData.CanUseConsumption(targetSlot))
             return false;
-
-        float cooldownTime = consumptionData.Cooldown;
-        string itemCooldownKey = targetSlot.GetItemCooldownKey();
-
-        if (cooldownTime > 0f)
-        {
-            var existingCooldown = Managers.Cooldown.GetSlotCooldown(itemCooldownKey);
-
-            if (existingCooldown != null && existingCooldown.IsOnCooldown)
-                return false;
-        }
 
         Character myCharacter = Managers.Game?.Player;
 
         if (myCharacter == null)
             return false;
 
-        var saveData = Managers.Save.CurrentData;
-        List<ItemTemplateData> templates = null;
-
-        if (Managers.Data.ItemTemplates.Contains(itemID))
-            templates = Managers.Data.ItemTemplates[itemID].ToList();
-
-        if (templates != null && saveData?.AppliedFlagItems != null)
-        {
-            foreach (var template in templates)
-            {
-                if (template.Flag)
-                {
-                    string flagKey = targetSlot.GetConsumableFlagKey(template);
-
-                    if (saveData?.AppliedFlagItems != null && saveData.AppliedFlagItems.Contains(flagKey))
-                        return false;
-                }
-            }
-        }
-
         if (!RemoveItem(targetSlot, 1))
             return false;
 
         itemData.ApplyConsumptionEffects(myCharacter, targetObject);
-
-        if (cooldownTime > 0f)
-            Managers.Cooldown.RegisterSlotCooldown(itemCooldownKey, cooldownTime);
-
-        if (templates != null && saveData != null)
-        {
-            foreach (var template in templates)
-            {
-                if (template.Flag)
-                {
-                    if (saveData.AppliedFlagItems == null)
-                        saveData.AppliedFlagItems = new HashSet<string>();
-
-                    string flagKey = targetSlot.GetConsumableFlagKey(template);
-                    saveData.AppliedFlagItems.Add(flagKey);
-                }
-            }
-        }
-
+        itemData.PostProcessConsumption(targetSlot);
         return true;
     }
 

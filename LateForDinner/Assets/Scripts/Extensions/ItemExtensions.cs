@@ -105,6 +105,80 @@ public static class ItemExtensions
         }
     }
 
+    public static bool CanUseConsumption(this ItemData itemData, InventorySlot targetSlot)
+    {
+        if (itemData == null || targetSlot == null || targetSlot.ItemID <= 0)
+            return false;
+
+        if (!itemData.TryGetConsumptionData(out var consumptionData))
+            return false;
+
+        if (Enum.TryParse<ConsumptionType>(consumptionData.ConsumptionType, true, out var consumptionType) && consumptionType == ConsumptionType.Potion)
+        {
+            float cooldownTime = consumptionData.Cooldown;
+
+            if (cooldownTime > 0f)
+            {
+                string itemCooldownKey = targetSlot.GetItemCooldownKey();
+                var existingCooldown = Managers.Cooldown.GetSlotCooldown(itemCooldownKey);
+
+                if (existingCooldown != null && existingCooldown.IsOnCooldown)
+                    return false;
+            }
+        }
+
+        if (Managers.Data.ItemTemplates.Contains(itemData.ID))
+        {
+            var saveData = Managers.Save.CurrentData;
+            var templates = Managers.Data.ItemTemplates[itemData.ID];
+
+            foreach (var template in templates)
+            {
+                if (template.Flag)
+                {
+                    string flagKey = targetSlot.GetConsumableFlagKey(template);
+
+                    if (saveData.AppliedFlagItems.Contains(flagKey))
+                        return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    public static void PostProcessConsumption(this ItemData itemData, InventorySlot targetSlot)
+    {
+        if (itemData == null || !itemData.TryGetConsumptionData(out var consumptionData))
+            return;
+
+        if (Enum.TryParse<ConsumptionType>(consumptionData.ConsumptionType, true, out var consumptionType) && consumptionType == ConsumptionType.Potion)
+        {
+            float cooldownTime = consumptionData.Cooldown;
+
+            if (cooldownTime > 0f)
+            {
+                string itemCooldownKey = targetSlot.GetItemCooldownKey();
+                Managers.Cooldown.RegisterSlotCooldown(itemCooldownKey, cooldownTime);
+            }
+        }
+
+        if (Managers.Data.ItemTemplates.Contains(itemData.ID))
+        {
+            var saveData = Managers.Save.CurrentData;
+            var templates = Managers.Data.ItemTemplates[itemData.ID];
+
+            foreach (var template in templates)
+            {
+                if (template.Flag)
+                {
+                    string flagKey = targetSlot.GetConsumableFlagKey(template);
+                    saveData.AppliedFlagItems.Add(flagKey);
+                }
+            }
+        }
+    }
+
     public static void ApplyConsumptionEffects(this ItemData itemData, Character targetCharacter, GameObject targetObject = null)
     {
         if (itemData == null || targetCharacter?.Attributes == null)
