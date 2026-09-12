@@ -39,9 +39,9 @@ public class UIRemainHealthSlot : UISlot, IAnimatableUI
         _slotIndex = index;
         _slotType = slotType;
         AttributeType currentAttrType = (_slotType == UI_HealthSlotType.Temporary) ? AttributeType.TemporaryHealth : AttributeType.Health;
-        var healthAttr = player.Attributes.Get<int>(currentAttrType);
+        var healthAttribute = player.Attributes.Get<int>(currentAttrType);
         int slotThreshold = _slotIndex * 2;
-        _currentState = GetStateFromHealth(healthAttr.CurrentValue, slotThreshold);
+        _currentState = GetStateFromHealth(healthAttribute.CurrentValue, slotThreshold);
         ApplyStaticState(_currentState);
     }
 
@@ -50,8 +50,9 @@ public class UIRemainHealthSlot : UISlot, IAnimatableUI
         base.OnGet();
         var player = Managers.Game.Player;
         AttributeType currentAttrType = (_slotType == UI_HealthSlotType.Temporary) ? AttributeType.TemporaryHealth : AttributeType.Health;
-        var maxHealthAttr = player.Attributes.GetBase<int>(currentAttrType);
-        Observable.CombineLatest(maxHealthAttr.AsObservable(), player.Attributes.GetBase<int>(currentAttrType).AsObservable(), (health, maxHealth) => (health, maxHealth))
+        var healthAttribute = player.Attributes.Get<int>(currentAttrType);
+        var maxHealthAttribute = player.Attributes.GetBase<int>(currentAttrType);
+        Observable.CombineLatest(healthAttribute.AsObservable(), maxHealthAttribute.AsObservable(), (health, maxHealth) => (health, maxHealth))
         .Skip(1)
         .Subscribe(this, (tuple, slot) =>
         {

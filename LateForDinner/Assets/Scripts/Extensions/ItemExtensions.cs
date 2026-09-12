@@ -38,12 +38,6 @@ public static class ItemExtensions
             }
 
             ApplyEffectInternal(character, attributeType, template.Value.ToString(), template.Duration, isPassive, itemData.ID);
-
-            if (isOneTime)
-            {
-                string flagKey = (equipInstance.InstanceID).GetEquipableFlagKey(template.AttributeKey);
-                saveData.AppliedFlagItems.Add(flagKey);
-            }
         }
     }
 
@@ -55,6 +49,7 @@ public static class ItemExtensions
         if (Managers.Data.ItemTemplates == null || !Managers.Data.ItemTemplates.Contains(itemData.ID))
             return;
 
+        var saveData = Managers.Save.CurrentData;
         var templates = Managers.Data.ItemTemplates[itemData.ID];
 
         foreach (var template in templates)
@@ -66,10 +61,6 @@ public static class ItemExtensions
                 continue;
 
             bool isPassive = (applyType == ApplyType.Passive);
-            bool isOneTime = template.Flag;
-
-            if (isOneTime)
-                continue;
 
             if (isPassive)
                 character.Attributes.SubBaseValue(attributeType, template.Value.ToString());

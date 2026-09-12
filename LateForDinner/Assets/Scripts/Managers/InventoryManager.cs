@@ -100,7 +100,7 @@ public class InventoryManager
         if (!TryGetValidItemData(itemID, out _, out _))
             return false;
 
-        int totalExistingQuantity = _totalSlots.Where(s => s.ItemID == itemID).Sum(s => s.Quantity);
+        int totalExistingQuantity = _totalSlots.Where(slot => slot.ItemID == itemID).Sum(slot => slot.Quantity);
 
         if (totalExistingQuantity < quantity)
             return false;
@@ -133,7 +133,7 @@ public class InventoryManager
         if (targetSlot == null || targetSlot.ItemID <= 0 || targetSlot.Quantity < quantity)
             return false;
 
-        var slotToModify = _totalSlots.FirstOrDefault(s => s.GlobalIndex == targetSlot.GlobalIndex) ?? targetSlot;
+        var slotToModify = _totalSlots.FirstOrDefault(slot => slot.GlobalIndex == targetSlot.GlobalIndex) ?? targetSlot;
 
         if (slotToModify.Quantity < quantity)
             return false;
@@ -154,7 +154,7 @@ public class InventoryManager
             return false;
 
         int itemID = targetSlot.ItemID;
-        var masterSlot = _totalSlots.FirstOrDefault(s => s.GlobalIndex == targetSlot.GlobalIndex);
+        var masterSlot = _totalSlots.FirstOrDefault(slot => slot.GlobalIndex == targetSlot.GlobalIndex);
 
         if (masterSlot == null || masterSlot.Quantity < quantity)
             return false;
@@ -212,7 +212,7 @@ public class InventoryManager
         if (equipmentSlot.ItemID > 0)
             UnequipItemInternal(equipmentSlot, myCharacter);
 
-        var equipInstance = _unlockedEquipments.FirstOrDefault(eq => eq.InstanceID == sourceSlot.InstanceID);
+        var equipInstance = _unlockedEquipments.FirstOrDefault(equip => equip.InstanceID == sourceSlot.InstanceID);
 
         if (equipInstance == null && !string.IsNullOrEmpty(sourceSlot.InstanceID))
         {
@@ -286,7 +286,7 @@ public class InventoryManager
 
         if (Managers.Data.Items.TryGetValue(equipmentSlot.ItemID, out var itemData))
         {
-            var equipInstance = _unlockedEquipments.FirstOrDefault(eq => eq.InstanceID == equipmentSlot.InstanceID);
+            var equipInstance = _unlockedEquipments.FirstOrDefault(equip => equip.InstanceID == equipmentSlot.InstanceID);
 
             if (equipInstance != null)
                 equipInstance.RemoveEquipmentEffects(itemData, character);
@@ -460,9 +460,9 @@ public class InventoryManager
 
         if (normalSourceSlot.ItemID > 0 && normalTargetSlot.ItemID > 0)
         {
-            if (TryGetValidItemData(normalSourceSlot.ItemID, out _, out var srcCat) && TryGetValidItemData(normalTargetSlot.ItemID, out _, out var tgtCat))
+            if (TryGetValidItemData(normalSourceSlot.ItemID, out _, out var sourceCategory) && TryGetValidItemData(normalTargetSlot.ItemID, out _, out var targetCategory))
             {
-                if (srcCat != tgtCat)
+                if (sourceCategory != targetCategory)
                     return false;
             }
         }
@@ -471,10 +471,10 @@ public class InventoryManager
         {
             if (currentTabType.Value != ItemCategory.Equipment)
             {
-                if (normalSourceSlot.ItemID > 0 && TryGetValidItemData(normalSourceSlot.ItemID, out _, out var srcCat2) && srcCat2 == ItemCategory.Equipment)
+                if (normalSourceSlot.ItemID > 0 && TryGetValidItemData(normalSourceSlot.ItemID, out _, out var sCategory) && sCategory == ItemCategory.Equipment)
                     return false;
 
-                if (normalTargetSlot.ItemID > 0 && TryGetValidItemData(normalTargetSlot.ItemID, out _, out var tgtCat2) && tgtCat2 == ItemCategory.Equipment)
+                if (normalTargetSlot.ItemID > 0 && TryGetValidItemData(normalTargetSlot.ItemID, out _, out var tCategory) && tCategory == ItemCategory.Equipment)
                     return false;
             }
         }
@@ -539,7 +539,7 @@ public class InventoryManager
         {
             var slot = _totalSlots[index];
 
-            if (slot.ItemID > 0 && TryGetValidItemData(slot.ItemID, out _, out var cat) && cat == category)
+            if (slot.ItemID > 0 && TryGetValidItemData(slot.ItemID, out _, out var slotCategory) && slotCategory == category)
                 ClearSlot(slot);
         }
 
@@ -558,7 +558,7 @@ public class InventoryManager
         {
             if (tabSlot.ItemID > 0 && (tabSlot.GlobalIndex < 0 || tabSlot.GlobalIndex >= _totalSlots.Count || _totalSlots[tabSlot.GlobalIndex].ItemID != tabSlot.ItemID))
             {
-                var emptyMaster = _totalSlots.FirstOrDefault(s => s.ItemID == 0);
+                var emptyMaster = _totalSlots.FirstOrDefault(slot => slot.ItemID == 0);
 
                 if (emptyMaster != null)
                 {
@@ -617,7 +617,7 @@ public class InventoryManager
     private bool HasEnoughSpaceForCategory(List<InventorySlot> totalSlots, int itemID, int maxStack, int quantity, ItemCategory targetCategory)
     {
         var categorySlots = totalSlots
-        .Where(s => s.ItemID > 0 && TryGetValidItemData(s.ItemID, out _, out var cat) && cat == targetCategory)
+        .Where(slot => slot.ItemID > 0 && TryGetValidItemData(slot.ItemID, out _, out var category) && category == targetCategory)
         .ToList();
         int usedCategorySlotsCount = categorySlots.Count;
         int maxCategorySlots = Define.Amount.InventoryTabSize;
@@ -640,7 +640,7 @@ public class InventoryManager
             if (neededSlots > emptyCategorySlotsCount)
                 return false;
 
-            int totalEmptySlots = totalSlots.Count(s => s.ItemID == 0);
+            int totalEmptySlots = totalSlots.Count(slot => slot.ItemID == 0);
 
             if (neededSlots > totalEmptySlots)
                 return false;
@@ -689,7 +689,7 @@ public class InventoryManager
             string targetInstanceID = string.IsNullOrEmpty(instanceID) ? Guid.NewGuid().ToString() : instanceID;
             slot.InstanceID = targetInstanceID;
 
-            if (!_unlockedEquipments.Any(eq => eq.InstanceID == targetInstanceID))
+            if (!_unlockedEquipments.Any(equip => equip.InstanceID == targetInstanceID))
             {
                 _unlockedEquipments.Add(new EquipmentInstance
                 {
@@ -702,17 +702,17 @@ public class InventoryManager
         }
     }
 
-    private void SwapSlotsValues(InventorySlot a, InventorySlot b)
+    private void SwapSlotsValues(InventorySlot source, InventorySlot target)
     {
-        (a.ItemID, b.ItemID) = (b.ItemID, a.ItemID);
-        (a.Quantity, b.Quantity) = (b.Quantity, a.Quantity);
-        (a.InstanceID, b.InstanceID) = (b.InstanceID, a.InstanceID);
+        (source.ItemID, target.ItemID) = (target.ItemID, source.ItemID);
+        (source.Quantity, target.Quantity) = (target.Quantity, source.Quantity);
+        (source.InstanceID, target.InstanceID) = (target.InstanceID, source.InstanceID);
     }
 
-    private void SwapTabSlotValues(InventorySlot a, InventorySlot b)
+    private void SwapTabSlotValues(InventorySlot source, InventorySlot target)
     {
-        SwapSlotsValues(a, b);
-        (a.GlobalIndex, b.GlobalIndex) = (b.GlobalIndex, a.GlobalIndex);
+        SwapSlotsValues(source, target);
+        (source.GlobalIndex, target.GlobalIndex) = (target.GlobalIndex, source.GlobalIndex);
     }
 
     private void RebuildTabsFromTotal()
@@ -726,7 +726,7 @@ public class InventoryManager
     {
         EnsureTabCapacity(tabSlots);
         var masterItems = _totalSlots
-        .Where(s => s.ItemID > 0 && TryGetValidItemData(s.ItemID, out _, out var cat) && cat == category)
+        .Where(slot => slot.ItemID > 0 && TryGetValidItemData(slot.ItemID, out _, out var slotCategory) && slotCategory == category)
         .ToList();
         var existingMap = new Dictionary<int, InventorySlot>();
 
@@ -802,11 +802,11 @@ public class InventoryManager
     private void SortSlotList(List<InventorySlot> slots)
     {
         var sortedItems = slots
-        .Where(s => s.ItemID != 0)
-        .Select(s => (s.ItemID, s.Quantity, s.InstanceID, s.GlobalIndex))
-        .OrderBy(x => x.ItemID)
-        .ThenByDescending(x => x.Quantity)
-        .ThenBy(x => x.InstanceID)
+        .Where(slot => slot.ItemID != 0)
+        .Select(slot => (slot.ItemID, slot.Quantity, slot.InstanceID, slot.GlobalIndex))
+        .OrderBy(slot => slot.ItemID)
+        .ThenByDescending(slot => slot.Quantity)
+        .ThenBy(slot => slot.InstanceID)
         .ToList();
         int index = 0;
 

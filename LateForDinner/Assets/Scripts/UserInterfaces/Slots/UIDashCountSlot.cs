@@ -38,8 +38,8 @@ public class UIDashCountSlot : UISlot, IAnimatableUI
     {
         base.OnGet();
         var player = Managers.Game.Player;
-        player.Attributes.Get<int>(AttributeType.DashCount)
-        .AsObservable()
+        var dashAttribute = player.Attributes.Get<int>(AttributeType.DashCount);
+        dashAttribute.AsObservable()
         .Skip(1)
         .Subscribe(this, (currentCount, slot) =>
         {
@@ -52,11 +52,11 @@ public class UIDashCountSlot : UISlot, IAnimatableUI
     {
         base.Refresh();
         var player = Managers.Game.Player;
-        var dashAttr = player.Attributes.Get<int>(AttributeType.DashCount);
+        var dashAttribute = player.Attributes.Get<int>(AttributeType.DashCount);
 
-        if (dashAttr != null)
+        if (dashAttribute != null)
         {
-            UI_DashState realState = GetStateFromDash(dashAttr.CurrentValue, _slotIndex);
+            UI_DashState realState = GetStateFromDash(dashAttribute.CurrentValue, _slotIndex);
             _currentState = realState;
             ApplyStaticState(_currentState);
         }
