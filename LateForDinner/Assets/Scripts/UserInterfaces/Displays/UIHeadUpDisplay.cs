@@ -57,14 +57,15 @@ public class UIHeadUpDisplay : UIDisplay
         var healthAttribute = player.Attributes.Get<int>(AttributeType.Health);
         var maxHealthAttribute = player.Attributes.GetBase<int>(AttributeType.Health);
         var temporaryHealthAttribute = player.Attributes.Get<int>(AttributeType.TemporaryHealth);
-        Observable.CombineLatest(healthAttribute.AsObservable(), maxHealthAttribute.AsObservable(), temporaryHealthAttribute.AsObservable(),
-        (health, maxHealth, tempHealth) => (health, maxHealth, tempHealth))
+        var maxTemporaryHealthAttribute = player.Attributes.GetBase<int>(AttributeType.TemporaryHealth);
+        Observable.CombineLatest(healthAttribute.AsObservable(), maxHealthAttribute.AsObservable(), temporaryHealthAttribute.AsObservable(), maxTemporaryHealthAttribute.AsObservable(),
+        (health, maxHealth, temporaryHealth, maxTemporaryHealth) => (health, maxHealth, temporaryHealth, maxTemporaryHealth))
         .Skip(1)
         .Subscribe(this, (tuple, hud) =>
         {
             int healthSlotCount = Mathf.CeilToInt(tuple.maxHealth / 2f);
             hud.UpdateHealthSlots(healthSlotCount);
-            int tempHealthSlotCount = Mathf.CeilToInt(tuple.tempHealth / 2f);
+            int tempHealthSlotCount = Mathf.CeilToInt(tuple.maxTemporaryHealth / 2f);
             hud.UpdateTemporaryHealthSlots(tempHealthSlotCount);
         }).RegisterToPool(this);
     }
@@ -101,7 +102,6 @@ public class UIHeadUpDisplay : UIDisplay
     private void GetHealthSlots()
     {
         var player = Managers.Game.Player;
-        var healthAttribute = player.Attributes.Get<int>(AttributeType.Health);
         var maxHealthAttribute = player.Attributes.GetBase<int>(AttributeType.Health);
         int initialSlotCount = Mathf.CeilToInt(maxHealthAttribute.CurrentValue / 2f);
         UpdateHealthSlots(initialSlotCount);
@@ -110,8 +110,8 @@ public class UIHeadUpDisplay : UIDisplay
     private void GetTemporaryHealthSlots()
     {
         var player = Managers.Game.Player;
-        var temporaryHealthAttribute = player.Attributes.Get<int>(AttributeType.TemporaryHealth);
-        int initialSlotCount = Mathf.CeilToInt(temporaryHealthAttribute.CurrentValue / 2f);
+        var maxTemporaryHealthAttribute = player.Attributes.GetBase<int>(AttributeType.TemporaryHealth);
+        int initialSlotCount = Mathf.CeilToInt(maxTemporaryHealthAttribute.CurrentValue / 2f);
         UpdateTemporaryHealthSlots(initialSlotCount);
     }
 
@@ -124,8 +124,8 @@ public class UIHeadUpDisplay : UIDisplay
         var maxHealthAttribute = player.Attributes.GetBase<int>(AttributeType.Health);
         int initialHealthSlotCount = Mathf.CeilToInt(maxHealthAttribute.CurrentValue / 2f);
         UpdateHealthSlots(initialHealthSlotCount);
-        var temporaryHealthAttribute = player.Attributes.Get<int>(AttributeType.TemporaryHealth);
-        int initialTemporaryHealthSlotCount = Mathf.CeilToInt(temporaryHealthAttribute.CurrentValue / 2f);
+        var maxTemporaryHealthAttribute = player.Attributes.GetBase<int>(AttributeType.TemporaryHealth);
+        int initialTemporaryHealthSlotCount = Mathf.CeilToInt(maxTemporaryHealthAttribute.CurrentValue / 2f);
         UpdateTemporaryHealthSlots(initialTemporaryHealthSlotCount);
     }
 

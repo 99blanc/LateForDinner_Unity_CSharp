@@ -2,6 +2,7 @@ using Cysharp.Threading.Tasks;
 using R3;
 using System;
 using System.Threading;
+using UnityEngine;
 
 public class UIRemainHealthSlot : UISlot, IAnimatableUI
 {
@@ -35,22 +36,8 @@ public class UIRemainHealthSlot : UISlot, IAnimatableUI
 
     public void SetHealthSlot(int index, UI_HealthSlotType slotType)
     {
+        AttributeType currentAttributeType = (slotType == UI_HealthSlotType.Temporary) ? AttributeType.TemporaryHealth : AttributeType.Health;
         var player = Managers.Game.Player;
-        _slotIndex = index;
-        _slotType = slotType;
-        AttributeType currentAttributeType = (_slotType == UI_HealthSlotType.Temporary) ? AttributeType.TemporaryHealth : AttributeType.Health;
-        var healthAttribute = player.Attributes.Get<int>(currentAttributeType);
-        var maxHealthAttribute = player.Attributes.GetBase<int>(currentAttributeType);
-        int slotThreshold = _slotIndex * 2;
-        _currentState = GetStateFromHealth(healthAttribute.CurrentValue, maxHealthAttribute.CurrentValue, slotThreshold);
-        ApplyStaticState(_currentState);
-    }
-
-    public override void OnGet()
-    {
-        base.OnGet();
-        var player = Managers.Game.Player;
-        AttributeType currentAttributeType = (_slotType == UI_HealthSlotType.Temporary) ? AttributeType.TemporaryHealth : AttributeType.Health;
         var healthAttribute = player.Attributes.Get<int>(currentAttributeType);
         var maxHealthAttribute = player.Attributes.GetBase<int>(currentAttributeType);
         Observable.CombineLatest(healthAttribute.AsObservable(), maxHealthAttribute.AsObservable(), (health, maxHealth) => (health, maxHealth))
@@ -59,6 +46,11 @@ public class UIRemainHealthSlot : UISlot, IAnimatableUI
         {
             slot.UpdateHealthState(tuple.health, tuple.maxHealth);
         }).RegisterToPool(this);
+        int slotThreshold = _slotIndex * 2;
+        _slotIndex = index;
+        _slotType = slotType;
+        _currentState = GetStateFromHealth(healthAttribute.CurrentValue, maxHealthAttribute.CurrentValue, slotThreshold);
+        ApplyStaticState(_currentState);
         Refresh();
     }
 
@@ -83,6 +75,7 @@ public class UIRemainHealthSlot : UISlot, IAnimatableUI
     {
         int slotThreshold = _slotIndex * 2;
         UI_HealthState targetState = GetStateFromHealth(currentHealth, maxHealth, slotThreshold);
+        Debug.Log($"[Slot Check] Type: {_slotType}, Index: {_slotIndex}, CurrentHealth: {currentHealth}, MaxHealth: {maxHealth}, Calculated State: {targetState}");
 
         if (_currentState == targetState)
             return;
@@ -107,7 +100,7 @@ public class UIRemainHealthSlot : UISlot, IAnimatableUI
         return UI_HealthState.Empty;
     }
 
-    private async UniTaskVoid PlayHealthTransitionAsync(UI_HealthState oldState, UI_HealthState newState)
+    private async UniTask PlayHealthTransitionAsync(UI_HealthState oldState, UI_HealthState newState)
     {
         int hash = 0;
 

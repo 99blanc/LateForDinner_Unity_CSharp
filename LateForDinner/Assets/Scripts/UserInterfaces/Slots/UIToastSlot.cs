@@ -74,7 +74,7 @@ public class UIToastSlot : UISlot
         FadeAndExpireAsync(3f, onExpire, token).Forget();
     }
 
-    private async UniTaskVoid FadeAndExpireAsync(float duration, Action onExpire, CancellationToken token)
+    private async UniTask FadeAndExpireAsync(float duration, Action onExpire, CancellationToken token)
     {
         var canvasGroup = GetPanel(Panels.SlotPanel);
 

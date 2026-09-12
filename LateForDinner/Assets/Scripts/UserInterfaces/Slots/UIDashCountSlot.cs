@@ -28,24 +28,19 @@ public class UIDashCountSlot : UISlot, IAnimatableUI
     public void SetDashSlot(int index)
     {
         var player = Managers.Game.Player;
-        _slotIndex = index;
-        int initialCount = player.Attributes.Get<int>(AttributeType.DashCount).CurrentValue;
-        _currentState = GetStateFromDash(initialCount, _slotIndex);
-        ApplyStaticState(_currentState);
-    }
-
-    public override void OnGet()
-    {
-        base.OnGet();
-        var player = Managers.Game.Player;
         var dashAttribute = player.Attributes.Get<int>(AttributeType.DashCount);
+        int initialCount = dashAttribute.CurrentValue;
+        _slotIndex = index;
+        _currentState = GetStateFromDash(initialCount, _slotIndex);
         dashAttribute.AsObservable()
         .Skip(1)
         .Subscribe(this, (currentCount, slot) =>
         {
             slot.UpdateDashState(currentCount);
         }).RegisterToPool(this);
+        ApplyStaticState(_currentState); 
         Refresh();
+
     }
 
     public override void Refresh()
@@ -77,7 +72,7 @@ public class UIDashCountSlot : UISlot, IAnimatableUI
     private UI_DashState GetStateFromDash(int currentCount, int slotIndex)
         => slotIndex < currentCount ? UI_DashState.Full : UI_DashState.Empty;
 
-    private async UniTaskVoid PlayDashTransitionAsync(UI_DashState oldState, UI_DashState newState)
+    private async UniTask PlayDashTransitionAsync(UI_DashState oldState, UI_DashState newState)
     {
         int hash = 0;
 
