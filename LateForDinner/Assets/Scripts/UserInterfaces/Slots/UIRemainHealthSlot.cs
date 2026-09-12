@@ -75,7 +75,6 @@ public class UIRemainHealthSlot : UISlot, IAnimatableUI
     {
         int slotThreshold = _slotIndex * 2;
         UI_HealthState targetState = GetStateFromHealth(currentHealth, maxHealth, slotThreshold);
-        Debug.Log($"[Slot Check] Type: {_slotType}, Index: {_slotIndex}, CurrentHealth: {currentHealth}, MaxHealth: {maxHealth}, Calculated State: {targetState}");
 
         if (_currentState == targetState)
             return;
