@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
-public class UIInventorySlot : UISlot, IDraggableSlot<UIInventorySlot>
+public class UIInventorySlot : UISlot, IDraggableSlot
 {
     private enum Images
     {
@@ -34,12 +34,12 @@ public class UIInventorySlot : UISlot, IDraggableSlot<UIInventorySlot>
             return itemImage.gameObject.activeSelf ? itemImage.sprite : null;
         }
     }
-    private bool _isEquipmentSlot;
-    private InventorySlot _data;
-    public InventorySlot Data 
-        => _data;
-    public SlotArea CurrentSlotArea 
+    public SlotArea CurrentSlotArea
         => _isEquipmentSlot ? SlotArea.Equipment : SlotArea.Inventory;
+    public InventorySlot Data
+        => _data;
+    private InventorySlot _data;
+    private bool _isEquipmentSlot;
     private IDisposable _disposable;
 
     public override void OnInit()
@@ -106,7 +106,7 @@ public class UIInventorySlot : UISlot, IDraggableSlot<UIInventorySlot>
     {
         _isEquipmentSlot = isEquipmentSlot;
         _data = slotData;
-        var draggable = (IDraggableSlot<UIInventorySlot>)this;
+        var draggable = (IDraggableSlot)this;
         draggable.SlotIndex = displayIndex;
         Refresh();
     }
@@ -115,7 +115,7 @@ public class UIInventorySlot : UISlot, IDraggableSlot<UIInventorySlot>
     {
         _isEquipmentSlot = false;
         _data = slotData;
-        var draggable = (IDraggableSlot<UIInventorySlot>)this;
+        var draggable = (IDraggableSlot)this;
         draggable.SlotIndex = displayIndex;
         _disposable?.Dispose();
         _disposable = null;
@@ -133,7 +133,7 @@ public class UIInventorySlot : UISlot, IDraggableSlot<UIInventorySlot>
         if (_isEquipmentSlot && (_data == null || _data.ItemID <= 0))
         {
             GetImage(Images.SlotCoverImage).SetActive(true);
-            EquipmentSlotType slotType = (EquipmentSlotType)((IDraggableSlot<UIInventorySlot>)this).SlotIndex;
+            EquipmentSlotType slotType = (EquipmentSlotType)((IDraggableSlot)this).SlotIndex;
             string coverSpriteName = slotType.ToSpriteAsEquipmentCover();
 
             if (!string.IsNullOrEmpty(coverSpriteName))
@@ -170,16 +170,26 @@ public class UIInventorySlot : UISlot, IDraggableSlot<UIInventorySlot>
             GetText(Texts.SlotQuantityText).SetActive(false);
     }
 
-    public void OnDropItem(UIInventorySlot targetSlot)
+    public void OnDropItem(UISlot targetSlot)
     {
         if (targetSlot == null || targetSlot == this)
             return;
 
-        if (_data == null || targetSlot.Data == null)
+        if (targetSlot is not IDraggableSlot targetDraggable)
             return;
 
-        ItemCategory? currentTabType = Managers.UI.GetPopup<UIQuestInventoryPopup>().CurrentTabType;
-        Managers.Inventory.HandleItemMoveByTab(currentTabType, CurrentSlotArea, ((IDraggableSlot<UIInventorySlot>)this).SlotIndex, targetSlot.CurrentSlotArea, ((IDraggableSlot<UIInventorySlot>)targetSlot).SlotIndex);
+        ItemCategory? currentTabType = Managers.UI.GetPopup<UIQuestInventoryPopup>()?.CurrentTabType;
+
+        if (targetSlot is UIQuickSlot)
+        {
+            Managers.Inventory.HandleCrossAreaMove(currentTabType, CurrentSlotArea, ((IDraggableSlot)this).SlotIndex, targetDraggable.CurrentSlotArea, targetDraggable.SlotIndex);
+            return;
+        }
+
+        if (_data == null)
+            return;
+
+        Managers.Inventory.HandleItemMoveByTab(currentTabType, CurrentSlotArea, ((IDraggableSlot)this).SlotIndex, targetDraggable.CurrentSlotArea, targetDraggable.SlotIndex);
     }
 
     public void OnDropOutside()
@@ -221,7 +231,7 @@ public class UIInventorySlot : UISlot, IDraggableSlot<UIInventorySlot>
 
     private void OnDoubleClickSlot(PointerEventData data)
     {
-        int sourceIndex = ((IDraggableSlot<UIInventorySlot>)this).SlotIndex;
+        int sourceIndex = ((IDraggableSlot)this).SlotIndex;
         var inventoryPopup = Managers.UI.GetPopup<UIQuestInventoryPopup>();
         ItemCategory? currentTabType = inventoryPopup?.CurrentTabType;
         bool success = _data.HandleDoubleClick(_isEquipmentSlot, sourceIndex, currentTabType);

@@ -1,13 +1,16 @@
 using LateForDinner.Data;
+using R3;
+using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class UIQuickSlot : UISlot
+public class UIQuickSlot : UISlot, IDraggableSlot
 {
     private enum Images
     {
         QuickSlotItemImage,
-        QuickSlotCooldownImage
+        QuickSlotCooldownImage,
+        QuickSlotFrameImage
     }
 
     private enum Texts
@@ -20,8 +23,21 @@ public class UIQuickSlot : UISlot
         QuickSlotButton
     }
 
-    private int _quickSlotIndex;
+    public Sprite DragSprite
+    {
+        get
+        {
+            var itemImage = GetImage(Images.QuickSlotItemImage);
+            return itemImage.gameObject.activeSelf ? itemImage.sprite : null;
+        }
+    }
+    public SlotArea CurrentSlotArea 
+        => SlotArea.Quick;
+    public InventorySlot Data 
+        => _data;
     private InventorySlot _data;
+    private int _index;
+    private IDisposable _disposable;
 
     public override void OnInit()
     {
@@ -29,25 +45,71 @@ public class UIQuickSlot : UISlot
         BindImage(typeof(Images));
         BindText(typeof(Texts));
         BindButton(typeof(Buttons));
+        GetImage(Images.QuickSlotItemImage).raycastTarget = false;
+        GetImage(Images.QuickSlotFrameImage).raycastTarget = false;
+        GetText(Texts.QuickSlotQuantityText).raycastTarget = false;
     }
 
     public override void OnGet()
     {
         base.OnGet();
-        GetButton(Buttons.QuickSlotButton).BindView(OnClickQuickSlot, ViewEvent.LeftClick, this);
+        GetButton(Buttons.QuickSlotButton).BindView(OnDoubleClickQuickSlot, ViewEvent.DoubleClick, this);
         Refresh();
+    }
+
+    private void BindCooldown()
+    {
+        _disposable?.Dispose();
+        _disposable = null;
+
+        if (_data == null || _data.ItemID <= 0)
+        {
+            SetCooldown(0f);
+            return;
+        }
+
+        string itemKey = _data.GetItemCooldownKey();
+        var cooldownRegistry = Managers.Cooldown.GetSlotCooldown(itemKey);
+
+        if (cooldownRegistry != null && cooldownRegistry.IsOnCooldown)
+        {
+            _disposable = cooldownRegistry.CooldownProgress
+            .Subscribe(SetCooldown)
+            .RegisterToPool(this);
+        }
+        else
+            SetCooldown(0f);
+    }
+
+    private void SetCooldown(float fillAmount)
+    {
+        var cooldownImage = GetImage(Images.QuickSlotCooldownImage);
+
+        if (fillAmount > 0f)
+        {
+            cooldownImage.SetActive(true);
+            cooldownImage.fillAmount = fillAmount;
+        }
+        else
+        {
+            cooldownImage.SetActive(false);
+            cooldownImage.fillAmount = 0f;
+        }
     }
 
     public void Setup(int index, InventorySlot slotData)
     {
-        _quickSlotIndex = index;
+        _index = index;
         _data = slotData;
+        var draggable = (IDraggableSlot)this;
+        draggable.SlotIndex = index;
         Refresh();
     }
 
     public override void Refresh()
     {
         base.Refresh();
+        BindCooldown();
 
         if (_data == null || _data.ItemID <= 0)
         {
@@ -66,6 +128,7 @@ public class UIQuickSlot : UISlot
         {
             GetImage(Images.QuickSlotItemImage).SetActive(false);
             GetText(Texts.QuickSlotQuantityText).SetActive(false);
+            GetImage(Images.QuickSlotCooldownImage).SetActive(false);
             return;
         }
 
@@ -78,8 +141,27 @@ public class UIQuickSlot : UISlot
             GetText(Texts.QuickSlotQuantityText).SetActive(false);
     }
 
-    private void OnClickQuickSlot(PointerEventData data)
+    private void OnDoubleClickQuickSlot(PointerEventData data)
+        => Managers.Inventory.UseQuickSlot(_index);
+
+    public void OnDropItem(UISlot targetSlot)
     {
-        Debug.Log($"Clicked QuickSlot Index: {_quickSlotIndex}, ItemID: {_data?.ItemID ?? 0}");
+        if (targetSlot == null || targetSlot == this)
+            return;
+
+        if (targetSlot is not UIQuickSlot targetQuickSlot)
+            return;
+
+        int targetIndex = ((IDraggableSlot)targetQuickSlot).SlotIndex;
+        Managers.Inventory.HandleQuickSlotMove(CurrentSlotArea, _index, null, targetIndex);
+    }
+
+    public void OnDropOutside()
+    {
+        if (_data != null && _data.ItemID > 0)
+        {
+            Managers.Inventory.ClearQuickSlot(_index);
+            Refresh();
+        }
     }
 }

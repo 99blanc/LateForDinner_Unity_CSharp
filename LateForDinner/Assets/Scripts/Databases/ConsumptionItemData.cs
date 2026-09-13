@@ -8,6 +8,7 @@ namespace LateForDinner.Data
         public int ID { get; set; }
         public string ConsumptionType { get; set; }
         public float Cooldown { get; set; }
+        public bool Disposable { get; set; }
         public string TargetType { get; set; }
     }
 }

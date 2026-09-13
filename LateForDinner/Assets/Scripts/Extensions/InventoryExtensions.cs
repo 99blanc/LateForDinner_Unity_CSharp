@@ -5,7 +5,7 @@ using System.Linq;
 using UnityEngine;
 using ZLinq;
 
-public static class ItemExtensions
+public static class InventoryExtensions
 {
     public static void ApplyEquipmentEffects(this EquipmentInstance equipInstance, ItemData itemData, Character character)
     {
@@ -248,6 +248,88 @@ public static class ItemExtensions
         return Managers.Data.ConsumptionItems.ContainsKey(itemData.ID);
     }
 
+    public static bool IsEtc(this ItemData itemData)
+    {
+        if (itemData == null)
+            return false;
+
+        if (Enum.TryParse<ItemCategory>(itemData.ItemCategory, true, out var category))
+            return category == ItemCategory.Etc;
+
+        return false;
+    }
+
+    public static bool IsPotion(this ItemData itemData)
+    {
+        if (itemData == null)
+            return false;
+
+        if (itemData.TryGetConsumptionData(out var consumptionData) && Enum.TryParse<ConsumptionType>(consumptionData.ConsumptionType, true, out var consumptionType) && consumptionType == ConsumptionType.Potion)
+            return true;
+
+        return false;
+    }
+
+    public static bool TryGetValidItemData(this int itemID, out ItemData itemData, out ItemCategory itemCategory)
+    {
+        itemData = null;
+        itemCategory = ItemCategory.Etc;
+
+        if (!Managers.Data.Items.ContainsKey(itemID))
+            return false;
+
+        itemData = Managers.Data.Items[itemID];
+        Enum.TryParse(itemData.ItemCategory, true, out itemCategory);
+        return true;
+    }
+
+    public static bool IsValidIndex(this int index, int count)
+        => index >= 0 && index < count;
+
+    public static bool ShouldConsumeOnUse(this ItemData itemData)
+    {
+        if (itemData == null)
+            return false;
+
+        return itemData.TryGetConsumptionData(out var consumptionData) && consumptionData.Disposable;
+    }
+
+    public static bool HasEnoughSpaceForCategory(this List<InventorySlot> totalSlots, int itemID, int maxStack, int quantity, ItemCategory targetCategory)
+    {
+        var categorySlots = totalSlots
+            .Where(slot => slot.ItemID > 0 && slot.ItemID.TryGetValidItemData(out _, out var category) && category == targetCategory)
+            .ToList();
+
+        int usedCategorySlotsCount = categorySlots.Count;
+        int maxCategorySlots = Define.Amount.InventoryTabSize;
+        int emptyCategorySlotsCount = maxCategorySlots - usedCategorySlotsCount;
+        int required = quantity;
+
+        foreach (var slot in categorySlots)
+        {
+            if (required <= 0)
+                break;
+
+            if (slot.ItemID == itemID && slot.Quantity < maxStack)
+                required -= (maxStack - slot.Quantity);
+        }
+
+        if (required > 0)
+        {
+            int neededSlots = (int)Math.Ceiling((double)required / maxStack);
+
+            if (neededSlots > emptyCategorySlotsCount)
+                return false;
+
+            int totalEmptySlots = totalSlots.Count(slot => slot.ItemID == 0);
+
+            if (neededSlots > totalEmptySlots)
+                return false;
+        }
+
+        return true;
+    }
+
     public static bool TryGetEquipmentSlotType(this ItemData itemData, out EquipmentSlotType slotType)
     {
         slotType = default;
@@ -365,6 +447,93 @@ public static class ItemExtensions
 
         return null;
     }
+
+    public static void AssignSlotData(this InventorySlot target, InventorySlot source)
+    {
+        target.ItemID = source.ItemID;
+        target.Quantity = source.Quantity;
+        target.InstanceID = source.InstanceID;
+    }
+
+    public static void ClearSlot(this InventorySlot slot)
+    {
+        slot.ItemID = 0;
+        slot.Quantity = 0;
+        slot.InstanceID = null;
+    }
+
+    public static void ClearTabSlot(this InventorySlot slot)
+    {
+        slot.ClearSlot();
+        slot.GlobalIndex = -1;
+    }
+
+    public static bool TryMergeSlots(this InventorySlot source, InventorySlot target)
+    {
+        if (source.ItemID <= 0 || source.ItemID != target.ItemID)
+            return false;
+
+        if (!source.ItemID.TryGetValidItemData(out var itemData, out var itemCategory) || itemCategory == ItemCategory.Equipment)
+            return false;
+
+        int maxStack = itemData.MaxStack;
+
+        if (target.Quantity >= maxStack)
+            return false;
+
+        int space = maxStack - target.Quantity;
+        int transfer = Math.Min(space, source.Quantity);
+        target.Quantity += transfer;
+        source.Quantity -= transfer;
+
+        if (source.Quantity <= 0)
+            source.ClearSlot();
+
+        return true;
+    }
+
+    public static List<InventorySlot> DeepCopySlots(this List<InventorySlot> sourceSlots)
+    {
+        if (sourceSlots == null)
+            return new List<InventorySlot>();
+
+        return sourceSlots.Select(slot => new InventorySlot
+        {
+            GlobalIndex = slot.GlobalIndex,
+            SlotIndex = slot.SlotIndex,
+            ItemID = slot.ItemID,
+            Quantity = slot.Quantity,
+            InstanceID = slot.InstanceID
+        }).ToList();
+    }
+
+    public static void SortSlots(this List<InventorySlot> slots, Comparison<InventorySlot> comparison = null)
+    {
+        if (slots == null || slots.Count <= 0)
+            return;
+
+        if (comparison != null)
+            slots.Sort(comparison);
+        else
+        {
+            slots.Sort((a, b) =>
+            {
+                if (a.ItemID == b.ItemID)
+                    return a.Quantity.CompareTo(b.Quantity);
+
+                if (a.ItemID <= 0) 
+                    return 1;
+
+                if (b.ItemID <= 0) 
+                    return -1;
+
+                return a.ItemID.CompareTo(b.ItemID);
+            });
+        }
+    }
+
+    public static bool TryMergeSameItemInTab(this InventorySlot sourceTabSlot, InventorySlot targetTabSlot)
+        => sourceTabSlot.TryMergeSlots(targetTabSlot);
 
     public static string GetItemCooldownKey(this InventorySlot slot)
         => slot == null || slot.ItemID <= 0 ? string.Empty : Define.Key.GetItemCooldownKey(slot.ItemID);

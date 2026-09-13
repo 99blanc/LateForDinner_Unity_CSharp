@@ -32,6 +32,7 @@ public class UIRemainHealthSlot : UISlot, IAnimatableUI
     {
         base.OnInit();
         BindImage(typeof(Images));
+        GetImage(Images.RemainHealthImage).raycastTarget = false;
     }
 
     public void SetHealthSlot(int index, UI_HealthSlotType slotType)

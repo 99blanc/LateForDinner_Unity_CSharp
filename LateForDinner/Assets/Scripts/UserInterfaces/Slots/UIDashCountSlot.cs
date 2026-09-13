@@ -23,6 +23,7 @@ public class UIDashCountSlot : UISlot, IAnimatableUI
     {
         base.OnInit();
         BindImage(typeof(Images));
+        GetImage(Images.DashCountImage).raycastTarget = false;
     }
 
     public void SetDashSlot(int index)

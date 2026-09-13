@@ -34,7 +34,7 @@ public interface IPoolable
         if (this is IDraggablePopup draggablePopup)
             draggablePopup.Reset();
 
-        if (this is IDraggableSlotVariant draggableSlot)
+        if (this is IDraggableSlot draggableSlot)
             draggableSlot.Reset();
 
         if (this is IInteractable interactable)

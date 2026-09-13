@@ -3,9 +3,9 @@ using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public interface IDraggableSlot<TTarget> : IDraggableSlotVariant, IBeginDragHandler, IDragHandler, IEndDragHandler where TTarget : Component
+public interface IDraggableSlot : IBeginDragHandler, IDragHandler, IEndDragHandler
 {
-    private static readonly ConditionalWeakTable<IDraggableSlot<TTarget>, SlotDragState> _dragValues = new ConditionalWeakTable<IDraggableSlot<TTarget>, SlotDragState>();
+    private static readonly ConditionalWeakTable<IDraggableSlot, SlotDragState> _dragValues = new ConditionalWeakTable<IDraggableSlot, SlotDragState>();
     private class SlotDragState
     {
         public int SlotIndex = -1;
@@ -22,7 +22,7 @@ public interface IDraggableSlot<TTarget> : IDraggableSlotVariant, IBeginDragHand
     Sprite DragSprite { get; }
     SlotArea CurrentSlotArea { get; }
 
-    void OnDropItem(TTarget targetSlot);
+    void OnDropItem(UISlot targetSlot);
 
     void OnDropOutside() { }
 
@@ -77,13 +77,13 @@ public interface IDraggableSlot<TTarget> : IDraggableSlotVariant, IBeginDragHand
             state.CanvasGroup.blocksRaycasts = true;
         }
 
-        TTarget targetSlot = null;
+        UISlot targetSlot = null;
         var raycastResults = new List<RaycastResult>();
         EventSystem.current.RaycastAll(data, raycastResults);
 
         foreach (var result in raycastResults)
         {
-            var slot = result.gameObject.GetComponentInParent<TTarget>();
+            var slot = result.gameObject.GetComponentInParent<UISlot>();
 
             if (slot != null && slot != (Component)this)
             {
@@ -106,7 +106,7 @@ public interface IDraggableSlot<TTarget> : IDraggableSlotVariant, IBeginDragHand
         state.IsDragging = false;
     }
 
-    void IDraggableSlotVariant.Reset()
+    public void Reset()
     {
         if (_dragValues.TryGetValue(this, out var state))
         {

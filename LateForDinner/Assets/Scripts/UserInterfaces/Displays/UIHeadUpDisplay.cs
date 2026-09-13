@@ -37,6 +37,20 @@ public class UIHeadUpDisplay : UIDisplay
         BindRectTransform(typeof(RectTransforms));
         BindImage(typeof(Images));
         BindPanel(typeof(Panels));
+        InitQuickSlots();
+    }
+
+    private void InitQuickSlots()
+    {
+        var content = GetRectTransform(RectTransforms.SlotContent).transform;
+
+        for (int index = 0; index < Define.Amount.MaxQuickSlot; index++)
+        {
+            var (slot, _) = Managers.Pool.Pop<UIQuickSlot>(content);
+
+            if (slot != null)
+                _quickSlots.Add(slot);
+        }
     }
 
     public override void OnGet()
@@ -46,6 +60,9 @@ public class UIHeadUpDisplay : UIDisplay
         GetDashSlots();
         GetHealthSlots();
         GetTemporaryHealthSlots();
+        Managers.Inventory.OnInventoryChanged
+        .Subscribe(_ => SetQuickSlots())
+        .RegisterToPool(this);
         var player = Managers.Game.Player;
         var dashAttribute = player.Attributes.GetBase<int>(AttributeType.DashCount);
         dashAttribute.AsObservable()
@@ -72,23 +89,12 @@ public class UIHeadUpDisplay : UIDisplay
 
     private void SetQuickSlots()
     {
-        foreach (var slot in _quickSlots)
-            Managers.Pool.Push(slot);
-
-        _quickSlots.Clear();
-        var content = GetRectTransform(RectTransforms.SlotContent).transform;
         var quickSlotsData = Managers.Inventory?.GetQuickSlots();
 
-        for (int index = 0; index < Define.Amount.MaxQuickSlot; index++)
+        for (int index = 0; index < _quickSlots.Count; index++)
         {
-            var (slot, _) = Managers.Pool.Pop<UIQuickSlot>(content);
-
-            if (slot != null)
-            {
-                InventorySlot slotData = (quickSlotsData != null && index < quickSlotsData.Count) ? quickSlotsData[index] : null;
-                slot.Setup(index, slotData);
-                _quickSlots.Add(slot);
-            }
+            InventorySlot slotData = (quickSlotsData != null && index < quickSlotsData.Count) ? quickSlotsData[index] : null;
+            _quickSlots[index].Setup(index, slotData);
         }
     }
 
