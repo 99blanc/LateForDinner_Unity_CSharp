@@ -326,6 +326,46 @@ public static class ItemExtensions
         return categoryText;
     }
 
+    public static bool HandleDoubleClick(this InventorySlot slot, bool isEquipmentSlot, int sourceIndex, ItemCategory? currentTabType)
+    {
+        if (slot == null || slot.ItemID <= 0)
+            return false;
+
+        if (!Managers.Data.Items.TryGetValue(slot.ItemID, out var itemData))
+            return false;
+
+        if (isEquipmentSlot)
+        {
+            EquipmentSlotType targetEquipmentSlot = (EquipmentSlotType)sourceIndex;
+            int? emptyIndex = GetFirstEmptyInventoryIndex(currentTabType);
+            return Managers.Inventory.UnequipItem(targetEquipmentSlot, currentTabType, emptyIndex);
+        }
+
+        if (itemData.IsConsumption())
+            return Managers.Inventory.UseConsumableItem(slot);
+
+        if (itemData.IsEquipmentCategory() && itemData.TryGetEquipmentSlotType(out var slotType))
+        {
+            SlotArea sourceArea = isEquipmentSlot ? SlotArea.Equipment : SlotArea.Inventory;
+            return Managers.Inventory.EquipItem(sourceArea, sourceIndex, slotType, currentTabType);
+        }
+
+        return false;
+    }
+
+    private static int? GetFirstEmptyInventoryIndex(ItemCategory? currentTabType)
+    {
+        var slots = Managers.Inventory.GetSlotsByType(currentTabType);
+
+        for (int index = 0; index < slots.Count; index++)
+        {
+            if (slots[index].ItemID <= 0)
+                return index;
+        }
+
+        return null;
+    }
+
     public static string GetItemCooldownKey(this InventorySlot slot)
         => slot == null || slot.ItemID <= 0 ? string.Empty : Define.Key.GetItemCooldownKey(slot.ItemID);
 

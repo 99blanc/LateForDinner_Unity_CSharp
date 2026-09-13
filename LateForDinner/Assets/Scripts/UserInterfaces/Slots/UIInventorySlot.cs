@@ -56,7 +56,7 @@ public class UIInventorySlot : UISlot, IDraggableSlot<UIInventorySlot>
     public override void OnGet()
     {
         base.OnGet();
-        GetButton(Buttons.SlotButton).BindView(OnClickSlot, ViewEvent.DoubleClick, this);
+        GetButton(Buttons.SlotButton).BindView(OnDoubleClickSlot, ViewEvent.DoubleClick, this);
         GetButton(Buttons.SlotButton).BindView(OnPointerEnterSlot, ViewEvent.Enter, this);
         GetButton(Buttons.SlotButton).BindView(OnPointerExitSlot, ViewEvent.Exit, this);
         Refresh();
@@ -219,18 +219,15 @@ public class UIInventorySlot : UISlot, IDraggableSlot<UIInventorySlot>
         onCancel: () => { });
     }
 
-    private void OnClickSlot(PointerEventData data)
+    private void OnDoubleClickSlot(PointerEventData data)
     {
-        if (_data == null || _data.ItemID <= 0)
-            return;
-
-        bool success = Managers.Inventory.UseConsumableItem(_data);
+        int sourceIndex = ((IDraggableSlot<UIInventorySlot>)this).SlotIndex;
+        var inventoryPopup = Managers.UI.GetPopup<UIQuestInventoryPopup>();
+        ItemCategory? currentTabType = inventoryPopup?.CurrentTabType;
+        bool success = _data.HandleDoubleClick(_isEquipmentSlot, sourceIndex, currentTabType);
 
         if (success)
-        {
-            var popup = Managers.UI.GetPopup<UIQuestInventoryPopup>();
-            popup.Refresh();
-        }
+            inventoryPopup?.Refresh();
     }
 
     private void OnPointerEnterSlot(PointerEventData data)
