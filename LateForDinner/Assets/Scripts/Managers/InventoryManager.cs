@@ -486,7 +486,7 @@ public class InventoryManager
 
         if (sourceTabSlot.TryMergeSlots(targetTabSlot))
         {
-            SyncTotalSlotsByTabMove(sourceTabSlot, targetTabSlot);
+            SyncTotalSlotsByTabMerge(sourceTabSlot, targetTabSlot);
             RebuildTabsFromTotal();
             FinalizeInventoryChange();
             return true;
@@ -548,6 +548,14 @@ public class InventoryManager
 
         if (normalSourceSlot == null || normalTargetSlot == null)
             return false;
+
+        if (normalSourceSlot.TryMergeSlots(normalTargetSlot))
+        {
+            SyncTotalSlotsByTabMerge(normalSourceSlot, normalTargetSlot);
+            RebuildTabsFromTotal();
+            FinalizeInventoryChange();
+            return true;
+        }
 
         int globalA = normalSourceSlot.GlobalIndex;
         int globalB = normalTargetSlot.GlobalIndex;
@@ -636,6 +644,19 @@ public class InventoryManager
     {
         SyncQuickSlotsAfterItemChanged(modifiedSlot);
         _onInventoryChanged.OnNext(Unit.Default);
+    }
+
+    private void SyncTotalSlotsByTabMerge(InventorySlot sourceTabSlot, InventorySlot targetTabSlot)
+    {
+        var masterSource = _totalSlots.FirstOrDefault(s => s.GlobalIndex == sourceTabSlot.GlobalIndex);
+        var masterTarget = _totalSlots.FirstOrDefault(s => s.GlobalIndex == targetTabSlot.GlobalIndex);
+
+        if (masterSource != null && masterTarget != null)
+        {
+            masterSource.TryMergeSlots(masterTarget);
+            SyncQuickSlotsAfterItemChanged(masterSource);
+            SyncQuickSlotsAfterItemChanged(masterTarget);
+        }
     }
 
     private void SyncQuickSlotsAfterItemChanged(InventorySlot modifiedInventorySlot = null)
