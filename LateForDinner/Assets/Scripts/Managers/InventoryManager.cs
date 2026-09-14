@@ -484,24 +484,17 @@ public class InventoryManager
         if (sourceTabSlot == targetTabSlot)
             return false;
 
-        var masterSource = _totalSlots.FirstOrDefault(s => s.GlobalIndex == sourceTabSlot.GlobalIndex);
-        var masterTarget = _totalSlots.FirstOrDefault(s => s.GlobalIndex == targetTabSlot.GlobalIndex);
-
-        if (masterSource == null || masterTarget == null)
-            return false;
-
-        if (masterSource.TryMergeSlots(masterTarget))
+        if (sourceTabSlot.TryMergeSlots(targetTabSlot))
         {
+            SyncTotalSlotsByTabMove(sourceTabSlot, targetTabSlot);
             RebuildTabsFromTotal();
             FinalizeInventoryChange();
             return true;
         }
 
-        int globalA = masterSource.GlobalIndex;
-        int globalB = masterTarget.GlobalIndex;
-        masterSource.SwapValues(masterTarget);
-        (masterSource.GlobalIndex, masterTarget.GlobalIndex) = (masterTarget.GlobalIndex, masterSource.GlobalIndex);
-        SwapQuickSlotReferences(globalA, globalB);
+        sourceTabSlot.SwapValues(targetTabSlot);
+        (sourceTabSlot.GlobalIndex, targetTabSlot.GlobalIndex) = (targetTabSlot.GlobalIndex, sourceTabSlot.GlobalIndex);
+        SyncTotalSlotsByTabMove(sourceTabSlot, targetTabSlot);
         RebuildTabsFromTotal();
         FinalizeInventoryChange();
         return true;
