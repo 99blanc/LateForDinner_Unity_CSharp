@@ -444,7 +444,7 @@ public static class InventoryExtensions
             if (emptySlot == null)
                 return false;
 
-            return Managers.Inventory.UnequipItem(currentTabType, targetEquipmentSlot, emptySlot);
+            return Managers.Inventory.UnEquipItem(currentTabType, targetEquipmentSlot, emptySlot);
         }
 
         if (itemData.IsConsumption())

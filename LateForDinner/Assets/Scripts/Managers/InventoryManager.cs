@@ -241,7 +241,7 @@ public class InventoryManager
         return true;
     }
 
-    public bool UnequipItem(ItemCategory? currentTabType, InventorySlot targetEquipmentSlot, InventorySlot targetSlot = null)
+    public bool UnEquipItem(ItemCategory? currentTabType, InventorySlot targetEquipmentSlot, InventorySlot targetSlot = null)
     {
         if (targetEquipmentSlot == null || targetEquipmentSlot.ItemID <= 0)
             return false;
@@ -510,7 +510,7 @@ public class InventoryManager
             if (targetSlot == null)
                 return false;
 
-            return UnequipItem(currentTabType, sourceSlot, targetSlot);
+            return UnEquipItem(currentTabType, sourceSlot, targetSlot);
         }
 
         if (sourceArea == SlotArea.Quick)
