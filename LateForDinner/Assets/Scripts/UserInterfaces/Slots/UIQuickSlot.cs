@@ -149,11 +149,8 @@ public class UIQuickSlot : UISlot, IDraggableSlot
         if (targetSlot == null || targetSlot == this)
             return;
 
-        if (targetSlot is not UIQuickSlot targetQuickSlot)
-            return;
-
-        int targetIndex = ((IDraggableSlot)targetQuickSlot).SlotIndex;
-        Managers.Inventory.HandleQuickSlotMove(CurrentSlotArea, _index, null, targetIndex);
+        if (targetSlot is UIQuickSlot targetQuickSlot)
+            Managers.Inventory.HandleQuickSlotMove(CurrentSlotArea, _data, targetQuickSlot.Data);
     }
 
     public void OnDropOutside()

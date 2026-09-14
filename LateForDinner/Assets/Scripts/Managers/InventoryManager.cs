@@ -9,7 +9,8 @@ using ZLinq;
 
 public class InventoryManager
 {
-    public Observable<Unit> OnInventoryChanged => _onInventoryChanged;
+    public Observable<Unit> OnInventoryChanged 
+        => _onInventoryChanged;
     private readonly Subject<Unit> _onInventoryChanged = new Subject<Unit>();
     private List<InventorySlot> _totalSlots = new List<InventorySlot>(Define.Amount.MaxInventorySlot);
     private List<InventorySlot> _equipmentTabSlots = new List<InventorySlot>(Define.Amount.InventoryTabSize);
@@ -46,12 +47,14 @@ public class InventoryManager
             slots.Add(new InventorySlot { GlobalIndex = updateGlobalIndex ? index : -1, SlotIndex = index });
         }
 
-        for (int index = 0; index < slots.Count; index++)
+        int currentIndex = 0;
+
+        foreach (var slot in slots)
         {
             if (updateGlobalIndex)
-                slots[index].GlobalIndex = index;
+                slot.GlobalIndex = currentIndex;
 
-            slots[index].SlotIndex = index;
+            slot.SlotIndex = currentIndex++;
         }
     }
 
@@ -63,8 +66,10 @@ public class InventoryManager
             tabSlots.Add(new InventorySlot { GlobalIndex = -1, SlotIndex = index });
         }
 
-        for (int index = 0; index < tabSlots.Count; index++)
-            tabSlots[index].SlotIndex = index;
+        int currentIndex = 0;
+
+        foreach (var slot in tabSlots)
+            slot.SlotIndex = currentIndex++;
     }
 
     public bool AddItem(int itemID, int quantity, string instanceID = "")
@@ -84,7 +89,7 @@ public class InventoryManager
 
     public bool RemoveItem(int itemID, int quantity)
     {
-        if (!itemID.TryGetValidItemData(out _, out _) || _totalSlots.Where(s => s.ItemID == itemID).Sum(s => s.Quantity) < quantity)
+        if (!itemID.TryGetValidItemData(out _, out _) || _totalSlots.Where(slot => slot.ItemID == itemID).Sum(slot => slot.Quantity) < quantity)
             return false;
 
         int remainingToRemove = quantity;
@@ -115,7 +120,7 @@ public class InventoryManager
         if (targetSlot == null || targetSlot.ItemID <= 0 || targetSlot.Quantity < quantity)
             return false;
 
-        var slotToModify = _totalSlots.FirstOrDefault(slot => slot.GlobalIndex == targetSlot.GlobalIndex);
+        var slotToModify = _totalSlots.FirstOrDefault(slot => slot == targetSlot || slot.GlobalIndex == targetSlot.GlobalIndex);
 
         if (slotToModify == null || slotToModify.ItemID <= 0 || slotToModify.Quantity < quantity)
             return false;
@@ -136,7 +141,7 @@ public class InventoryManager
             return false;
 
         int itemID = targetSlot.ItemID;
-        var masterSlot = _totalSlots.FirstOrDefault(slot => slot.GlobalIndex == targetSlot.GlobalIndex);
+        var masterSlot = _totalSlots.FirstOrDefault(slot => slot == targetSlot || slot.GlobalIndex == targetSlot.GlobalIndex);
 
         if (masterSlot == null || masterSlot.ItemID <= 0 || masterSlot.Quantity < quantity)
             return false;
@@ -172,16 +177,14 @@ public class InventoryManager
         if (sourceSlot == null || sourceSlot.ItemID <= 0 || targetEquipmentSlot == null)
             return false;
 
-        int targetIndex = targetEquipmentSlot.SlotIndex;
-        EquipmentSlotType targetSlotType = (EquipmentSlotType)targetIndex;
+        EquipmentSlotType targetSlotType = (EquipmentSlotType)targetEquipmentSlot.SlotIndex;
 
         if (!sourceSlot.ItemID.TryGetValidItemData(out var itemData, out _) || !itemData.IsEquipmentCategory() || !itemData.CanEquipInSlot(targetSlotType))
             return false;
 
-        if (_equipmentSlots == null || !targetIndex.IsValidIndex(_equipmentSlots.Count))
+        if (!_equipmentSlots.Contains(targetEquipmentSlot))
             return false;
 
-        var equipmentSlot = _equipmentSlots[targetIndex];
         Character myCharacter = Managers.Game?.Player;
 
         if (myCharacter == null)
@@ -190,49 +193,43 @@ public class InventoryManager
         InventorySlot masterSlot = null;
 
         if (!currentTabType.HasValue)
-        {
-            if (sourceSlot.GlobalIndex >= 0 && sourceSlot.GlobalIndex.IsValidIndex(_totalSlots.Count))
-                masterSlot = _totalSlots[sourceSlot.GlobalIndex];
-        }
+            masterSlot = _totalSlots.FirstOrDefault(slot => slot == sourceSlot || slot.GlobalIndex == sourceSlot.GlobalIndex);
         else
         {
             var targetTabSlots = GetSlotsByType(currentTabType);
 
-            if (targetTabSlots != null && targetTabSlots.IndexOf(sourceSlot) >= 0)
-            {
-                if (sourceSlot.GlobalIndex >= 0 && sourceSlot.GlobalIndex.IsValidIndex(_totalSlots.Count))
-                    masterSlot = _totalSlots[sourceSlot.GlobalIndex];
-            }
+            if (targetTabSlots != null && targetTabSlots.Contains(sourceSlot))
+                masterSlot = _totalSlots.FirstOrDefault(slot => slot.GlobalIndex == sourceSlot.GlobalIndex);
         }
 
         if (masterSlot == null || masterSlot.ItemID <= 0)
-            masterSlot = _totalSlots.FirstOrDefault(s => s.ItemID == sourceSlot.ItemID && s.InstanceID == sourceSlot.InstanceID);
+            masterSlot = _totalSlots.FirstOrDefault(slot => slot.ItemID == sourceSlot.ItemID && slot.InstanceID == sourceSlot.InstanceID);
 
         if (masterSlot == null || masterSlot.ItemID <= 0)
             return false;
 
-        if (equipmentSlot.ItemID > 0)
+        if (targetEquipmentSlot.ItemID > 0)
         {
-            UnequipItemInternal(equipmentSlot, myCharacter);
+            UnequipItemInternal(targetEquipmentSlot, myCharacter);
             var tempEquipmentData = new InventorySlot();
-            tempEquipmentData.AssignSlotData(equipmentSlot);
-            equipmentSlot.AssignSlotData(masterSlot);
-            equipmentSlot.GlobalIndex = -1;
+            tempEquipmentData.AssignSlotData(targetEquipmentSlot);
+            targetEquipmentSlot.AssignSlotData(masterSlot);
+            targetEquipmentSlot.GlobalIndex = -1;
             masterSlot.AssignSlotData(tempEquipmentData);
             masterSlot.GlobalIndex = masterSlot.SlotIndex;
         }
         else
         {
-            equipmentSlot.AssignSlotData(masterSlot);
-            equipmentSlot.GlobalIndex = -1;
+            targetEquipmentSlot.AssignSlotData(masterSlot);
+            targetEquipmentSlot.GlobalIndex = -1;
             masterSlot.ClearSlot();
         }
 
-        var equipInstance = _unlockedEquipments.FirstOrDefault(equip => equip.InstanceID == equipmentSlot.InstanceID);
+        var equipInstance = _unlockedEquipments.FirstOrDefault(equip => equip.InstanceID == targetEquipmentSlot.InstanceID);
 
-        if (equipInstance == null && !string.IsNullOrEmpty(equipmentSlot.InstanceID))
+        if (equipInstance == null && !string.IsNullOrEmpty(targetEquipmentSlot.InstanceID))
         {
-            equipInstance = new EquipmentInstance { InstanceID = equipmentSlot.InstanceID, ItemID = equipmentSlot.ItemID, UpgradeLevel = 0, ExtraOptionValue = 0 };
+            equipInstance = new EquipmentInstance { InstanceID = targetEquipmentSlot.InstanceID, ItemID = targetEquipmentSlot.ItemID, UpgradeLevel = 0, ExtraOptionValue = 0 };
             _unlockedEquipments.Add(equipInstance);
         }
 
@@ -249,12 +246,9 @@ public class InventoryManager
         if (targetEquipmentSlot == null || targetEquipmentSlot.ItemID <= 0)
             return false;
 
-        int sourceIndex = targetEquipmentSlot.SlotIndex;
-
-        if (_equipmentSlots == null || !sourceIndex.IsValidIndex(_equipmentSlots.Count))
+        if (!_equipmentSlots.Contains(targetEquipmentSlot))
             return false;
 
-        var equipmentSlot = _equipmentSlots[sourceIndex];
         Character myCharacter = Managers.Game?.Player;
 
         if (myCharacter == null)
@@ -266,27 +260,27 @@ public class InventoryManager
         {
             if (targetSlot.ItemID > 0)
             {
-                EquipmentSlotType targetSlotType = (EquipmentSlotType)sourceIndex;
+                EquipmentSlotType targetSlotType = (EquipmentSlotType)targetEquipmentSlot.SlotIndex;
 
                 if (!targetSlot.ItemID.TryGetValidItemData(out var targetItemData, out _) || !targetItemData.IsEquipmentCategory() || !targetItemData.CanEquipInSlot(targetSlotType))
                     return false;
 
-                if (targetSlot.GlobalIndex >= 0 && targetSlot.GlobalIndex.IsValidIndex(_totalSlots.Count))
-                    masterSlot = _totalSlots[targetSlot.GlobalIndex];
-                else
-                    masterSlot = _totalSlots.FirstOrDefault(s => s.ItemID == targetSlot.ItemID && s.InstanceID == targetSlot.InstanceID);
+                masterSlot = _totalSlots.FirstOrDefault(slot => slot == targetSlot || slot.GlobalIndex == targetSlot.GlobalIndex);
+
+                if (masterSlot == null)
+                    masterSlot = _totalSlots.FirstOrDefault(slot => slot.ItemID == targetSlot.ItemID && slot.InstanceID == targetSlot.InstanceID);
 
                 if (masterSlot == null)
                     return false;
 
-                UnequipItemInternal(equipmentSlot, myCharacter);
+                UnequipItemInternal(targetEquipmentSlot, myCharacter);
                 var tempEquipmentData = new InventorySlot();
-                tempEquipmentData.AssignSlotData(equipmentSlot);
-                equipmentSlot.AssignSlotData(masterSlot);
-                equipmentSlot.GlobalIndex = -1;
+                tempEquipmentData.AssignSlotData(targetEquipmentSlot);
+                targetEquipmentSlot.AssignSlotData(masterSlot);
+                targetEquipmentSlot.GlobalIndex = -1;
                 masterSlot.AssignSlotData(tempEquipmentData);
                 masterSlot.GlobalIndex = masterSlot.SlotIndex;
-                var newEquipInstance = _unlockedEquipments.FirstOrDefault(equip => equip.InstanceID == equipmentSlot.InstanceID);
+                var newEquipInstance = _unlockedEquipments.FirstOrDefault(equip => equip.InstanceID == targetEquipmentSlot.InstanceID);
 
                 if (newEquipInstance != null)
                     newEquipInstance.ApplyEquipmentEffects(targetItemData, myCharacter);
@@ -296,23 +290,18 @@ public class InventoryManager
                 return true;
             }
             else
-            {
-                if (targetSlot.GlobalIndex >= 0 && targetSlot.GlobalIndex.IsValidIndex(_totalSlots.Count))
-                    masterSlot = _totalSlots[targetSlot.GlobalIndex];
-                else
-                    masterSlot = _totalSlots.FirstOrDefault(s => s.ItemID <= 0);
-            }
+                masterSlot = _totalSlots.FirstOrDefault(slot => slot == targetSlot || (slot.GlobalIndex == targetSlot.GlobalIndex && slot.ItemID <= 0)) ?? _totalSlots.FirstOrDefault(slot => slot.ItemID <= 0);
         }
         else
-            masterSlot = _totalSlots.FirstOrDefault(s => s.ItemID <= 0);
+            masterSlot = _totalSlots.FirstOrDefault(slot => slot.ItemID <= 0);
 
         if (masterSlot == null || masterSlot.ItemID > 0)
             return false;
 
-        UnequipItemInternal(equipmentSlot, myCharacter);
-        masterSlot.AssignSlotData(equipmentSlot);
+        UnequipItemInternal(targetEquipmentSlot, myCharacter);
+        masterSlot.AssignSlotData(targetEquipmentSlot);
         masterSlot.GlobalIndex = masterSlot.SlotIndex;
-        equipmentSlot.ClearSlot();
+        targetEquipmentSlot.ClearSlot();
         RebuildTabsFromTotal();
         FinalizeInventoryChange();
         return true;
@@ -350,7 +339,7 @@ public class InventoryManager
 
         if (itemData.ShouldConsumeOnUse())
         {
-            var masterSlot = _totalSlots.FirstOrDefault(slot => slot.GlobalIndex == targetSlot.GlobalIndex);
+            var masterSlot = _totalSlots.FirstOrDefault(slot => slot == targetSlot || slot.GlobalIndex == targetSlot.GlobalIndex);
 
             if (masterSlot == null || !RemoveItem(masterSlot, 1))
                 return false;
@@ -371,7 +360,11 @@ public class InventoryManager
             return false;
 
         var quickSlot = _quickSlots[quickSlotIndex];
+        return UseQuickSlot(quickSlot, targetObject);
+    }
 
+    public bool UseQuickSlot(InventorySlot quickSlot, GameObject targetObject = null)
+    {
         if (quickSlot == null || quickSlot.ItemID <= 0 || !quickSlot.IsValidAndCategory(ItemCategory.Consumption))
             return false;
 
@@ -391,11 +384,11 @@ public class InventoryManager
             bool success = false;
             InventorySlot masterSlot = null;
 
-            if (quickSlot.GlobalIndex.IsValidIndex(_totalSlots.Count))
+            if (quickSlot.GlobalIndex >= 0)
             {
-                masterSlot = _totalSlots[quickSlot.GlobalIndex];
+                masterSlot = _totalSlots.FirstOrDefault(slot => slot.GlobalIndex == quickSlot.GlobalIndex);
 
-                if (masterSlot.ItemID == quickSlot.ItemID)
+                if (masterSlot != null && masterSlot.ItemID == quickSlot.ItemID)
                     success = RemoveItem(masterSlot, 1);
             }
 
@@ -434,23 +427,27 @@ public class InventoryManager
 
     public bool HandleItemMoveByTab(ItemCategory? currentTab, SlotArea sourceArea, int sourceIndex, SlotArea targetArea, int targetIndex)
     {
-        if (sourceArea != targetArea)
-            return HandleCrossAreaMove(currentTab, sourceArea, sourceIndex, targetArea, targetIndex);
-
-        if (!currentTab.HasValue)
-            return HandleTotalTabMove(sourceIndex, targetIndex);
-
-        return HandleCategoryTabMove(currentTab.Value, sourceIndex, targetIndex);
+        var sourceSlot = GetSourceSlot(currentTab, sourceArea, sourceIndex);
+        var targetSlot = GetTargetSlot(currentTab, targetArea, targetIndex);
+        return HandleItemMoveByTab(currentTab, sourceArea, sourceSlot, targetArea, targetSlot);
     }
 
-    private bool HandleTotalTabMove(int sourceIndex, int targetIndex)
+    public bool HandleItemMoveByTab(ItemCategory? currentTab, SlotArea sourceArea, InventorySlot sourceSlot, SlotArea targetArea, InventorySlot targetSlot)
     {
-        if (!sourceIndex.IsValidIndex(_totalSlots.Count) || !targetIndex.IsValidIndex(_totalSlots.Count))
+        if (sourceSlot == null || targetSlot == null)
             return false;
 
-        var sourceMaster = _totalSlots[sourceIndex];
-        var targetMaster = _totalSlots[targetIndex];
+        if (sourceArea != targetArea)
+            return HandleCrossAreaMove(currentTab, sourceArea, sourceSlot, targetArea, targetSlot);
 
+        if (!currentTab.HasValue)
+            return HandleTotalTabMove(sourceSlot, targetSlot);
+
+        return HandleCategoryTabMove(currentTab.Value, sourceSlot, targetSlot);
+    }
+
+    private bool HandleTotalTabMove(InventorySlot sourceMaster, InventorySlot targetMaster)
+    {
         if (sourceMaster == targetMaster)
             return false;
 
@@ -471,16 +468,8 @@ public class InventoryManager
         return true;
     }
 
-    private bool HandleCategoryTabMove(ItemCategory currentTab, int sourceIndex, int targetIndex)
+    private bool HandleCategoryTabMove(ItemCategory currentTab, InventorySlot sourceTabSlot, InventorySlot targetTabSlot)
     {
-        var targetList = GetSlotsByType(currentTab);
-
-        if (targetList == null || !sourceIndex.IsValidIndex(targetList.Count) || !targetIndex.IsValidIndex(targetList.Count))
-            return false;
-
-        var sourceTabSlot = targetList[sourceIndex];
-        var targetTabSlot = targetList[targetIndex];
-
         if (sourceTabSlot == targetTabSlot)
             return false;
 
@@ -500,13 +489,10 @@ public class InventoryManager
         return true;
     }
 
-    public bool HandleCrossAreaMove(ItemCategory? currentTabType, SlotArea sourceArea, int sourceIndex, SlotArea targetArea, int targetIndex)
+    public bool HandleCrossAreaMove(ItemCategory? currentTabType, SlotArea sourceArea, InventorySlot sourceSlot, SlotArea targetArea, InventorySlot targetSlot)
     {
         if (targetArea == SlotArea.Equipment)
         {
-            var sourceSlot = GetSourceSlot(currentTabType, sourceArea, sourceIndex);
-            var targetSlot = GetTargetSlot(currentTabType, targetArea, targetIndex);
-
             if (sourceSlot == null || sourceSlot.ItemID <= 0)
                 return false;
 
@@ -517,70 +503,55 @@ public class InventoryManager
         }
 
         if (targetArea == SlotArea.Quick)
-            return HandleQuickSlotMove(sourceArea, sourceIndex, currentTabType, targetIndex);
+            return HandleQuickSlotMove(sourceArea, sourceSlot, targetSlot);
 
         if (sourceArea == SlotArea.Equipment)
         {
-            var sourceEquipmentSlot = GetSourceSlot(currentTabType, sourceArea, sourceIndex);
-            var targetSlot = GetTargetSlot(currentTabType, targetArea, targetIndex);
-
             if (targetSlot == null)
                 return false;
 
-            return UnequipItem(currentTabType, sourceEquipmentSlot, targetSlot);
+            return UnequipItem(currentTabType, sourceSlot, targetSlot);
         }
 
         if (sourceArea == SlotArea.Quick)
         {
-            var sourceQuickSlot = GetSourceSlot(currentTabType, sourceArea, sourceIndex);
-            var targetNormalSlot = GetTargetSlot(currentTabType, targetArea, targetIndex);
-
-            if (sourceQuickSlot == null || targetNormalSlot == null)
+            if (sourceSlot == null || targetSlot == null)
                 return false;
 
-            sourceQuickSlot.SwapValues(targetNormalSlot);
+            sourceSlot.SwapValues(targetSlot);
             FinalizeInventoryChange();
             return true;
         }
 
-        InventorySlot normalSourceSlot = GetSourceSlot(currentTabType, sourceArea, sourceIndex);
-        InventorySlot normalTargetSlot = GetTargetSlot(currentTabType, targetArea, targetIndex);
-
-        if (normalSourceSlot == null || normalTargetSlot == null)
-            return false;
-
-        if (normalSourceSlot.TryMergeSlots(normalTargetSlot))
+        if (sourceSlot.TryMergeSlots(targetSlot))
         {
-            SyncTotalSlotsByTabMerge(normalSourceSlot, normalTargetSlot);
+            SyncTotalSlotsByTabMerge(sourceSlot, targetSlot);
             RebuildTabsFromTotal();
             FinalizeInventoryChange();
             return true;
         }
 
-        int globalA = normalSourceSlot.GlobalIndex;
-        int globalB = normalTargetSlot.GlobalIndex;
-        normalSourceSlot.SwapValues(normalTargetSlot);
-        (normalSourceSlot.GlobalIndex, normalTargetSlot.GlobalIndex) = (normalTargetSlot.GlobalIndex, normalSourceSlot.GlobalIndex);
-        SyncTotalSlotsByTabMove(normalSourceSlot, normalTargetSlot);
+        int globalA = sourceSlot.GlobalIndex;
+        int globalB = targetSlot.GlobalIndex;
+        sourceSlot.SwapValues(targetSlot);
+        (sourceSlot.GlobalIndex, targetSlot.GlobalIndex) = (targetSlot.GlobalIndex, sourceSlot.GlobalIndex);
+        SyncTotalSlotsByTabMove(sourceSlot, targetSlot);
         SwapQuickSlotReferences(globalA, globalB);
         RebuildTabsFromTotal();
         FinalizeInventoryChange();
         return true;
     }
 
-    public bool HandleQuickSlotMove(SlotArea sourceArea, int sourceIndex, ItemCategory? currentTabType, int targetQuickIndex)
+    public bool HandleQuickSlotMove(SlotArea sourceArea, InventorySlot sourceSlot, InventorySlot targetQuickSlot)
     {
-        var sourceSlot = GetSourceSlot(currentTabType, sourceArea, sourceIndex);
-        if (sourceSlot == null || sourceSlot.ItemID <= 0)
+        if (sourceSlot == null || sourceSlot.ItemID <= 0 || targetQuickSlot == null)
             return false;
 
         if (!sourceSlot.ItemID.TryGetValidItemData(out var itemData, out _) || itemData.IsEtc())
             return false;
 
-        if (_quickSlots == null || !targetQuickIndex.IsValidIndex(_quickSlots.Count))
+        if (!_quickSlots.Contains(targetQuickSlot))
             return false;
-
-        var targetQuickSlot = _quickSlots[targetQuickIndex];
 
         if (sourceArea == SlotArea.Quick)
         {
@@ -601,8 +572,8 @@ public class InventoryManager
     {
         return sourceArea switch
         {
-            SlotArea.Equipment => sourceIndex.IsValidIndex(_equipmentSlots?.Count ?? 0) ? _equipmentSlots[sourceIndex] : null,
-            SlotArea.Quick => sourceIndex.IsValidIndex(_quickSlots?.Count ?? 0) ? _quickSlots[sourceIndex] : null,
+            SlotArea.Equipment => _equipmentSlots.ElementAtOrDefault(sourceIndex),
+            SlotArea.Quick => _quickSlots.ElementAtOrDefault(sourceIndex),
             _ => GetInventorySlotByTab(currentTabType, sourceIndex)
         };
     }
@@ -611,8 +582,8 @@ public class InventoryManager
     {
         return targetArea switch
         {
-            SlotArea.Equipment => targetIndex.IsValidIndex(_equipmentSlots?.Count ?? 0) ? _equipmentSlots[targetIndex] : null,
-            SlotArea.Quick => targetIndex.IsValidIndex(_quickSlots?.Count ?? 0) ? _quickSlots[targetIndex] : null,
+            SlotArea.Equipment => _equipmentSlots.ElementAtOrDefault(targetIndex),
+            SlotArea.Quick => _quickSlots.ElementAtOrDefault(targetIndex),
             _ => GetInventorySlotByTab(currentTabType, targetIndex, true)
         };
     }
@@ -620,24 +591,16 @@ public class InventoryManager
     private InventorySlot GetInventorySlotByTab(ItemCategory? currentTabType, int index, bool isTarget = false)
     {
         if (!currentTabType.HasValue)
-            return index.IsValidIndex(_totalSlots.Count) ? _totalSlots[index] : null;
+            return _totalSlots.ElementAtOrDefault(index);
 
         var targetList = GetSlotsByType(currentTabType);
-
-        if (targetList == null || !index.IsValidIndex(targetList.Count))
-            return null;
-
-        return targetList[index];
+        return targetList?.ElementAtOrDefault(index);
     }
 
     public InventorySlot GetEquipmentSlotByType(EquipmentSlotType slotType)
     {
         int index = (int)slotType;
-
-        if (_equipmentSlots != null && index.IsValidIndex(_equipmentSlots.Count))
-            return _equipmentSlots[index];
-
-        return null;
+        return _equipmentSlots.ElementAtOrDefault(index);
     }
 
     private void FinalizeInventoryChange(InventorySlot modifiedSlot = null)
@@ -648,8 +611,8 @@ public class InventoryManager
 
     private void SyncTotalSlotsByTabMerge(InventorySlot sourceTabSlot, InventorySlot targetTabSlot)
     {
-        var masterSource = _totalSlots.FirstOrDefault(s => s.GlobalIndex == sourceTabSlot.GlobalIndex);
-        var masterTarget = _totalSlots.FirstOrDefault(s => s.GlobalIndex == targetTabSlot.GlobalIndex);
+        var masterSource = _totalSlots.FirstOrDefault(slot => slot.GlobalIndex == sourceTabSlot.GlobalIndex);
+        var masterTarget = _totalSlots.FirstOrDefault(slot => slot.GlobalIndex == targetTabSlot.GlobalIndex);
 
         if (masterSource != null && masterTarget != null)
         {
@@ -661,10 +624,8 @@ public class InventoryManager
 
     private void SyncQuickSlotsAfterItemChanged(InventorySlot modifiedInventorySlot = null)
     {
-        for (int index = 0; index < _quickSlots.Count; index++)
+        foreach (var quickSlot in _quickSlots)
         {
-            var quickSlot = _quickSlots[index];
-
             if (quickSlot == null || quickSlot.ItemID <= 0)
                 continue;
 
@@ -673,15 +634,14 @@ public class InventoryManager
                 if (quickSlot.IsRelatedTo(modifiedInventorySlot))
                 {
                     if (modifiedInventorySlot.ItemID <= 0 || modifiedInventorySlot.Quantity <= 0)
-                        ClearQuickSlot(index);
+                        quickSlot.ClearSlot();
                     else
                         quickSlot.Quantity = modifiedInventorySlot.Quantity;
                 }
-
                 continue;
             }
 
-            var masterSlot = quickSlot.GlobalIndex.IsValidIndex(_totalSlots.Count) ? _totalSlots[quickSlot.GlobalIndex] : null;
+            var masterSlot = _totalSlots.FirstOrDefault(slot => slot.GlobalIndex == quickSlot.GlobalIndex && slot.ItemID == quickSlot.ItemID);
 
             if (masterSlot == null || masterSlot.ItemID <= 0 || masterSlot.ItemID != quickSlot.ItemID)
             {
@@ -694,21 +654,24 @@ public class InventoryManager
             if (masterSlot != null && masterSlot.ItemID > 0 && masterSlot.ItemID == quickSlot.ItemID)
                 quickSlot.Quantity = masterSlot.Quantity;
             else
-                ClearQuickSlot(index);
+                quickSlot.ClearSlot();
         }
+    }
+
+    public void ClearQuickSlot(InventorySlot quickSlot)
+    {
+        if (quickSlot != null && _quickSlots.Contains(quickSlot))
+            quickSlot.ClearSlot();
     }
 
     public void ClearQuickSlot(int index)
     {
-        if (index.IsValidIndex(_quickSlots.Count))
-            _quickSlots[index].ClearSlot();
+        var slot = _quickSlots.ElementAtOrDefault(index);
+        ClearQuickSlot(slot);
     }
 
     private void SwapQuickSlotReferences(int globalIndexA, int globalIndexB)
     {
-        if (_quickSlots == null)
-            return;
-
         foreach (var quickSlot in _quickSlots)
         {
             if (quickSlot == null || quickSlot.ItemID <= 0)
@@ -719,10 +682,10 @@ public class InventoryManager
         }
     }
 
-    public IReadOnlyList<InventorySlot> GetEquipmentSlots()
+    public IReadOnlyList<InventorySlot> GetEquipmentSlots() 
         => _equipmentSlots;
 
-    public IReadOnlyList<InventorySlot> GetQuickSlots()
+    public IReadOnlyList<InventorySlot> GetQuickSlots() 
         => _quickSlots;
 
     private void FillExistingItemSlots(List<InventorySlot> slots, int itemID, int maxStack, ref int remaining)
@@ -779,8 +742,8 @@ public class InventoryManager
 
     private void SyncTotalSlotsByTabMove(InventorySlot slotA, InventorySlot slotB)
     {
-        var masterA = _totalSlots.FirstOrDefault(s => s.GlobalIndex == slotA.GlobalIndex);
-        var masterB = _totalSlots.FirstOrDefault(s => s.GlobalIndex == slotB.GlobalIndex);
+        var masterA = _totalSlots.FirstOrDefault(slot => slot.GlobalIndex == slotA.GlobalIndex);
+        var masterB = _totalSlots.FirstOrDefault(slot => slot.GlobalIndex == slotB.GlobalIndex);
 
         if (masterA != null && masterB != null)
         {
@@ -838,8 +801,10 @@ public class InventoryManager
         {
             _totalSlots.SortSlots();
 
-            for (int index = 0; index < _totalSlots.Count; index++)
-                _totalSlots[index].GlobalIndex = index;
+            int index = 0;
+
+            foreach (var slot in _totalSlots)
+                slot.GlobalIndex = index++;
 
             RebuildTabsFromTotal();
         }

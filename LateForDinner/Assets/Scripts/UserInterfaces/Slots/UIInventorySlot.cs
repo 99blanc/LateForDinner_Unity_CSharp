@@ -175,21 +175,16 @@ public class UIInventorySlot : UISlot, IDraggableSlot
         if (targetSlot == null || targetSlot == this)
             return;
 
-        if (targetSlot is not IDraggableSlot targetDraggable)
-            return;
-
         ItemCategory? currentTabType = Managers.UI.GetPopup<UIQuestInventoryPopup>()?.CurrentTabType;
 
-        if (targetSlot is UIQuickSlot)
+        if (targetSlot is UIQuickSlot targetQuickSlot)
         {
-            Managers.Inventory.HandleCrossAreaMove(currentTabType, CurrentSlotArea, ((IDraggableSlot)this).SlotIndex, targetDraggable.CurrentSlotArea, targetDraggable.SlotIndex);
+            Managers.Inventory.HandleCrossAreaMove(currentTabType, CurrentSlotArea, _data, targetQuickSlot.CurrentSlotArea, targetQuickSlot.Data);
             return;
         }
 
-        if (_data == null)
-            return;
-
-        Managers.Inventory.HandleItemMoveByTab(currentTabType, CurrentSlotArea, ((IDraggableSlot)this).SlotIndex, targetDraggable.CurrentSlotArea, targetDraggable.SlotIndex);
+        if (targetSlot is UIInventorySlot targetInventorySlot)
+            Managers.Inventory.HandleItemMoveByTab(currentTabType, CurrentSlotArea, _data, targetInventorySlot.CurrentSlotArea, targetInventorySlot.Data);
     }
 
     public void OnDropOutside()
