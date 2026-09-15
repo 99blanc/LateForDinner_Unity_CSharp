@@ -4,12 +4,12 @@
 # Foreign Key: Localization.csv,,,,,,,
 ID,ItemCategory,NameKey,DescriptionKey,FlavorKey,AddressableKey,Destroy,MaxStack
 # Index: ArmorItem,,,,,,,
-1,Equipment,Item_Name_1,Item_Description_1,Item_Flavor_1,item_weapon_greatsword1,1,1
-2,Equipment,Item_Name_2,Item_Description_2,Item_Flavor_2,item_weapon_greatsword1,1,1
-3,Equipment,Item_Name_3,Item_Description_3,Item_Flavor_3,item_weapon_greatsword1,1,1
-4,Equipment,Item_Name_4,Item_Description_4,Item_Flavor_4,item_weapon_greatsword1,1,1
+1,Equipment,Item_Name_1,Item_Description_1,Item_Flavor_1,item_weapon_greatsword1,0,1
+2,Equipment,Item_Name_2,Item_Description_2,Item_Flavor_2,item_weapon_greatsword1,0,1
+3,Equipment,Item_Name_3,Item_Description_3,Item_Flavor_3,item_weapon_greatsword1,0,1
+4,Equipment,Item_Name_4,Item_Description_4,Item_Flavor_4,item_weapon_greatsword1,0,1
 # Index: WeaponItem,,,,,,,
-5,Equipment,Item_Name_5,Item_Description_5,Item_Flavor_5,item_weapon_greatsword1,1,1
+5,Equipment,Item_Name_5,Item_Description_5,Item_Flavor_5,item_weapon_greatsword1,0,1
 # Index: ConsumptionItem,,,,,,,
 6,Consumption,Item_Name_6,Item_Description_6,Item_Flavor_6,item_weapon_greatsword1,1,99
 # Index: EtcItem,,,,,,,

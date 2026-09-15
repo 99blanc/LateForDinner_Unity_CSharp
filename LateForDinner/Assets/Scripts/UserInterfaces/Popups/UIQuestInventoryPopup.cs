@@ -16,7 +16,6 @@ public class UIQuestInventoryPopup : UIPopup, IDraggablePopup, IFocusablePopup
     private enum Images
     {
         AttributeButtonImage,
-        TotalButtonImage,
         EquipmentButtonImage,
         ConsumptionButtonImage,
         EtcButtonImage,
@@ -43,7 +42,6 @@ public class UIQuestInventoryPopup : UIPopup, IDraggablePopup, IFocusablePopup
     private enum Buttons
     {
         AttributeButton,
-        TotalButton,
         EquipmentButton,
         ConsumptionButton,
         EtcButton,
@@ -62,11 +60,10 @@ public class UIQuestInventoryPopup : UIPopup, IDraggablePopup, IFocusablePopup
         AttributePanel
     }
 
-    public ItemCategory? CurrentTabType 
+    public ItemCategory CurrentTabType 
         => _currentTabType;
-    private ItemCategory? _currentTabType = null;
+    private ItemCategory _currentTabType = ItemCategory.Equipment;
     private readonly ReactiveProperty<ButtonState> _attributeButtonState = new ReactiveProperty<ButtonState>(ButtonState.Normal);
-    private readonly ReactiveProperty<ButtonState> _totalButtonState = new ReactiveProperty<ButtonState>(ButtonState.Normal);
     private readonly ReactiveProperty<ButtonState> _equipmentButtonState = new ReactiveProperty<ButtonState>(ButtonState.Normal);
     private readonly ReactiveProperty<ButtonState> _consumptionButtonState = new ReactiveProperty<ButtonState>(ButtonState.Normal);
     private readonly ReactiveProperty<ButtonState> _etcButtonState = new ReactiveProperty<ButtonState>(ButtonState.Normal);
@@ -95,7 +92,7 @@ public class UIQuestInventoryPopup : UIPopup, IDraggablePopup, IFocusablePopup
     {
         var content = GetScrollRect(ScrollRects.InventoryScrollRect).content;
 
-        for (int index = 0; index < Define.Amount.MaxInventorySlot; index++)
+        for (int index = 0; index < Define.Amount.DefaultInventorySlot; index++)
         {
             var (slot, _) = Managers.Pool.Pop<UIInventorySlot>(content);
 
@@ -106,11 +103,11 @@ public class UIQuestInventoryPopup : UIPopup, IDraggablePopup, IFocusablePopup
 
     private void InitEquipmentSlots()
     {
-        var equipmentContent = GetRectTransform(RectTransforms.EquipmentContent);
+        var content = GetRectTransform(RectTransforms.EquipmentContent);
 
         for (int index = 0; index < Define.Amount.MaxEquipmentSlot; index++)
         {
-            var (slot, _) = Managers.Pool.Pop<UIInventorySlot>(equipmentContent);
+            var (slot, _) = Managers.Pool.Pop<UIInventorySlot>(content);
 
             if (slot != null)
                 _equipmentCreatedSlots.Add(slot);
@@ -138,7 +135,6 @@ public class UIQuestInventoryPopup : UIPopup, IDraggablePopup, IFocusablePopup
     private void BindButtonStates()
     {
         GetImage(Images.AttributeButtonImage).BindState(_attributeButtonState, Define.Atlas.Common, this);
-        GetImage(Images.TotalButtonImage).BindState(_totalButtonState, Define.Atlas.Common, this);
         GetImage(Images.EquipmentButtonImage).BindState(_equipmentButtonState, Define.Atlas.Common, this);
         GetImage(Images.ConsumptionButtonImage).BindState(_consumptionButtonState, Define.Atlas.Common, this);
         GetImage(Images.EtcButtonImage).BindState(_etcButtonState, Define.Atlas.Common, this);
@@ -150,7 +146,6 @@ public class UIQuestInventoryPopup : UIPopup, IDraggablePopup, IFocusablePopup
     private void BindButtonActions()
     {
         GetButton(Buttons.AttributeButton).BindViewAsButton(OnClickAttributeTab, ViewEvent.LeftClick, this, _attributeButtonState);
-        GetButton(Buttons.TotalButton).BindViewAsButton(OnClickTotalTab, ViewEvent.LeftClick, this, _totalButtonState);
         GetButton(Buttons.EquipmentButton).BindViewAsButton(OnClickEquipmentTab, ViewEvent.LeftClick, this, _equipmentButtonState);
         GetButton(Buttons.ConsumptionButton).BindViewAsButton(OnClickConsumptionTab, ViewEvent.LeftClick, this, _consumptionButtonState);
         GetButton(Buttons.EtcButton).BindViewAsButton(OnClickEtcTab, ViewEvent.LeftClick, this, _etcButtonState);
@@ -167,7 +162,7 @@ public class UIQuestInventoryPopup : UIPopup, IDraggablePopup, IFocusablePopup
         RefreshPlayerInfo();
     }
 
-    private void RefreshInventory(ItemCategory? type)
+    private void RefreshInventory(ItemCategory type)
     {
         var displaySlots = Managers.Inventory.GetSlotsByType(type).ToList();
 
@@ -191,11 +186,8 @@ public class UIQuestInventoryPopup : UIPopup, IDraggablePopup, IFocusablePopup
         }
     }
 
-    private bool IsFilteredOut(InventorySlot slotData, ItemCategory? type)
+    private bool IsFilteredOut(InventorySlot slotData, ItemCategory type)
     {
-        if (!type.HasValue) 
-            return false;
-
         if (slotData.ItemID <= 0) 
             return false;
 
@@ -205,7 +197,7 @@ public class UIQuestInventoryPopup : UIPopup, IDraggablePopup, IFocusablePopup
         if (!Enum.TryParse<ItemCategory>(itemData.ItemCategory, true, out var parsedItemCategory)) 
             return false;
 
-        return parsedItemCategory != type.Value;
+        return parsedItemCategory != type;
     }
 
     private void RefreshEquipmentSlots()
@@ -252,12 +244,6 @@ public class UIQuestInventoryPopup : UIPopup, IDraggablePopup, IFocusablePopup
 
         if (_isAttributePanelOpen)
             RefreshPlayerInfo();
-    }
-
-    private void OnClickTotalTab(PointerEventData data)
-    {
-        _currentTabType = null;
-        RefreshInventory(_currentTabType);
     }
 
     private void OnClickEquipmentTab(PointerEventData data)

@@ -180,7 +180,8 @@ public enum LocalizationKey
     Log_Game_CharacterSpawnFailed                      , // [GameManager] 캐릭터('{0}') 생성에 실패했습니다.
     Log_Game_CharacterSpawnSuccess                     , // [GameManager] 캐릭터('{0}')를 성공적으로 생성했습니다.
     Log_Graphic_RootInitialized                        , // [UIManager] 그래픽 볼륨 구조가 성공적으로 초기화되었습니다.
-    Log_Interact_NotRegistered                         , // [InteractManager] 등록되지 않은 상호작용 타입입니다: '{0}'
+    Log_Inventory_CannotDestroy                        , // [InventoryManager] 버리거나 파괴할 수 없는 아이템입니다.
+    Log_Inventory_AlreadyEquipped                      , // [InventoryManager] 이미 장착 중인 아이템입니다.
     Log_Localization_LoadedSuccessfully                , // [LocalizationManager] 현지화 시스템을 성공적으로 불러왔습니다.
     Log_Localization_FileReadFailed                    , // [LocalizationManager] 현지화 파일('{0}')을 읽는 중 오류가 발생했습니다.
     Log_Localization_Synced                            , // [LocalizationManager] 현지화 데이터 동기화를 완료했습니다: (변경: '{0}'건)

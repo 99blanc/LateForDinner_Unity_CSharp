@@ -1,15 +1,14 @@
 using Cysharp.Text;
-using System;
 
 public class Define
 {
     public class Amount
     {
         public const int MaxSaveSlot = 4;
-        public const int MaxQuickSlot = 4;
-        public const int MaxEquipmentSlot = 5;
+        public const int DefaultInventorySlot = 20;
         public const int MaxInventorySlot = 60;
-        public const int InventoryTabSize = 20;
+        public const int MaxEquipmentSlot = 5;
+        public const int MaxQuickSlot = 4;
         public const int MaxDashCount = 28;
         public const int MaxHealthCount = 56;
     }

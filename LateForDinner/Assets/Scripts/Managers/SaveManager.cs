@@ -225,7 +225,6 @@ public class SaveManager
 
         if (Managers.Inventory != null)
         {
-            CurrentData.TotalSlots = Managers.Inventory.ExportTotalSlotSaveData();
             CurrentData.EquipmentTabSlots = Managers.Inventory.ExportEquipmentTabSaveData();
             CurrentData.ConsumptionTabSlots = Managers.Inventory.ExportConsumptionTabSaveData();
             CurrentData.EtcTabSlots = Managers.Inventory.ExportEtcTabSaveData();

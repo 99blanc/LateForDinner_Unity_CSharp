@@ -277,9 +277,6 @@ public static class InventoryExtensions
     public static bool IsValidIndex(this int index, int count)
         => index >= 0 && index < count;
 
-    public static bool IsValidIndex<T>(this List<T> list, int index)
-        => list != null && index >= 0 && index < list.Count;
-
     public static bool ShouldConsumeOnUse(this ItemData itemData)
     {
         if (itemData == null)
@@ -294,8 +291,7 @@ public static class InventoryExtensions
         .Where(slot => slot.ItemID > 0 && slot.ItemID.TryGetValidItemData(out _, out var category) && category == targetCategory)
         .ToList();
         int usedCategorySlotsCount = categorySlots.Count;
-        int maxCategorySlots = Define.Amount.InventoryTabSize;
-        int emptyCategorySlotsCount = maxCategorySlots - usedCategorySlotsCount;
+        int emptyCategorySlotsCount = Define.Amount.DefaultInventorySlot - usedCategorySlotsCount;
         int required = quantity;
 
         foreach (var slot in categorySlots)
@@ -382,20 +378,6 @@ public static class InventoryExtensions
         return slot.ItemID.TryGetValidItemData(out _, out var itemCategory) && itemCategory == category;
     }
 
-    public static bool IsRelatedTo(this InventorySlot quickSlot, InventorySlot inventorySlot)
-    {
-        if (quickSlot == null || inventorySlot == null)
-            return false;
-
-        if (quickSlot.GlobalIndex >= 0 && quickSlot.GlobalIndex == inventorySlot.GlobalIndex)
-            return true;
-
-        if (!string.IsNullOrEmpty(quickSlot.InstanceID) && quickSlot.InstanceID == inventorySlot.InstanceID)
-            return true;
-
-        return false;
-    }
-
     public static string GetFormattedCategoryText(this ItemData itemData)
     {
         if (itemData == null)
@@ -423,7 +405,7 @@ public static class InventoryExtensions
         return categoryText;
     }
 
-    public static bool HandleDoubleClick(this InventorySlot slot, bool isEquipmentSlot, int sourceIndex, ItemCategory? currentTabType)
+    public static bool HandleDoubleClick(this InventorySlot slot, bool isEquipmentSlot, int sourceIndex, ItemCategory currentTabType)
     {
         if (slot == null || slot.ItemID <= 0)
             return false;
@@ -462,14 +444,8 @@ public static class InventoryExtensions
         return false;
     }
 
-    private static InventorySlot GetFirstEmptyInventorySlot(ItemCategory? currentTabType)
-    {
-        var slots = Managers.Inventory.GetSlotsByType(currentTabType);
-        if (slots == null)
-            return null;
-
-        return slots.FirstOrDefault(slot => slot.ItemID <= 0);
-    }
+    private static InventorySlot GetFirstEmptyInventorySlot(ItemCategory currentTabType)
+        => Managers.Inventory.GetSlotsByType(currentTabType).FirstOrDefault(slot => slot.ItemID <= 0);
 
     public static void AssignSlotData(this InventorySlot target, InventorySlot source)
     {
@@ -483,12 +459,6 @@ public static class InventoryExtensions
         slot.ItemID = 0;
         slot.Quantity = 0;
         slot.InstanceID = null;
-    }
-
-    public static void ClearTabSlot(this InventorySlot slot)
-    {
-        slot.ClearSlot();
-        slot.GlobalIndex = -1;
     }
 
     public static bool TryMergeSlots(this InventorySlot source, InventorySlot target)
@@ -522,7 +492,6 @@ public static class InventoryExtensions
 
         return sourceSlots.Select(slot => new InventorySlot
         {
-            GlobalIndex = slot.GlobalIndex,
             SlotIndex = slot.SlotIndex,
             ItemID = slot.ItemID,
             Quantity = slot.Quantity,
@@ -535,23 +504,51 @@ public static class InventoryExtensions
         if (slots == null || slots.Count <= 0)
             return;
 
-        if (comparison != null)
-            slots.Sort(comparison);
-        else
+        var allItems = new List<(int itemID, int quantity, string instanceID)>();
+
+        foreach (var slot in slots)
         {
-            slots.Sort((a, b) =>
+            if (slot.ItemID > 0 && slot.Quantity > 0)
+                allItems.Add((slot.ItemID, slot.Quantity, slot.InstanceID));
+        }
+
+        foreach (var slot in slots)
+            slot.ClearSlot();
+
+        var sortedItems = allItems
+        .OrderBy(item =>
+        {
+            if (item.itemID.TryGetValidItemData(out var data, out _) && Managers.Localization != null)
+                return Managers.Localization.Get(data.NameKey);
+            return string.Empty;
+        })
+        .ThenByDescending(item => item.quantity)
+        .ThenBy(item => item.itemID);
+
+        foreach (var item in sortedItems)
+        {
+            int remainingQty = item.quantity;
+
+            if (!item.itemID.TryGetValidItemData(out var itemData, out _))
+                continue;
+
+            while (remainingQty > 0)
             {
-                if (a.ItemID == b.ItemID)
-                    return a.Quantity.CompareTo(b.Quantity);
+                var targetSlot = slots.FirstOrDefault(slot => slot.ItemID == item.itemID && slot.Quantity < itemData.MaxStack) ?? slots.FirstOrDefault(s => s.ItemID <= 0);
 
-                if (a.ItemID <= 0)
-                    return 1;
+                if (targetSlot == null)
+                    break;
 
-                if (b.ItemID <= 0)
-                    return -1;
+                if (targetSlot.ItemID <= 0)
+                {
+                    targetSlot.ItemID = item.itemID;
+                    targetSlot.InstanceID = string.IsNullOrEmpty(item.instanceID) ? Guid.NewGuid().ToString() : item.instanceID;
+                }
 
-                return a.ItemID.CompareTo(b.ItemID);
-            });
+                int addQty = Math.Min(remainingQty, itemData.MaxStack - targetSlot.Quantity);
+                targetSlot.Quantity += addQty;
+                remainingQty -= addQty;
+            }
         }
     }
 

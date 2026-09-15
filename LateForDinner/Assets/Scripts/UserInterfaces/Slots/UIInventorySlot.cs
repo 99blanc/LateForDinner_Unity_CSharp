@@ -138,7 +138,7 @@ public class UIInventorySlot : UISlot, IDraggableSlot
         if (targetSlot == null || targetSlot == this)
             return;
 
-        ItemCategory? currentTabType = Managers.UI.GetPopup<UIQuestInventoryPopup>()?.CurrentTabType;
+        ItemCategory currentTabType = Managers.UI.GetPopup<UIQuestInventoryPopup>().CurrentTabType;
 
         if (targetSlot is UIQuickSlot targetQuickSlot)
         {
@@ -193,7 +193,7 @@ public class UIInventorySlot : UISlot, IDraggableSlot
             return;
 
         var inventoryPopup = Managers.UI.GetPopup<UIQuestInventoryPopup>();
-        ItemCategory? currentTabType = inventoryPopup?.CurrentTabType;
+        ItemCategory currentTabType = inventoryPopup.CurrentTabType;
         int targetIndex = _isEquipmentSlot ? _slotTypeIndex : _data.SlotIndex;
         bool success = _data.HandleDoubleClick(_isEquipmentSlot, targetIndex, currentTabType);
 

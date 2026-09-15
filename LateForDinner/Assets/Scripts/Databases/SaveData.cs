@@ -38,7 +38,6 @@ namespace LateForDinner.Data
     [MemoryPackable]
     public partial class InventorySlot
     {
-        public int GlobalIndex;
         public int SlotIndex;
         public int ItemID;
         public int Quantity;
@@ -127,7 +126,7 @@ namespace LateForDinner.Data
         public List<AttributeSaveData> SavedAttributes;
         public Vector2 PlayerPosition;
         public bool PlayerFlipX;
-        public List<InventorySlot> TotalSlots;
+        public int InventoryTabCapacity;
         public List<InventorySlot> EquipmentTabSlots;
         public List<InventorySlot> ConsumptionTabSlots;
         public List<InventorySlot> EtcTabSlots;
@@ -155,10 +154,10 @@ namespace LateForDinner.Data
             SavedAttributes = CharacterID.Protagonist.CreateDefaultAttributes(),
             PlayerPosition = Vector2.zero,
             PlayerFlipX = false,
-            TotalSlots = Enumerable.Range(0, Define.Amount.MaxInventorySlot).Select(i => new InventorySlot { GlobalIndex = i, SlotIndex = i, ItemID = 0, Quantity = 0 }).ToList(),
-            EquipmentTabSlots = Enumerable.Range(0, Define.Amount.InventoryTabSize).Select(i => new InventorySlot { SlotIndex = i, ItemID = 0, Quantity = 0 }).ToList(),
-            ConsumptionTabSlots = Enumerable.Range(0, Define.Amount.InventoryTabSize).Select(i => new InventorySlot { SlotIndex = i, ItemID = 0, Quantity = 0 }).ToList(),
-            EtcTabSlots = Enumerable.Range(0, Define.Amount.InventoryTabSize).Select(i => new InventorySlot { SlotIndex = i, ItemID = 0, Quantity = 0 }).ToList(),
+            InventoryTabCapacity = Define.Amount.DefaultInventorySlot,
+            EquipmentTabSlots = Enumerable.Range(0, Define.Amount.DefaultInventorySlot).Select(i => new InventorySlot { SlotIndex = i, ItemID = 0, Quantity = 0 }).ToList(),
+            ConsumptionTabSlots = Enumerable.Range(0, Define.Amount.DefaultInventorySlot).Select(i => new InventorySlot { SlotIndex = i, ItemID = 0, Quantity = 0 }).ToList(),
+            EtcTabSlots = Enumerable.Range(0, Define.Amount.DefaultInventorySlot).Select(i => new InventorySlot { SlotIndex = i, ItemID = 0, Quantity = 0 }).ToList(),
             EquipmentSlots = Enumerable.Range(0, Define.Amount.MaxEquipmentSlot).Select(i => new InventorySlot { SlotIndex = i, ItemID = 0, Quantity = 0 }).ToList(),
             QuickSlots = Enumerable.Range(0, Define.Amount.MaxQuickSlot).Select(i => new InventorySlot { SlotIndex = i, ItemID = 0, Quantity = 0 }).ToList(),
             UnlockedEquipments = new List<EquipmentInstance>(),
