@@ -643,25 +643,47 @@ public class InventoryManager
         var masterItems = _totalSlots
         .Where(slot => slot.IsValidAndCategory(category))
         .ToList();
+        var matchedMasters = new HashSet<InventorySlot>();
 
         foreach (var tabSlot in tabSlots)
         {
             if (tabSlot.ItemID <= 0)
-            {
-                tabSlot.GlobalIndex = -1;
                 continue;
-            }
 
-            var matchedMaster = masterItems.FirstOrDefault(m => m.ItemID == tabSlot.ItemID && m.InstanceID == tabSlot.InstanceID);
+            InventorySlot matchedMaster = null;
+
+            if (!string.IsNullOrEmpty(tabSlot.InstanceID))
+                matchedMaster = masterItems.FirstOrDefault(m => !matchedMasters.Contains(m) && m.ItemID == tabSlot.ItemID && m.InstanceID == tabSlot.InstanceID);
+
+            if (matchedMaster == null)
+                matchedMaster = masterItems.FirstOrDefault(m => !matchedMasters.Contains(m) && m.ItemID == tabSlot.ItemID);
 
             if (matchedMaster == null && tabSlot.GlobalIndex >= 0)
-                matchedMaster = masterItems.FirstOrDefault(m => m.GlobalIndex == tabSlot.GlobalIndex);
+                matchedMaster = masterItems.FirstOrDefault(m => !matchedMasters.Contains(m) && m.GlobalIndex == tabSlot.GlobalIndex);
 
             if (matchedMaster != null)
             {
                 tabSlot.AssignSlotData(matchedMaster);
                 tabSlot.GlobalIndex = matchedMaster.GlobalIndex;
-                masterItems.Remove(matchedMaster);
+                matchedMasters.Add(matchedMaster);
+            }
+            else
+                tabSlot.ClearTabSlot();
+        }
+
+        var remainingMasters = masterItems.Except(matchedMasters).ToList();
+        int masterIndex = 0;
+
+        foreach (var tabSlot in tabSlots)
+        {
+            if (tabSlot.ItemID > 0)
+                continue;
+
+            if (masterIndex < remainingMasters.Count)
+            {
+                var newMaster = remainingMasters[masterIndex++];
+                tabSlot.AssignSlotData(newMaster);
+                tabSlot.GlobalIndex = newMaster.GlobalIndex;
             }
             else
                 tabSlot.ClearTabSlot();
