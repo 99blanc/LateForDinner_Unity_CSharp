@@ -41,6 +41,7 @@ public class UIInventorySlot : UISlot, IDraggableSlot
         => _data;
     private InventorySlot _data;
     private bool _isEquipmentSlot;
+    private bool _isPointerOver;
     private int _slotTypeIndex;
     private IDisposable _disposable;
 
@@ -70,6 +71,9 @@ public class UIInventorySlot : UISlot, IDraggableSlot
         _data = slotData;
         _slotTypeIndex = slotTypeIndex;
         Refresh();
+
+        if (_isPointerOver)
+            UpdateDetailPopup();
     }
 
     public void SetupAsFilteredOut(InventorySlot slotData)
@@ -241,17 +245,33 @@ public class UIInventorySlot : UISlot, IDraggableSlot
         }
     }
 
-    private void OnPointerEnterSlot(PointerEventData data)
+    private void UpdateDetailPopup()
     {
         if (_data == null || _data.ItemID <= 0)
+        {
+            Managers.UI.Close<UIItemDetailPopup>();
             return;
+        }
 
         var detailPopup = Managers.UI.OpenPopup<UIItemDetailPopup>();
         detailPopup?.Setup(_data.ItemID, Mouse.current.position.ReadValue(), _data.InstanceID);
     }
 
+    private void OnPointerEnterSlot(PointerEventData data)
+    {
+        _isPointerOver = true;
+
+        if (_data == null || _data.ItemID <= 0)
+            return;
+
+        UpdateDetailPopup();
+    }
+
     private void OnPointerExitSlot(PointerEventData data)
-        => Managers.UI.Close<UIItemDetailPopup>();
+    {
+        _isPointerOver = false;
+        Managers.UI.Close<UIItemDetailPopup>();
+    }
 
     private void SetEquipmentImageSprite(string spriteName)
         => GetImage(Images.SlotCoverImage).sprite = Managers.Resource.GetSprite(Define.Atlas.Common, spriteName);
