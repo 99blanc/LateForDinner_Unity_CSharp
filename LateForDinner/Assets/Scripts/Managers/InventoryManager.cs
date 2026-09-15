@@ -558,10 +558,20 @@ public class InventoryManager
             if (quickSlot == null || quickSlot.ItemID <= 0)
                 continue;
 
-            var targetMaster = _totalSlots.FirstOrDefault(slot => (!string.IsNullOrEmpty(quickSlot.InstanceID) && slot.InstanceID == quickSlot.InstanceID) || (string.IsNullOrEmpty(quickSlot.InstanceID) && slot.ItemID == quickSlot.ItemID));
+            List<InventorySlot> targetMasters;
 
-            if (targetMaster != null && targetMaster.ItemID > 0)
-                quickSlot.Quantity = targetMaster.Quantity;
+            if (!string.IsNullOrEmpty(quickSlot.InstanceID))
+                targetMasters = _totalSlots.Where(slot => slot.ItemID == quickSlot.ItemID && slot.InstanceID == quickSlot.InstanceID).ToList();
+            else
+                targetMasters = _totalSlots.Where(slot => slot.ItemID == quickSlot.ItemID && string.IsNullOrEmpty(slot.InstanceID)).ToList();
+
+            if (targetMasters.Any(slot => slot.ItemID > 0))
+            {
+                var representativeMaster = targetMasters.First(slot => slot.ItemID > 0);
+                quickSlot.ItemID = representativeMaster.ItemID;
+                quickSlot.InstanceID = representativeMaster.InstanceID;
+                quickSlot.Quantity = targetMasters.Sum(slot => slot.Quantity);
+            }
             else
                 quickSlot.ClearSlot();
         }
