@@ -57,12 +57,16 @@ public class UIHeadUpDisplay : UIDisplay
     {
         base.OnGet();
         SetQuickSlots();
+        UpdateWeaponSlot();
         GetDashSlots();
         GetHealthSlots();
         GetTemporaryHealthSlots();
         Managers.Inventory.OnInventoryChanged
-        .Subscribe(_ => SetQuickSlots())
-        .RegisterToPool(this);
+        .Subscribe(_ => 
+        { 
+            SetQuickSlots(); 
+            UpdateWeaponSlot();
+        }).RegisterToPool(this);
         var player = Managers.Game.Player;
         var dashAttribute = player.Attributes.GetBase<int>(AttributeType.DashCount);
         dashAttribute.AsObservable()
@@ -96,6 +100,21 @@ public class UIHeadUpDisplay : UIDisplay
             InventorySlot slotData = (quickSlotsData != null && index < quickSlotsData.Count) ? quickSlotsData[index] : null;
             _quickSlots[index].Setup(index, slotData);
         }
+    }
+
+    private void UpdateWeaponSlot()
+    {
+        var weaponSlot = Managers.Inventory?.GetEquipmentSlotByType(EquipmentSlotType.Weapon);
+
+        if (weaponSlot == null || weaponSlot.ItemID <= 0 || !weaponSlot.ItemID.TryGetValidItemData(out var itemData, out _))
+        {
+            GetImage(Images.WeaponSlotImage).SetActive(false);
+            GetImage(Images.WeaponSlotImage).sprite = null;
+            return;
+        }
+
+        GetImage(Images.WeaponSlotImage).SetActive(true);
+        GetImage(Images.WeaponSlotImage).sprite = Managers.Resource.GetSprite(Define.Atlas.Item, itemData.AddressableKey);
     }
 
     private void GetDashSlots()
