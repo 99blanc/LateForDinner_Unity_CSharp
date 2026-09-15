@@ -241,44 +241,71 @@ public class InventoryManager
         if (myCharacter == null)
             return false;
 
+        var currentTabSlots = GetSlotsByType(currentTab);
+        InventorySlot slotToUse = null;
+
+        if (targetSlot != null)
+        {
+            slotToUse = currentTabSlots.Contains(targetSlot) ? targetSlot : currentTabSlots.FirstOrDefault(s => s.GlobalIndex == targetSlot.GlobalIndex);
+
+            if (slotToUse == null)
+                slotToUse = targetSlot;
+        }
+
+        if (slotToUse == null)
+            slotToUse = currentTabSlots.FirstOrDefault(slot => slot.ItemID <= 0);
+
+        if (slotToUse == null || slotToUse.ItemID > 0 && targetSlot == null)
+            slotToUse = _totalSlots.FirstOrDefault(slot => slot.ItemID <= 0);
+
+        if (slotToUse == null)
+            return false;
+
         InventorySlot masterSlot = null;
 
-        if (targetSlot != null && targetSlot.ItemID <= 0)
-        {
-            if (targetSlot.GlobalIndex >= 0)
-                masterSlot = _totalSlots.FirstOrDefault(slot => slot.GlobalIndex == targetSlot.GlobalIndex);
-            else
-            {
-                masterSlot = _totalSlots.FirstOrDefault(slot => slot.ItemID <= 0);
-
-                if (masterSlot != null)
-                    targetSlot.GlobalIndex = masterSlot.GlobalIndex;
-            }
-        }
+        if (slotToUse.GlobalIndex >= 0)
+            masterSlot = _totalSlots.FirstOrDefault(slot => slot.GlobalIndex == slotToUse.GlobalIndex);
 
         if (masterSlot == null)
-        {
-            if (targetSlot != null && targetSlot.GlobalIndex >= 0)
-                masterSlot = _totalSlots.FirstOrDefault(slot => slot.GlobalIndex == targetSlot.GlobalIndex);
-
-            if (masterSlot == null || masterSlot.ItemID > 0)
-                masterSlot = _totalSlots.FirstOrDefault(slot => slot.ItemID <= 0);
-        }
+            masterSlot = _totalSlots.FirstOrDefault(slot => slot.ItemID <= 0);
 
         if (masterSlot == null)
             return false;
 
-        UnEquipItemInternal(targetEquipmentSlot, myCharacter);
-        masterSlot.AssignSlotData(targetEquipmentSlot);
-        masterSlot.GlobalIndex = masterSlot.SlotIndex;
+        EquipmentSlotType targetSlotType = (EquipmentSlotType)targetEquipmentSlot.SlotIndex;
 
-        if (targetSlot != null)
+        if (masterSlot.ItemID > 0)
         {
-            targetSlot.AssignSlotData(targetEquipmentSlot);
-            targetSlot.GlobalIndex = masterSlot.GlobalIndex;
+            if (!masterSlot.ItemID.TryGetValidItemData(out var incomingItemData, out _) || !incomingItemData.IsEquipmentCategory() ||!incomingItemData.CanEquipInSlot(targetSlotType))
+                return false;
         }
 
-        targetEquipmentSlot.ClearSlot();
+        UnEquipItemInternal(targetEquipmentSlot, myCharacter);
+
+        if (masterSlot.ItemID > 0)
+        {
+            var tempEquipmentData = new InventorySlot();
+            tempEquipmentData.AssignSlotData(masterSlot);
+            masterSlot.AssignSlotData(targetEquipmentSlot);
+            masterSlot.GlobalIndex = masterSlot.SlotIndex;
+            targetEquipmentSlot.AssignSlotData(tempEquipmentData);
+            targetEquipmentSlot.GlobalIndex = -1;
+
+            if (masterSlot.ItemID.TryGetValidItemData(out var newItemData, out _))
+            {
+                var equipInstance = _unlockedEquipments.FirstOrDefault(equip => equip.InstanceID == targetEquipmentSlot.InstanceID);
+
+                if (equipInstance != null)
+                    equipInstance.ApplyEquipmentEffects(newItemData, myCharacter);
+            }
+        }
+        else
+        {
+            masterSlot.AssignSlotData(targetEquipmentSlot);
+            masterSlot.GlobalIndex = masterSlot.SlotIndex;
+            targetEquipmentSlot.ClearSlot();
+        }
+
         RebuildTabsFromTotal();
         FinalizeInventoryChange();
         return true;
