@@ -409,6 +409,8 @@ public class ControlManager
             _actionAsset.RemoveAllBindingOverrides();
         else
             _actionAsset.LoadBindingOverridesFromJson(json);
+
+        CacheAllActions();
     }
 
     public List<InputAction> GetBindableActions()
@@ -443,7 +445,10 @@ public class ControlManager
         => _actionAsset?.SaveBindingOverridesAsJson() ?? string.Empty;
 
     public void ResetBindings()
-        => _actionAsset?.RemoveAllBindingOverrides();
+    {
+        _actionAsset?.RemoveAllBindingOverrides();
+        CacheAllActions();
+    }
 
     public void ClearSubscribers(IPoolable owner)
     {

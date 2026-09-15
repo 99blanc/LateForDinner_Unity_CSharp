@@ -436,6 +436,7 @@ public class UIOptionPopup : UIPopup, IDraggablePopup, IFocusablePopup
             languageDropdown.AddOptions(displayOptions);
         }
 
+        ClearKeybindSlots();
         var content = GetScrollRect(ScrollRects.KeybindScrollRect).content;
         Func<bool> isRebindingCheck = () => _isRebinding;
         Action<bool> setRebindingLock = isBusy => _isRebinding = isBusy;
@@ -736,9 +737,7 @@ public class UIOptionPopup : UIPopup, IDraggablePopup, IFocusablePopup
                 _initialModifierDash = Managers.Config.Option.Access.modifierDash;
                 _initialBindingSnapshot = Managers.Control.CreateBindingSnapshot();
                 _initialLanguage = newLanguage;
-
-                if (isLanguageChanged)
-                    Managers.UI.RefreshAll();
+                Managers.UI.RefreshAll();
             })).Lock();
         }
         catch
@@ -763,9 +762,7 @@ public class UIOptionPopup : UIPopup, IDraggablePopup, IFocusablePopup
 
                 await Managers.Config.SaveAsync();
                 Close();
-
-                if (isLanguageChanged)
-                    Managers.UI.RefreshAll();
+                Managers.UI.RefreshAll();
             })).Lock();
         }
         catch
@@ -822,8 +819,8 @@ public class UIOptionPopup : UIPopup, IDraggablePopup, IFocusablePopup
                 _initialModifierDash = Managers.Config.Option.Access.modifierDash;
                 _initialBindingSnapshot = Managers.Control.CreateBindingSnapshot();
                 _initialLanguage = defaultLang;
-                Refresh();
                 Managers.UI.RefreshAll();
+                Refresh();
             })).Lock();
             Close();
         }

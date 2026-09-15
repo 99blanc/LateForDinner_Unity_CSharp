@@ -168,6 +168,7 @@ public class UIHeadUpDisplay : UIDisplay
     public override void Refresh()
     {
         base.Refresh();
+        SetQuickSlots();
         var player = Managers.Game.Player;
         var dashAttribute = player.Attributes.GetBase<int>(AttributeType.DashCount);
         UpdateDashSlots(dashAttribute.CurrentValue);
