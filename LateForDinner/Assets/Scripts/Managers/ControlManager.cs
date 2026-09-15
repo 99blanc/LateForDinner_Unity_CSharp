@@ -425,6 +425,14 @@ public class ControlManager
         return bindableActions;
     }
 
+    public string GetBindingDisplayString(string actionName)
+    {
+        if (_actionCaches.TryGetValue(actionName, out var action) && action.bindings.Count > 0)
+            return action.GetBindingDisplayString();
+
+        return string.Empty;
+    }
+
     public string CreateBindingSnapshot()
         => SaveBindingsToJson();
 

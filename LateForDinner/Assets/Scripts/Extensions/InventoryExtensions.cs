@@ -527,12 +527,12 @@ public static class InventoryExtensions
 
         foreach (var item in sortedItems)
         {
-            int remainingQty = item.quantity;
+            int remainingQuentity = item.quantity;
 
             if (!item.itemID.TryGetValidItemData(out var itemData, out _))
                 continue;
 
-            while (remainingQty > 0)
+            while (remainingQuentity > 0)
             {
                 var targetSlot = slots.FirstOrDefault(slot => slot.ItemID == item.itemID && slot.Quantity < itemData.MaxStack) ?? slots.FirstOrDefault(s => s.ItemID <= 0);
 
@@ -545,9 +545,9 @@ public static class InventoryExtensions
                     targetSlot.InstanceID = string.IsNullOrEmpty(item.instanceID) ? Guid.NewGuid().ToString() : item.instanceID;
                 }
 
-                int addQty = Math.Min(remainingQty, itemData.MaxStack - targetSlot.Quantity);
-                targetSlot.Quantity += addQty;
-                remainingQty -= addQty;
+                int addQuentity = Math.Min(remainingQuentity, itemData.MaxStack - targetSlot.Quantity);
+                targetSlot.Quantity += addQuentity;
+                remainingQuentity -= addQuentity;
             }
         }
     }

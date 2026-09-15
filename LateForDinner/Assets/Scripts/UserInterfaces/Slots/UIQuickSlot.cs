@@ -15,6 +15,7 @@ public class UIQuickSlot : UISlot, IDraggableSlot
 
     private enum Texts
     {
+        QuickSlotKeyText,
         QuickSlotQuantityText
     }
 
@@ -47,6 +48,7 @@ public class UIQuickSlot : UISlot, IDraggableSlot
         BindButton(typeof(Buttons));
         GetImage(Images.QuickSlotItemImage).raycastTarget = false;
         GetImage(Images.QuickSlotFrameImage).raycastTarget = false;
+        GetText(Texts.QuickSlotKeyText).raycastTarget = false;
         GetText(Texts.QuickSlotQuantityText).raycastTarget = false;
     }
 
@@ -108,6 +110,7 @@ public class UIQuickSlot : UISlot, IDraggableSlot
     {
         base.Refresh();
         BindCooldown();
+        UpdateKeyText();
 
         if (_data == null || _data.ItemID <= 0)
         {
@@ -137,6 +140,32 @@ public class UIQuickSlot : UISlot, IDraggableSlot
         }
         else
             GetText(Texts.QuickSlotQuantityText).SetActive(false);
+    }
+
+    private void UpdateKeyText()
+    {
+        string hotkeyName = _index switch
+        {
+            0 => Literal.Hotkeys.QuickSlot1,
+            1 => Literal.Hotkeys.QuickSlot2,
+            2 => Literal.Hotkeys.QuickSlot3,
+            3 => Literal.Hotkeys.QuickSlot4,
+            _ => string.Empty
+        };
+
+        if (!string.IsNullOrEmpty(hotkeyName))
+        {
+            string displayString = Managers.Control.GetBindingDisplayString(hotkeyName);
+
+            if (!string.IsNullOrEmpty(displayString))
+            {
+                GetText(Texts.QuickSlotKeyText).SetActive(true);
+                GetText(Texts.QuickSlotKeyText).text = displayString;
+                return;
+            }
+        }
+
+        GetText(Texts.QuickSlotKeyText).SetActive(false);
     }
 
     private void OnDoubleClickQuickSlot(PointerEventData data)

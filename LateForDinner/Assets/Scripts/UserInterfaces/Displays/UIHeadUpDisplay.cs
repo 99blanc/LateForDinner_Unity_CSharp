@@ -57,6 +57,7 @@ public class UIHeadUpDisplay : UIDisplay
     {
         base.OnGet();
         SetQuickSlots();
+        RegisterQuickSlotHotkeys();
         UpdateWeaponSlot();
         GetDashSlots();
         GetHealthSlots();
@@ -99,6 +100,30 @@ public class UIHeadUpDisplay : UIDisplay
         {
             InventorySlot slotData = (quickSlotsData != null && index < quickSlotsData.Count) ? quickSlotsData[index] : null;
             _quickSlots[index].Setup(index, slotData);
+        }
+    }
+
+    private void RegisterQuickSlotHotkeys()
+    {
+        for (int index = 0; index < Define.Amount.MaxQuickSlot; index++)
+        {
+            int slotIndex = index;
+            string hotkeyName = index switch
+            {
+                0 => Literal.Hotkeys.QuickSlot1,
+                1 => Literal.Hotkeys.QuickSlot2,
+                2 => Literal.Hotkeys.QuickSlot3,
+                3 => Literal.Hotkeys.QuickSlot4,
+                _ => string.Empty
+            };
+
+            if (string.IsNullOrEmpty(hotkeyName))
+                continue;
+
+            Managers.Control.Subscribe(this, hotkeyName, InputEventType.Triggered, () =>
+            {
+                Managers.Inventory.UseQuickSlot(slotIndex);
+            }).RegisterToPool(this);
         }
     }
 
