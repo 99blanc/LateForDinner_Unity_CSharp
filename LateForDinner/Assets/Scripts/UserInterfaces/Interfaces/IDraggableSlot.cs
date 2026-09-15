@@ -8,22 +8,14 @@ public interface IDraggableSlot : IBeginDragHandler, IDragHandler, IEndDragHandl
     private static readonly ConditionalWeakTable<IDraggableSlot, SlotDragState> _dragValues = new ConditionalWeakTable<IDraggableSlot, SlotDragState>();
     private class SlotDragState
     {
-        public int SlotIndex = -1;
         public bool IsDragging = false;
         public UIGhostImagePopup GhostImage = null;
         public CanvasGroup CanvasGroup = null;
     }
-    public int SlotIndex
-    {
-        get => _dragValues.GetOrCreateValue(this).SlotIndex;
-        set => _dragValues.GetOrCreateValue(this).SlotIndex = value;
-    }
-
     Sprite DragSprite { get; }
     SlotArea CurrentSlotArea { get; }
 
     void OnDropItem(UISlot targetSlot);
-
     void OnDropOutside() { }
 
     void IBeginDragHandler.OnBeginDrag(PointerEventData data)
@@ -123,7 +115,6 @@ public interface IDraggableSlot : IBeginDragHandler, IDragHandler, IEndDragHandl
             }
 
             state.IsDragging = false;
-            state.SlotIndex = -1;
         }
     }
 }

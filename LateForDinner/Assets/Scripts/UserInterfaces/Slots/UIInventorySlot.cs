@@ -34,12 +34,14 @@ public class UIInventorySlot : UISlot, IDraggableSlot
             return itemImage.gameObject.activeSelf ? itemImage.sprite : null;
         }
     }
+
     public SlotArea CurrentSlotArea
         => _isEquipmentSlot ? SlotArea.Equipment : SlotArea.Inventory;
-    public InventorySlot Data
+    public InventorySlot Data 
         => _data;
     private InventorySlot _data;
     private bool _isEquipmentSlot;
+    private int _slotTypeIndex;
     private IDisposable _disposable;
 
     public override void OnInit()
@@ -60,6 +62,143 @@ public class UIInventorySlot : UISlot, IDraggableSlot
         GetButton(Buttons.SlotButton).BindView(OnPointerEnterSlot, ViewEvent.Enter, this);
         GetButton(Buttons.SlotButton).BindView(OnPointerExitSlot, ViewEvent.Exit, this);
         Refresh();
+    }
+
+    public void Setup(InventorySlot slotData, bool isEquipmentSlot = false, int slotTypeIndex = -1)
+    {
+        _isEquipmentSlot = isEquipmentSlot;
+        _data = slotData;
+        _slotTypeIndex = slotTypeIndex;
+        Refresh();
+    }
+
+    public void SetupAsFilteredOut(InventorySlot slotData)
+    {
+        _isEquipmentSlot = false;
+        _data = slotData;
+        _disposable?.Dispose();
+        _disposable = null;
+        GetImage(Images.SlotCoverImage).SetActive(false);
+        GetImage(Images.SlotItemImage).SetActive(false);
+        GetText(Texts.SlotQuantityText).text = string.Empty;
+        GetImage(Images.SlotCooldownImage).SetActive(false);
+    }
+
+    public override void Refresh()
+    {
+        base.Refresh();
+        BindCooldown();
+
+        if (_isEquipmentSlot && (_data == null || _data.ItemID <= 0))
+        {
+            GetImage(Images.SlotCoverImage).SetActive(true);
+            EquipmentSlotType slotType = (EquipmentSlotType)(_slotTypeIndex >= 0 ? _slotTypeIndex : (_data?.SlotIndex ?? 0));
+            string coverSpriteName = slotType.ToSpriteAsEquipmentCover();
+
+            if (!string.IsNullOrEmpty(coverSpriteName))
+                SetEquipmentImageSprite(coverSpriteName);
+        }
+        else
+        {
+            GetImage(Images.SlotCoverImage).SetActive(false);
+        }
+
+        if (_data == null || _data.ItemID <= 0)
+        {
+            GetImage(Images.SlotItemImage).SetActive(false);
+            GetText(Texts.SlotQuantityText).text = string.Empty;
+            GetImage(Images.SlotCooldownImage).SetActive(false);
+            return;
+        }
+
+        if (Managers.Data.Items.TryGetValue(_data.ItemID, out ItemData itemData))
+        {
+            GetImage(Images.SlotItemImage).SetActive(true);
+            GetImage(Images.SlotItemImage).sprite = Managers.Resource.GetSprite(Define.Atlas.Item, itemData.AddressableKey);
+        }
+        else
+        {
+            GetImage(Images.SlotItemImage).SetActive(false);
+            return;
+        }
+
+        if (_data.Quantity > 1)
+        {
+            GetText(Texts.SlotQuantityText).SetActive(true);
+            GetText(Texts.SlotQuantityText).text = _data.Quantity.ToString();
+        }
+        else
+        {
+            GetText(Texts.SlotQuantityText).SetActive(false);
+        }
+    }
+
+    public void OnDropItem(UISlot targetSlot)
+    {
+        if (targetSlot == null || targetSlot == this)
+            return;
+
+        ItemCategory? currentTabType = Managers.UI.GetPopup<UIQuestInventoryPopup>()?.CurrentTabType;
+
+        if (targetSlot is UIQuickSlot targetQuickSlot)
+        {
+            Managers.Inventory.HandleCrossAreaMove(currentTabType, CurrentSlotArea, _data, targetQuickSlot.CurrentSlotArea, targetQuickSlot.Data);
+            return;
+        }
+
+        if (targetSlot is UIInventorySlot targetInventorySlot)
+            Managers.Inventory.HandleItemMoveByTab(currentTabType, CurrentSlotArea, _data, targetInventorySlot.CurrentSlotArea, targetInventorySlot.Data);
+    }
+
+    public void OnDropOutside()
+    {
+        if (_isEquipmentSlot)
+        {
+            Managers.Notify.ToastAsync(LocalizationKey.Log_Inventory_Slot_DropFailed).Forget();
+            return;
+        }
+
+        var rectTransform = Managers.UI.GetPopup<UIQuestInventoryPopup>()?.RectTransform;
+
+        if (rectTransform != null && RectTransformUtility.RectangleContainsScreenPoint(rectTransform, Mouse.current.position.ReadValue(), null))
+        {
+            Refresh();
+            return;
+        }
+
+        if (_data == null || _data.ItemID <= 0)
+            return;
+
+        if (!Managers.Data.Items.TryGetValue(_data.ItemID, out ItemData itemData))
+            return;
+
+        var dropPopup = Managers.UI.OpenPopup<UIItemDropPopup>();
+
+        if (dropPopup == null)
+            return;
+
+        dropPopup.Setup(LocalizationKey.UI_Inventory_Slot_Drop_Confirm_Title, LocalizationKey.UI_Inventory_Slot_Drop_Confirm_Message, _data.Quantity, arg1: itemData.NameKey,
+        onConfirm: async (selectedCount) =>
+        {
+            var player = Managers.Game.Player;
+            Vector3 dropPosition = player != null ? player.transform.position + (player.Renderer.flipX ? Vector3.left : Vector3.right) : Vector3.zero;
+            await Managers.Inventory.DropItem(_data, selectedCount, dropPosition);
+        },
+        onCancel: () => { });
+    }
+
+    private void OnDoubleClickSlot(PointerEventData data)
+    {
+        if (_data == null || _data.ItemID <= 0)
+            return;
+
+        var inventoryPopup = Managers.UI.GetPopup<UIQuestInventoryPopup>();
+        ItemCategory? currentTabType = inventoryPopup?.CurrentTabType;
+        int targetIndex = _isEquipmentSlot ? _slotTypeIndex : _data.SlotIndex;
+        bool success = _data.HandleDoubleClick(_isEquipmentSlot, targetIndex, currentTabType);
+
+        if (success)
+            inventoryPopup?.Refresh();
     }
 
     private void BindCooldown()
@@ -100,139 +239,6 @@ public class UIInventorySlot : UISlot, IDraggableSlot
             cooldownImage.SetActive(false);
             cooldownImage.fillAmount = 0f;
         }
-    }
-
-    public void Setup(int displayIndex, InventorySlot slotData, bool isEquipmentSlot = false)
-    {
-        _isEquipmentSlot = isEquipmentSlot;
-        _data = slotData;
-        var draggable = (IDraggableSlot)this;
-        draggable.SlotIndex = displayIndex;
-        Refresh();
-    }
-
-    public void SetupAsFilteredOut(int displayIndex, InventorySlot slotData)
-    {
-        _isEquipmentSlot = false;
-        _data = slotData;
-        var draggable = (IDraggableSlot)this;
-        draggable.SlotIndex = displayIndex;
-        _disposable?.Dispose();
-        _disposable = null;
-        GetImage(Images.SlotCoverImage).SetActive(false);
-        GetImage(Images.SlotItemImage).SetActive(false);
-        GetText(Texts.SlotQuantityText).text = string.Empty;
-        GetImage(Images.SlotCooldownImage).SetActive(false);
-    }
-
-    public override void Refresh()
-    {
-        base.Refresh();
-        BindCooldown();
-
-        if (_isEquipmentSlot && (_data == null || _data.ItemID <= 0))
-        {
-            GetImage(Images.SlotCoverImage).SetActive(true);
-            EquipmentSlotType slotType = (EquipmentSlotType)((IDraggableSlot)this).SlotIndex;
-            string coverSpriteName = slotType.ToSpriteAsEquipmentCover();
-
-            if (!string.IsNullOrEmpty(coverSpriteName))
-                SetEquipmentImageSprite(coverSpriteName);
-        }
-        else
-            GetImage(Images.SlotCoverImage).SetActive(false);
-
-        if (_data == null || _data.ItemID <= 0)
-        {
-            GetImage(Images.SlotItemImage).SetActive(false);
-            GetText(Texts.SlotQuantityText).text = string.Empty;
-            GetImage(Images.SlotCooldownImage).SetActive(false);
-            return;
-        }
-
-        if (Managers.Data.Items.TryGetValue(_data.ItemID, out ItemData itemData))
-        {
-            GetImage(Images.SlotItemImage).SetActive(true);
-            GetImage(Images.SlotItemImage).sprite = Managers.Resource.GetSprite(Define.Atlas.Item, itemData.AddressableKey);
-        }
-        else
-        {
-            GetImage(Images.SlotItemImage).SetActive(false);
-            return;
-        }
-
-        if (_data.Quantity > 1)
-        {
-            GetText(Texts.SlotQuantityText).SetActive(true);
-            GetText(Texts.SlotQuantityText).text = _data.Quantity.ToString();
-        }
-        else
-            GetText(Texts.SlotQuantityText).SetActive(false);
-    }
-
-    public void OnDropItem(UISlot targetSlot)
-    {
-        if (targetSlot == null || targetSlot == this)
-            return;
-
-        ItemCategory? currentTabType = Managers.UI.GetPopup<UIQuestInventoryPopup>()?.CurrentTabType;
-
-        if (targetSlot is UIQuickSlot targetQuickSlot)
-        {
-            Managers.Inventory.HandleCrossAreaMove(currentTabType, CurrentSlotArea, _data, targetQuickSlot.CurrentSlotArea, targetQuickSlot.Data);
-            return;
-        }
-
-        if (targetSlot is UIInventorySlot targetInventorySlot)
-            Managers.Inventory.HandleItemMoveByTab(currentTabType, CurrentSlotArea, _data, targetInventorySlot.CurrentSlotArea, targetInventorySlot.Data);
-    }
-
-    public void OnDropOutside()
-    {
-        if (_isEquipmentSlot)
-        {
-            Managers.Notify.ToastAsync(LocalizationKey.Log_Inventory_Slot_DropFailed).Forget();
-            return;
-        }
-
-        var rectTransform = Managers.UI.GetPopup<UIQuestInventoryPopup>().RectTransform;
-
-        if (rectTransform != null && RectTransformUtility.RectangleContainsScreenPoint(rectTransform, Mouse.current.position.ReadValue(), null))
-        {
-            Refresh();
-            return;
-        }
-
-        if (_data == null || _data.ItemID <= 0)
-            return;
-
-        if (!Managers.Data.Items.TryGetValue(_data.ItemID, out ItemData itemData))
-            return;
-
-        var dropPopup = Managers.UI.OpenPopup<UIItemDropPopup>();
-
-        if (dropPopup == null)
-            return;
-
-        dropPopup.Setup(LocalizationKey.UI_Inventory_Slot_Drop_Confirm_Title, LocalizationKey.UI_Inventory_Slot_Drop_Confirm_Message, _data.Quantity, arg1: itemData.NameKey,
-        onConfirm: async (selectedCount) =>
-        {
-            var player = Managers.Game.Player;
-            Vector3 dropPosition = player != null ? player.transform.position + (player.Renderer.flipX ? Vector3.left : Vector3.right) : Vector3.zero;
-            await Managers.Inventory.DropItem(_data, selectedCount, dropPosition);
-        },
-        onCancel: () => { });
-    }
-
-    private void OnDoubleClickSlot(PointerEventData data)
-    {
-        int sourceIndex = ((IDraggableSlot)this).SlotIndex;
-        var inventoryPopup = Managers.UI.GetPopup<UIQuestInventoryPopup>();
-        ItemCategory? currentTabType = inventoryPopup?.CurrentTabType;
-        bool success = _data.HandleDoubleClick(_isEquipmentSlot, sourceIndex, currentTabType);
-
-        if (success)
-            inventoryPopup?.Refresh();
     }
 
     private void OnPointerEnterSlot(PointerEventData data)

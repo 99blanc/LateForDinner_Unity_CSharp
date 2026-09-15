@@ -101,8 +101,6 @@ public class UIQuickSlot : UISlot, IDraggableSlot
     {
         _index = index;
         _data = slotData;
-        var draggable = (IDraggableSlot)this;
-        draggable.SlotIndex = index;
         Refresh();
     }
 

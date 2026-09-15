@@ -444,7 +444,7 @@ public static class InventoryExtensions
             if (emptySlot == null)
                 return false;
 
-            return Managers.Inventory.UnEquipItem(currentTabType, targetEquipmentSlot, emptySlot);
+            return Managers.Inventory.UnEquipItem(targetEquipmentSlot, emptySlot);
         }
 
         if (itemData.IsConsumption())
@@ -456,7 +456,7 @@ public static class InventoryExtensions
             if (targetEquipmentSlot == null)
                 return false;
 
-            return Managers.Inventory.EquipItem(currentTabType, slot, targetEquipmentSlot);
+            return Managers.Inventory.EquipItem(slot, targetEquipmentSlot);
         }
 
         return false;
@@ -570,9 +570,6 @@ public static class InventoryExtensions
         target.Quantity = tempQuantity;
         target.InstanceID = tempInstanceID;
     }
-
-    public static bool TryMergeSameItemInTab(this InventorySlot sourceTabSlot, InventorySlot targetTabSlot)
-        => sourceTabSlot.TryMergeSlots(targetTabSlot);
 
     public static string GetItemCooldownKey(this InventorySlot slot)
         => slot == null || slot.ItemID <= 0 ? string.Empty : Define.Key.GetItemCooldownKey(slot.ItemID);

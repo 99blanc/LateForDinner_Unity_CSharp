@@ -62,7 +62,8 @@ public class UIQuestInventoryPopup : UIPopup, IDraggablePopup, IFocusablePopup
         AttributePanel
     }
 
-    public ItemCategory? CurrentTabType => _currentTabType;
+    public ItemCategory? CurrentTabType 
+        => _currentTabType;
     private ItemCategory? _currentTabType = null;
     private readonly ReactiveProperty<ButtonState> _attributeButtonState = new ReactiveProperty<ButtonState>(ButtonState.Normal);
     private readonly ReactiveProperty<ButtonState> _totalButtonState = new ReactiveProperty<ButtonState>(ButtonState.Normal);
@@ -184,9 +185,9 @@ public class UIQuestInventoryPopup : UIPopup, IDraggablePopup, IFocusablePopup
             targetSlot.SetActive(true);
 
             if (IsFilteredOut(slotData, type))
-                targetSlot.SetupAsFilteredOut(index, slotData);
+                targetSlot.SetupAsFilteredOut(slotData);
             else
-                targetSlot.Setup(index, slotData, false);
+                targetSlot.Setup(slotData, false);
         }
     }
 
@@ -213,8 +214,8 @@ public class UIQuestInventoryPopup : UIPopup, IDraggablePopup, IFocusablePopup
 
         for (int index = 0; index < _equipmentCreatedSlots.Count; index++)
         {
-            InventorySlot targetData = equipmentDataList.FirstOrDefault(x => x.SlotIndex == index);
-            _equipmentCreatedSlots[index].Setup(index, targetData, true);
+            InventorySlot targetData = equipmentDataList.FirstOrDefault(slot => slot.SlotIndex == index);
+            _equipmentCreatedSlots[index].Setup(targetData, true, index);
         }
     }
 
